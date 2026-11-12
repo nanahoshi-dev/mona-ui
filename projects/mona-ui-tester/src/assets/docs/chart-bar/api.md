@@ -9,7 +9,8 @@ Everything below is imported from `@nanahoshi/mona-ui/chart`.
 Renders financial cash-flow and contribution movements with positive delta increases, negative delta decreases,
 zero-change neutral bars, intermediate subtotals, and cumulative grand totals.
 
-**Selector:** `mona-waterfall-series`
+**Selector:** `mona-waterfall-series`  
+**API reference:** [`WaterfallSeriesComponent`](/api/chart/WaterfallSeriesComponent)
 
 #### Inputs
 
@@ -53,7 +54,8 @@ zero-change neutral bars, intermediate subtotals, and cumulative grand totals.
 Renders a Cartesian bar series supporting standalone bars, grouped slots, stacked segments, and 100% normalized
 stacks.
 
-**Selector:** `mona-bar-series`
+**Selector:** `mona-bar-series`  
+**API reference:** [`BarSeriesComponent`](/api/chart/BarSeriesComponent)
 
 #### Inputs
 
@@ -90,7 +92,8 @@ stacks.
 Renders floating Cartesian range bars spanning between a lower value and an upper value (e.g. min/max temperatures,
 price spans, or SLA tolerances).
 
-**Selector:** `mona-range-bar-series`
+**Selector:** `mona-range-bar-series`  
+**API reference:** [`RangeBarSeriesComponent`](/api/chart/RangeBarSeriesComponent)
 
 #### Inputs
 
@@ -123,7 +126,8 @@ price spans, or SLA tolerances).
 
 ### `ChartWaterfallLabelTemplateDirective`
 
-**Selector:** `ng-template[monaChartWaterfallLabelTemplate]`
+**Selector:** `ng-template[monaChartWaterfallLabelTemplate]`  
+**API reference:** [`ChartWaterfallLabelTemplateDirective`](/api/chart/ChartWaterfallLabelTemplateDirective)
 
 #### Template context
 
@@ -153,91 +157,13 @@ price spans, or SLA tolerances).
 
 ### Types
 
-#### `ChartWaterfallLabelTemplateContext`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `$implicit` (read-only) | `ChartWaterfallPointContext<T>` |
-| `barEnd` (read-only) | `number` |
-| `barStart` (read-only) | `number` |
-| `bounds` (read-only) | `ChartRect` |
-| `category` (read-only) | `unknown` |
-| `color` (read-only) | `string` |
-| `cumulativeAfter` (read-only) | `number` |
-| `cumulativeBefore` (read-only) | `number` |
-| `dataIndex` (read-only) | `number` |
-| `datum` (read-only) | `T` |
-| `deltaValue?` (read-only) | `number` |
-| `formattedCategory` (read-only) | `string` |
-| `formattedCumulativeAfter` (read-only) | `string` |
-| `formattedCumulativeBefore` (read-only) | `string` |
-| `formattedDelta?` (read-only) | `string` |
-| `formattedValue` (read-only) | `string` |
-| `kind` (read-only) | `ChartWaterfallDatumKind` |
-| `step` (read-only) | `ChartWaterfallPointContext<T>` |
-| `textColor?` (read-only) | `string` |
-| `value` (read-only) | `number` |
-| `visualKind` (read-only) | `ChartWaterfallVisualKind` |
+| [`ChartWaterfallLabelTemplateContext`](/api/chart/ChartWaterfallLabelTemplateContext) | Interface |
+| [`ChartWaterfallPointContext`](/api/chart/ChartWaterfallPointContext) | Interface |
+| [`ChartWaterfallPointValue`](/api/chart/ChartWaterfallPointValue) | Interface |
+| [`ChartBarOrientation`](/api/chart/ChartBarOrientation) | Type alias |
+| [`ChartWaterfallDatumKind`](/api/chart/ChartWaterfallDatumKind) | Type alias |
+| [`ChartWaterfallVisualKind`](/api/chart/ChartWaterfallVisualKind) | Type alias |
 
-#### `ChartWaterfallPointContext`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `barEnd` (read-only) | `number` |
-| `barStart` (read-only) | `number` |
-| `bounds` (read-only) | `ChartRect` |
-| `category` (read-only) | `unknown` |
-| `color` (read-only) | `string` |
-| `cumulativeAfter` (read-only) | `number` |
-| `cumulativeBefore` (read-only) | `number` |
-| `dataIndex` (read-only) | `number` |
-| `datum` (read-only) | `T` |
-| `deltaValue?` (read-only) | `number` |
-| `formattedCategory` (read-only) | `string` |
-| `formattedCumulativeAfter` (read-only) | `string` |
-| `formattedCumulativeBefore` (read-only) | `string` |
-| `formattedDelta?` (read-only) | `string` |
-| `formattedValue` (read-only) | `string` |
-| `kind` (read-only) | `ChartWaterfallDatumKind` |
-| `textColor?` (read-only) | `string` |
-| `value` (read-only) | `number` |
-| `visualKind` (read-only) | `ChartWaterfallVisualKind` |
-
-#### `ChartWaterfallPointValue`
-
-| Name | Type |
-| --- | --- |
-| `barEnd` (read-only) | `number` |
-| `barStart` (read-only) | `number` |
-| `cumulativeAfter` (read-only) | `number` |
-| `cumulativeBefore` (read-only) | `number` |
-| `deltaValue?` (read-only) | `number` |
-| `formattedCumulativeAfter` (read-only) | `string` |
-| `formattedCumulativeBefore` (read-only) | `string` |
-| `formattedDelta?` (read-only) | `string` |
-| `kind` (read-only) | `ChartWaterfallDatumKind` |
-| `valueKind` (read-only) | `"waterfall"` |
-
-#### `ChartBarOrientation`
-
-```typescript
-type ChartBarOrientation = "horizontal" | "vertical";
-```
-
-#### `ChartWaterfallDatumKind`
-
-```typescript
-type ChartWaterfallDatumKind = "change" | "subtotal" | "total";
-```
-
-#### `ChartWaterfallVisualKind`
-
-```typescript
-type ChartWaterfallVisualKind = "decrease" | "increase" | "neutral" | "subtotal" | "total";
-```
-
-**Documented elsewhere:** [`ChartDataLabelsInput`](/components/chart), [`ChartField`](/components/chart), [`ChartRect`](/components/chart), [`ChartStackMode`](/components/chart), [`ChartValueFormatter`](/components/chart)
+**Related types:** [`ChartDataLabelsInput`](/api/chart/ChartDataLabelsInput), [`ChartField`](/api/chart/ChartField), [`ChartRect`](/api/chart/ChartRect), [`ChartStackMode`](/api/chart/ChartStackMode), [`ChartValueFormatter`](/api/chart/ChartValueFormatter)

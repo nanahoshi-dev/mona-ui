@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/color-gradient`.
 ### `ColorGradientComponent`
 
 **Selector:** `mona-color-gradient`  
-**Implements:** `FormValueControl<string \| null \| undefined>`
+**Implements:** `FormValueControl<string \| null \| undefined>`  
+**API reference:** [`ColorGradientComponent`](/api/color-gradient/ColorGradientComponent)
 
 #### Inputs
 
@@ -45,46 +46,8 @@ Everything below is imported from `@nanahoshi/mona-ui/color-gradient`.
 
 ### Types
 
-#### `COLOR_GRADIENT_DEFAULT_MESSAGES`
-
-```typescript
-const COLOR_GRADIENT_DEFAULT_MESSAGES: MonaColorGradientMessages;
-```
-
-#### `ColorOutputFormat`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type ColorOutputFormat = "hex" | "rgb" | "hsl";
-```
-
-#### `MonaColorGradientMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `alpha` (read-only) | `string` |
-| `alphaText` (read-only) | `(opacity: number) => string` |
-| `apply` (read-only) | `string` |
-| `blue` (read-only) | `string` |
-| `cancel` (read-only) | `string` |
-| `clearColor` (read-only) | `string` |
-| `colorCopied` (read-only) | `string` |
-| `colorGradient` (read-only) | `string` |
-| `copyAsHex` (read-only) | `string` |
-| `copyAsRgb` (read-only) | `string` |
-| `copyColor` (read-only) | `string` |
-| `copyFailed` (read-only) | `string` |
-| `currentColor` (read-only) | `string` |
-| `green` (read-only) | `string` |
-| `hexColor` (read-only) | `string` |
-| `hue` (read-only) | `string` |
-| `previousColor` (read-only) | `string` |
-| `red` (read-only) | `string` |
-| `saturation` (read-only) | `string` |
-| `saturationAndValue` (read-only) | `string` |
-| `saturationAndValueText` (read-only) | `(saturation: number, value: number) => string` |
-| `switchColorMode` (read-only) | `string` |
-| `value` (read-only) | `string` |
+| [`COLOR_GRADIENT_DEFAULT_MESSAGES`](/api/color-gradient/COLOR_GRADIENT_DEFAULT_MESSAGES) | Constant |
+
+**Related types:** [`ColorOutputFormat`](/api/common/ColorOutputFormat), [`MonaColorGradientMessages`](/api/i18n/MonaColorGradientMessages)

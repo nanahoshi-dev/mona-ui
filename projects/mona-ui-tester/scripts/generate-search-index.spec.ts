@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { DocsPage } from "../src/app/layout/docs-manifest";
-import { readRouteSources, renderSearchDocument } from "./generate-search-index";
+import { readRouteSources, renderApiSearchDocument, renderSearchDocument } from "./generate-search-index";
 
 const PAGE: DocsPage = {
     description: "A <searchable> list.",
@@ -66,5 +66,21 @@ describe("generate-search-index", () => {
 
         expect(html).toContain("<code>query</code>");
         expect(html).toContain("<pre data-pagefind-ignore>&lt;a&gt;&lt;/a&gt;</pre>");
+    });
+
+    it("indexes a symbol's reference page with each member under the anchor the page gives it", () => {
+        const html = renderApiSearchDocument("chart", {
+            description: "Exports with <title> kept as text.",
+            inputs: [{ description: "Sets the `value`.", name: "value", twoWay: true, type: "string" }],
+            kind: "component",
+            name: "ChartComponent"
+        });
+
+        expect(html).toContain('content="API Reference"');
+        expect(html).toContain("<h1>ChartComponent</h1>\n<p>Component from @nanahoshi/mona-ui/chart.</p>");
+        expect(html).toContain("Exports with &lt;title&gt; kept as text.");
+        expect(html).toContain('<h2 id="inputs">Inputs</h2>');
+        expect(html).toContain('<h3 id="value">value</h3><p>Sets the <code>value</code>.</p>');
+        expect(html).toContain('<h3 id="valuechange">valueChange</h3>');
     });
 });

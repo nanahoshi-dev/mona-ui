@@ -9,7 +9,8 @@ Everything below is imported from `@nanahoshi/mona-ui/chart`.
 Renders a continuous Cartesian area series supporting gradient fades, solid fills, cumulative stacking, and 100%
 normalized bands.
 
-**Selector:** `mona-area-series`
+**Selector:** `mona-area-series`  
+**API reference:** [`AreaSeriesComponent`](/api/chart/AreaSeriesComponent)
 
 #### Inputs
 
@@ -51,7 +52,8 @@ normalized bands.
 Renders continuous Cartesian vertical range bands/areas bounded between lower and upper values (e.g. confidence
 intervals, forecast envelopes, or high/low bands).
 
-**Selector:** `mona-range-area-series`
+**Selector:** `mona-range-area-series`  
+**API reference:** [`RangeAreaSeriesComponent`](/api/chart/RangeAreaSeriesComponent)
 
 #### Inputs
 
@@ -90,7 +92,8 @@ intervals, forecast envelopes, or high/low bands).
 Renders a continuous Cartesian line series with configurable interpolation, optional null-gap joining, point markers,
 data labels, and multi-axis binding.
 
-**Selector:** `mona-line-series`
+**Selector:** `mona-line-series`  
+**API reference:** [`LineSeriesComponent`](/api/chart/LineSeriesComponent)
 
 #### Inputs
 
@@ -125,22 +128,10 @@ data labels, and multi-axis binding.
 
 ### Types
 
-#### `ChartAreaFillMode`
+| Type | Kind |
+| --- | --- |
+| [`ChartAreaFillMode`](/api/chart/ChartAreaFillMode) | Type alias |
+| [`ChartCurve`](/api/chart/ChartCurve) | Type alias |
+| [`ChartLineStyle`](/api/chart/ChartLineStyle) | Type alias |
 
-```typescript
-type ChartAreaFillMode = "gradient" | "solid";
-```
-
-#### `ChartCurve`
-
-```typescript
-type ChartCurve = "linear" | "monotone-x" | "natural" | "step" | "step-after";
-```
-
-#### `ChartLineStyle`
-
-```typescript
-type ChartLineStyle = "solid" | "dashed" | "dotted";
-```
-
-**Documented elsewhere:** [`ChartDataLabelsInput`](/components/chart), [`ChartDownsamplingInput`](/components/chart), [`ChartField`](/components/chart), [`ChartStackMode`](/components/chart), [`ChartValueFormatter`](/components/chart)
+**Related types:** [`ChartDataLabelsInput`](/api/chart/ChartDataLabelsInput), [`ChartDownsamplingInput`](/api/chart/ChartDownsamplingInput), [`ChartField`](/api/chart/ChartField), [`ChartStackMode`](/api/chart/ChartStackMode), [`ChartValueFormatter`](/api/chart/ChartValueFormatter)

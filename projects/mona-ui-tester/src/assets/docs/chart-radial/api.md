@@ -9,7 +9,8 @@ Everything below is imported from `@nanahoshi/mona-ui/chart`.
 Renders concentric circular progress rings with customizable bar gap, thickness, rounded corners, and background
 tracks.
 
-**Selector:** `mona-radial-bar-series`
+**Selector:** `mona-radial-bar-series`  
+**API reference:** [`RadialBarSeriesComponent`](/api/chart/RadialBarSeriesComponent)
 
 #### Inputs
 
@@ -63,7 +64,8 @@ tracks.
 Renders circular or semi-circular gauge meters with value progress arcs, tapered needles, central hubs, and centered
 value projection.
 
-**Selector:** `mona-gauge-series`
+**Selector:** `mona-gauge-series`  
+**API reference:** [`GaugeSeriesComponent`](/api/chart/GaugeSeriesComponent)
 
 #### Inputs
 
@@ -106,7 +108,8 @@ value projection.
 
 Renders Nightingale rose (coxcomb) charts with angular category petals whose radial extent scales by area or radius.
 
-**Selector:** `mona-rose-series`
+**Selector:** `mona-rose-series`  
+**API reference:** [`RoseSeriesComponent`](/api/chart/RoseSeriesComponent)
 
 #### Inputs
 
@@ -152,7 +155,8 @@ Renders Nightingale rose (coxcomb) charts with angular category petals whose rad
 
 ### `ChartGaugeCenterTemplateDirective`
 
-**Selector:** `ng-template[monaChartGaugeCenterTemplate]`
+**Selector:** `ng-template[monaChartGaugeCenterTemplate]`  
+**API reference:** [`ChartGaugeCenterTemplateDirective`](/api/chart/ChartGaugeCenterTemplateDirective)
 
 #### Template context
 
@@ -172,51 +176,12 @@ Renders Nightingale rose (coxcomb) charts with angular category petals whose rad
 
 ### Types
 
-#### `ChartGaugeCenterTemplateContext`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `$implicit` (read-only) | `number` |
-| `formattedMax` (read-only) | `string` |
-| `formattedMin` (read-only) | `string` |
-| `formattedValue` (read-only) | `string` |
-| `isClamped` (read-only) | `boolean` |
-| `max` (read-only) | `number` |
-| `min` (read-only) | `number` |
-| `ratio` (read-only) | `number` |
-| `seriesId` (read-only) | `string` |
-| `seriesName` (read-only) | `string` |
-| `value` (read-only) | `number` |
+| [`ChartGaugeCenterTemplateContext`](/api/chart/ChartGaugeCenterTemplateContext) | Interface |
+| [`ChartRadialDatumVisibilityEvent`](/api/chart/ChartRadialDatumVisibilityEvent) | Interface |
+| [`ChartGaugeIndicator`](/api/chart/ChartGaugeIndicator) | Type alias |
+| [`ChartRadialArcFillMode`](/api/chart/ChartRadialArcFillMode) | Type alias |
+| [`ChartRoseScaleMode`](/api/chart/ChartRoseScaleMode) | Type alias |
 
-#### `ChartRadialDatumVisibilityEvent`
-
-| Name | Type |
-| --- | --- |
-| `category` (read-only) | `unknown` |
-| `dataIndex` (read-only) | `number` |
-| `datum` (read-only) | `unknown` |
-| `itemId` (read-only) | `string` |
-| `seriesId` (read-only) | `string` |
-| `seriesName` (read-only) | `string` |
-| `seriesType` (read-only) | `"radialBar" \| "rose"` |
-| `visible` (read-only) | `boolean` |
-
-#### `ChartGaugeIndicator`
-
-```typescript
-type ChartGaugeIndicator = "arc" | "both" | "needle";
-```
-
-#### `ChartRadialArcFillMode`
-
-```typescript
-type ChartRadialArcFillMode = "gradient" | "solid";
-```
-
-#### `ChartRoseScaleMode`
-
-```typescript
-type ChartRoseScaleMode = "area" | "radius";
-```
-
-**Documented elsewhere:** [`ChartField`](/components/chart), [`ChartValueFormatter`](/components/chart)
+**Related types:** [`ChartField`](/api/chart/ChartField), [`ChartValueFormatter`](/api/chart/ChartValueFormatter)

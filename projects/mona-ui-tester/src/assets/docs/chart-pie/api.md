@@ -8,7 +8,8 @@ Everything below is imported from `@nanahoshi/mona-ui/chart`.
 
 Renders a full or partial donut. Use `ng-template[monaChartCenterTemplate]` for the center.
 
-**Selector:** `mona-donut-series`
+**Selector:** `mona-donut-series`  
+**API reference:** [`DonutSeriesComponent`](/api/chart/DonutSeriesComponent)
 
 #### Inputs
 
@@ -59,7 +60,8 @@ Renders a full or partial donut. Use `ng-template[monaChartCenterTemplate]` for 
 
 Renders a full or partial pie.
 
-**Selector:** `mona-pie-series`
+**Selector:** `mona-pie-series`  
+**API reference:** [`PieSeriesComponent`](/api/chart/PieSeriesComponent)
 
 #### Inputs
 
@@ -107,7 +109,8 @@ Renders a full or partial pie.
 
 ### `ChartCenterTemplateDirective`
 
-**Selector:** `ng-template[monaChartCenterTemplate]`
+**Selector:** `ng-template[monaChartCenterTemplate]`  
+**API reference:** [`ChartCenterTemplateDirective`](/api/chart/ChartCenterTemplateDirective)
 
 #### Template context
 
@@ -122,7 +125,8 @@ Renders a full or partial pie.
 
 ### `ChartSliceLabelTemplateDirective`
 
-**Selector:** `ng-template[monaChartSliceLabelTemplate]`
+**Selector:** `ng-template[monaChartSliceLabelTemplate]`  
+**API reference:** [`ChartSliceLabelTemplateDirective`](/api/chart/ChartSliceLabelTemplateDirective)
 
 #### Template context
 
@@ -145,87 +149,15 @@ Renders a full or partial pie.
 
 ### Types
 
-#### `ChartCenterTemplateContext`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `$implicit` | `number` |
-| `formattedTotal` | `string` |
-| `seriesId` | `string` |
-| `seriesName` | `string` |
-| `total` | `number` |
-| `visibleSliceCount` | `number` |
+| [`ChartCenterTemplateContext`](/api/chart/ChartCenterTemplateContext) | Interface |
+| [`ChartSliceContext`](/api/chart/ChartSliceContext) | Interface |
+| [`ChartSliceLabelTemplateContext`](/api/chart/ChartSliceLabelTemplateContext) | Interface |
+| [`ChartSliceVisibilityEvent`](/api/chart/ChartSliceVisibilityEvent) | Interface |
+| [`ChartPolarFillMode`](/api/chart/ChartPolarFillMode) | Type alias |
+| [`ChartPolarLabelContent`](/api/chart/ChartPolarLabelContent) | Type alias |
+| [`ChartPolarLabelPosition`](/api/chart/ChartPolarLabelPosition) | Type alias |
+| [`ChartPolarLabelSide`](/api/chart/ChartPolarLabelSide) | Type alias |
 
-#### `ChartSliceContext`
-
-| Name | Type |
-| --- | --- |
-| `category` | `unknown` |
-| `color` | `string` |
-| `dataIndex` | `number` |
-| `datum` | `unknown` |
-| `formattedCategory` | `string` |
-| `formattedPercentage` | `string` |
-| `formattedValue` | `string` |
-| `percentage` | `number` |
-| `seriesId` | `string` |
-| `seriesName` | `string` |
-| `seriesType` | `"donut" \| "pie"` |
-| `value` | `number` |
-
-#### `ChartSliceLabelTemplateContext`
-
-| Name | Type |
-| --- | --- |
-| `$implicit` | `ChartSliceContext` |
-| `category` | `unknown` |
-| `color` | `string` |
-| `dataIndex` | `number` |
-| `datum` | `unknown` |
-| `formattedCategory` | `string` |
-| `formattedPercentage` | `string` |
-| `formattedValue` | `string` |
-| `percentage` | `number` |
-| `seriesId` | `string` |
-| `seriesName` | `string` |
-| `seriesType` | `"donut" \| "pie"` |
-| `slice` | `ChartSliceContext` |
-| `value` | `number` |
-
-#### `ChartSliceVisibilityEvent`
-
-| Name | Type |
-| --- | --- |
-| `category` | `unknown` |
-| `dataIndex` | `number` |
-| `datum` | `unknown` |
-| `seriesId` | `string` |
-| `seriesName` | `string` |
-| `seriesType` | `"donut" \| "pie"` |
-| `visible` | `boolean` |
-
-#### `ChartPolarFillMode`
-
-```typescript
-type ChartPolarFillMode = "gradient" | "solid";
-```
-
-#### `ChartPolarLabelContent`
-
-```typescript
-type ChartPolarLabelContent = "category" | "category-percentage" | "percentage" | "value";
-```
-
-#### `ChartPolarLabelPosition`
-
-```typescript
-type ChartPolarLabelPosition = "inside" | "outside";
-```
-
-#### `ChartPolarLabelSide`
-
-```typescript
-type ChartPolarLabelSide = "left" | "right";
-```
-
-**Documented elsewhere:** [`ChartField`](/components/chart), [`ChartValueFormatter`](/components/chart)
+**Related types:** [`ChartField`](/api/chart/ChartField), [`ChartValueFormatter`](/api/chart/ChartValueFormatter)

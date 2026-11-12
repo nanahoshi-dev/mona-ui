@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/text-box`.
 
 ### `TextBoxDirective`
 
-**Selector:** `input[monaTextBox]`
+**Selector:** `input[monaTextBox]`  
+**API reference:** [`TextBoxDirective`](/api/text-box/TextBoxDirective)
 
 #### Inputs
 
@@ -20,8 +21,6 @@ Everything below is imported from `@nanahoshi/mona-ui/text-box`.
 
 ### Types
 
-#### `InputType`
-
-```typescript
-type InputType = "email" | "password" | "search" | "tel" | "text" | "url";
-```
+| Type | Kind |
+| --- | --- |
+| [`InputType`](/api/text-box/InputType) | Type alias |

@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/popup-menu`.
 
 ### `PopupMenuComponent`
 
-**Selector:** `mona-popup-menu`
+**Selector:** `mona-popup-menu`  
+**API reference:** [`PopupMenuComponent`](/api/popup-menu/PopupMenuComponent)
 
 #### Inputs
 
@@ -50,7 +51,8 @@ Everything below is imported from `@nanahoshi/mona-ui/popup-menu`.
 
 ### `PopupMenuCheckboxItemComponent`
 
-**Selector:** `mona-popup-menu-checkbox-item`
+**Selector:** `mona-popup-menu-checkbox-item`  
+**API reference:** [`PopupMenuCheckboxItemComponent`](/api/popup-menu/PopupMenuCheckboxItemComponent)
 
 #### Inputs
 
@@ -70,7 +72,8 @@ Everything below is imported from `@nanahoshi/mona-ui/popup-menu`.
 
 ### `PopupMenuItemComponent`
 
-**Selector:** `mona-popup-menu-item`
+**Selector:** `mona-popup-menu-item`  
+**API reference:** [`PopupMenuItemComponent`](/api/popup-menu/PopupMenuItemComponent)
 
 #### Inputs
 
@@ -88,7 +91,8 @@ Everything below is imported from `@nanahoshi/mona-ui/popup-menu`.
 
 ### `PopupMenuRadioItemComponent`
 
-**Selector:** `mona-popup-menu-radio-item`
+**Selector:** `mona-popup-menu-radio-item`  
+**API reference:** [`PopupMenuRadioItemComponent`](/api/popup-menu/PopupMenuRadioItemComponent)
 
 #### Inputs
 
@@ -106,7 +110,8 @@ Everything below is imported from `@nanahoshi/mona-ui/popup-menu`.
 
 ### `PopupMenuRadioGroupComponent`
 
-**Selector:** `mona-popup-menu-radio-group`
+**Selector:** `mona-popup-menu-radio-group`  
+**API reference:** [`PopupMenuRadioGroupComponent`](/api/popup-menu/PopupMenuRadioGroupComponent)
 
 #### Inputs
 
@@ -123,7 +128,8 @@ Everything below is imported from `@nanahoshi/mona-ui/popup-menu`.
 
 ### `PopupMenuGroupComponent`
 
-**Selector:** `mona-popup-menu-group`
+**Selector:** `mona-popup-menu-group`  
+**API reference:** [`PopupMenuGroupComponent`](/api/popup-menu/PopupMenuGroupComponent)
 
 #### Inputs
 
@@ -133,34 +139,41 @@ Everything below is imported from `@nanahoshi/mona-ui/popup-menu`.
 
 ### `PopupMenuSeparatorComponent`
 
-**Selector:** `mona-popup-menu-separator`
+**Selector:** `mona-popup-menu-separator`  
+**API reference:** [`PopupMenuSeparatorComponent`](/api/popup-menu/PopupMenuSeparatorComponent)
 
 ### `PopupMenuGroupTemplateDirective`
 
-**Selector:** `ng-template[monaPopupMenuGroupTemplate]`
+**Selector:** `ng-template[monaPopupMenuGroupTemplate]`  
+**API reference:** [`PopupMenuGroupTemplateDirective`](/api/popup-menu/PopupMenuGroupTemplateDirective)
 
 ### `PopupMenuIconTemplateDirective`
 
-**Selector:** `ng-template[monaPopupMenuIconTemplate]`
+**Selector:** `ng-template[monaPopupMenuIconTemplate]`  
+**API reference:** [`PopupMenuIconTemplateDirective`](/api/popup-menu/PopupMenuIconTemplateDirective)
 
 ### `PopupMenuShortcutTemplateDirective`
 
-**Selector:** `ng-template[monaPopupMenuShortcutTemplate]`
+**Selector:** `ng-template[monaPopupMenuShortcutTemplate]`  
+**API reference:** [`PopupMenuShortcutTemplateDirective`](/api/popup-menu/PopupMenuShortcutTemplateDirective)
 
 ### `PopupMenuTextTemplateDirective`
 
-**Selector:** `ng-template[monaPopupMenuTextTemplate]`
+**Selector:** `ng-template[monaPopupMenuTextTemplate]`  
+**API reference:** [`PopupMenuTextTemplateDirective`](/api/popup-menu/PopupMenuTextTemplateDirective)
 
 ### `PopupMenuCloseEvent`
 
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`PopupMenuCloseEvent`](/api/popup-menu/PopupMenuCloseEvent)
 
 ### `PopupMenuItemClickEvent`
 
 Emitted when a menu item is activated by a click, Enter or Space. Preventing it keeps the menu open and leaves a
 checkbox or radio item's state unchanged.
 
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`PopupMenuItemClickEvent`](/api/popup-menu/PopupMenuItemClickEvent)
 
 #### Properties
 
@@ -172,83 +185,12 @@ checkbox or radio item's state unchanged.
 
 ### Types
 
-#### `MenuItem`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `checkable?` | `boolean` | Whether the item is a checkbox item. Its `checked` state toggles when it's activated, unless `menuClick` is prevented. The state lives in the menu: read the new state from the event's `checked` and keep it in your items if they can be replaced. |
-| `checked?` | `boolean` | The item's initial checked state. |
-| `disabled?` | `boolean` | Keeps the item from being activated. |
-| `group?` | `string` | The title of the group the item belongs to. Consecutive items with the same group form one group. |
-| `items?` | `MenuItem[]` | The items of its submenu. |
-| `label` | `string` | Required. The item's text. |
-| `separator?` | `boolean` | Renders the item as a divider. |
-| `value?` | `unknown` | A value that identifies the item in `menuClick` (the event's `value`). |
+| [`MenuItem`](/api/popup-menu/MenuItem) | Interface |  |
+| [`PopupMenuItem`](/api/popup-menu/PopupMenuItem) | Interface |  |
+| [`PopupMenuNavigationEvent`](/api/popup-menu/PopupMenuNavigationEvent) | Interface |  |
+| [`PopupMenuInitialFocus`](/api/popup-menu/PopupMenuInitialFocus) | Type alias | The item a menu opened from the keyboard highlights first. |
+| [`PopupMenuTrigger`](/api/popup-menu/PopupMenuTrigger) | Type alias | What opens a popup menu: a click on the target, a right-click on it, or `"none"` to open it only through `openMenu()`. |
 
-#### `PopupMenuItem`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `checkable?` | `boolean` | Whether the item is a checkbox item. |
-| `checked?` | `Signal<boolean>` | The checked state of a checkbox item. |
-| `disabled` | `boolean` | Whether the item can't be activated. |
-| `group` | `string \| symbol` | The group the item belongs to. Consecutive items with the same key form a group. A string key, or a symbol with a description, is the group's title. |
-| `items` | `PopupMenuItem[]` | The items of the item's submenu. Empty when it has none. |
-| `label` | `string` | The item's text. |
-| `radio?` | `boolean` | Whether the item is a radio item in a radio group. |
-| `selected?` | `Signal<boolean>` | Whether a radio item is the selected item of its radio group. |
-| `separator?` | `boolean` | Whether the item is a divider. |
-| `value?` | `Signal<unknown>` | The item's value: the `value` input of the item component, or the `value` of a `MenuItem`. |
-
-#### `PopupMenuNavigationEvent`
-
-| Name | Type |
-| --- | --- |
-| `direction` | `"up" \| "down" \| "left" \| "right"` |
-| `item` | `PopupMenuItem \| null` |
-| `level` | `number` |
-
-#### `PopupMenuInitialFocus`
-
-The item a menu opened from the keyboard highlights first.
-
-```typescript
-type PopupMenuInitialFocus = "first" | "last";
-```
-
-#### `PopupMenuTrigger`
-
-What opens a popup menu: a click on the target, a right-click on it, or `"none"` to open it only through
-`openMenu()`.
-
-```typescript
-type PopupMenuTrigger = "click" | "contextmenu" | "none";
-```
-
-#### `ClassInputType`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type ClassInputType = string | string[] | Record<string, unknown> | null | undefined;
-```
-
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
-
-**Documented elsewhere:** [`ConnectionPoint`](/components/popup), [`PopupOffset`](/components/popup)
+**Related types:** [`ClassInputType`](/api/common/ClassInputType), [`ConnectionPoint`](/api/popup/ConnectionPoint), [`PopupOffset`](/api/popup/PopupOffset), [`PreventableEvent`](/api/common/PreventableEvent)

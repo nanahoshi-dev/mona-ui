@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/progress-bar`.
 
 ### `ProgressBarComponent`
 
-**Selector:** `mona-progress-bar`
+**Selector:** `mona-progress-bar`  
+**API reference:** [`ProgressBarComponent`](/api/progress-bar/ProgressBarComponent)
 
 #### Inputs
 
@@ -32,7 +33,8 @@ Everything below is imported from `@nanahoshi/mona-ui/progress-bar`.
 Structural template directive that replaces the default percentage label. The template is hidden when `indeterminate`
 is `true`.
 
-**Selector:** `ng-template[monaProgressBarLabelTemplate]`
+**Selector:** `ng-template[monaProgressBarLabelTemplate]`  
+**API reference:** [`ProgressBarLabelTemplateDirective`](/api/progress-bar/ProgressBarLabelTemplateDirective)
 
 #### Template context
 
@@ -45,41 +47,10 @@ is `true`.
 
 ### Types
 
-#### `PROGRESS_BAR_DEFAULT_MESSAGES`
-
-```typescript
-const PROGRESS_BAR_DEFAULT_MESSAGES: MonaProgressBarMessages;
-```
-
-#### `LabelTemplateContext`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `$implicit` | `number` |
-| `max` | `number` |
-| `min` | `number` |
-| `percent` | `number` |
+| [`PROGRESS_BAR_DEFAULT_MESSAGES`](/api/progress-bar/PROGRESS_BAR_DEFAULT_MESSAGES) | Constant |
+| [`LabelTemplateContext`](/api/progress-bar/LabelTemplateContext) | Interface |
+| [`LabelPosition`](/api/progress-bar/LabelPosition) | Type alias |
 
-#### `LabelPosition`
-
-```typescript
-type LabelPosition = "start" | "center" | "end";
-```
-
-#### `Action`
-
-From `@nanahoshi/mona-ui/common`.
-
-A function taking a `P` and returning an `R`.
-
-```typescript
-type Action<P = void, R = void> = (arg: P) => R;
-```
-
-#### `MonaProgressBarMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
-| --- | --- |
-| `label` (read-only) | `string` |
+**Related types:** [`Action`](/api/common/Action), [`MonaProgressBarMessages`](/api/i18n/MonaProgressBarMessages)

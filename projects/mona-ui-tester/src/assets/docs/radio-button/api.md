@@ -8,7 +8,8 @@ Everything below is imported from `@nanahoshi/mona-ui/radio-button`.
 
 **Selector:** `mona-radio-button`  
 **Type parameters:** `T = unknown`  
-**Implements:** `FormValueControl<T>`
+**Implements:** `FormValueControl<T>`  
+**API reference:** [`RadioButtonComponent`](/api/radio-button/RadioButtonComponent)
 
 #### Inputs
 
@@ -52,7 +53,8 @@ Everything below is imported from `@nanahoshi/mona-ui/radio-button`.
 
 **Selector:** `mona-radio-group`  
 **Type parameters:** `T = unknown`  
-**Implements:** `FormValueControl<T>`
+**Implements:** `FormValueControl<T>`  
+**API reference:** [`RadioGroupComponent`](/api/radio-button/RadioGroupComponent)
 
 #### Inputs
 
@@ -86,7 +88,8 @@ Everything below is imported from `@nanahoshi/mona-ui/radio-button`.
 
 ### `RadioButtonDirective`
 
-**Selector:** `input[type='radio'][monaRadioButton]`
+**Selector:** `input[type='radio'][monaRadioButton]`  
+**API reference:** [`RadioButtonDirective`](/api/radio-button/RadioButtonDirective)
 
 #### Inputs
 
@@ -98,8 +101,6 @@ Everything below is imported from `@nanahoshi/mona-ui/radio-button`.
 
 ### Types
 
-#### `RadioButtonDirectiveProps`
-
-```typescript
-type RadioButtonDirectiveProps = VariantProps<typeof radioButtonDirectiveThemeVariants>;
-```
+| Type | Kind |
+| --- | --- |
+| [`RadioButtonDirectiveProps`](/api/radio-button/RadioButtonDirectiveProps) | Type alias |

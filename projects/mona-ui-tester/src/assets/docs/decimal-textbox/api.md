@@ -12,7 +12,8 @@ so there is no precision limit. The value is canonical: `"-1234.5"`, with `.` as
 exponent, leading zeros or trailing fraction zeros.
 
 **Selector:** `mona-decimal-text-box`  
-**Implements:** `FormValueControl<string \| null>`
+**Implements:** `FormValueControl<string \| null>`  
+**API reference:** [`DecimalTextBoxComponent`](/api/numeric-text-box/DecimalTextBoxComponent)
 
 #### Inputs
 
@@ -62,16 +63,9 @@ exponent, leading zeros or trailing fraction zeros.
 
 ### `NumericTextBoxPrefixTemplateDirective`
 
-**Selector:** `ng-template[monaNumericTextBoxPrefixTemplate]`
+**Selector:** `ng-template[monaNumericTextBoxPrefixTemplate]`  
+**API reference:** [`NumericTextBoxPrefixTemplateDirective`](/api/numeric-text-box/NumericTextBoxPrefixTemplateDirective)
 
 ### Types
 
-#### `Action`
-
-From `@nanahoshi/mona-ui/common`.
-
-A function taking a `P` and returning an `R`.
-
-```typescript
-type Action<P = void, R = void> = (arg: P) => R;
-```
+**Related types:** [`Action`](/api/common/Action)

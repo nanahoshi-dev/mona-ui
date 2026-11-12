@@ -24,6 +24,27 @@
 <nav
     class="flex-1 min-h-0 overflow-y-auto no-scrollbar px-3 py-4 pb-8 flex flex-col gap-3 select-none"
     aria-label="Documentation">
+    @let inApi = navigation.apiLocation() !== null;
+    <a
+        class="group flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm transition-all cursor-pointer"
+        routerLink="/api"
+        [attr.aria-current]="inApi ? (navigation.apiLocation()?.entryPoint ? 'true' : 'page') : null"
+        [class.bg-selected]="inApi"
+        [class.font-medium]="!inApi"
+        [class.font-semibold]="inApi"
+        [class.forced-colors:bg-[Highlight]]="inApi"
+        [class.forced-colors:text-[HighlightText]]="inApi"
+        [class.hover:bg-hover]="!inApi"
+        [class.hover:text-foreground]="!inApi"
+        [class.text-foreground]="inApi"
+        [class.text-muted-foreground]="!inApi">
+        <svg
+            lucideBraces
+            class="text-muted-foreground group-hover:text-foreground group-[.bg-selected]:text-primary transition-colors flex-shrink-0"
+            aria-hidden="true"
+            [size]="16"></svg>
+        <span>API Reference</span>
+    </a>
     @for (category of navigation.categories; track category.id) {
         <app-sidebar-group [category]="category"></app-sidebar-group>
     }

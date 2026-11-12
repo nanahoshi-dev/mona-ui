@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/text-area`.
 
 ### `TextAreaDirective`
 
-**Selector:** `textarea[monaTextArea]`
+**Selector:** `textarea[monaTextArea]`  
+**API reference:** [`TextAreaDirective`](/api/text-area/TextAreaDirective)
 
 #### Inputs
 

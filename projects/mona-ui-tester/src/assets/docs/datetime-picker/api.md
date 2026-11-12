@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/datetime-picker`.
 ### `DateTimePickerComponent`
 
 **Selector:** `mona-datetime-picker`  
-**Implements:** `FormValueControl<Date \| null>`
+**Implements:** `FormValueControl<Date \| null>`  
+**API reference:** [`DateTimePickerComponent`](/api/datetime-picker/DateTimePickerComponent)
 
 #### Inputs
 
@@ -63,77 +64,8 @@ Everything below is imported from `@nanahoshi/mona-ui/datetime-picker`.
 
 ### Types
 
-#### `DATETIME_PICKER_DEFAULT_MESSAGES`
-
-```typescript
-const DATETIME_PICKER_DEFAULT_MESSAGES: MonaDateTimePickerMessages;
-```
-
-#### `DateDisabledType`
-
-From `@nanahoshi/mona-ui/date-input`.
-
-```typescript
-type DateDisabledType = Iterable<Date> | Predicate<Date> | null | undefined;
-```
-
-#### `HourFormat`
-
-From `@nanahoshi/mona-ui/date-input`.
-
-```typescript
-type HourFormat = "12" | "24";
-```
-
-#### `ListSizeInputType`
-
-From `@nanahoshi/mona-ui/list`.
-
-```typescript
-type ListSizeInputType = ListSizeType | number;
-```
-
-#### `ListSizeType`
-
-From `@nanahoshi/mona-ui/list`.
-
-A CSS length, or nothing to leave it to the stylesheet.
-
-```typescript
-type ListSizeType = string | null | undefined;
-```
-
-#### `MonaDateTimePickerMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `calendar` (read-only) | `string` |
-| `cancel` (read-only) | `string` |
-| `date` (read-only) | `string` |
-| `dateTimePicker` (read-only) | `string` |
-| `openDateTimePicker` (read-only) | `string` |
-| `set` (read-only) | `string` |
-| `time` (read-only) | `string` |
-| `timePicker` (read-only) | `string` |
+| [`DATETIME_PICKER_DEFAULT_MESSAGES`](/api/datetime-picker/DATETIME_PICKER_DEFAULT_MESSAGES) | Constant |
 
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
-
-**Documented elsewhere:** [`FirstDayOfWeek`](/components/calendar), [`PopupCloseEvent`](/components/popup)
+**Related types:** [`DateDisabledType`](/api/date-input/DateDisabledType), [`FirstDayOfWeek`](/api/calendar/FirstDayOfWeek), [`HourFormat`](/api/date-input/HourFormat), [`ListSizeInputType`](/api/list/ListSizeInputType), [`ListSizeType`](/api/list/ListSizeType), [`MonaDateTimePickerMessages`](/api/i18n/MonaDateTimePickerMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`PreventableEvent`](/api/common/PreventableEvent)

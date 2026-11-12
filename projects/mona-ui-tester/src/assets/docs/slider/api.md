@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/slider`.
 ### `SliderComponent`
 
 **Selector:** `mona-slider`  
-**Implements:** `FormValueControl<number>`
+**Implements:** `FormValueControl<number>`  
+**API reference:** [`SliderComponent`](/api/slider/SliderComponent)
 
 #### Inputs
 
@@ -57,7 +58,8 @@ Everything below is imported from `@nanahoshi/mona-ui/slider`.
 
 ### `SliderHandleTemplateDirective`
 
-**Selector:** `ng-template[monaSliderHandleTemplate]`
+**Selector:** `ng-template[monaSliderHandleTemplate]`  
+**API reference:** [`SliderHandleTemplateDirective`](/api/slider/SliderHandleTemplateDirective)
 
 #### Template context
 
@@ -67,7 +69,8 @@ Everything below is imported from `@nanahoshi/mona-ui/slider`.
 
 ### `SliderTickValueTemplateDirective`
 
-**Selector:** `ng-template[monaSliderTickValueTemplate]`
+**Selector:** `ng-template[monaSliderTickValueTemplate]`  
+**API reference:** [`SliderTickValueTemplateDirective`](/api/slider/SliderTickValueTemplateDirective)
 
 #### Template context
 
@@ -77,32 +80,9 @@ Everything below is imported from `@nanahoshi/mona-ui/slider`.
 
 ### Types
 
-#### `SLIDER_DEFAULT_MESSAGES`
-
-```typescript
-const SLIDER_DEFAULT_MESSAGES: MonaSliderMessages;
-```
-
-#### `SliderLabelPosition`
-
-```typescript
-type SliderLabelPosition = "before" | "after";
-```
-
-#### `MonaSliderMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `maximumValue` (read-only) | `string` |
-| `minimumValue` (read-only) | `string` |
-| `sliderValue` (read-only) | `string` |
+| [`SLIDER_DEFAULT_MESSAGES`](/api/slider/SLIDER_DEFAULT_MESSAGES) | Constant |
+| [`SliderLabelPosition`](/api/slider/SliderLabelPosition) | Type alias |
 
-#### `Orientation`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type Orientation = "horizontal" | "vertical";
-```
+**Related types:** [`MonaSliderMessages`](/api/i18n/MonaSliderMessages), [`Orientation`](/api/common/Orientation)

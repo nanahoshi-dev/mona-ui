@@ -48,10 +48,24 @@ A page needs at least one of **Examples** or **Appearance & Styling**, because a
 - **Plain classes, services, interfaces, types, functions and constants:** everything exported and public appears.
 - **Styling types** (`*VariantProps`, `*VariantInput`) don't appear, because inputs spell out their values.
 - **Template context** comes from a directive's `ngTemplateContextGuard`.
-- **Types from another entry point** link to the page that documents them. When that entry point has no page, as with `common`, the type is shown on the page using it.
+- **Components, directives, pipes, services and classes** keep their tables on the page, next to the examples, with a link to their reference page.
+- **Types** (interfaces, type aliases, enums and constants) are a table of links to their reference pages, each with the first sentence of its description. The types the page uses from elsewhere follow as **Related types**, including those of an entry point with no page, such as `common`, and what those use in turn.
 - **Pages sharing an entry point** name their exports with `apiExports` in the manifest. A page of that entry point without `apiExports` documents the exports no other page names, so a new export always lands somewhere: the chart family and grid feature pages name theirs, and Chart Overview and Grid Overview take the rest. `apiAlsoFrom` adds another entry point's exports, as the dropdowns do with `dropdowns`.
 
 `npm run check:api-docs` also fails when the public API uses a type no entry point exports, because a consumer couldn't name it and the page couldn't describe it. `npm run generate:api-docs -- --report` lists them.
+
+A description is markdown. A `<` in it is escaped, so naming an element such as `<title>` shows it as written, except for the inline formatting tags `b`, `br`, `code`, `em`, `i`, `kbd`, `strong`, `sub` and `sup`.
+
+## The API reference
+
+Every export has its own page at `/api/<entry point>/<name>`, and every entry point a page at `/api/<entry point>` that lists its exports by kind. `/api` lists the entry points and finds an export by name. The sidebar links to it above the categories.
+
+`npm run build:api-data` (`generate-api-docs.ts --data`) writes what these pages show to `dist/docs-api`: an `index.json`, and a file per entry point with its symbols, served at `/assets/api`. `build:tester`, `serve:tester` and `build:prod` run it first, so it isn't committed. Its shape is in `src/app/api/api-model.ts`, which the scripts and the site share.
+
+- **Type names link** to their pages, in signatures, member types, base types and code spans in descriptions. A few names are exported by more than one entry point, not always for the same declaration, so an entry point's own export wins.
+- **Inherited members** from an exported base type are listed under it, nearest base first.
+- **Used by** lists the exports whose API mentions the symbol.
+- **Anchors:** each section and member has one, from `apiSections()` in `src/app/api/api-text.ts`, which the search index uses too, so a member's search result lands on it.
 
 ## Guide pages
 
@@ -100,7 +114,7 @@ The page runs it, shows its source and can send it to StackBlitz as a generated 
 
 ## Search
 
-`npm run build:search-index` builds the search index from the manifest and the markdown each page's component shows, and `build:tester` and `serve:tester` run it first. The index goes to `dist/docs-search` and is served at `/pagefind`. It's rebuilt only when one of those starts, so a dev server keeps searching the text it started with.
+`npm run build:search-index` builds the search index from the manifest and the markdown each page's component shows, nested pages included, and from every export's reference page in `dist/docs-api`. `build:tester` and `serve:tester` run it first, after `build:api-data`. The index goes to `dist/docs-search` and is served at `/pagefind`. It's rebuilt only when one of those starts, so a dev server keeps searching the text it started with.
 
 A new page needs nothing extra, as long as its component names its markdown with `src="docs/…"`. The script fails if it finds no markdown for a page, except the ones listed in `PAGES_WITHOUT_MARKDOWN`. A heading's link in the results relies on `docs-heading-id.ts`, which the site and the script share.
 
@@ -109,10 +123,11 @@ A new page needs nothing extra, as long as its component names its markdown with
 `npm run generate:ai-docs` writes the docs as plain markdown for coding agents, and `build:tester` and `serve:tester` run it first. It reads the same manifest and markdown as search, and writes to `dist/docs-ai`, which the site serves from its root:
 
 - `/components/<page>.md`: one page, headed by its title, description and entry point. Each example's files replace its `example` block, so the code is there to read. HTML comments and H1s are left out, and links to other pages point at their markdown files.
-- `/llms.txt`: the essentials from `projects/mona-ui-tester/ai/llms-essentials.md`, then a link to every page, grouped as in the sidebar.
-- `/llms-full.txt`: every page in one file.
+- `/components/api/<entry point>.md`: everything the entry point exports, in full, from `dist/docs-api`. Links to `/api` pages point at these files.
+- `/llms.txt`: the essentials from `projects/mona-ui-tester/ai/llms-essentials.md`, then a link to every page, grouped as in the sidebar, then to every entry point's reference.
+- `/llms-full.txt`: every page and reference in one file.
 
-`npm run build:prod` also runs it with `--package`, which puts the pages in the package's `docs` folder and an `llms.txt` that links to them at its root, so an installed version carries the docs that match it. `verify:package` fails if a page that `llms.txt` links to is missing.
+`npm run build:prod` also runs it with `--package`, which puts the pages in the package's `docs` folder, the references in `docs/api`, and an `llms.txt` that links to them at its root, so an installed version carries the docs that match it. `verify:package` fails if a page that `llms.txt` links to is missing.
 
 Keep `llms-essentials.md` short. It's what an agent reads first: installing, importing, providers, and the mistakes worth warning about.
 

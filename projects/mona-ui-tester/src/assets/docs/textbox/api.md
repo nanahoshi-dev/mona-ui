@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/text-box`.
 ### `TextBoxComponent`
 
 **Selector:** `mona-text-box`  
-**Implements:** `FormValueControl<string>`
+**Implements:** `FormValueControl<string>`  
+**API reference:** [`TextBoxComponent`](/api/text-box/TextBoxComponent)
 
 #### Inputs
 
@@ -56,31 +57,21 @@ Everything below is imported from `@nanahoshi/mona-ui/text-box`.
 Marks an `<ng-template>` as a prefix slot. The template is rendered inside the container's left side. Multiple prefix
 templates are supported and render in source order.
 
-**Selector:** `ng-template[monaTextBoxPrefixTemplate]`
+**Selector:** `ng-template[monaTextBoxPrefixTemplate]`  
+**API reference:** [`TextBoxPrefixTemplateDirective`](/api/text-box/TextBoxPrefixTemplateDirective)
 
 ### `TextBoxSuffixTemplateDirective`
 
 Marks an `<ng-template>` as a suffix slot. The template is rendered inside the container's right side, after the
 optional clear button. Multiple suffix templates are supported and render in source order.
 
-**Selector:** `ng-template[monaTextBoxSuffixTemplate]`
+**Selector:** `ng-template[monaTextBoxSuffixTemplate]`  
+**API reference:** [`TextBoxSuffixTemplateDirective`](/api/text-box/TextBoxSuffixTemplateDirective)
 
 ### Types
 
-#### `TEXT_BOX_DEFAULT_MESSAGES`
+| Type | Kind |
+| --- | --- |
+| [`TEXT_BOX_DEFAULT_MESSAGES`](/api/text-box/TEXT_BOX_DEFAULT_MESSAGES) | Constant |
 
-```typescript
-const TEXT_BOX_DEFAULT_MESSAGES: { clear: string; };
-```
-
-#### `AttributeConfig`
-
-From `@nanahoshi/mona-ui/common`.
-
-HTML attributes by name, to apply to an element.
-
-```typescript
-type AttributeConfig = Record<string, unknown>;
-```
-
-**Documented elsewhere:** [`InputType`](/components/input)
+**Related types:** [`AttributeConfig`](/api/common/AttributeConfig), [`InputType`](/api/text-box/InputType)

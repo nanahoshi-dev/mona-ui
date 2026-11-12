@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/expansion-panel`.
 
 ### `ExpansionPanelComponent`
 
-**Selector:** `mona-expansion-panel`
+**Selector:** `mona-expansion-panel`  
+**API reference:** [`ExpansionPanelComponent`](/api/expansion-panel/ExpansionPanelComponent)
 
 #### Inputs
 
@@ -45,7 +46,8 @@ Everything below is imported from `@nanahoshi/mona-ui/expansion-panel`.
 Groups `mona-expansion-panel` elements: only one is open at a time unless `multiple` is set, and Up, Down, Home and End
 move between their headers. Adds no role of its own, as the pattern asks: each panel brings its heading and region.
 
-**Selector:** `mona-accordion`
+**Selector:** `mona-accordion`  
+**API reference:** [`AccordionComponent`](/api/expansion-panel/AccordionComponent)
 
 #### Inputs
 
@@ -59,17 +61,20 @@ Injects content beside the header's button, between the title and the toggle ico
 own: their clicks and keys don't reach the button, and they need their own accessible names. The template has no
 context variables.
 
-**Selector:** `ng-template[monaExpansionPanelActionsTemplate]`
+**Selector:** `ng-template[monaExpansionPanelActionsTemplate]`  
+**API reference:** [`ExpansionPanelActionsTemplateDirective`](/api/expansion-panel/ExpansionPanelActionsTemplateDirective)
 
 ### `ExpansionPanelIconTemplateDirective`
 
 Replaces the default plus/minus toggle icon.
 
-**Selector:** `ng-template[monaExpansionPanelIconTemplate]`
+**Selector:** `ng-template[monaExpansionPanelIconTemplate]`  
+**API reference:** [`ExpansionPanelIconTemplateDirective`](/api/expansion-panel/ExpansionPanelIconTemplateDirective)
 
 ### `ExpansionPanelTitleTemplateDirective`
 
 Replaces the string `title` in the header's button with projected content. It can't hold controls, since it's inside
 a button. The template has no context variables.
 
-**Selector:** `ng-template[monaExpansionPanelTitleTemplate]`
+**Selector:** `ng-template[monaExpansionPanelTitleTemplate]`  
+**API reference:** [`ExpansionPanelTitleTemplateDirective`](/api/expansion-panel/ExpansionPanelTitleTemplateDirective)

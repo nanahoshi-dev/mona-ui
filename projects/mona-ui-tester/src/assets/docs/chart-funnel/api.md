@@ -10,7 +10,8 @@ Renders conversion pipeline and sales funnel visualizations using connected trap
 horizontal layouts, custom stage colors, inscribed DOM labels, widening stages (>100% conversion), and dynamic stage
 visibility toggling.
 
-**Selector:** `mona-funnel-series`
+**Selector:** `mona-funnel-series`  
+**API reference:** [`FunnelSeriesComponent`](/api/chart/FunnelSeriesComponent)
 
 #### Inputs
 
@@ -60,7 +61,8 @@ visibility toggling.
 
 ### `ChartFunnelLabelTemplateDirective`
 
-**Selector:** `ng-template[monaChartFunnelLabelTemplate]`
+**Selector:** `ng-template[monaChartFunnelLabelTemplate]`  
+**API reference:** [`ChartFunnelLabelTemplateDirective`](/api/chart/ChartFunnelLabelTemplateDirective)
 
 #### Template context
 
@@ -88,99 +90,13 @@ visibility toggling.
 
 ### Types
 
-#### `ChartFunnelLabelTemplateContext`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `$implicit` (read-only) | `ChartFunnelStageContext<T>` |
-| `bounds` (read-only) | `ChartRect` |
-| `category` (read-only) | `unknown` |
-| `color` (read-only) | `string` |
-| `conversionRate?` (read-only) | `number` |
-| `dataIndex` (read-only) | `number` |
-| `datum` (read-only) | `T` |
-| `dropOff?` (read-only) | `number` |
-| `formattedCategory` (read-only) | `string` |
-| `formattedConversionRate?` (read-only) | `string` |
-| `formattedOverallConversionRate?` (read-only) | `string` |
-| `formattedValue` (read-only) | `string` |
-| `overallConversionRate?` (read-only) | `number` |
-| `previousValue?` (read-only) | `number` |
-| `stage` (read-only) | `ChartFunnelStageContext<T>` |
-| `stageId` (read-only) | `string` |
-| `stageIndex` (read-only) | `number` |
-| `textColor?` (read-only) | `string` |
-| `value` (read-only) | `number` |
+| [`ChartFunnelLabelTemplateContext`](/api/chart/ChartFunnelLabelTemplateContext) | Interface |
+| [`ChartFunnelPointMetadata`](/api/chart/ChartFunnelPointMetadata) | Interface |
+| [`ChartFunnelStageContext`](/api/chart/ChartFunnelStageContext) | Interface |
+| [`ChartFunnelStageVisibilityEvent`](/api/chart/ChartFunnelStageVisibilityEvent) | Interface |
+| [`ChartFunnelLabelContent`](/api/chart/ChartFunnelLabelContent) | Type alias |
+| [`ChartFunnelOrientation`](/api/chart/ChartFunnelOrientation) | Type alias |
 
-#### `ChartFunnelPointMetadata`
-
-| Name | Type |
-| --- | --- |
-| `category` (read-only) | `unknown` |
-| `conversionRate?` (read-only) | `number` |
-| `dropOff?` (read-only) | `number` |
-| `formattedCategory` (read-only) | `string` |
-| `formattedConversionRate?` (read-only) | `string` |
-| `formattedOverallConversionRate?` (read-only) | `string` |
-| `formattedValue` (read-only) | `string` |
-| `overallConversionRate?` (read-only) | `number` |
-| `previousValue?` (read-only) | `number` |
-| `stageId` (read-only) | `string` |
-| `stageIndex` (read-only) | `number` |
-| `value` (read-only) | `number` |
-
-#### `ChartFunnelStageContext`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `bounds` (read-only) | `ChartRect` |
-| `category` (read-only) | `unknown` |
-| `color` (read-only) | `string` |
-| `conversionRate?` (read-only) | `number` |
-| `dataIndex` (read-only) | `number` |
-| `datum` (read-only) | `T` |
-| `dropOff?` (read-only) | `number` |
-| `formattedCategory` (read-only) | `string` |
-| `formattedConversionRate?` (read-only) | `string` |
-| `formattedOverallConversionRate?` (read-only) | `string` |
-| `formattedValue` (read-only) | `string` |
-| `overallConversionRate?` (read-only) | `number` |
-| `previousValue?` (read-only) | `number` |
-| `stageId` (read-only) | `string` |
-| `stageIndex` (read-only) | `number` |
-| `textColor?` (read-only) | `string` |
-| `value` (read-only) | `number` |
-
-#### `ChartFunnelStageVisibilityEvent`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `category` (read-only) | `unknown` |
-| `dataIndex` (read-only) | `number` |
-| `datum` (read-only) | `T` |
-| `formattedCategory` (read-only) | `string` |
-| `seriesId` (read-only) | `string` |
-| `seriesName` (read-only) | `string` |
-| `seriesType` (read-only) | `"funnel"` |
-| `stageId` (read-only) | `string` |
-| `visible` (read-only) | `boolean` |
-
-#### `ChartFunnelLabelContent`
-
-```typescript
-type ChartFunnelLabelContent = "category" | "category-value" | "category-value-conversion" | "value";
-```
-
-#### `ChartFunnelOrientation`
-
-```typescript
-type ChartFunnelOrientation = "horizontal" | "vertical";
-```
-
-**Documented elsewhere:** [`ChartField`](/components/chart), [`ChartRect`](/components/chart), [`ChartValueFormatter`](/components/chart)
+**Related types:** [`ChartField`](/api/chart/ChartField), [`ChartRect`](/api/chart/ChartRect), [`ChartValueFormatter`](/api/chart/ChartValueFormatter)

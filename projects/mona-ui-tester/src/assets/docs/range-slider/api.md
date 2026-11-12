@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/slider`.
 ### `RangeSliderComponent`
 
 **Selector:** `mona-range-slider`  
-**Implements:** `FormValueControl<[number, number]>`
+**Implements:** `FormValueControl<[number, number]>`  
+**API reference:** [`RangeSliderComponent`](/api/slider/RangeSliderComponent)
 
 #### Inputs
 
@@ -57,7 +58,8 @@ Everything below is imported from `@nanahoshi/mona-ui/slider`.
 
 ### `SliderHandleTemplateDirective`
 
-**Selector:** `ng-template[monaSliderHandleTemplate]`
+**Selector:** `ng-template[monaSliderHandleTemplate]`  
+**API reference:** [`SliderHandleTemplateDirective`](/api/slider/SliderHandleTemplateDirective)
 
 #### Template context
 
@@ -67,7 +69,8 @@ Everything below is imported from `@nanahoshi/mona-ui/slider`.
 
 ### `SliderTickValueTemplateDirective`
 
-**Selector:** `ng-template[monaSliderTickValueTemplate]`
+**Selector:** `ng-template[monaSliderTickValueTemplate]`  
+**API reference:** [`SliderTickValueTemplateDirective`](/api/slider/SliderTickValueTemplateDirective)
 
 #### Template context
 
@@ -77,16 +80,8 @@ Everything below is imported from `@nanahoshi/mona-ui/slider`.
 
 ### Types
 
-#### `SliderLabelPosition`
+| Type | Kind |
+| --- | --- |
+| [`SliderLabelPosition`](/api/slider/SliderLabelPosition) | Type alias |
 
-```typescript
-type SliderLabelPosition = "before" | "after";
-```
-
-#### `Orientation`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type Orientation = "horizontal" | "vertical";
-```
+**Related types:** [`Orientation`](/api/common/Orientation)

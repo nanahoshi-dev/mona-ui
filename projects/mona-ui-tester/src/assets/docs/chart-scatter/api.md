@@ -8,7 +8,8 @@ Everything below is imported from `@nanahoshi/mona-ui/chart`.
 
 Renders 3-dimensional data points with position (X, Y) and proportionally-scaled circle areas (Size).
 
-**Selector:** `mona-bubble-series`
+**Selector:** `mona-bubble-series`  
+**API reference:** [`BubbleSeriesComponent`](/api/chart/BubbleSeriesComponent)
 
 #### Inputs
 
@@ -46,7 +47,8 @@ Renders 3-dimensional data points with position (X, Y) and proportionally-scaled
 
 Renders individual point markers across continuous numeric (linear) or temporal (time/utc) Cartesian coordinates.
 
-**Selector:** `mona-scatter-series`
+**Selector:** `mona-scatter-series`  
+**API reference:** [`ScatterSeriesComponent`](/api/chart/ScatterSeriesComponent)
 
 #### Inputs
 
@@ -79,4 +81,4 @@ Renders individual point markers across continuous numeric (linear) or temporal 
 
 ### Types
 
-**Documented elsewhere:** [`ChartDataLabelsInput`](/components/chart), [`ChartDownsamplingInput`](/components/chart), [`ChartField`](/components/chart), [`ChartValueFormatter`](/components/chart)
+**Related types:** [`ChartDataLabelsInput`](/api/chart/ChartDataLabelsInput), [`ChartDownsamplingInput`](/api/chart/ChartDownsamplingInput), [`ChartField`](/api/chart/ChartField), [`ChartValueFormatter`](/api/chart/ChartValueFormatter)

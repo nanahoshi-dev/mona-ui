@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/color-picker`.
 ### `ColorPickerComponent`
 
 **Selector:** `mona-color-picker`  
-**Implements:** `FormValueControl<string \| null>`
+**Implements:** `FormValueControl<string \| null>`  
+**API reference:** [`ColorPickerComponent`](/api/color-picker/ColorPickerComponent)
 
 #### Inputs
 
@@ -48,7 +49,8 @@ Everything below is imported from `@nanahoshi/mona-ui/color-picker`.
 
 ### `ColorPickerValueTemplateDirective`
 
-**Selector:** `ng-template[monaColorPickerValueTemplate]`
+**Selector:** `ng-template[monaColorPickerValueTemplate]`  
+**API reference:** [`ColorPickerValueTemplateDirective`](/api/color-picker/ColorPickerValueTemplateDirective)
 
 #### Template context
 
@@ -58,59 +60,10 @@ Everything below is imported from `@nanahoshi/mona-ui/color-picker`.
 
 ### Types
 
-#### `COLOR_PICKER_DEFAULT_MESSAGES`
-
-```typescript
-const COLOR_PICKER_DEFAULT_MESSAGES: MonaColorPickerMessages;
-```
-
-#### `ColorPickerValueTemplateContext`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `$implicit` | `string \| null` |
+| [`COLOR_PICKER_DEFAULT_MESSAGES`](/api/color-picker/COLOR_PICKER_DEFAULT_MESSAGES) | Constant |
+| [`ColorPickerValueTemplateContext`](/api/color-picker/ColorPickerValueTemplateContext) | Interface |
+| [`ColorPickerView`](/api/color-picker/ColorPickerView) | Type alias |
 
-#### `ColorPickerView`
-
-```typescript
-type ColorPickerView = "gradient" | "palette";
-```
-
-#### `ColorOutputFormat`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type ColorOutputFormat = "hex" | "rgb" | "hsl";
-```
-
-#### `ColorPaletteItem`
-
-From `@nanahoshi/mona-ui/common`.
-
-A swatch with a name of its own, for a palette whose colors mean something, such as brand colors.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `color` (read-only) | `string` | Any CSS color. |
-| `name?` (read-only) | `string` | What the color is called. Assistive technology reads it, and it shows as a tooltip. |
-
-#### `MonaColorPickerMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
-| --- | --- |
-| `clearColor` (read-only) | `string` |
-| `colorGradientPicker` (read-only) | `string` |
-| `colorPalettePicker` (read-only) | `string` |
-| `colorPicker` (read-only) | `string` |
-| `noColor` (read-only) | `string` |
-
-#### `PaletteType`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type PaletteType = "flat" | "material" | "websafe";
-```
+**Related types:** [`ColorOutputFormat`](/api/common/ColorOutputFormat), [`ColorPaletteItem`](/api/common/ColorPaletteItem), [`MonaColorPickerMessages`](/api/i18n/MonaColorPickerMessages), [`PaletteType`](/api/common/PaletteType)

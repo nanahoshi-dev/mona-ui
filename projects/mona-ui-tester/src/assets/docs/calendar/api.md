@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/calendar`.
 ### `CalendarComponent`
 
 **Selector:** `mona-calendar`  
-**Implements:** `FormValueControl<Date \| Date[] \| null>`
+**Implements:** `FormValueControl<Date \| Date[] \| null>`  
+**API reference:** [`CalendarComponent`](/api/calendar/CalendarComponent)
 
 #### Inputs
 
@@ -40,91 +41,32 @@ Everything below is imported from `@nanahoshi/mona-ui/calendar`.
 
 Provides a custom template for each year cell in the decade view.
 
-**Selector:** `ng-template[monaCalendarDecadeCellTemplate]`
+**Selector:** `ng-template[monaCalendarDecadeCellTemplate]`  
+**API reference:** [`CalendarDecadeCellTemplateDirective`](/api/calendar/CalendarDecadeCellTemplateDirective)
 
 ### `CalendarMonthCellTemplateDirective`
 
 Provides a custom template for each day cell in the month view.
 
-**Selector:** `ng-template[monaCalendarMonthCellTemplate]`
+**Selector:** `ng-template[monaCalendarMonthCellTemplate]`  
+**API reference:** [`CalendarMonthCellTemplateDirective`](/api/calendar/CalendarMonthCellTemplateDirective)
 
 ### `CalendarYearCellTemplateDirective`
 
 Provides a custom template for each month cell in the year (month-selection) view.
 
-**Selector:** `ng-template[monaCalendarYearCellTemplate]`
+**Selector:** `ng-template[monaCalendarYearCellTemplate]`  
+**API reference:** [`CalendarYearCellTemplateDirective`](/api/calendar/CalendarYearCellTemplateDirective)
 
 ### Types
 
-#### `CALENDAR_DEFAULT_MESSAGES`
-
-```typescript
-const CALENDAR_DEFAULT_MESSAGES: MonaCalendarMessages;
-```
-
-#### `DecadeCellTemplateContext`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `number` | The year interval of per decade. |
-
-#### `MonthCellTemplateContext`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `number` | The day of the month. |
-| `date` | `Date` | The date object representing the day. |
-
-#### `YearCellTemplateContext`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `number` | The month number (1–12) represented by this cell. |
-| `text` | `string` | The text representation of the month. |
-
-#### `CalendarSelection`
-
-```typescript
-type CalendarSelection = "multiple" | "range" | "single";
-```
-
-#### `FirstDayOfWeek`
-
-```typescript
-type FirstDayOfWeek = | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
-```
-
-#### `DateDisabledType`
-
-From `@nanahoshi/mona-ui/date-input`.
-
-```typescript
-type DateDisabledType = Iterable<Date> | Predicate<Date> | null | undefined;
-```
-
-#### `MonaCalendarMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `nextDecade` (read-only) | `string` |
-| `nextMonth` (read-only) | `string` |
-| `nextYear` (read-only) | `string` |
-| `previousDecade` (read-only) | `string` |
-| `previousMonth` (read-only) | `string` |
-| `previousYear` (read-only) | `string` |
-| `today` (read-only) | `string` |
+| [`CALENDAR_DEFAULT_MESSAGES`](/api/calendar/CALENDAR_DEFAULT_MESSAGES) | Constant |
+| [`DecadeCellTemplateContext`](/api/calendar/DecadeCellTemplateContext) | Interface |
+| [`MonthCellTemplateContext`](/api/calendar/MonthCellTemplateContext) | Interface |
+| [`YearCellTemplateContext`](/api/calendar/YearCellTemplateContext) | Interface |
+| [`CalendarSelection`](/api/calendar/CalendarSelection) | Type alias |
+| [`FirstDayOfWeek`](/api/calendar/FirstDayOfWeek) | Type alias |
 
-**Methods**
-
-| Signature |
-| --- |
-| `calendarLabel(formattedMonthAndYear: string): string` |
-| `decadeRange(start: number, end: number): string` |
-| `decadeViewLabel(start: number, end: number): string` |
-| `goToToday(formattedDate: string): string` |
-| `switchToDecadeView(currentYear: string): string` |
-| `switchToYearView(currentMonthAndYear: string): string` |
-| `yearCellLabel(year: number): string` |
-| `yearViewLabel(year: string): string` |
+**Related types:** [`DateDisabledType`](/api/date-input/DateDisabledType), [`MonaCalendarMessages`](/api/i18n/MonaCalendarMessages)

@@ -8,7 +8,8 @@ Everything below is imported from `@nanahoshi/mona-ui/chart`.
 
 Renders hierarchical treemap visualizations using nested squarified, binary, dice, or slice-dice rectangles.
 
-**Selector:** `mona-treemap-series`
+**Selector:** `mona-treemap-series`  
+**API reference:** [`TreemapSeriesComponent`](/api/chart/TreemapSeriesComponent)
 
 #### Inputs
 
@@ -63,7 +64,8 @@ Renders hierarchical treemap visualizations using nested squarified, binary, dic
 
 ### `ChartTreemapLabelTemplateDirective`
 
-**Selector:** `ng-template[monaChartTreemapLabelTemplate]`
+**Selector:** `ng-template[monaChartTreemapLabelTemplate]`  
+**API reference:** [`ChartTreemapLabelTemplateDirective`](/api/chart/ChartTreemapLabelTemplateDirective)
 
 #### Template context
 
@@ -90,117 +92,14 @@ Renders hierarchical treemap visualizations using nested squarified, binary, dic
 
 ### Types
 
-#### `ChartHierarchyNodeContext`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `aggregateValue` (read-only) | `number` |
-| `childCount` (read-only) | `number` |
-| `dataIndex` (read-only) | `number` |
-| `datum` (read-only) | `T` |
-| `depth` (read-only) | `number` |
-| `descendantCount` (read-only) | `number` |
-| `formattedLabel` (read-only) | `string` |
-| `formattedPath` (read-only) | `readonly string[]` |
-| `formattedValue` (read-only) | `string` |
-| `isCollapsed` (read-only) | `boolean` |
-| `isLeaf` (read-only) | `boolean` |
-| `label` (read-only) | `unknown` |
-| `nodeId` (read-only) | `string` |
-| `parentId?` (read-only) | `string` |
-| `path` (read-only) | `readonly unknown[]` |
-| `percentageOfParent?` (read-only) | `number` |
-| `percentageOfRoot?` (read-only) | `number` |
-| `rawValue?` (read-only) | `number` |
-| `siblingIndex` (read-only) | `number` |
-| `sourceIndexPath` (read-only) | `readonly number[]` |
-| `treeHeight` (read-only) | `number` |
+| [`ChartHierarchyNodeContext`](/api/chart/ChartHierarchyNodeContext) | Interface |
+| [`ChartHierarchyPointMetadata`](/api/chart/ChartHierarchyPointMetadata) | Interface |
+| [`ChartTreemapLabelTemplateContext`](/api/chart/ChartTreemapLabelTemplateContext) | Interface |
+| [`ChartTreemapNodeVisibilityEvent`](/api/chart/ChartTreemapNodeVisibilityEvent) | Interface |
+| [`ChartHierarchicalKind`](/api/chart/ChartHierarchicalKind) | Type alias |
+| [`ChartTreemapSort`](/api/chart/ChartTreemapSort) | Type alias |
+| [`ChartTreemapTile`](/api/chart/ChartTreemapTile) | Type alias |
 
-#### `ChartHierarchyPointMetadata`
-
-| Name | Type |
-| --- | --- |
-| `aggregateValue` (read-only) | `number` |
-| `childCount` (read-only) | `number` |
-| `dataIndex` (read-only) | `number` |
-| `depth` (read-only) | `number` |
-| `descendantCount` (read-only) | `number` |
-| `formattedLabel` (read-only) | `string` |
-| `formattedPath` (read-only) | `readonly string[]` |
-| `formattedValue` (read-only) | `string` |
-| `isCollapsed` (read-only) | `boolean` |
-| `isLeaf` (read-only) | `boolean` |
-| `label` (read-only) | `unknown` |
-| `nodeId` (read-only) | `string` |
-| `parentId?` (read-only) | `string` |
-| `path` (read-only) | `readonly unknown[]` |
-| `percentageOfParent?` (read-only) | `number` |
-| `percentageOfRoot?` (read-only) | `number` |
-| `rawValue?` (read-only) | `number` |
-| `siblingIndex` (read-only) | `number` |
-| `sourceIndexPath` (read-only) | `readonly number[]` |
-| `treeHeight` (read-only) | `number` |
-
-#### `ChartTreemapLabelTemplateContext`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `$implicit` (read-only) | `ChartHierarchyNodeContext<T>` |
-| `bounds` (read-only) | `ChartRect` |
-| `color` (read-only) | `string` |
-| `datum` (read-only) | `T` |
-| `depth` (read-only) | `number` |
-| `formattedLabel` (read-only) | `string` |
-| `formattedPath` (read-only) | `readonly string[]` |
-| `formattedValue` (read-only) | `string` |
-| `isCollapsed` (read-only) | `boolean` |
-| `isLeaf` (read-only) | `boolean` |
-| `label` (read-only) | `unknown` |
-| `node` (read-only) | `ChartHierarchyNodeContext<T>` |
-| `nodeId` (read-only) | `string` |
-| `path` (read-only) | `readonly unknown[]` |
-| `percentageOfParent?` (read-only) | `number` |
-| `percentageOfRoot?` (read-only) | `number` |
-| `textColor` (read-only) | `string` |
-| `value` (read-only) | `number` |
-
-#### `ChartTreemapNodeVisibilityEvent`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `dataIndex?` (read-only) | `number` |
-| `datum?` (read-only) | `T` |
-| `depth?` (read-only) | `number` |
-| `formattedLabel?` (read-only) | `string` |
-| `label?` (read-only) | `unknown` |
-| `nodeId` (read-only) | `string` |
-| `seriesId` (read-only) | `string` |
-| `seriesName` (read-only) | `string` |
-| `seriesType` (read-only) | `"treemap"` |
-| `visible` (read-only) | `boolean` |
-
-#### `ChartHierarchicalKind`
-
-```typescript
-type ChartHierarchicalKind = "treemap";
-```
-
-#### `ChartTreemapSort`
-
-```typescript
-type ChartTreemapSort = "ascending" | "descending" | "none";
-```
-
-#### `ChartTreemapTile`
-
-```typescript
-type ChartTreemapTile = "binary" | "dice" | "slice" | "slice-dice" | "squarify";
-```
-
-**Documented elsewhere:** [`ChartField`](/components/chart), [`ChartRect`](/components/chart), [`ChartValueFormatter`](/components/chart)
+**Related types:** [`ChartField`](/api/chart/ChartField), [`ChartRect`](/api/chart/ChartRect), [`ChartValueFormatter`](/api/chart/ChartValueFormatter)

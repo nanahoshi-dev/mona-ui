@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/avatar`.
 
 ### `AvatarComponent`
 
-**Selector:** `mona-avatar`
+**Selector:** `mona-avatar`  
+**API reference:** [`AvatarComponent`](/api/avatar/AvatarComponent)
 
 #### Inputs
 

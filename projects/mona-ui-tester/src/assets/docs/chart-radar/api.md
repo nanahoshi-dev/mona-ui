@@ -8,7 +8,8 @@ Everything below is imported from `@nanahoshi/mona-ui/chart`.
 
 Renders continuous polar series mapping magnitude over continuous degree angles (0° to 360°).
 
-**Selector:** `mona-polar-series`
+**Selector:** `mona-polar-series`  
+**API reference:** [`PolarSeriesComponent`](/api/chart/PolarSeriesComponent)
 
 #### Inputs
 
@@ -42,7 +43,8 @@ Renders continuous polar series mapping magnitude over continuous degree angles 
 
 Renders closed polygonal radar series comparing categorical metrics across angular spokes.
 
-**Selector:** `mona-radar-series`
+**Selector:** `mona-radar-series`  
+**API reference:** [`RadarSeriesComponent`](/api/chart/RadarSeriesComponent)
 
 #### Inputs
 
@@ -75,7 +77,8 @@ Renders closed polygonal radar series comparing categorical metrics across angul
 
 Configures the radial numeric dimension (distance from pole) in Polar Axis charts.
 
-**Selector:** `mona-chart-radial-axis`
+**Selector:** `mona-chart-radial-axis`  
+**API reference:** [`ChartRadialAxisComponent`](/api/chart/ChartRadialAxisComponent)
 
 #### Inputs
 
@@ -99,7 +102,8 @@ Configures the radial numeric dimension (distance from pole) in Polar Axis chart
 
 Configures the angular dimension (spokes and continuous degrees) in Polar Axis charts.
 
-**Selector:** `mona-chart-angular-axis`
+**Selector:** `mona-chart-angular-axis`  
+**API reference:** [`ChartAngularAxisComponent`](/api/chart/ChartAngularAxisComponent)
 
 #### Inputs
 
@@ -117,22 +121,10 @@ Configures the angular dimension (spokes and continuous degrees) in Polar Axis c
 
 ### Types
 
-#### `ChartRadialCurve`
+| Type | Kind |
+| --- | --- |
+| [`ChartRadialCurve`](/api/chart/ChartRadialCurve) | Type alias |
+| [`ChartRadialFillMode`](/api/chart/ChartRadialFillMode) | Type alias |
+| [`ChartRadialGridShape`](/api/chart/ChartRadialGridShape) | Type alias |
 
-```typescript
-type ChartRadialCurve = "linear" | "smooth";
-```
-
-#### `ChartRadialFillMode`
-
-```typescript
-type ChartRadialFillMode = "gradient" | "none" | "solid";
-```
-
-#### `ChartRadialGridShape`
-
-```typescript
-type ChartRadialGridShape = "auto" | "circle" | "polygon";
-```
-
-**Documented elsewhere:** [`ChartAxisFormatter`](/components/chart), [`ChartField`](/components/chart), [`ChartValueFormatter`](/components/chart)
+**Related types:** [`ChartAxisFormatter`](/api/chart/ChartAxisFormatter), [`ChartField`](/api/chart/ChartField), [`ChartValueFormatter`](/api/chart/ChartValueFormatter)

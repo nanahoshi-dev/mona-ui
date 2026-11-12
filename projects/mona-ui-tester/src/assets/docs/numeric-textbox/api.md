@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/numeric-text-box`.
 ### `NumericTextBoxComponent`
 
 **Selector:** `mona-numeric-text-box`  
-**Implements:** `FormValueControl<number \| null>`
+**Implements:** `FormValueControl<number \| null>`  
+**API reference:** [`NumericTextBoxComponent`](/api/numeric-text-box/NumericTextBoxComponent)
 
 #### Inputs
 
@@ -57,31 +58,13 @@ Everything below is imported from `@nanahoshi/mona-ui/numeric-text-box`.
 
 ### `NumericTextBoxPrefixTemplateDirective`
 
-**Selector:** `ng-template[monaNumericTextBoxPrefixTemplate]`
+**Selector:** `ng-template[monaNumericTextBoxPrefixTemplate]`  
+**API reference:** [`NumericTextBoxPrefixTemplateDirective`](/api/numeric-text-box/NumericTextBoxPrefixTemplateDirective)
 
 ### Types
 
-#### `NUMERIC_TEXT_BOX_DEFAULT_MESSAGES`
-
-```typescript
-const NUMERIC_TEXT_BOX_DEFAULT_MESSAGES: MonaNumericTextBoxMessages;
-```
-
-#### `Action`
-
-From `@nanahoshi/mona-ui/common`.
-
-A function taking a `P` and returning an `R`.
-
-```typescript
-type Action<P = void, R = void> = (arg: P) => R;
-```
-
-#### `MonaNumericTextBoxMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `decrease` (read-only) | `string` |
-| `increase` (read-only) | `string` |
+| [`NUMERIC_TEXT_BOX_DEFAULT_MESSAGES`](/api/numeric-text-box/NUMERIC_TEXT_BOX_DEFAULT_MESSAGES) | Constant |
+
+**Related types:** [`Action`](/api/common/Action), [`MonaNumericTextBoxMessages`](/api/i18n/MonaNumericTextBoxMessages)

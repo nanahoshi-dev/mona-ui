@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/list-view`.
 ### `ListViewComponent`
 
 **Selector:** `mona-list-view`  
-**Type parameters:** `T = unknown`
+**Type parameters:** `T = unknown`  
+**API reference:** [`ListViewComponent`](/api/list-view/ListViewComponent)
 
 #### Inputs
 
@@ -41,7 +42,8 @@ Everything below is imported from `@nanahoshi/mona-ui/list-view`.
 
 ### `ListViewPageableDirective`
 
-**Selector:** `mona-list-view[monaListViewPageable]`
+**Selector:** `mona-list-view[monaListViewPageable]`  
+**API reference:** [`ListViewPageableDirective`](/api/list-view/ListViewPageableDirective)
 
 #### Inputs
 
@@ -62,7 +64,8 @@ Everything below is imported from `@nanahoshi/mona-ui/list-view`.
 ### `ListViewSelectableDirective`
 
 **Selector:** `mona-list-view[monaListViewSelectable]`  
-**Type parameters:** `T`, `K = unknown`
+**Type parameters:** `T`, `K = unknown`  
+**API reference:** [`ListViewSelectableDirective`](/api/list-view/ListViewSelectableDirective)
 
 #### Inputs
 
@@ -81,7 +84,8 @@ Everything below is imported from `@nanahoshi/mona-ui/list-view`.
 ### `ListViewGroupableDirective`
 
 **Selector:** `mona-list-view[monaListViewGroupable]`  
-**Type parameters:** `T`, `K = T`
+**Type parameters:** `T`, `K = T`  
+**API reference:** [`ListViewGroupableDirective`](/api/list-view/ListViewGroupableDirective)
 
 #### Inputs
 
@@ -96,7 +100,8 @@ Template for each item of a list view. The data item is the template's implicit 
 view's items to `monaListViewItemTemplateOf` to type it; without it, the item is `any` in templates.
 
 **Selector:** `ng-template[monaListViewItemTemplate]`  
-**Type parameters:** `T = any`
+**Type parameters:** `T = any`  
+**API reference:** [`ListViewItemTemplateDirective`](/api/list-view/ListViewItemTemplateDirective)
 
 #### Inputs
 
@@ -113,7 +118,8 @@ view's items to `monaListViewItemTemplateOf` to type it; without it, the item is
 ### `ListViewNavigableDirective`
 
 **Selector:** `mona-list-view[monaListViewNavigable]`  
-**Type parameters:** `T`
+**Type parameters:** `T`  
+**API reference:** [`ListViewNavigableDirective`](/api/list-view/ListViewNavigableDirective)
 
 #### Inputs
 
@@ -124,7 +130,8 @@ view's items to `monaListViewItemTemplateOf` to type it; without it, the item is
 ### `ListViewVirtualScrollDirective`
 
 **Selector:** `mona-list-view[monaListViewVirtualScroll]`  
-**Type parameters:** `T`
+**Type parameters:** `T`  
+**API reference:** [`ListViewVirtualScrollDirective`](/api/list-view/ListViewVirtualScrollDirective)
 
 #### Inputs
 
@@ -134,7 +141,8 @@ view's items to `monaListViewItemTemplateOf` to type it; without it, the item is
 
 ### `ListViewFooterTemplateDirective`
 
-**Selector:** `ng-template[monaListViewFooterTemplate]`
+**Selector:** `ng-template[monaListViewFooterTemplate]`  
+**API reference:** [`ListViewFooterTemplateDirective`](/api/list-view/ListViewFooterTemplateDirective)
 
 ### `ListViewGroupHeaderTemplateDirective`
 
@@ -142,101 +150,31 @@ Template for the header of each group. The group's value is the template's impli
 `ListViewGroupHeaderTemplateContext`. The context isn't type-checked, so templates written against the value's own
 type keep compiling.
 
-**Selector:** `ng-template[monaListViewGroupHeaderTemplate]`
+**Selector:** `ng-template[monaListViewGroupHeaderTemplate]`  
+**API reference:** [`ListViewGroupHeaderTemplateDirective`](/api/list-view/ListViewGroupHeaderTemplateDirective)
 
 ### `ListViewHeaderTemplateDirective`
 
-**Selector:** `ng-template[monaListViewHeaderTemplate]`
+**Selector:** `ng-template[monaListViewHeaderTemplate]`  
+**API reference:** [`ListViewHeaderTemplateDirective`](/api/list-view/ListViewHeaderTemplateDirective)
 
 ### `ListViewNoDataTemplateDirective`
 
-**Selector:** `ng-template[monaListViewNoDataTemplate]`
+**Selector:** `ng-template[monaListViewNoDataTemplate]`  
+**API reference:** [`ListViewNoDataTemplateDirective`](/api/list-view/ListViewNoDataTemplateDirective)
 
 ### Types
 
-#### `ListViewGroupHeaderTemplateContext`
-
-The context of a `monaListViewGroupHeaderTemplate`: the group's value (what `groupBy` returned for its items), as
-`let-group`.
-
-**Type parameters:** `G = unknown`
-
-| Name | Type |
-| --- | --- |
-| `$implicit` (read-only) | `G` |
-
-#### `ListViewItemTemplateContext`
-
-The context of a `monaListViewItemTemplate`: the data item, as `let-item`.
-
-**Type parameters:** `T = unknown`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `$implicit` (read-only) | `T` | The data item (`let-item`), or the group's value (`let-group`). |
+| [`ListViewGroupHeaderTemplateContext`](/api/list-view/ListViewGroupHeaderTemplateContext) | Interface | The context of a `monaListViewGroupHeaderTemplate`: the group's value (what `groupBy` returned for its items), as `let-group`. |
+| [`ListViewItemTemplateContext`](/api/list-view/ListViewItemTemplateContext) | Interface | The context of a `monaListViewItemTemplate`: the data item, as `let-item`. |
+| [`NavigableOptions`](/api/list-view/NavigableOptions) | Interface |  |
+| [`PagerSettings`](/api/list-view/PagerSettings) | Interface |  |
+| [`VirtualScrollOptions`](/api/list-view/VirtualScrollOptions) | Interface |  |
+| [`GroupableOptions`](/api/list-view/GroupableOptions) | Type alias |  |
+| [`NavigationMode`](/api/list-view/NavigationMode) | Type alias | Whether arrow keys only highlight an item, or select it as well. |
+| [`OrderByOptions`](/api/list-view/OrderByOptions) | Type alias | How the items within each group are ordered. |
+| [`SelectableOptions`](/api/list-view/SelectableOptions) | Type alias |  |
 
-#### `NavigableOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `enabled` | `boolean` | Whether keyboard navigation is active. |
-| `mode` | `NavigationMode` | Whether navigation only moves a visual highlight (`"highlight"`) or also changes selection (`"select"`). |
-| `wrap` | `boolean` | Whether navigating past the last (or before the first) item cycles to the other end. |
-
-#### `PagerSettings`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `enabled` | `boolean` | Whether the pager is active. |
-| `firstLast` | `boolean` | Whether first/last page buttons are shown. |
-| `pageSize` | `number` | Number of items shown per page. |
-| `pageSizeValues` | `number[] \| boolean` | Page size options shown in the pager, or `false`/`true` to hide/show a default set. |
-| `previousNext` | `boolean` | Whether previous/next page buttons are shown. |
-| `showInfo` | `boolean` | Whether a page summary (e.g. "1-10 of 50") is shown. |
-| `type` | `"numeric" \| "input"` | Whether pages are selected via numbered buttons or a page-number input. |
-| `visiblePages` | `number` | Number of numeric page buttons shown at once, when `type` is `"numeric"`. |
-
-#### `VirtualScrollOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `enabled` | `boolean` | Whether virtual scrolling is active. |
-| `height?` | `number` | Fixed row height, in pixels, used to measure the virtual scroll viewport. |
-
-#### `GroupableOptions`
-
-```typescript
-type GroupableOptions<T = unknown, R = unknown> = { enabled?: boolean; headerOrder?: "asc" | "desc"; headerText?: (value: unknown) => string; } & OrderByOptions<T, R>;
-```
-
-#### `NavigationMode`
-
-Whether arrow keys only highlight an item, or select it as well.
-
-```typescript
-type NavigationMode = "highlight" | "select";
-```
-
-#### `OrderByOptions`
-
-How the items within each group are ordered. Leave both out to keep their order.
-
-```typescript
-type OrderByOptions<T, R> = | { orderBy?: never; orderByDirection?: never } | { orderBy: string | Selector<T, R>; orderByDirection?: "asc" | "desc"; };
-```
-
-#### `SelectableOptions`
-
-```typescript
-type SelectableOptions = | { checkboxes?: boolean; enabled?: boolean; mode: "single"; toggleable?: boolean; } | { checkboxes?: boolean; enabled?: boolean; mode: "multiple"; };
-```
-
-#### `ListKeySelector`
-
-From `@nanahoshi/mona-ui/list`.
-
-```typescript
-type ListKeySelector<T, K = unknown> = string | Selector<T, K> | null;
-```
-
-**Documented elsewhere:** [`PageSizeChangeEvent`](/components/pager)
+**Related types:** [`ListKeySelector`](/api/list/ListKeySelector), [`PageSizeChangeEvent`](/api/pager/PageSizeChangeEvent)

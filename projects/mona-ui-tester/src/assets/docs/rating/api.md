@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/rating`.
 ### `RatingComponent`
 
 **Selector:** `mona-rating`  
-**Implements:** `FormValueControl<number>`
+**Implements:** `FormValueControl<number>`  
+**API reference:** [`RatingComponent`](/api/rating/RatingComponent)
 
 #### Inputs
 
@@ -54,7 +55,8 @@ Everything below is imported from `@nanahoshi/mona-ui/rating`.
 Renders the pointer-preview visual for rating items. Overrides the default preset
 overlay whenever the visible state comes from pointer preview.
 
-**Selector:** `ng-template[monaRatingHoveredItemTemplate]`
+**Selector:** `ng-template[monaRatingHoveredItemTemplate]`  
+**API reference:** [`RatingHoveredItemTemplateDirective`](/api/rating/RatingHoveredItemTemplateDirective)
 
 #### Template context
 
@@ -72,7 +74,8 @@ overlay whenever the visible state comes from pointer preview.
 Renders the default (unselected) visual for every rating item. Overrides the
 default preset icon for the base layer of each item.
 
-**Selector:** `ng-template[monaRatingItemTemplate]`
+**Selector:** `ng-template[monaRatingItemTemplate]`  
+**API reference:** [`RatingItemTemplateDirective`](/api/rating/RatingItemTemplateDirective)
 
 #### Template context
 
@@ -90,7 +93,8 @@ default preset icon for the base layer of each item.
 Renders the committed selected visual for rating items. Overrides the default
 preset overlay whenever the visible state comes from the committed value.
 
-**Selector:** `ng-template[monaRatingSelectedItemTemplate]`
+**Selector:** `ng-template[monaRatingSelectedItemTemplate]`  
+**API reference:** [`RatingSelectedItemTemplateDirective`](/api/rating/RatingSelectedItemTemplateDirective)
 
 #### Template context
 
@@ -105,69 +109,13 @@ preset overlay whenever the visible state comes from the committed value.
 
 ### Types
 
-#### `RATING_DEFAULT_MESSAGES`
-
-```typescript
-const RATING_DEFAULT_MESSAGES: MonaRatingMessages;
-```
-
-#### `RatingItemTemplateContext`
-
-Rendering context passed to the default, selected, and hovered item templates.
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `$implicit` (read-only) | `number` | Zero-based item index. |
-| `fill` (read-only) | `number` | Visible fill amount between 0 and 1. |
-| `hovered` (read-only) | `boolean` | Whether the visible state comes from pointer preview. |
-| `index` (read-only) | `number` | Zero-based item index. |
-| `itemValue` (read-only) | `number` | One-based value represented by this item. |
-| `selected` (read-only) | `boolean` | Whether the visible state comes from the committed value. |
+| [`RATING_DEFAULT_MESSAGES`](/api/rating/RATING_DEFAULT_MESSAGES) | Constant |  |
+| [`RatingItemTemplateContext`](/api/rating/RatingItemTemplateContext) | Interface | Rendering context passed to the default, selected, and hovered item templates. |
+| [`RatingIconName`](/api/rating/RatingIconName) | Type alias | Built-in icon names available for the default rating visuals. |
+| [`RatingLabelPosition`](/api/rating/RatingLabelPosition) | Type alias | Position of the visible label relative to the rating items. |
+| [`RatingPrecision`](/api/rating/RatingPrecision) | Type alias | Selection granularity of the rating. |
+| [`RatingSelectionMode`](/api/rating/RatingSelectionMode) | Type alias | How the selected value is visualized across the items. |
 
-#### `RatingIconName`
-
-Built-in icon names available for the default rating visuals.
-
-```typescript
-type RatingIconName = "circle" | "diamond" | "flame" | "heart" | "star";
-```
-
-#### `RatingLabelPosition`
-
-Position of the visible label relative to the rating items.
-
-```typescript
-type RatingLabelPosition = "before" | "after";
-```
-
-#### `RatingPrecision`
-
-Selection granularity of the rating. `"item"` selects whole items, `"half"` selects
-half-item increments.
-
-```typescript
-type RatingPrecision = "item" | "half";
-```
-
-#### `RatingSelectionMode`
-
-How the selected value is visualized across the items. `"continuous"` fills every
-item up to the selected value, `"single"` fills only the item representing the selected value.
-
-```typescript
-type RatingSelectionMode = "continuous" | "single";
-```
-
-#### `MonaRatingMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
-| --- | --- |
-| `notRated` (read-only) | `string` |
-
-**Methods**
-
-| Signature |
-| --- |
-| `valueText(value: number, max: number): string` |
+**Related types:** [`MonaRatingMessages`](/api/i18n/MonaRatingMessages)

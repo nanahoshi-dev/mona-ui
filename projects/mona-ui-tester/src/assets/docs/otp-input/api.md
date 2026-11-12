@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/otp-input`.
 ### `OtpInputComponent`
 
 **Selector:** `mona-otp-input`  
-**Implements:** `FormValueControl<string>`
+**Implements:** `FormValueControl<string>`  
+**API reference:** [`OtpInputComponent`](/api/otp-input/OtpInputComponent)
 
 #### Inputs
 
@@ -57,7 +58,8 @@ Everything below is imported from `@nanahoshi/mona-ui/otp-input`.
 
 ### `OtpInputSeparatorTemplateDirective`
 
-**Selector:** `ng-template[monaOtpInputSeparatorTemplate]`
+**Selector:** `ng-template[monaOtpInputSeparatorTemplate]`  
+**API reference:** [`OtpInputSeparatorTemplateDirective`](/api/otp-input/OtpInputSeparatorTemplateDirective)
 
 #### Template context
 
@@ -68,39 +70,10 @@ Everything below is imported from `@nanahoshi/mona-ui/otp-input`.
 
 ### Types
 
-#### `OTP_INPUT_DEFAULT_MESSAGES`
-
-```typescript
-const OTP_INPUT_DEFAULT_MESSAGES: MonaOtpInputMessages;
-```
-
-#### `OtpInputSeparatorContext`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `$implicit` | `number` |
-| `groupIndex` | `number` |
+| [`OTP_INPUT_DEFAULT_MESSAGES`](/api/otp-input/OTP_INPUT_DEFAULT_MESSAGES) | Constant |
+| [`OtpInputSeparatorContext`](/api/otp-input/OtpInputSeparatorContext) | Interface |
+| [`OtpInputType`](/api/otp-input/OtpInputType) | Type alias |
 
-#### `OtpInputType`
-
-```typescript
-type OtpInputType = "text" | "number" | "password";
-```
-
-#### `AttributeConfig`
-
-From `@nanahoshi/mona-ui/common`.
-
-HTML attributes by name, to apply to an element.
-
-```typescript
-type AttributeConfig = Record<string, unknown>;
-```
-
-#### `MonaOtpInputMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
-| --- | --- |
-| `verificationCode` (read-only) | `string` |
+**Related types:** [`AttributeConfig`](/api/common/AttributeConfig), [`MonaOtpInputMessages`](/api/i18n/MonaOtpInputMessages)

@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/chip`.
 
 ### `ChipComponent`
 
-**Selector:** `mona-chip`
+**Selector:** `mona-chip`  
+**API reference:** [`ChipComponent`](/api/chip/ChipComponent)
 
 #### Inputs
 
@@ -40,12 +41,11 @@ Everything below is imported from `@nanahoshi/mona-ui/chip`.
 Apply to an `<ng-template>` directly inside `<mona-chip>` to render prefix content
 (e.g., an avatar or icon) before the chip label or projected content. The template receives no context.
 
-**Selector:** `ng-template[monaChipPrefixTemplate]`
+**Selector:** `ng-template[monaChipPrefixTemplate]`  
+**API reference:** [`ChipPrefixTemplateDirective`](/api/chip/ChipPrefixTemplateDirective)
 
 ### Types
 
-#### `CHIP_DEFAULT_MESSAGES`
-
-```typescript
-const CHIP_DEFAULT_MESSAGES: { removeLabel: (label?: string) => string; };
-```
+| Type | Kind |
+| --- | --- |
+| [`CHIP_DEFAULT_MESSAGES`](/api/chip/CHIP_DEFAULT_MESSAGES) | Constant |

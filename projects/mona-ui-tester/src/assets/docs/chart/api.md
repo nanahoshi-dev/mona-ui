@@ -8,7 +8,8 @@ Everything below is imported from `@nanahoshi/mona-ui/chart`.
 
 Root visualization container coordinating coordinate layouts, canvas rendering, theme styles, and interactions.
 
-**Selector:** `mona-chart`
+**Selector:** `mona-chart`  
+**API reference:** [`ChartComponent`](/api/chart/ChartComponent)
 
 #### Inputs
 
@@ -63,7 +64,8 @@ Root visualization container coordinating coordinate layouts, canvas rendering, 
 
 Configures an X axis in Cartesian charts. Add more than one with distinct `axisId` values for multiple axes.
 
-**Selector:** `mona-chart-x-axis`
+**Selector:** `mona-chart-x-axis`  
+**API reference:** [`ChartXAxisComponent`](/api/chart/ChartXAxisComponent)
 
 #### Inputs
 
@@ -97,7 +99,8 @@ Configures an X axis in Cartesian charts. Add more than one with distinct `axisI
 
 Configures a Y axis in Cartesian charts. Add more than one with distinct `axisId` values for multiple axes.
 
-**Selector:** `mona-chart-y-axis`
+**Selector:** `mona-chart-y-axis`  
+**API reference:** [`ChartYAxisComponent`](/api/chart/ChartYAxisComponent)
 
 #### Inputs
 
@@ -130,7 +133,8 @@ Configures a Y axis in Cartesian charts. Add more than one with distinct `axisId
 
 Renders callouts, milestone badges, and outlier markers anchored to specific (X, Y) coordinates.
 
-**Selector:** `mona-chart-annotation`
+**Selector:** `mona-chart-annotation`  
+**API reference:** [`ChartAnnotationComponent`](/api/chart/ChartAnnotationComponent)
 
 #### Inputs
 
@@ -160,7 +164,8 @@ Renders callouts, milestone badges, and outlier markers anchored to specific (X,
 Renders dynamic crosshair guide lines and axis label badges for pointer and keyboard navigation in Cartesian XY
 charts.
 
-**Selector:** `mona-chart-crosshair`
+**Selector:** `mona-chart-crosshair`  
+**API reference:** [`ChartCrosshairComponent`](/api/chart/ChartCrosshairComponent)
 
 #### Inputs
 
@@ -186,7 +191,8 @@ charts.
 
 Renders highlighted threshold intervals and target regions in Cartesian XY charts.
 
-**Selector:** `mona-chart-reference-band`
+**Selector:** `mona-chart-reference-band`  
+**API reference:** [`ChartReferenceBandComponent`](/api/chart/ChartReferenceBandComponent)
 
 #### Inputs
 
@@ -212,7 +218,8 @@ Renders highlighted threshold intervals and target regions in Cartesian XY chart
 
 Selects a region of a Cartesian plot by dragging, or from the keyboard with `Shift` + arrows from a focused point.
 
-**Selector:** `mona-chart-brush`
+**Selector:** `mona-chart-brush`  
+**API reference:** [`ChartBrushComponent`](/api/chart/ChartBrushComponent)
 
 #### Inputs
 
@@ -242,7 +249,8 @@ Selects a region of a Cartesian plot by dragging, or from the keyboard with `Shi
 
 Renders static horizontal or vertical benchmark lines in Cartesian XY charts.
 
-**Selector:** `mona-chart-reference-line`
+**Selector:** `mona-chart-reference-line`  
+**API reference:** [`ChartReferenceLineComponent`](/api/chart/ChartReferenceLineComponent)
 
 #### Inputs
 
@@ -267,7 +275,8 @@ Renders static horizontal or vertical benchmark lines in Cartesian XY charts.
 
 Lets users select marks with the pointer and keyboard, and holds the selected mark IDs.
 
-**Selector:** `mona-chart-selection`
+**Selector:** `mona-chart-selection`  
+**API reference:** [`ChartSelectionComponent`](/api/chart/ChartSelectionComponent)
 
 #### Inputs
 
@@ -296,7 +305,8 @@ Lets users select marks with the pointer and keyboard, and holds the selected ma
 
 Adds a legend. Items toggle what they represent unless `interactive` is off.
 
-**Selector:** `mona-chart-legend`
+**Selector:** `mona-chart-legend`  
+**API reference:** [`ChartLegendComponent`](/api/chart/ChartLegendComponent)
 
 #### Inputs
 
@@ -311,7 +321,8 @@ Adds a legend. Items toggle what they represent unless `interactive` is off.
 
 Adds a tooltip for pointer and keyboard interaction. Use `ng-template[monaChartTooltipTemplate]` for custom content.
 
-**Selector:** `mona-chart-tooltip`
+**Selector:** `mona-chart-tooltip`  
+**API reference:** [`ChartTooltipComponent`](/api/chart/ChartTooltipComponent)
 
 #### Inputs
 
@@ -323,7 +334,8 @@ Adds a tooltip for pointer and keyboard interaction. Use `ng-template[monaChartT
 
 ### `ChartAnnotationLabelTemplateDirective`
 
-**Selector:** `ng-template[monaChartAnnotationLabelTemplate], ng-template[monaChartAnnotationLabel]`
+**Selector:** `ng-template[monaChartAnnotationLabelTemplate], ng-template[monaChartAnnotationLabel]`  
+**API reference:** [`ChartAnnotationLabelTemplateDirective`](/api/chart/ChartAnnotationLabelTemplateDirective)
 
 #### Template context
 
@@ -341,7 +353,8 @@ Adds a tooltip for pointer and keyboard interaction. Use `ng-template[monaChartT
 
 ### `ChartAxisLabelTemplateDirective`
 
-**Selector:** `ng-template[monaChartAxisLabelTemplate]`
+**Selector:** `ng-template[monaChartAxisLabelTemplate]`  
+**API reference:** [`ChartAxisLabelTemplateDirective`](/api/chart/ChartAxisLabelTemplateDirective)
 
 #### Template context
 
@@ -357,7 +370,8 @@ Adds a tooltip for pointer and keyboard interaction. Use `ng-template[monaChartT
 
 ### `ChartCrosshairLabelTemplateDirective`
 
-**Selector:** `ng-template[monaChartCrosshairLabelTemplate], ng-template[monaChartCrosshairLabel]`
+**Selector:** `ng-template[monaChartCrosshairLabelTemplate], ng-template[monaChartCrosshairLabel]`  
+**API reference:** [`ChartCrosshairLabelTemplateDirective`](/api/chart/ChartCrosshairLabelTemplateDirective)
 
 #### Template context
 
@@ -375,7 +389,8 @@ Adds a tooltip for pointer and keyboard interaction. Use `ng-template[monaChartT
 ### `ChartDataLabelTemplateDirective`
 
 **Selector:** `ng-template[monaChartDataLabelTemplate], ng-template[monaChartDataLabel]`  
-**Type parameters:** `T = unknown`
+**Type parameters:** `T = unknown`  
+**API reference:** [`ChartDataLabelTemplateDirective`](/api/chart/ChartDataLabelTemplateDirective)
 
 #### Template context
 
@@ -421,7 +436,8 @@ Adds a tooltip for pointer and keyboard interaction. Use `ng-template[monaChartT
 
 ### `ChartLegendItemTemplateDirective`
 
-**Selector:** `ng-template[monaChartLegendItemTemplate]`
+**Selector:** `ng-template[monaChartLegendItemTemplate]`  
+**API reference:** [`ChartLegendItemTemplateDirective`](/api/chart/ChartLegendItemTemplateDirective)
 
 #### Template context
 
@@ -445,11 +461,13 @@ Adds a tooltip for pointer and keyboard interaction. Use `ng-template[monaChartT
 
 ### `ChartNoDataTemplateDirective`
 
-**Selector:** `ng-template[monaChartNoDataTemplate]`
+**Selector:** `ng-template[monaChartNoDataTemplate]`  
+**API reference:** [`ChartNoDataTemplateDirective`](/api/chart/ChartNoDataTemplateDirective)
 
 ### `ChartReferenceLabelTemplateDirective`
 
-**Selector:** `ng-template[monaChartReferenceLabelTemplate], ng-template[monaChartReferenceLabel]`
+**Selector:** `ng-template[monaChartReferenceLabelTemplate], ng-template[monaChartReferenceLabel]`  
+**API reference:** [`ChartReferenceLabelTemplateDirective`](/api/chart/ChartReferenceLabelTemplateDirective)
 
 #### Template context
 
@@ -470,7 +488,8 @@ Adds a tooltip for pointer and keyboard interaction. Use `ng-template[monaChartT
 
 ### `ChartSubtitleTemplateDirective`
 
-**Selector:** `ng-template[monaChartSubtitleTemplate]`
+**Selector:** `ng-template[monaChartSubtitleTemplate]`  
+**API reference:** [`ChartSubtitleTemplateDirective`](/api/chart/ChartSubtitleTemplateDirective)
 
 #### Template context
 
@@ -481,7 +500,8 @@ Adds a tooltip for pointer and keyboard interaction. Use `ng-template[monaChartT
 
 ### `ChartTitleTemplateDirective`
 
-**Selector:** `ng-template[monaChartTitleTemplate]`
+**Selector:** `ng-template[monaChartTitleTemplate]`  
+**API reference:** [`ChartTitleTemplateDirective`](/api/chart/ChartTitleTemplateDirective)
 
 #### Template context
 
@@ -492,7 +512,8 @@ Adds a tooltip for pointer and keyboard interaction. Use `ng-template[monaChartT
 
 ### `ChartTooltipTemplateDirective`
 
-**Selector:** `ng-template[monaChartTooltipTemplate]`
+**Selector:** `ng-template[monaChartTooltipTemplate]`  
+**API reference:** [`ChartTooltipTemplateDirective`](/api/chart/ChartTooltipTemplateDirective)
 
 #### Template context
 
@@ -508,6 +529,8 @@ Adds a tooltip for pointer and keyboard interaction. Use `ng-template[monaChartT
 
 Error thrown when a chart export operation fails.
 
+**API reference:** [`ChartExportError`](/api/chart/ChartExportError)
+
 #### Properties
 
 | Name | Type |
@@ -520,6 +543,8 @@ The ID of the item whose category is `category`, as a radial bar or rose series 
 value. Use it in `hiddenItemIds`. Returns `undefined` for a number that isn't finite or a date that isn't valid,
 which can't identify an item.
 
+**API reference:** [`chartItemCategoryId`](/api/chart/chartItemCategoryId)
+
 ```typescript
 function chartItemCategoryId(category: boolean | string): string;
 function chartItemCategoryId(category: ChartItemKey): string | undefined;
@@ -529,6 +554,8 @@ function chartItemCategoryId(category: ChartItemKey): string | undefined;
 
 The ID of the item in row `index`, as a funnel stage, waterfall step, or radial bar or rose item gets it when it has
 no `keyField` value (and, for a radial series, no category). It follows the position, not the row.
+
+**API reference:** [`chartItemIndexId`](/api/chart/chartItemIndexId)
 
 ```typescript
 function chartItemIndexId(index: number): string;
@@ -540,6 +567,8 @@ The ID of the item whose `keyField` value is `key`, as funnel stages, treemap no
 and rose items use it. Use it in `hiddenStageIds`, `hiddenNodeIds` or `hiddenItemIds`, or to compare with an ID an
 event gives. Returns `undefined` for a number that isn't finite or a date that isn't valid, which can't be a key.
 
+**API reference:** [`chartItemKeyId`](/api/chart/chartItemKeyId)
+
 ```typescript
 function chartItemKeyId(key: boolean | string): string;
 function chartItemKeyId(key: ChartItemKey): string | undefined;
@@ -547,11 +576,15 @@ function chartItemKeyId(key: ChartItemKey): string | undefined;
 
 ### `getChartSeriesFamily`
 
+**API reference:** [`getChartSeriesFamily`](/api/chart/getChartSeriesFamily)
+
 ```typescript
 function getChartSeriesFamily(type: ChartSeriesType): ChartSeriesFamily;
 ```
 
 ### `isCartesianCoordinateFamily`
+
+**API reference:** [`isCartesianCoordinateFamily`](/api/chart/isCartesianCoordinateFamily)
 
 ```typescript
 function isCartesianCoordinateFamily(family: ChartSeriesFamily): boolean;
@@ -559,11 +592,15 @@ function isCartesianCoordinateFamily(family: ChartSeriesFamily): boolean;
 
 ### `isHierarchicalCoordinateFamily`
 
+**API reference:** [`isHierarchicalCoordinateFamily`](/api/chart/isHierarchicalCoordinateFamily)
+
 ```typescript
 function isHierarchicalCoordinateFamily(family: ChartSeriesFamily): boolean;
 ```
 
 ### `isPolarCoordinateFamily`
+
+**API reference:** [`isPolarCoordinateFamily`](/api/chart/isPolarCoordinateFamily)
 
 ```typescript
 function isPolarCoordinateFamily(family: ChartSeriesFamily): boolean;
@@ -571,1332 +608,127 @@ function isPolarCoordinateFamily(family: ChartSeriesFamily): boolean;
 
 ### Types
 
-#### `CHART_DEFAULT_MESSAGES`
-
-```typescript
-const CHART_DEFAULT_MESSAGES: MonaChartMessages;
-```
-
-#### `ChartAnimationOptions`
-
-| Name | Type |
-| --- | --- |
-| `data?` (read-only) | `boolean` |
-| `duration?` (read-only) | `number` |
-| `easing?` (read-only) | `ChartAnimationEasing` |
-| `enabled?` (read-only) | `boolean` |
-| `initial?` (read-only) | `boolean` |
-| `visibility?` (read-only) | `boolean` |
-
-#### `ChartAnnotationLabelTemplateContext`
-
-**Type parameters:** `TData = unknown`
-
-| Name | Type |
-| --- | --- |
-| `$implicit` (read-only) | `TData` |
-| `data` (read-only) | `TData` |
-| `formattedX` (read-only) | `string` |
-| `formattedY` (read-only) | `string` |
-| `point` (read-only) | `ChartPoint` |
-| `x` (read-only) | `ChartAnnotationAxisValue` |
-| `xAxisId` (read-only) | `string` |
-| `y` (read-only) | `ChartAnnotationAxisValue` |
-| `yAxisId` (read-only) | `string` |
-
-#### `ChartAxisLabelTemplateContext`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `$implicit` | `T` |
-| `axis` | `"angular" \| "radial" \| "x" \| "y"` |
-| `axisId?` | `string` |
-| `index` | `number` |
-| `position?` | `ChartAxisPosition` |
-| `scaleType?` | `ChartXAxisType \| string` |
-| `value` | `T` |
-
-#### `ChartAxisTick`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `coordinate` | `number` |
-| `formattedValue` | `string` |
-| `index` | `number` |
-| `value` | `T` |
-
-#### `ChartBrushCategoryRange`
-
-| Name | Type |
-| --- | --- |
-| `axis` (read-only) | `"x" \| "y"` |
-| `axisId` (read-only) | `string` |
-| `fromIndex` (read-only) | `number` |
-| `fromValue` (read-only) | `unknown` |
-| `kind` (read-only) | `"category"` |
-| `toIndex` (read-only) | `number` |
-| `toValue` (read-only) | `unknown` |
-
-#### `ChartBrushChangeEvent`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `cancelReason?` (read-only) | `ChartBrushCancelReason` |
-| `matchedMarkIds?` (read-only) | `readonly string[]` |
-| `matchedPoints?` (read-only) | `readonly ChartSelectedPoint<T>[]` |
-| `mode` (read-only) | `ChartBrushMode` |
-| `phase` (read-only) | `ChartBrushPhase` |
-| `pixelBounds` (read-only) | `ChartRect \| null` |
-| `xRange?` (read-only) | `ChartBrushAxisRange` |
-| `yRange?` (read-only) | `ChartBrushAxisRange` |
-
-#### `ChartBrushContinuousRange`
-
-| Name | Type |
-| --- | --- |
-| `axis` (read-only) | `"x" \| "y"` |
-| `axisId` (read-only) | `string` |
-| `from` (read-only) | `number \| Date` |
-| `kind` (read-only) | `"continuous"` |
-| `scaleType` (read-only) | `"linear" \| "log" \| "pow" \| "sqrt" \| "symlog" \| "time" \| "utc"` |
-| `to` (read-only) | `number \| Date` |
-
-#### `ChartCategoryViewportWindow`
-
-**Extends:** `ChartViewportAxisRef`
-
-| Name | Type |
-| --- | --- |
-| `endIndexExclusive` (read-only) | `number` |
-| `kind` (read-only) | `"category"` |
-| `startIndex` (read-only) | `number` |
-
-#### `ChartContinuousViewportWindow`
-
-**Extends:** `ChartViewportAxisRef`
-
-| Name | Type |
-| --- | --- |
-| `kind` (read-only) | `"continuous"` |
-| `max` (read-only) | `Date \| number` |
-| `min` (read-only) | `Date \| number` |
-
-#### `ChartCrosshairAxisLabelContext`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `$implicit` (read-only) | `T` |
-| `axis` (read-only) | `"x" \| "y"` |
-| `axisId` (read-only) | `string` |
-| `coordinate` (read-only) | `number` |
-| `formattedValue` (read-only) | `string` |
-| `snapped` (read-only) | `boolean` |
-| `source` (read-only) | `"keyboard" \| "pointer" \| "sync"` |
-| `value` (read-only) | `T` |
-
-#### `ChartCrosshairResolvedAxisValue`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `axis` (read-only) | `"x" \| "y"` |
-| `axisId` (read-only) | `string` |
-| `coordinate` (read-only) | `number` |
-| `formattedValue` (read-only) | `string` |
-| `value` (read-only) | `T` |
-
-#### `ChartCrosshairSynchronizationOptions`
-
-| Name | Type |
-| --- | --- |
-| `axes?` (read-only) | `"auto" \| "x" \| "xy" \| "y"` |
-| `clearOnLeave?` (read-only) | `boolean` |
-| `enabled?` (read-only) | `boolean` |
-| `match?` (read-only) | `"axis-value" \| "nearest-point"` |
-| `mode?` (read-only) | `ChartSynchronizationMode` |
-| `showTooltip?` (read-only) | `boolean` |
-
-#### `ChartDataLabelContext`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `$implicit` (read-only) | `ChartDataLabelContext<T>` | The same context object, so `let-context` in the template receives every field below. |
-| `close?` (read-only) | `number` | The closing price of a candlestick or OHLC mark. |
-| `color` (read-only) | `string` | The color of the mark the label belongs to. Falls back to the series color, then to black. |
-| `dataIndex` (read-only) | `number` | The index of the data item in the series data. |
-| `datum` (read-only) | `T` | The data item the mark was drawn from. |
-| `formattedClose?` (read-only) | `string` | The closing price of a candlestick or OHLC mark, formatted for display. |
-| `formattedFrom?` (read-only) | `string` | The start value of a range bar or range area mark, formatted for display. |
-| `formattedHigh?` (read-only) | `string` | The high price of a candlestick or OHLC mark, formatted for display. |
-| `formattedLow?` (read-only) | `string` | The low price of a candlestick or OHLC mark, formatted for display. |
-| `formattedOpen?` (read-only) | `string` | The opening price of a candlestick or OHLC mark, formatted for display. |
-| `formattedSize?` (read-only) | `string` | The size value of a bubble mark, formatted for display. |
-| `formattedStackPercentage?` (read-only) | `string` | The mark's share of its stack total, formatted for display. The default label text for percent-stacked bar and area series. |
-| `formattedStackTotal?` (read-only) | `string` | The total of the stack the mark belongs to, formatted for display. |
-| `formattedTo?` (read-only) | `string` | The end value of a range bar or range area mark, formatted for display. |
-| `formattedValue` (read-only) | `string` | The value text the chart shows for the mark. For range marks it joins the start and end values; for horizontal bars it is the formatted x value. |
-| `formattedX` (read-only) | `string` | The x value of the mark, formatted for display. Empty when the mark has no x value. |
-| `formattedY` (read-only) | `string` | The y value of the mark, formatted for display. Empty when the mark has no y value. |
-| `fromValue?` (read-only) | `number` | The start value of a range bar or range area mark. |
-| `high?` (read-only) | `number` | The high price of a candlestick or OHLC mark. |
-| `low?` (read-only) | `number` | The low price of a candlestick or OHLC mark. |
-| `markId` (read-only) | `string` | A stable identifier of the mark within the chart, the same one selection events report. |
-| `open?` (read-only) | `number` | The opening price of a candlestick or OHLC mark. |
-| `rawValue?` (read-only) | `unknown` | The value read from the data item before stacking or other processing, when the series provides one. |
-| `selected` (read-only) | `boolean` | Persistent selection state for this mark. |
-| `seriesId` (read-only) | `string` | The identifier of the series the mark belongs to. |
-| `seriesName` (read-only) | `string` | The display name of the series the mark belongs to. |
-| `seriesType` (read-only) | `ChartSeriesType` | The type of the series the mark belongs to, such as `"bar"` or `"line"`. |
-| `sizeValue?` (read-only) | `number` | The size value of a bubble mark. |
-| `stackEnd?` (read-only) | `number` | The value where the mark ends on its stack. |
-| `stackMode?` (read-only) | `ChartStackMode` | The stacking mode of the series, when the series is stacked. |
-| `stackPercentage?` (read-only) | `number` | The mark's share of its stack total, as a percentage. |
-| `stackStart?` (read-only) | `number` | The value where the mark starts on its stack. |
-| `stackTotal?` (read-only) | `number` | The total of the stack the mark belongs to. |
-| `toValue?` (read-only) | `number` | The end value of a range bar or range area mark. |
-| `value?` (read-only) | `unknown` | The value of the mark. A `[from, to]` pair for range marks, the aggregate value for hierarchical marks, and the y value otherwise. |
-| `xValue?` (read-only) | `unknown` | The x value of the mark. |
-| `yValue?` (read-only) | `unknown` | The y value of the mark. |
-
-#### `ChartDataLabelOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `allowOverlap?` | `boolean` | Whether labels may overlap other generic data labels. Default: false |
-| `collisionPadding?` | `number` | Collision padding around the label bounds. Default: 2 |
-| `color?` | `string` | Optional text color override. |
-| `formatter?` | `ChartDataLabelFormatter` | Optional semantic formatter. Returning null/undefined/"" suppresses that label. |
-| `maxLabels?` | `number` | Maximum accepted labels for this series. Default: 200 |
-| `offset?` | `number` | Distance in CSS pixels between the mark anchor and label. Default: 6 |
-| `overflow?` | `"clip" \| "hide"` | Plot-boundary behavior. Default: "hide" |
-| `position?` | `ChartDataLabelPosition` | Placement strategy. Default: "auto" |
-
-#### `ChartDownsamplingOptions`
-
-| Name | Type |
-| --- | --- |
-| `algorithm?` (read-only) | `ChartDownsamplingAlgorithm` |
-| `enabled?` (read-only) | `boolean` |
-| `maxPoints?` (read-only) | `number` |
-| `samplesPerPixel?` (read-only) | `number` |
-| `threshold?` (read-only) | `number` |
-
-#### `ChartExportBaseOptions`
-
-Shared base options for all chart export formats.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `background?` (read-only) | `ChartExportBackground` | Background color policy or explicit CSS color. Default: "auto". |
-| `height?` (read-only) | `number` | Optional logical output height in CSS pixels. When omitted, the current chart aspect ratio or source height is preserved. |
-| `presentation?` (read-only) | `ChartExportPresentationOptions` | Optional presentation options controlling selection, crosshair, and brush inclusion. |
-| `signal?` (read-only) | `AbortSignal` | Optional AbortSignal for aborting the export operation. |
-| `width?` (read-only) | `number` | Optional logical output width in CSS pixels. When omitted, the current chart width is preserved. |
-
-#### `ChartExportPresentationOptions`
-
-Options controlling which interactive/presentation elements are included in the export.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `brush?` (read-only) | `boolean` | Whether to include active brush marquee overlay. Default: false. |
-| `crosshair?` (read-only) | `boolean` | Whether to include active crosshair overlay and axis badges. Default: false. |
-| `selection?` (read-only) | `boolean` | Whether to include persistent mark selection visuals. Default: true. |
-
-#### `ChartExportResult`
-
-Result of a chart export operation.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `blob` (read-only) | `Blob` | The generated binary Blob containing the exported chart. |
-| `format` (read-only) | `ChartExportFormat` | The export format that was produced. |
-| `height` (read-only) | `number` | The logical output height in CSS pixels. |
-| `mimeType` (read-only) | `string` | The MIME type of the exported blob (e.g. "image/png", "image/svg+xml", "application/pdf"). |
-| `width` (read-only) | `number` | The logical output width in CSS pixels. |
-
-#### `ChartLabelMeasurement`
-
-| Name | Type |
-| --- | --- |
-| `height` | `number` |
-| `width` | `number` |
-
-#### `ChartLegendItem`
-
-| Name | Type |
-| --- | --- |
-| `color` (read-only) | `string` |
-| `dataIndex?` (read-only) | `number` |
-| `datum?` (read-only) | `unknown` |
-| `interactive?` (read-only) | `boolean` |
-| `itemId` (read-only) | `string` |
-| `kind?` (read-only) | `ChartLegendItemKind` |
-| `name` (read-only) | `string` |
-| `percentage?` (read-only) | `number` |
-| `secondaryColor?` (read-only) | `string` |
-| `seriesId` (read-only) | `string` |
-| `seriesType` (read-only) | `ChartSeriesType` |
-| `value?` (read-only) | `number` |
-| `visible` (read-only) | `boolean` |
-
-#### `ChartLegendItemTemplateContext`
-
-| Name | Type |
-| --- | --- |
-| `$implicit` | `ChartLegendItem` |
-| `color` | `string` |
-| `dataIndex?` | `number` |
-| `datum?` | `unknown` |
-| `interactive?` | `boolean` |
-| `itemId` | `string` |
-| `kind?` | `ChartLegendItemKind` |
-| `name` | `string` |
-| `percentage?` | `number` |
-| `secondaryColor?` | `string` |
-| `series` | `ChartLegendItem` |
-| `seriesId` | `string` |
-| `seriesType` | `ChartSeriesType` |
-| `value?` | `number` |
-| `visible` | `boolean` |
-
-#### `ChartNavigationOptions`
-
-| Name | Type |
-| --- | --- |
-| `clampToData?` (read-only) | `boolean` |
-| `constraints?` (read-only) | `readonly ChartViewportConstraint[]` |
-| `dragPan?` (read-only) | `boolean` |
-| `keyboard?` (read-only) | `boolean` |
-| `keyboardPanRatio?` (read-only) | `number` |
-| `keyboardZoomFactor?` (read-only) | `number` |
-| `linkGroups?` (read-only) | `readonly ChartViewportLinkGroup[]` |
-| `minVisibleCategories?` (read-only) | `number` |
-| `pan?` (read-only) | `boolean` |
-| `panAxes?` (read-only) | `ChartNavigationAxisTarget` |
-| `pinchZoom?` (read-only) | `boolean` |
-| `wheelSensitivity?` (read-only) | `number` |
-| `wheelZoom?` (read-only) | `boolean` |
-| `zoom?` (read-only) | `boolean` |
-| `zoomAxes?` (read-only) | `ChartNavigationAxisTarget` |
-
-#### `ChartPadding`
-
-| Name | Type |
-| --- | --- |
-| `bottom` | `number` |
-| `left` | `number` |
-| `right` | `number` |
-| `top` | `number` |
-
-#### `ChartPdfExportOptions`
-
-Options for exporting a chart as a PDF document.
-
-**Extends:** `ChartExportBaseOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `format` (read-only) | `"pdf"` | Selects export as a PDF document. |
-| `mode?` (read-only) | `ChartPdfRenderMode` | PDF rendering mode ("auto", "vector", or "raster"). Default: "auto". |
-| `page?` (read-only) | `ChartPdfPageOptions` | PDF page configuration. |
-
-#### `ChartPdfMargins`
-
-PDF page margins in PDF points (72 points = 1 inch).
-
-| Name | Type |
-| --- | --- |
-| `bottom?` (read-only) | `number` |
-| `left?` (read-only) | `number` |
-| `right?` (read-only) | `number` |
-| `top?` (read-only) | `number` |
-
-#### `ChartPdfPageOptions`
-
-Page layout options for PDF export.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `margin?` (read-only) | `number \| ChartPdfMargins` | Page margins in PDF points. Default: 0 for "chart" page size, 24 for standard pages if not specified. |
-| `orientation?` (read-only) | `"auto" \| "portrait" \| "landscape"` | Page orientation. Default: "auto" (derived from the chart aspect ratio). |
-| `size?` (read-only) | `ChartPdfPageSize` | Target page size. Default: "chart". |
-
-#### `ChartPngExportOptions`
-
-Options for exporting a chart as a PNG raster image.
-
-**Extends:** `ChartExportBaseOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `format` (read-only) | `"png"` | Selects export as a PNG image. |
-| `pixelRatio?` (read-only) | `number` | Raster scaling ratio relative to logical CSS pixels. Default: 2. |
-
-#### `ChartPoint`
-
-| Name | Type |
-| --- | --- |
-| `x` | `number` |
-| `y` | `number` |
-
-#### `ChartPointEvent`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `category?` (read-only) | `unknown` |
-| `categoryX?` (read-only) | `string` |
-| `categoryY?` (read-only) | `string` |
-| `change?` (read-only) | `number` |
-| `changePercentage?` (read-only) | `number` |
-| `close?` (read-only) | `number` |
-| `dataIndex` (read-only) | `number` |
-| `datum` (read-only) | `T` |
-| `financial?` (read-only) | `ChartOhlcPointValue` |
-| `financialDirection?` (read-only) | `ChartFinancialDirection` |
-| `formattedChange?` (read-only) | `string` |
-| `formattedChangePercentage?` (read-only) | `string` |
-| `formattedClose?` (read-only) | `string` |
-| `formattedFrom?` (read-only) | `string` |
-| `formattedHigh?` (read-only) | `string` |
-| `formattedLow?` (read-only) | `string` |
-| `formattedOpen?` (read-only) | `string` |
-| `formattedTo?` (read-only) | `string` |
-| `formattedXValue?` (read-only) | `string` |
-| `formattedYCategory?` (read-only) | `string` |
-| `fromValue?` (read-only) | `number` |
-| `funnel?` (read-only) | `ChartFunnelPointMetadata` |
-| `hierarchy?` (read-only) | `ChartHierarchyPointMetadata` |
-| `high?` (read-only) | `number` |
-| `low?` (read-only) | `number` |
-| `markId?` (read-only) | `string` |
-| `open?` (read-only) | `number` |
-| `percentage?` (read-only) | `number` |
-| `rawValue?` (read-only) | `unknown` |
-| `seriesId` (read-only) | `string` |
-| `seriesName` (read-only) | `string` |
-| `seriesType` (read-only) | `ChartSeriesType` |
-| `sizeValue?` (read-only) | `number` |
-| `sliceId?` (read-only) | `string` |
-| `stackEnd?` (read-only) | `number` |
-| `stackGroup?` (read-only) | `string` |
-| `stackMode?` (read-only) | `ChartStackMode` |
-| `stackPercentage?` (read-only) | `number` |
-| `stackPosition?` (read-only) | `"inner" \| "outer" \| "single"` |
-| `stackStart?` (read-only) | `number` |
-| `stackTotal?` (read-only) | `number` |
-| `toValue?` (read-only) | `number` |
-| `value?` (read-only) | `unknown` |
-| `valueKind?` (read-only) | `ChartPointValueKind` |
-| `waterfall?` (read-only) | `ChartWaterfallPointValue` |
-| `xAxisId?` (read-only) | `string` |
-| `xAxisTitle?` (read-only) | `string` |
-| `xValue` (read-only) | `unknown` |
-| `yAxisId?` (read-only) | `string` |
-| `yAxisTitle?` (read-only) | `string` |
-| `yCategory?` (read-only) | `unknown` |
-| `yValue?` (read-only) | `number` |
-
-#### `ChartPointFocusEvent`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `category?` (read-only) | `unknown` |
-| `categoryX?` (read-only) | `string` |
-| `categoryY?` (read-only) | `string` |
-| `change?` (read-only) | `number` |
-| `changePercentage?` (read-only) | `number` |
-| `close?` (read-only) | `number` |
-| `dataIndex` (read-only) | `number` |
-| `datum` (read-only) | `T` |
-| `financial?` (read-only) | `ChartOhlcPointValue` |
-| `financialDirection?` (read-only) | `ChartFinancialDirection` |
-| `formattedChange?` (read-only) | `string` |
-| `formattedChangePercentage?` (read-only) | `string` |
-| `formattedClose?` (read-only) | `string` |
-| `formattedFrom?` (read-only) | `string` |
-| `formattedHigh?` (read-only) | `string` |
-| `formattedLow?` (read-only) | `string` |
-| `formattedOpen?` (read-only) | `string` |
-| `formattedTo?` (read-only) | `string` |
-| `formattedXValue?` (read-only) | `string` |
-| `formattedYCategory?` (read-only) | `string` |
-| `fromValue?` (read-only) | `number` |
-| `funnel?` (read-only) | `ChartFunnelPointMetadata` |
-| `hierarchy?` (read-only) | `ChartHierarchyPointMetadata` |
-| `high?` (read-only) | `number` |
-| `low?` (read-only) | `number` |
-| `markId?` (read-only) | `string` |
-| `open?` (read-only) | `number` |
-| `percentage?` (read-only) | `number` |
-| `rawValue?` (read-only) | `unknown` |
-| `seriesId` (read-only) | `string` |
-| `seriesName` (read-only) | `string` |
-| `seriesType` (read-only) | `ChartSeriesType` |
-| `sizeValue?` (read-only) | `number` |
-| `sliceId?` (read-only) | `string` |
-| `stackEnd?` (read-only) | `number` |
-| `stackGroup?` (read-only) | `string` |
-| `stackMode?` (read-only) | `ChartStackMode` |
-| `stackPercentage?` (read-only) | `number` |
-| `stackPosition?` (read-only) | `"inner" \| "outer" \| "single"` |
-| `stackStart?` (read-only) | `number` |
-| `stackTotal?` (read-only) | `number` |
-| `toValue?` (read-only) | `number` |
-| `value?` (read-only) | `unknown` |
-| `valueKind?` (read-only) | `ChartPointValueKind` |
-| `waterfall?` (read-only) | `ChartWaterfallPointValue` |
-| `xAxisId?` (read-only) | `string` |
-| `xAxisTitle?` (read-only) | `string` |
-| `xValue` (read-only) | `unknown` |
-| `yAxisId?` (read-only) | `string` |
-| `yAxisTitle?` (read-only) | `string` |
-| `yCategory?` (read-only) | `unknown` |
-| `yValue?` (read-only) | `number` |
-
-#### `ChartRangePointValue`
-
-| Name | Type |
-| --- | --- |
-| `formattedFrom` (read-only) | `string` |
-| `formattedTo` (read-only) | `string` |
-| `fromValue` (read-only) | `number` |
-| `toValue` (read-only) | `number` |
-| `valueKind` (read-only) | `"range"` |
-
-#### `ChartRect`
-
-| Name | Type |
-| --- | --- |
-| `height` | `number` |
-| `width` | `number` |
-| `x` | `number` |
-| `y` | `number` |
-
-#### `ChartReferenceBandLabelContext`
-
-**Type parameters:** `TFrom extends ChartAnnotationAxisValue = ChartAnnotationAxisValue`, `TTo extends ChartAnnotationAxisValue = ChartAnnotationAxisValue`
-
-| Name | Type |
-| --- | --- |
-| `$implicit` (read-only) | `{ readonly from: TFrom; readonly to: TTo }` |
-| `axis` (read-only) | `"x" \| "y"` |
-| `axisId` (read-only) | `string` |
-| `bounds` (read-only) | `ChartRect` |
-| `coordinate?` (read-only) | `undefined` |
-| `formattedFrom` (read-only) | `string` |
-| `formattedTo` (read-only) | `string` |
-| `formattedValue?` (read-only) | `undefined` |
-| `from` (read-only) | `TFrom` |
-| `kind` (read-only) | `"band"` |
-| `to` (read-only) | `TTo` |
-| `value?` (read-only) | `undefined` |
-
-#### `ChartReferenceLineLabelContext`
-
-**Type parameters:** `T extends ChartAnnotationAxisValue = ChartAnnotationAxisValue`
-
-| Name | Type |
-| --- | --- |
-| `$implicit` (read-only) | `T` |
-| `axis` (read-only) | `"x" \| "y"` |
-| `axisId` (read-only) | `string` |
-| `bounds?` (read-only) | `undefined` |
-| `coordinate` (read-only) | `number` |
-| `formattedFrom?` (read-only) | `undefined` |
-| `formattedTo?` (read-only) | `undefined` |
-| `formattedValue` (read-only) | `string` |
-| `from?` (read-only) | `undefined` |
-| `kind` (read-only) | `"line"` |
-| `to?` (read-only) | `undefined` |
-| `value` (read-only) | `T` |
-
-#### `ChartScalarPointValue`
-
-| Name | Type |
-| --- | --- |
-| `valueKind` (read-only) | `"scalar"` |
-| `yValue` (read-only) | `number` |
-
-#### `ChartSelectedPoint`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `close?` (read-only) | `number` |
-| `dataIndex` (read-only) | `number` |
-| `datum` (read-only) | `T` |
-| `fromValue?` (read-only) | `number` |
-| `high?` (read-only) | `number` |
-| `low?` (read-only) | `number` |
-| `markId` (read-only) | `string` |
-| `open?` (read-only) | `number` |
-| `rawValue?` (read-only) | `unknown` |
-| `seriesId` (read-only) | `string` |
-| `seriesName` (read-only) | `string` |
-| `seriesType` (read-only) | `ChartSeriesType` |
-| `stackEnd?` (read-only) | `number` |
-| `stackPercentage?` (read-only) | `number` |
-| `stackStart?` (read-only) | `number` |
-| `toValue?` (read-only) | `number` |
-| `value?` (read-only) | `unknown` |
-| `xValue?` (read-only) | `unknown` |
-| `yValue?` (read-only) | `unknown` |
-
-#### `ChartSelectionChangeEvent`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `addedMarkIds` (read-only) | `readonly string[]` |
-| `changedPoints` (read-only) | `readonly ChartSelectedPoint<T>[]` |
-| `previousSelectedMarkIds` (read-only) | `readonly string[]` |
-| `removedMarkIds` (read-only) | `readonly string[]` |
-| `selectedMarkIds` (read-only) | `readonly string[]` |
-| `source` (read-only) | `ChartSelectionChangeSource` |
-| `visibleSelectedPoints` (read-only) | `readonly ChartSelectedPoint<T>[]` |
-
-#### `ChartSeriesStyle`
-
-| Name | Type |
-| --- | --- |
-| `areaFillColor` | `string` |
-| `areaFillOpacity` | `number` |
-| `color` | `string` |
-| `fillOpacity` | `number` |
-| `lineStyle?` | `ChartLineStyle` |
-| `lineWidth` | `number` |
-| `opacity` | `number` |
-| `pointRadius` | `number` |
-
-#### `ChartSeriesVisibilityEvent`
-
-| Name | Type |
-| --- | --- |
-| `seriesId` (read-only) | `string` |
-| `seriesName` (read-only) | `string` |
-| `visible` (read-only) | `boolean` |
-
-#### `ChartSize`
-
-| Name | Type |
-| --- | --- |
-| `height` | `number` |
-| `width` | `number` |
-
-#### `ChartSubtitleTemplateContext`
-
-| Name | Type |
-| --- | --- |
-| `$implicit` (read-only) | `string` |
-| `subtitle` (read-only) | `string` |
-
-#### `ChartSvgExportOptions`
-
-Options for exporting a chart as a standalone SVG vector document.
-
-**Extends:** `ChartExportBaseOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `accessibility?` (read-only) | `boolean` | Whether to include accessibility metadata (\<title>, \<desc>, and ARIA attributes). Default: true. |
-| `format` (read-only) | `"svg"` | Selects export as a SVG document. |
-
-#### `ChartSynchronizationAxisMapping`
-
-| Name | Type |
-| --- | --- |
-| `source` (read-only) | `ChartViewportAxisRef` |
-| `target` (read-only) | `ChartViewportAxisRef` |
-
-#### `ChartSynchronizationOptions`
-
-| Name | Type |
-| --- | --- |
-| `axisMappings?` (read-only) | `readonly ChartSynchronizationAxisMapping[]` |
-| `crosshair?` (read-only) | `boolean \| ChartCrosshairSynchronizationOptions` |
-| `group` (read-only) | `string` |
-| `viewport?` (read-only) | `boolean \| ChartViewportSynchronizationOptions` |
-
-#### `ChartTitleTemplateContext`
-
-| Name | Type |
-| --- | --- |
-| `$implicit` (read-only) | `string` |
-| `title` (read-only) | `string` |
-
-#### `ChartTooltipPointContext`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `category?` | `unknown` |
-| `categoryX?` | `string` |
-| `categoryY?` | `string` |
-| `change?` | `number` |
-| `changePercentage?` | `number` |
-| `close?` | `number` |
-| `color` | `string` |
-| `dataIndex` | `number` |
-| `datum` | `T` |
-| `financial?` | `ChartOhlcPointValue` |
-| `financialDirection?` | `ChartFinancialDirection` |
-| `formattedCategory?` | `string` |
-| `formattedChange?` | `string` |
-| `formattedChangePercentage?` | `string` |
-| `formattedClose?` | `string` |
-| `formattedFrom?` | `string` |
-| `formattedHigh?` | `string` |
-| `formattedLow?` | `string` |
-| `formattedOpen?` | `string` |
-| `formattedPercentage?` | `string` |
-| `formattedRadialMax?` | `string` |
-| `formattedRadialMin?` | `string` |
-| `formattedSize?` | `string` |
-| `formattedStackPercentage?` | `string` |
-| `formattedStackTotal?` | `string` |
-| `formattedTo?` | `string` |
-| `formattedX` | `string` |
-| `formattedXValue?` | `string` |
-| `formattedY` | `string` |
-| `formattedYCategory?` | `string` |
-| `fromValue?` | `number` |
-| `funnel?` | `ChartFunnelPointMetadata` |
-| `hierarchy?` | `ChartHierarchyPointMetadata` |
-| `high?` | `number` |
-| `isClamped?` | `boolean` |
-| `low?` | `number` |
-| `markId` | `string` |
-| `open?` | `number` |
-| `percentage?` | `number` |
-| `radialMax?` | `number` |
-| `radialMin?` | `number` |
-| `radialRatio?` | `number` |
-| `rawValue?` | `unknown` |
-| `seriesId` | `string` |
-| `seriesName` | `string` |
-| `seriesType` | `ChartSeriesType` |
-| `sizeValue?` | `number` |
-| `sliceId?` | `string` |
-| `stackEnd?` | `number` |
-| `stackGroup?` | `string` |
-| `stackMode?` | `ChartStackMode` |
-| `stackPercentage?` | `number` |
-| `stackPosition?` | `"inner" \| "outer" \| "single"` |
-| `stackStart?` | `number` |
-| `stackTotal?` | `number` |
-| `toValue?` | `number` |
-| `value?` | `unknown` |
-| `valueKind?` | `ChartPointValueKind` |
-| `waterfall?` | `ChartWaterfallPointValue` |
-| `xAxisId?` | `string` |
-| `xAxisTitle?` | `string` |
-| `xValue` | `unknown` |
-| `yAxisId?` | `string` |
-| `yAxisTitle?` | `string` |
-| `yCategory?` | `unknown` |
-| `yValue?` | `number` |
-
-#### `ChartTooltipTemplateContext`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `$implicit` | `ChartTooltipPointContext<T>` |
-| `point` | `ChartTooltipPointContext<T>` |
-| `points` | `readonly ChartTooltipPointContext<T>[]` |
-| `series` | `readonly string[]` |
-| `shared` | `boolean` |
-
-#### `ChartViewportAxisRef`
-
-| Name | Type |
-| --- | --- |
-| `axis` (read-only) | `"x" \| "y"` |
-| `axisId` (read-only) | `string` |
-
-#### `ChartViewportChangeEvent`
-
-| Name | Type |
-| --- | --- |
-| `changedAxes` (read-only) | `readonly ChartViewportAxisRef[]` |
-| `phase` (read-only) | `ChartViewportChangePhase` |
-| `previousViewport` (read-only) | `ChartViewportState` |
-| `source` (read-only) | `ChartViewportChangeSource` |
-| `viewport` (read-only) | `ChartViewportState` |
-
-#### `ChartViewportConstraint`
-
-**Extends:** `ChartViewportAxisRef`
-
-| Name | Type |
-| --- | --- |
-| `maxSpan?` (read-only) | `number` |
-| `maxVisibleCategories?` (read-only) | `number` |
-| `maxZoom?` (read-only) | `number` |
-| `minSpan?` (read-only) | `number` |
-| `minVisibleCategories?` (read-only) | `number` |
-
-#### `ChartViewportLinkGroup`
-
-| Name | Type |
-| --- | --- |
-| `axes` (read-only) | `readonly ChartViewportAxisRef[]` |
-| `id` (read-only) | `string` |
-| `mode` (read-only) | `ChartViewportLinkMode` |
-
-#### `ChartViewportState`
-
-| Name | Type |
-| --- | --- |
-| `axes` (read-only) | `readonly ChartViewportWindow[]` |
-
-#### `ChartViewportSynchronizationOptions`
-
-| Name | Type |
-| --- | --- |
-| `axes?` (read-only) | `ChartNavigationAxisTarget` |
-| `enabled?` (read-only) | `boolean` |
-| `mode?` (read-only) | `ChartSynchronizationMode` |
-| `phase?` (read-only) | `"continuous" \| "end"` |
-
-#### `ChartAnimationEasing`
-
-```typescript
-type ChartAnimationEasing = "linear" | "ease-in" | "ease-out" | "ease-in-out";
-```
-
-#### `ChartAnimationInput`
-
-```typescript
-type ChartAnimationInput = boolean | ChartAnimationOptions;
-```
-
-#### `ChartAnnotationAxisValue`
-
-```typescript
-type ChartAnnotationAxisValue = Date | number | string;
-```
-
-#### `ChartAnnotationLabelPlacement`
-
-```typescript
-type ChartAnnotationLabelPlacement = "bottom" | "left" | "right" | "top";
-```
-
-#### `ChartAnnotationMarker`
-
-```typescript
-type ChartAnnotationMarker = "circle" | "diamond" | "none";
-```
-
-#### `ChartAxisFormatter`
-
-```typescript
-type ChartAxisFormatter<T = unknown> = (value: T, index: number) => string;
-```
-
-#### `ChartAxisLabelRotation`
-
-```typescript
-type ChartAxisLabelRotation = "auto" | number;
-```
-
-#### `ChartAxisPosition`
-
-```typescript
-type ChartAxisPosition = ChartXAxisPosition | ChartYAxisSide;
-```
-
-#### `ChartBrushActivation`
-
-```typescript
-type ChartBrushActivation = "drag" | "shift-drag";
-```
-
-#### `ChartBrushAxisRange`
-
-```typescript
-type ChartBrushAxisRange = ChartBrushCategoryRange | ChartBrushContinuousRange;
-```
-
-#### `ChartBrushCancelReason`
-
-```typescript
-type ChartBrushCancelReason = | "authority-change" | "component-disabled" | "data-change" | "destroyed" | "disabled" | "escape" | "lost-pointer-capture" | "pointer-cancel" | "pointer-leave" | "viewport-change";
-```
-
-#### `ChartBrushHitPolicy`
-
-```typescript
-type ChartBrushHitPolicy = "center" | "intersect";
-```
-
-#### `ChartBrushLineStyle`
-
-```typescript
-type ChartBrushLineStyle = "solid" | "dashed" | "dotted";
-```
-
-#### `ChartBrushMode`
-
-```typescript
-type ChartBrushMode = "x" | "y" | "xy";
-```
-
-#### `ChartBrushPhase`
-
-```typescript
-type ChartBrushPhase = "start" | "update" | "end" | "cancel";
-```
-
-#### `ChartBrushSelectionBehavior`
-
-```typescript
-type ChartBrushSelectionBehavior = "none" | "replace" | "add" | "remove" | "toggle";
-```
-
-#### `ChartCoordinateSystem`
-
-```typescript
-type ChartCoordinateSystem = "cartesian" | "hierarchical" | "polar";
-```
-
-#### `ChartCrosshairLineStyle`
-
-```typescript
-type ChartCrosshairLineStyle = "dashed" | "dotted" | "solid";
-```
-
-#### `ChartCrosshairMode`
-
-```typescript
-type ChartCrosshairMode = "auto" | "x" | "xy" | "y";
-```
-
-#### `ChartCrosshairSnapMode`
-
-```typescript
-type ChartCrosshairSnapMode = "nearest" | "pointer";
-```
-
-#### `ChartDataLabelFormatter`
-
-```typescript
-type ChartDataLabelFormatter<T = unknown> = (context: ChartDataLabelContext<T>) => string | null | undefined;
-```
-
-#### `ChartDataLabelPosition`
-
-```typescript
-type ChartDataLabelPosition = | "auto" | "top" | "bottom" | "left" | "right" | "center" | "inside-start" | "inside-center" | "inside-end" | "outside-start" | "outside-end";
-```
-
-#### `ChartDataLabelsInput`
-
-```typescript
-type ChartDataLabelsInput = boolean | ChartDataLabelOptions;
-```
-
-#### `ChartDownloadOptions`
-
-Options for downloading a chart export.
-
-```typescript
-type ChartDownloadOptions = ChartExportOptions & { readonly fileName?: string; };
-```
-
-#### `ChartDownsamplingAlgorithm`
-
-```typescript
-type ChartDownsamplingAlgorithm = "auto" | "lttb" | "minmax" | "pixel";
-```
-
-#### `ChartDownsamplingInput`
-
-```typescript
-type ChartDownsamplingInput = boolean | ChartDownsamplingOptions;
-```
-
-#### `ChartExportBackground`
-
-Chart export background policy.
-- "auto": Resolves the effective chart background color from the chart container/theme.
-- "transparent": Creates a transparent background.
-- CSS color string: Uses an explicit background color.
-
-```typescript
-type ChartExportBackground = "auto" | "transparent" | string;
-```
-
-#### `ChartExportErrorCode`
-
-Error code identifying the cause of a chart export failure.
-
-```typescript
-type ChartExportErrorCode = | "not-ready" | "unsupported-environment" | "unsupported-template" | "invalid-size" | "too-large" | "resource-load-failed" | "template-rasterization-failed" | "svg-composition-failed" | "svg-serialization-failed" | "png-rasterization-failed" | "pdf-vector-unsupported" | "pdf-generation-failed";
-```
-
-#### `ChartExportFormat`
-
-Supported chart export formats.
-
-```typescript
-type ChartExportFormat = "png" | "svg" | "pdf";
-```
-
-#### `ChartExportOptions`
-
-Discriminated union of chart export options.
-
-```typescript
-type ChartExportOptions = ChartPngExportOptions | ChartSvgExportOptions | ChartPdfExportOptions;
-```
-
-#### `ChartField`
-
-```typescript
-type ChartField<T = any, TResult = unknown> = string | ChartValueAccessor<T, TResult>;
-```
-
-#### `ChartHeaderAlignment`
-
-How the title and subtitle align: `start` and `end` follow the direction, `left` and `right` don't.
-
-```typescript
-type ChartHeaderAlignment = "center" | "end" | "left" | "right" | "start";
-```
-
-#### `ChartItemKey`
-
-A value that can identify a chart item: a `keyField` value or a category.
-
-```typescript
-type ChartItemKey = boolean | Date | number | string;
-```
-
-#### `ChartLegendItemKind`
-
-```typescript
-type ChartLegendItemKind = "datum" | "semantic" | "series";
-```
-
-#### `ChartLegendMode`
-
-```typescript
-type ChartLegendMode = "auto" | "color" | "series";
-```
-
-#### `ChartLegendPosition`
-
-Where a legend goes: `start` and `end` follow the direction, `left` and `right` don't.
-
-```typescript
-type ChartLegendPosition = "bottom" | "end" | "left" | "right" | "start" | "top";
-```
-
-#### `ChartNavigationAxisTarget`
-
-```typescript
-type ChartNavigationAxisTarget = "auto" | "x" | "xy" | "y" | readonly ChartViewportAxisRef[];
-```
-
-#### `ChartNavigationInput`
-
-```typescript
-type ChartNavigationInput = boolean | ChartNavigationOptions;
-```
-
-#### `ChartNumericScaleType`
-
-```typescript
-type ChartNumericScaleType = "linear" | "log" | "symlog" | "pow" | "sqrt";
-```
-
-#### `ChartOverlayLayer`
-
-```typescript
-type ChartOverlayLayer = "overlay" | "underlay";
-```
-
-#### `ChartPdfPageSize`
-
-Standard or custom PDF page size.
-- "chart": Custom page dimensions sized to exactly match the chart dimensions in PDF points.
-- "a4": Standard ISO A4 page (595.28 x 841.89 pt).
-- "letter": Standard North American Letter page (612 x 792 pt).
-- Custom object: Explicit width and height in PDF points (72 points = 1 inch).
-
-```typescript
-type ChartPdfPageSize = | "chart" | "a4" | "letter" | { readonly height: number; readonly width: number; };
-```
-
-#### `ChartPdfRenderMode`
-
-PDF generation rendering mode.
-- "auto": Prefers vector output, falling back to embedded high-resolution raster image when vector fidelity cannot be guaranteed.
-- "vector": Requires strict vector conversion; rejects if vector conversion is unsupported.
-- "raster": Directly renders a rasterized chart image onto the PDF page.
-
-```typescript
-type ChartPdfRenderMode = "auto" | "vector" | "raster";
-```
-
-#### `ChartPointValue`
-
-```typescript
-type ChartPointValue = ChartOhlcPointValue | ChartRangePointValue | ChartScalarPointValue | ChartWaterfallPointValue;
-```
-
-#### `ChartPointValueKind`
-
-```typescript
-type ChartPointValueKind = "ohlc" | "range" | "scalar" | "waterfall";
-```
-
-#### `ChartReferenceLabelPosition`
-
-```typescript
-type ChartReferenceLabelPosition = "center" | "end" | "start";
-```
-
-#### `ChartReferenceLabelTemplateContext`
-
-```typescript
-type ChartReferenceLabelTemplateContext = ChartReferenceLineLabelContext | ChartReferenceBandLabelContext;
-```
-
-#### `ChartReferenceLineStyle`
-
-```typescript
-type ChartReferenceLineStyle = "dashed" | "dotted" | "solid";
-```
-
-#### `ChartRendererMode`
-
-```typescript
-type ChartRendererMode = "canvas" | "svg";
-```
-
-#### `ChartSelectionChangeSource`
-
-```typescript
-type ChartSelectionChangeSource = "brush" | "click" | "keyboard" | "programmatic";
-```
-
-#### `ChartSelectionMode`
-
-```typescript
-type ChartSelectionMode = "single" | "multiple";
-```
-
-#### `ChartSeriesFamily`
-
-```typescript
-type ChartSeriesFamily = "cartesian" | "funnel" | "heatmap" | "hierarchy" | "polar" | "radar" | "radialArc" | "sector" | "waterfall";
-```
-
-#### `ChartSeriesType`
-
-```typescript
-type ChartSeriesType = | "area" | "bar" | "bubble" | "candlestick" | "donut" | "funnel" | "gauge" | "heatmap" | "line" | "ohlc" | "pie" | "polar" | "radar" | "radialBar" | "rangeArea" | "rangeBar" | "rose" | "scatter" | "treemap" | "waterfall";
-```
-
-#### `ChartStackMode`
-
-```typescript
-type ChartStackMode = "normal" | "percent";
-```
-
-#### `ChartSynchronizationInput`
-
-```typescript
-type ChartSynchronizationInput = false | string | ChartSynchronizationOptions;
-```
-
-#### `ChartSynchronizationMode`
-
-```typescript
-type ChartSynchronizationMode = "domain" | "relative";
-```
-
-#### `ChartValueAccessor`
-
-```typescript
-type ChartValueAccessor<T = any, TResult = unknown> = (item: T, index: number) => TResult;
-```
-
-#### `ChartValueFormatter`
-
-```typescript
-type ChartValueFormatter<T = unknown> = (value: T, index: number) => string;
-```
-
-#### `ChartViewportChangePhase`
-
-```typescript
-type ChartViewportChangePhase = "end" | "start" | "update";
-```
-
-#### `ChartViewportChangeSource`
-
-```typescript
-type ChartViewportChangeSource = "data-reconcile" | "drag" | "fit" | "keyboard" | "pinch" | "programmatic" | "reset" | "sync" | "wheel";
-```
-
-#### `ChartViewportLinkMode`
-
-```typescript
-type ChartViewportLinkMode = "domain" | "relative";
-```
-
-#### `ChartViewportWindow`
-
-```typescript
-type ChartViewportWindow = ChartCategoryViewportWindow | ChartContinuousViewportWindow;
-```
-
-#### `ChartXAxisPosition`
-
-```typescript
-type ChartXAxisPosition = "bottom" | "top";
-```
-
-#### `ChartXAxisType`
-
-```typescript
-type ChartXAxisType = "auto" | "category" | ChartNumericScaleType | "time" | "utc";
-```
-
-#### `ChartYAxisPosition`
-
-Where a Y axis goes: `start` and `end` follow the direction, `left` and `right` don't.
-
-```typescript
-type ChartYAxisPosition = ChartYAxisSide | "end" | "start";
-```
-
-#### `ChartYAxisSide`
-
-The physical side a Y axis is drawn on.
-
-```typescript
-type ChartYAxisSide = "left" | "right";
-```
-
-#### `ChartYAxisType`
-
-```typescript
-type ChartYAxisType = "auto" | "category" | ChartNumericScaleType;
-```
-
-#### `MonaChartMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `announcementSeparator` (read-only) | `string` | Joins the parts of a screen reader announcement (", " in English). |
-| `brushApplied` (read-only) | `(count: number) => string` | Announced when a keyboard brush is committed. |
-| `brushCleared` (read-only) | `string` | Announced when a keyboard brush is canceled. |
-| `brushRange` (read-only) | `(from: string, to: string) => string` | Announced while a keyboard brush is extended. |
-| `category` (read-only) | `string` | The data table's first column header when the X axis has no title. |
-| `categoryFallbackName` (read-only) | `(index: number) => string` | The name of a radar category without a value. |
-| `categoryRange` (read-only) | `(from: string, to: string) => string` | The category range of a Cartesian chart, in its description. |
-| `change` (read-only) | `string` | The tooltip label for a waterfall change step or a financial point's price change. |
-| `changeValue` (read-only) | `(change: string) => string` | The price change in a financial announcement. |
-| `chart` (read-only) | `string` | The chart's accessible name when it has neither an `ariaLabel` nor a title. |
-| `chartLegend` (read-only) | `string` | The accessible name of the legend. |
-| `chartRoleDescription` (read-only) | `string` | What screen readers call the chart (`aria-roledescription`). |
-| `close` (read-only) | `string` | The tooltip label for a candlestick or OHLC point's closing price. |
-| `closeAbbreviation` (read-only) | `string` | The short closing price label in a tooltip that lists several financial series ("C" in English). |
-| `colorScale` (read-only) | `string` | The name of a heatmap color legend whose scale has no title, in its accessible name. |
-| `conversion` (read-only) | `string` | The tooltip label for a funnel stage's conversion rate. |
-| `conversionOfPrevious` (read-only) | `(rate: string) => string` | A funnel stage's conversion from the previous stage, in an announcement. |
-| `dataTableTruncated` (read-only) | `(shown: number, total: number) => string` | Below the data table when it shows only the first rows. |
-| `decrease` (read-only) | `string` | The waterfall legend's name for falling steps. |
-| `decreaseAnnouncement` (read-only) | `(delta: string, from: string, to: string) => string` | Announced for a waterfall step that lowers the running total. |
-| `divergingRangeDescription` (read-only) | `( title: string, minimum: string, midpoint: string, maximum: string ) => string` | The accessible name of a diverging heatmap color legend, with its minimum, midpoint and maximum. |
-| `dropOff` (read-only) | `string` | The tooltip label for a funnel stage's drop-off from the previous stage. |
-| `dropOffValue` (read-only) | `(value: string) => string` | A funnel stage's drop-off from the previous stage, in an announcement. |
-| `falling` (read-only) | `string` | Names a falling candlestick or OHLC point, in the tooltip and in announcements. |
-| `gaugeRange` (read-only) | `(minimum: string, maximum: string) => string` | A gauge's scale, in an announcement. |
-| `high` (read-only) | `string` | The tooltip label for a candlestick or OHLC point's high price. |
-| `highAbbreviation` (read-only) | `string` | The short high price label in a tooltip that lists several financial series ("H" in English). |
-| `increase` (read-only) | `string` | The waterfall legend's name for rising steps. |
-| `increaseAnnouncement` (read-only) | `(delta: string, from: string, to: string) => string` | Announced for a waterfall step that raises the running total. |
-| `itemDeselected` (read-only) | `(item: string) => string` | Announced when the keyboard deselects a point. |
-| `itemFallbackName` (read-only) | `(index: number) => string` | The name of a pie, donut, rose or radial bar item without a category. |
-| `itemSelected` (read-only) | `(item: string) => string` | Announced when the keyboard selects a point. |
-| `keyboardHelp` (read-only) | `string` | The keyboard instructions at the end of the chart's description. |
-| `labeledValue` (read-only) | `(label: string, value: string) => string` | Pairs a label with a value in an announcement, such as a series name with the point's values. |
-| `labelValueSeparator` (read-only) | `string` | Separates a label from its value in the tooltip (":" in English). |
-| `low` (read-only) | `string` | The tooltip label for a candlestick or OHLC point's low price. |
-| `lowAbbreviation` (read-only) | `string` | The short low price label in a tooltip that lists several financial series ("L" in English). |
-| `noChange` (read-only) | `string` | The waterfall legend's name for unchanged steps. |
-| `noChangeAnnouncement` (read-only) | `(value: string) => string` | Announced for a waterfall step that leaves the running total unchanged. |
-| `noData` (read-only) | `string` | Shown and included in the chart's description when it has no data and no `noData` template. |
-| `ohlcValues` (read-only) | `(open: string, high: string, low: string, close: string) => string` | A candlestick or OHLC point's prices, in an announcement. |
-| `open` (read-only) | `string` | The tooltip label for a candlestick or OHLC point's opening price. |
-| `openAbbreviation` (read-only) | `string` | The short opening price label in a tooltip that lists several financial series ("O" in English). |
-| `overall` (read-only) | `string` | The tooltip label for a funnel stage's conversion from the first stage. |
-| `overallConversion` (read-only) | `(rate: string) => string` | A funnel stage's conversion from the first stage, in an announcement. |
-| `pannedDown` (read-only) | `string` | Announced when the keyboard pans the viewport down. |
-| `pannedLeft` (read-only) | `string` | Announced when the keyboard pans the viewport left. |
-| `pannedRight` (read-only) | `string` | Announced when the keyboard pans the viewport right. |
-| `pannedUp` (read-only) | `string` | Announced when the keyboard pans the viewport up. |
-| `pathSeparator` (read-only) | `string` | Joins a treemap node's path (" / " in English). |
-| `pointPosition` (read-only) | `(position: number, total: number) => string` | A point's position among the points it is navigated with, in an announcement. |
-| `range` (read-only) | `string` | The tooltip label for a radial point's minimum-to-maximum range. |
-| `rangeDescription` (read-only) | `( title: string, minimum: string, maximum: string ) => string` | Describes a range with its title, minimum and maximum: a range point in an announcement, or a heatmap color legend in its accessible name. |
-| `rangeValue` (read-only) | `(from: string, to: string) => string` | A range value, in an announcement. |
-| `rising` (read-only) | `string` | Names a rising candlestick or OHLC point, in the tooltip and in announcements. |
-| `runningTotal` (read-only) | `string` | The tooltip label for a waterfall step's running total. |
-| `seriesFallbackName` (read-only) | `(index: number) => string` | The name of a series without a name. |
-| `seriesHidden` (read-only) | `(series: string) => string` | Announced when a legend item hides a series or item. |
-| `seriesShown` (read-only) | `(series: string) => string` | Announced when a legend item shows a series or item. |
-| `seriesSummary` (read-only) | `(count: number, names: string) => string` | The series of the chart, in its description. |
-| `seriesValueRange` (read-only) | `(series: string, minimum: string, maximum: string) => string` | A series' lowest and highest value, in the chart's description. |
-| `shareOfTotal` (read-only) | `(share: string) => string` | A treemap node's share of the whole, in an announcement. |
-| `size` (read-only) | `string` | The tooltip label for a bubble's size. |
-| `sizeValue` (read-only) | `(size: string) => string` | A bubble's size, in an announcement. |
-| `stackShare` (read-only) | `(share: string) => string` | A point's share of its 100% stack, in an announcement. |
-| `stageFallbackName` (read-only) | `(index: number) => string` | The name of a funnel stage without a category. |
-| `stagePosition` (read-only) | `(position: number, total: number) => string` | A funnel stage's position among the stages, in an announcement. |
-| `stepFallbackName` (read-only) | `(index: number) => string` | The name of a waterfall step without a category. |
-| `stepPosition` (read-only) | `(position: number, total: number) => string` | A waterfall step's position among the steps, in an announcement. |
-| `subtotal` (read-only) | `string` | The waterfall legend's name for subtotal steps. |
-| `subtotalAnnouncement` (read-only) | `(value: string) => string` | Announced for a waterfall subtotal step. |
-| `total` (read-only) | `string` | The waterfall legend's name for total steps. |
-| `totalAnnouncement` (read-only) | `(value: string) => string` | Announced for a waterfall total step. |
-| `treemapGroup` (read-only) | `(count: number) => string` | A treemap group, in an announcement. |
-| `treemapLeaf` (read-only) | `string` | A treemap leaf, in an announcement. |
-| `unchanged` (read-only) | `string` | Names a candlestick or OHLC point that closed at its opening price, in the tooltip and in announcements. |
-| `value` (read-only) | `string` | The tooltip label for a point's value. |
-| `valueRange` (read-only) | `(from: string, to: string) => string` | A range value in the tooltip ("10 – 20" in English). |
-| `viewportResetToDefault` (read-only) | `string` | Announced when the keyboard resets the viewport to its configured default range. |
-| `viewportResetToFull` (read-only) | `string` | Announced when the keyboard resets the viewport to the full data range, when no default range is configured. |
-| `visualIndicatorClamped` (read-only) | `string` | Shown and announced when a gauge value lies outside the gauge's scale and its indicator stops at the edge. |
-| `zoomedIn` (read-only) | `string` | Announced when the keyboard zooms the viewport in. |
-| `zoomedOut` (read-only) | `string` | Announced when the keyboard zooms the viewport out. |
-
-**Documented elsewhere:** [`ChartFinancialDirection`](/components/chart-financial), [`ChartFunnelPointMetadata`](/components/chart-funnel), [`ChartHierarchyPointMetadata`](/components/chart-treemap), [`ChartLineStyle`](/components/chart-line-area), [`ChartOhlcPointValue`](/components/chart-financial), [`ChartWaterfallPointValue`](/components/chart-bar)
+| [`CHART_DEFAULT_MESSAGES`](/api/chart/CHART_DEFAULT_MESSAGES) | Constant |  |
+| [`ChartAnimationOptions`](/api/chart/ChartAnimationOptions) | Interface |  |
+| [`ChartAnnotationLabelTemplateContext`](/api/chart/ChartAnnotationLabelTemplateContext) | Interface |  |
+| [`ChartAxisLabelTemplateContext`](/api/chart/ChartAxisLabelTemplateContext) | Interface |  |
+| [`ChartAxisTick`](/api/chart/ChartAxisTick) | Interface |  |
+| [`ChartBrushCategoryRange`](/api/chart/ChartBrushCategoryRange) | Interface |  |
+| [`ChartBrushChangeEvent`](/api/chart/ChartBrushChangeEvent) | Interface |  |
+| [`ChartBrushContinuousRange`](/api/chart/ChartBrushContinuousRange) | Interface |  |
+| [`ChartCategoryViewportWindow`](/api/chart/ChartCategoryViewportWindow) | Interface |  |
+| [`ChartContinuousViewportWindow`](/api/chart/ChartContinuousViewportWindow) | Interface |  |
+| [`ChartCrosshairAxisLabelContext`](/api/chart/ChartCrosshairAxisLabelContext) | Interface |  |
+| [`ChartCrosshairResolvedAxisValue`](/api/chart/ChartCrosshairResolvedAxisValue) | Interface |  |
+| [`ChartCrosshairSynchronizationOptions`](/api/chart/ChartCrosshairSynchronizationOptions) | Interface |  |
+| [`ChartDataLabelContext`](/api/chart/ChartDataLabelContext) | Interface |  |
+| [`ChartDataLabelOptions`](/api/chart/ChartDataLabelOptions) | Interface |  |
+| [`ChartDownsamplingOptions`](/api/chart/ChartDownsamplingOptions) | Interface |  |
+| [`ChartExportBaseOptions`](/api/chart/ChartExportBaseOptions) | Interface | Shared base options for all chart export formats. |
+| [`ChartExportPresentationOptions`](/api/chart/ChartExportPresentationOptions) | Interface | Options controlling which interactive/presentation elements are included in the export. |
+| [`ChartExportResult`](/api/chart/ChartExportResult) | Interface | Result of a chart export operation. |
+| [`ChartLabelMeasurement`](/api/chart/ChartLabelMeasurement) | Interface |  |
+| [`ChartLegendItem`](/api/chart/ChartLegendItem) | Interface |  |
+| [`ChartLegendItemTemplateContext`](/api/chart/ChartLegendItemTemplateContext) | Interface |  |
+| [`ChartNavigationOptions`](/api/chart/ChartNavigationOptions) | Interface |  |
+| [`ChartPadding`](/api/chart/ChartPadding) | Interface |  |
+| [`ChartPdfExportOptions`](/api/chart/ChartPdfExportOptions) | Interface | Options for exporting a chart as a PDF document. |
+| [`ChartPdfMargins`](/api/chart/ChartPdfMargins) | Interface | PDF page margins in PDF points (72 points = 1 inch). |
+| [`ChartPdfPageOptions`](/api/chart/ChartPdfPageOptions) | Interface | Page layout options for PDF export. |
+| [`ChartPngExportOptions`](/api/chart/ChartPngExportOptions) | Interface | Options for exporting a chart as a PNG raster image. |
+| [`ChartPoint`](/api/chart/ChartPoint) | Interface |  |
+| [`ChartPointEvent`](/api/chart/ChartPointEvent) | Interface |  |
+| [`ChartPointFocusEvent`](/api/chart/ChartPointFocusEvent) | Interface |  |
+| [`ChartRangePointValue`](/api/chart/ChartRangePointValue) | Interface |  |
+| [`ChartRect`](/api/chart/ChartRect) | Interface |  |
+| [`ChartReferenceBandLabelContext`](/api/chart/ChartReferenceBandLabelContext) | Interface |  |
+| [`ChartReferenceLineLabelContext`](/api/chart/ChartReferenceLineLabelContext) | Interface |  |
+| [`ChartScalarPointValue`](/api/chart/ChartScalarPointValue) | Interface |  |
+| [`ChartSelectedPoint`](/api/chart/ChartSelectedPoint) | Interface |  |
+| [`ChartSelectionChangeEvent`](/api/chart/ChartSelectionChangeEvent) | Interface |  |
+| [`ChartSeriesStyle`](/api/chart/ChartSeriesStyle) | Interface |  |
+| [`ChartSeriesVisibilityEvent`](/api/chart/ChartSeriesVisibilityEvent) | Interface |  |
+| [`ChartSize`](/api/chart/ChartSize) | Interface |  |
+| [`ChartSubtitleTemplateContext`](/api/chart/ChartSubtitleTemplateContext) | Interface |  |
+| [`ChartSvgExportOptions`](/api/chart/ChartSvgExportOptions) | Interface | Options for exporting a chart as a standalone SVG vector document. |
+| [`ChartSynchronizationAxisMapping`](/api/chart/ChartSynchronizationAxisMapping) | Interface |  |
+| [`ChartSynchronizationOptions`](/api/chart/ChartSynchronizationOptions) | Interface |  |
+| [`ChartTitleTemplateContext`](/api/chart/ChartTitleTemplateContext) | Interface |  |
+| [`ChartTooltipPointContext`](/api/chart/ChartTooltipPointContext) | Interface |  |
+| [`ChartTooltipTemplateContext`](/api/chart/ChartTooltipTemplateContext) | Interface |  |
+| [`ChartViewportAxisRef`](/api/chart/ChartViewportAxisRef) | Interface |  |
+| [`ChartViewportChangeEvent`](/api/chart/ChartViewportChangeEvent) | Interface |  |
+| [`ChartViewportConstraint`](/api/chart/ChartViewportConstraint) | Interface |  |
+| [`ChartViewportLinkGroup`](/api/chart/ChartViewportLinkGroup) | Interface |  |
+| [`ChartViewportState`](/api/chart/ChartViewportState) | Interface |  |
+| [`ChartViewportSynchronizationOptions`](/api/chart/ChartViewportSynchronizationOptions) | Interface |  |
+| [`ChartAnimationEasing`](/api/chart/ChartAnimationEasing) | Type alias |  |
+| [`ChartAnimationInput`](/api/chart/ChartAnimationInput) | Type alias |  |
+| [`ChartAnnotationAxisValue`](/api/chart/ChartAnnotationAxisValue) | Type alias |  |
+| [`ChartAnnotationLabelPlacement`](/api/chart/ChartAnnotationLabelPlacement) | Type alias |  |
+| [`ChartAnnotationMarker`](/api/chart/ChartAnnotationMarker) | Type alias |  |
+| [`ChartAxisFormatter`](/api/chart/ChartAxisFormatter) | Type alias |  |
+| [`ChartAxisLabelRotation`](/api/chart/ChartAxisLabelRotation) | Type alias |  |
+| [`ChartAxisPosition`](/api/chart/ChartAxisPosition) | Type alias |  |
+| [`ChartBrushActivation`](/api/chart/ChartBrushActivation) | Type alias |  |
+| [`ChartBrushAxisRange`](/api/chart/ChartBrushAxisRange) | Type alias |  |
+| [`ChartBrushCancelReason`](/api/chart/ChartBrushCancelReason) | Type alias |  |
+| [`ChartBrushHitPolicy`](/api/chart/ChartBrushHitPolicy) | Type alias |  |
+| [`ChartBrushLineStyle`](/api/chart/ChartBrushLineStyle) | Type alias |  |
+| [`ChartBrushMode`](/api/chart/ChartBrushMode) | Type alias |  |
+| [`ChartBrushPhase`](/api/chart/ChartBrushPhase) | Type alias |  |
+| [`ChartBrushSelectionBehavior`](/api/chart/ChartBrushSelectionBehavior) | Type alias |  |
+| [`ChartCoordinateSystem`](/api/chart/ChartCoordinateSystem) | Type alias |  |
+| [`ChartCrosshairLineStyle`](/api/chart/ChartCrosshairLineStyle) | Type alias |  |
+| [`ChartCrosshairMode`](/api/chart/ChartCrosshairMode) | Type alias |  |
+| [`ChartCrosshairSnapMode`](/api/chart/ChartCrosshairSnapMode) | Type alias |  |
+| [`ChartDataLabelFormatter`](/api/chart/ChartDataLabelFormatter) | Type alias |  |
+| [`ChartDataLabelPosition`](/api/chart/ChartDataLabelPosition) | Type alias |  |
+| [`ChartDataLabelsInput`](/api/chart/ChartDataLabelsInput) | Type alias |  |
+| [`ChartDownloadOptions`](/api/chart/ChartDownloadOptions) | Type alias | Options for downloading a chart export. |
+| [`ChartDownsamplingAlgorithm`](/api/chart/ChartDownsamplingAlgorithm) | Type alias |  |
+| [`ChartDownsamplingInput`](/api/chart/ChartDownsamplingInput) | Type alias |  |
+| [`ChartExportBackground`](/api/chart/ChartExportBackground) | Type alias | Chart export background policy. - "auto": Resolves the effective chart background color from the chart container/theme. - "transparent": Creates a transparent background. - CSS color string: Uses an explicit background color. |
+| [`ChartExportErrorCode`](/api/chart/ChartExportErrorCode) | Type alias | Error code identifying the cause of a chart export failure. |
+| [`ChartExportFormat`](/api/chart/ChartExportFormat) | Type alias | Supported chart export formats. |
+| [`ChartExportOptions`](/api/chart/ChartExportOptions) | Type alias | Discriminated union of chart export options. |
+| [`ChartField`](/api/chart/ChartField) | Type alias |  |
+| [`ChartHeaderAlignment`](/api/chart/ChartHeaderAlignment) | Type alias | How the title and subtitle align: `start` and `end` follow the direction, `left` and `right` don't. |
+| [`ChartItemKey`](/api/chart/ChartItemKey) | Type alias | A value that can identify a chart item: a `keyField` value or a category. |
+| [`ChartLegendItemKind`](/api/chart/ChartLegendItemKind) | Type alias |  |
+| [`ChartLegendMode`](/api/chart/ChartLegendMode) | Type alias |  |
+| [`ChartLegendPosition`](/api/chart/ChartLegendPosition) | Type alias | Where a legend goes: `start` and `end` follow the direction, `left` and `right` don't. |
+| [`ChartNavigationAxisTarget`](/api/chart/ChartNavigationAxisTarget) | Type alias |  |
+| [`ChartNavigationInput`](/api/chart/ChartNavigationInput) | Type alias |  |
+| [`ChartNumericScaleType`](/api/chart/ChartNumericScaleType) | Type alias |  |
+| [`ChartOverlayLayer`](/api/chart/ChartOverlayLayer) | Type alias |  |
+| [`ChartPdfPageSize`](/api/chart/ChartPdfPageSize) | Type alias | Standard or custom PDF page size. - "chart": Custom page dimensions sized to exactly match the chart dimensions in PDF points. - "a4": Standard ISO A4 page (595.28 x 841.89 pt). - "letter": Standard North American Letter page (612 x 792 pt). - Custom object: Explicit width and height in PDF points (72 points = 1 inch). |
+| [`ChartPdfRenderMode`](/api/chart/ChartPdfRenderMode) | Type alias | PDF generation rendering mode. - "auto": Prefers vector output, falling back to embedded high-resolution raster image when vector fidelity cannot be guaranteed. - "vector": Requires strict vector conversion; rejects if vector conversion is unsupported. - "raster": Directly renders a rasterized chart image onto the PDF page. |
+| [`ChartPointValue`](/api/chart/ChartPointValue) | Type alias |  |
+| [`ChartPointValueKind`](/api/chart/ChartPointValueKind) | Type alias |  |
+| [`ChartReferenceLabelPosition`](/api/chart/ChartReferenceLabelPosition) | Type alias |  |
+| [`ChartReferenceLabelTemplateContext`](/api/chart/ChartReferenceLabelTemplateContext) | Type alias |  |
+| [`ChartReferenceLineStyle`](/api/chart/ChartReferenceLineStyle) | Type alias |  |
+| [`ChartRendererMode`](/api/chart/ChartRendererMode) | Type alias |  |
+| [`ChartSelectionChangeSource`](/api/chart/ChartSelectionChangeSource) | Type alias |  |
+| [`ChartSelectionMode`](/api/chart/ChartSelectionMode) | Type alias |  |
+| [`ChartSeriesFamily`](/api/chart/ChartSeriesFamily) | Type alias |  |
+| [`ChartSeriesType`](/api/chart/ChartSeriesType) | Type alias |  |
+| [`ChartStackMode`](/api/chart/ChartStackMode) | Type alias |  |
+| [`ChartSynchronizationInput`](/api/chart/ChartSynchronizationInput) | Type alias |  |
+| [`ChartSynchronizationMode`](/api/chart/ChartSynchronizationMode) | Type alias |  |
+| [`ChartValueAccessor`](/api/chart/ChartValueAccessor) | Type alias |  |
+| [`ChartValueFormatter`](/api/chart/ChartValueFormatter) | Type alias |  |
+| [`ChartViewportChangePhase`](/api/chart/ChartViewportChangePhase) | Type alias |  |
+| [`ChartViewportChangeSource`](/api/chart/ChartViewportChangeSource) | Type alias |  |
+| [`ChartViewportLinkMode`](/api/chart/ChartViewportLinkMode) | Type alias |  |
+| [`ChartViewportWindow`](/api/chart/ChartViewportWindow) | Type alias |  |
+| [`ChartXAxisPosition`](/api/chart/ChartXAxisPosition) | Type alias |  |
+| [`ChartXAxisType`](/api/chart/ChartXAxisType) | Type alias |  |
+| [`ChartYAxisPosition`](/api/chart/ChartYAxisPosition) | Type alias | Where a Y axis goes: `start` and `end` follow the direction, `left` and `right` don't. |
+| [`ChartYAxisSide`](/api/chart/ChartYAxisSide) | Type alias | The physical side a Y axis is drawn on. |
+| [`ChartYAxisType`](/api/chart/ChartYAxisType) | Type alias |  |
+
+**Related types:** [`ChartFinancialDirection`](/api/chart/ChartFinancialDirection), [`ChartFunnelPointMetadata`](/api/chart/ChartFunnelPointMetadata), [`ChartHierarchyPointMetadata`](/api/chart/ChartHierarchyPointMetadata), [`ChartLineStyle`](/api/chart/ChartLineStyle), [`ChartOhlcPointValue`](/api/chart/ChartOhlcPointValue), [`ChartWaterfallPointValue`](/api/chart/ChartWaterfallPointValue), [`MonaChartMessages`](/api/i18n/MonaChartMessages)

@@ -12,8 +12,10 @@ import {
     input,
     signal
 } from "@angular/core";
+import { Router } from "@angular/router";
 import { MarkdownComponent } from "ngx-markdown";
 import { createUniqueHeadingId } from "../../docs-heading-id";
+import { routeInternalLink } from "../../internal-links";
 import type { SectionItem } from "../../models/SectionItem";
 import { ExampleComponent } from "../example/example.component";
 import { PageService } from "../../services/page.service";
@@ -21,7 +23,10 @@ import { PageService } from "../../services/page.service";
 @Component({
     selector: "app-markdown-doc",
     imports: [MarkdownComponent],
-    template: `<markdown [src]="assetUrl()" (ready)="onReady()" class="block"></markdown>`
+    template: `<markdown [src]="assetUrl()" (ready)="onReady()" class="block"></markdown>`,
+    host: {
+        "(click)": "onClick($event)"
+    }
 })
 export class MarkdownDocComponent {
     readonly #application = inject(ApplicationRef);
@@ -31,6 +36,7 @@ export class MarkdownDocComponent {
     readonly #injector = inject(Injector);
     readonly #pageService = inject(PageService);
     readonly #registeredItems = signal<SectionItem[]>([]);
+    readonly #router = inject(Router);
     #examples: ComponentRef<ExampleComponent>[] = [];
 
     protected readonly assetUrl = computed(() => `/assets/${this.src()}`);
@@ -48,6 +54,11 @@ export class MarkdownDocComponent {
             this.#destroyExamples();
             this.#registeredItems().forEach(item => this.#pageService.removeSection(item));
         });
+    }
+
+    /** A link to another page, such as a type's API reference, opens it without reloading the site. */
+    protected onClick(event: MouseEvent): void {
+        routeInternalLink(event, this.#router);
     }
 
     protected onReady(): void {

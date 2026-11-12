@@ -9,7 +9,8 @@ Everything below is imported from `@nanahoshi/mona-ui/chart`.
 Renders traditional financial OHLC (Open-High-Low-Close) bar series with vertical high/low price spans, left-facing
 open ticks, right-facing close ticks, and directional color coding.
 
-**Selector:** `mona-ohlc-series`
+**Selector:** `mona-ohlc-series`  
+**API reference:** [`OhlcSeriesComponent`](/api/chart/OhlcSeriesComponent)
 
 #### Inputs
 
@@ -55,7 +56,8 @@ open ticks, right-facing close ticks, and directional color coding.
 Renders financial Japanese candlestick series with central high/low wicks, rectangular open/close bodies,
 rising/falling/neutral color coding, and solid or hollow rising bodies.
 
-**Selector:** `mona-candlestick-series`
+**Selector:** `mona-candlestick-series`  
+**API reference:** [`CandlestickSeriesComponent`](/api/chart/CandlestickSeriesComponent)
 
 #### Inputs
 
@@ -97,35 +99,10 @@ rising/falling/neutral color coding, and solid or hollow rising bodies.
 
 ### Types
 
-#### `ChartOhlcPointValue`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `change?` (read-only) | `number` |
-| `changePercentage?` (read-only) | `number` |
-| `close` (read-only) | `number` |
-| `direction` (read-only) | `ChartFinancialDirection` |
-| `formattedChange?` (read-only) | `string` |
-| `formattedChangePercentage?` (read-only) | `string` |
-| `formattedClose?` (read-only) | `string` |
-| `formattedHigh?` (read-only) | `string` |
-| `formattedLow?` (read-only) | `string` |
-| `formattedOpen?` (read-only) | `string` |
-| `high` (read-only) | `number` |
-| `low` (read-only) | `number` |
-| `open` (read-only) | `number` |
-| `valueKind` (read-only) | `"ohlc"` |
+| [`ChartOhlcPointValue`](/api/chart/ChartOhlcPointValue) | Interface |
+| [`ChartFinancialDirection`](/api/chart/ChartFinancialDirection) | Type alias |
+| [`ChartFinancialFillMode`](/api/chart/ChartFinancialFillMode) | Type alias |
 
-#### `ChartFinancialDirection`
-
-```typescript
-type ChartFinancialDirection = "falling" | "neutral" | "rising";
-```
-
-#### `ChartFinancialFillMode`
-
-```typescript
-type ChartFinancialFillMode = "filled" | "hollow";
-```
-
-**Documented elsewhere:** [`ChartAxisFormatter`](/components/chart), [`ChartDataLabelsInput`](/components/chart), [`ChartField`](/components/chart)
+**Related types:** [`ChartAxisFormatter`](/api/chart/ChartAxisFormatter), [`ChartDataLabelsInput`](/api/chart/ChartDataLabelsInput), [`ChartField`](/api/chart/ChartField)

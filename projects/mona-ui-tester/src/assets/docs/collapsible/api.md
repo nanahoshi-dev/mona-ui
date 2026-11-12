@@ -10,7 +10,8 @@ Headless disclosure root. Adds no markup of its own, so it can be applied to any
 (`li`, `div`, `section`) and paired with `monaCollapsibleTrigger` and `monaCollapsibleContent`.
 
 **Selector:** `[monaCollapsible]`  
-**Exported as:** `monaCollapsible`
+**Exported as:** `monaCollapsible`  
+**API reference:** [`CollapsibleDirective`](/api/collapsible/CollapsibleDirective)
 
 #### Inputs
 
@@ -49,7 +50,8 @@ element, so it can be applied directly to a `ul`, `div` or any other container w
 The measured size is also published on the host as the `--mona-collapsible-content-height` custom
 property, so consumers can drive their own animation instead (pair it with `[animate]="false"` on the root).
 
-**Selector:** `[monaCollapsibleContent]`
+**Selector:** `[monaCollapsibleContent]`  
+**API reference:** [`CollapsibleContentDirective`](/api/collapsible/CollapsibleContentDirective)
 
 #### Inputs
 
@@ -62,32 +64,12 @@ property, so consumers can drive their own animation instead (pair it with `[ani
 Toggles the closest `monaCollapsible`. Wires `aria-expanded` / `aria-controls` automatically and
 only adds `role`, `tabindex` and keyboard handling when the host element is not already interactive.
 
-**Selector:** `[monaCollapsibleTrigger]`
+**Selector:** `[monaCollapsibleTrigger]`  
+**API reference:** [`CollapsibleTriggerDirective`](/api/collapsible/CollapsibleTriggerDirective)
 
 ### Types
 
-#### `COLLAPSIBLE_CONFIG`
-
-```typescript
-const COLLAPSIBLE_CONFIG: InjectionToken<CollapsibleConfig>;
-```
-
-#### `CollapsibleConfig`
-
-The contract a collapsible root exposes to its trigger and content parts.
-
-| Name | Type |
-| --- | --- |
-| `animate` (read-only) | `Signal<boolean>` |
-| `contentId` (read-only) | `string` |
-| `disabled` (read-only) | `Signal<boolean>` |
-| `expanded` (read-only) | `Signal<boolean>` |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `collapse(): void` | Collapses the content. |
-| `expand(): void` | Expands the content. |
-| `setContentId(id: string \| null): void` | Takes the id the content was given, so the trigger points at it. A root without it always uses `contentId`. |
-| `toggle(): void` | Switches between expanded and collapsed. The trigger calls it on activation. |
+| Type | Kind | Description |
+| --- | --- | --- |
+| [`COLLAPSIBLE_CONFIG`](/api/collapsible/COLLAPSIBLE_CONFIG) | Constant |  |
+| [`CollapsibleConfig`](/api/collapsible/CollapsibleConfig) | Interface | The contract a collapsible root exposes to its trigger and content parts. |

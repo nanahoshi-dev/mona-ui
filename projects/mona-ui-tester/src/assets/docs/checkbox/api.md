@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/check-box`.
 ### `CheckBoxComponent`
 
 **Selector:** `mona-check-box`  
-**Implements:** `FormCheckboxControl`
+**Implements:** `FormCheckboxControl`  
+**API reference:** [`CheckBoxComponent`](/api/check-box/CheckBoxComponent)
 
 #### Inputs
 
@@ -54,7 +55,8 @@ Everything below is imported from `@nanahoshi/mona-ui/check-box`.
 Applies Mona UI styling to a native `<input type="checkbox">`. All native checkbox behaviors — keyboard interaction,
 form submission, `indeterminate` state, and Angular forms directives — are preserved.
 
-**Selector:** `input[type='checkbox'][monaCheckbox]`
+**Selector:** `input[type='checkbox'][monaCheckbox]`  
+**API reference:** [`CheckboxDirective`](/api/check-box/CheckboxDirective)
 
 #### Inputs
 

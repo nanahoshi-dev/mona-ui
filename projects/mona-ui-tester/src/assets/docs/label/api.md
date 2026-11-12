@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/label`.
 
 ### `LabelComponent`
 
-**Selector:** `mona-label`
+**Selector:** `mona-label`  
+**API reference:** [`LabelComponent`](/api/label/LabelComponent)
 
 #### Inputs
 
@@ -20,7 +21,8 @@ Everything below is imported from `@nanahoshi/mona-ui/label`.
 
 ### `LabelDirective`
 
-**Selector:** `label[monaLabel]`
+**Selector:** `label[monaLabel]`  
+**API reference:** [`LabelDirective`](/api/label/LabelDirective)
 
 #### Inputs
 
@@ -31,18 +33,7 @@ Everything below is imported from `@nanahoshi/mona-ui/label`.
 
 ### Types
 
-#### `LabelFocusable`
-
-**Methods**
-
-| Signature | Description |
+| Type | Kind |
 | --- | --- |
-| `activateFromLabel(): void` | Runs instead of `focus()` on a click, for a control a native label would activate. |
-| `focus(options?: FocusOptions): void` | Moves focus to the control. The label calls it on a click when the control has no `activateFromLabel`. |
-| `setLabelledBy(id: string \| null): void` | Receives the id of the label's text, so the control can use it for `aria-labelledby`. |
-
-#### `LabelTarget`
-
-```typescript
-type LabelTarget = string | LabelFocusable | null | undefined;
-```
+| [`LabelFocusable`](/api/label/LabelFocusable) | Interface |
+| [`LabelTarget`](/api/label/LabelTarget) | Type alias |

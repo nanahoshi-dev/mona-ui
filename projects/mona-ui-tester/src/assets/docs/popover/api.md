@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/popover`.
 ### `PopoverComponent`
 
 **Selector:** `mona-popover`  
-**Exported as:** `monaPopover`
+**Exported as:** `monaPopover`  
+**API reference:** [`PopoverComponent`](/api/popover/PopoverComponent)
 
 #### Inputs
 
@@ -44,17 +45,20 @@ Everything below is imported from `@nanahoshi/mona-ui/popover`.
 
 Marks an `ng-template` as the popover's custom footer content.
 
-**Selector:** `ng-template[monaPopoverFooterTemplate]`
+**Selector:** `ng-template[monaPopoverFooterTemplate]`  
+**API reference:** [`PopoverFooterTemplateDirective`](/api/popover/PopoverFooterTemplateDirective)
 
 ### `PopoverTitleTemplateDirective`
 
 Marks an `ng-template` as the popover's custom title content.
 
-**Selector:** `ng-template[monaPopoverTitleTemplate]`
+**Selector:** `ng-template[monaPopoverTitleTemplate]`  
+**API reference:** [`PopoverTitleTemplateDirective`](/api/popover/PopoverTitleTemplateDirective)
 
 ### `PopoverHideEvent`
 
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`PopoverHideEvent`](/api/popover/PopoverHideEvent)
 
 #### Properties
 
@@ -65,7 +69,8 @@ Marks an `ng-template` as the popover's custom title content.
 
 ### `PopoverShowEvent`
 
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`PopoverShowEvent`](/api/popover/PopoverShowEvent)
 
 #### Properties
 
@@ -74,6 +79,8 @@ Marks an `ng-template` as the popover's custom title content.
 | `target` (read-only) | `Element` |
 
 ### `PopoverShownEvent`
+
+**API reference:** [`PopoverShownEvent`](/api/popover/PopoverShownEvent)
 
 #### Properties
 
@@ -84,51 +91,10 @@ Marks an `ng-template` as the popover's custom title content.
 
 ### Types
 
-#### `OverlaySide`
-
-A side of the anchor. `start` and `end` follow the direction.
-
-```typescript
-type OverlaySide = "bottom" | "end" | "left" | "right" | "start" | "top";
-```
-
-#### `PopoverPosition`
-
-The side of its target a popover opens on. `left` and `right` are physical in every direction; `start` and `end`
-follow the text direction.
-
-```typescript
-type PopoverPosition = OverlaySide;
-```
-
-#### `PopoverTrigger`
-
-The trigger event for showing/hiding a popover.
-"click" toggles the popover on click, "hover" opens on pointer enter and
-closes on pointer leave, and "none" disables automatic triggering so the
-popover can only be controlled via its `open()`/`close()` methods.
-Any other DOM event name is also accepted and used as-is to open the popover.
-
-```typescript
-type PopoverTrigger = "click" | "hover" | "none" | (string & {});
-```
-
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
+| [`OverlaySide`](/api/popover/OverlaySide) | Type alias | A side of the anchor. |
+| [`PopoverPosition`](/api/popover/PopoverPosition) | Type alias | The side of its target a popover opens on. |
+| [`PopoverTrigger`](/api/popover/PopoverTrigger) | Type alias | The trigger event for showing/hiding a popover. "click" toggles the popover on click, "hover" opens on pointer enter and closes on pointer leave, and "none" disables automatic triggering so the popover can only be controlled via its `open()`/`close()` methods. |
 
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
-
-**Documented elsewhere:** [`PopupRef`](/components/popup)
+**Related types:** [`PopupRef`](/api/popup/PopupRef), [`PreventableEvent`](/api/common/PreventableEvent)

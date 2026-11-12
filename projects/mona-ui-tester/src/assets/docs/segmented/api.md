@@ -8,7 +8,8 @@ Everything below is imported from `@nanahoshi/mona-ui/segmented`.
 
 **Selector:** `mona-segmented`  
 **Type parameters:** `T extends SegmentedValue = SegmentedValue`  
-**Implements:** `FormValueControl<T \| null>`
+**Implements:** `FormValueControl<T \| null>`  
+**API reference:** [`SegmentedComponent`](/api/segmented/SegmentedComponent)
 
 #### Inputs
 
@@ -49,7 +50,8 @@ Renders the visual content of every segmented option. Overrides the default labe
 text of each option. Bind the options, as `[monaSegmentedItemTemplate]="options"`, to type `let-option` from them.
 
 **Selector:** `ng-template[monaSegmentedItemTemplate]`  
-**Type parameters:** `T extends SegmentedValue = SegmentedValue`
+**Type parameters:** `T extends SegmentedValue = SegmentedValue`  
+**API reference:** [`SegmentedItemTemplateDirective`](/api/segmented/SegmentedItemTemplateDirective)
 
 #### Inputs
 
@@ -69,32 +71,8 @@ text of each option. Bind the options, as `[monaSegmentedItemTemplate]="options"
 
 ### Types
 
-#### `SegmentedItemTemplateContext`
-
-Rendering context passed to the segmented item template.
-
-**Type parameters:** `T extends SegmentedValue = SegmentedValue`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `$implicit` (read-only) | `SegmentedOption<T>` | The option rendered by this item. |
-| `disabled` (read-only) | `boolean` | Whether this option is disabled, either individually or via the group. |
-| `index` (read-only) | `number` | Zero-based option index. |
-| `option` (read-only) | `SegmentedOption<T>` | The option rendered by this item. |
-| `selected` (read-only) | `boolean` | Whether this option is currently selected. |
-
-#### `SegmentedOption`
-
-**Type parameters:** `T extends SegmentedValue = SegmentedValue`
-
-| Name | Type |
-| --- | --- |
-| `disabled?` (read-only) | `boolean` |
-| `label` (read-only) | `string` |
-| `value` (read-only) | `T` |
-
-#### `SegmentedValue`
-
-```typescript
-type SegmentedValue = string | number;
-```
+| [`SegmentedItemTemplateContext`](/api/segmented/SegmentedItemTemplateContext) | Interface | Rendering context passed to the segmented item template. |
+| [`SegmentedOption`](/api/segmented/SegmentedOption) | Interface |  |
+| [`SegmentedValue`](/api/segmented/SegmentedValue) | Type alias |  |

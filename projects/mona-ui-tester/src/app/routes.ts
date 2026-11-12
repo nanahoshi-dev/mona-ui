@@ -537,6 +537,31 @@ export const routes: Routes = [
         ]
     },
     {
+        path: "api",
+        loadComponent: () =>
+            import("./layout/components/components/components.component").then(m => m.ComponentsComponent),
+        children: [
+            {
+                path: "",
+                pathMatch: "full",
+                loadComponent: () =>
+                    import("./api/pages/api-index-page/api-index-page.component").then(m => m.ApiIndexPageComponent)
+            },
+            {
+                path: ":entryPoint",
+                loadComponent: () =>
+                    import("./api/pages/api-entry-point-page/api-entry-point-page.component").then(
+                        m => m.ApiEntryPointPageComponent
+                    )
+            },
+            {
+                path: ":entryPoint/:symbol",
+                loadComponent: () =>
+                    import("./api/pages/api-symbol-page/api-symbol-page.component").then(m => m.ApiSymbolPageComponent)
+            }
+        ]
+    },
+    {
         path: "browser-test/grid-geometry",
         loadComponent: () => import("./browser-test/grid-geometry-fixture.component").then(m => m.GridGeometryFixtureComponent)
     },

@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/scroll-view`.
 
 ### `ScrollViewComponent`
 
-**Selector:** `mona-scroll-view`
+**Selector:** `mona-scroll-view`  
+**API reference:** [`ScrollViewComponent`](/api/scroll-view/ScrollViewComponent)
 
 #### Inputs
 
@@ -40,7 +41,8 @@ Marks the template that renders each slide. Bind `[monaScrollViewSlide]` to the 
 view, and `let-item` takes its type from it.
 
 **Selector:** `ng-template[monaScrollViewSlide]`  
-**Type parameters:** `T = unknown`
+**Type parameters:** `T = unknown`  
+**API reference:** [`ScrollViewSlideDirective`](/api/scroll-view/ScrollViewSlideDirective)
 
 #### Inputs
 
@@ -58,40 +60,10 @@ view, and `let-item` takes its type from it.
 
 ### Types
 
-#### `SCROLL_VIEW_DEFAULT_MESSAGES`
-
-```typescript
-const SCROLL_VIEW_DEFAULT_MESSAGES: MonaScrollViewMessages;
-```
-
-#### `ScrollViewSlideContext`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `$implicit` | `T` |
-| `height` | `number` |
-| `width` | `number` |
+| [`SCROLL_VIEW_DEFAULT_MESSAGES`](/api/scroll-view/SCROLL_VIEW_DEFAULT_MESSAGES) | Constant |
+| [`ScrollViewSlideContext`](/api/scroll-view/ScrollViewSlideContext) | Interface |
+| [`PagerOverlay`](/api/scroll-view/PagerOverlay) | Type alias |
 
-#### `PagerOverlay`
-
-```typescript
-type PagerOverlay = "dark" | "light" | "none";
-```
-
-#### `MonaScrollViewMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
-| --- | --- |
-| `carousel` (read-only) | `string` |
-| `nextPage` (read-only) | `string` |
-| `page` (read-only) | `(current: number) => string` |
-| `pageOf` (read-only) | `(current: number, total: number) => string` |
-| `pages` (read-only) | `string` |
-| `previousPage` (read-only) | `string` |
-| `scrollPagerNext` (read-only) | `string` |
-| `scrollPagerPrevious` (read-only) | `string` |
-| `slide` (read-only) | `string` |
+**Related types:** [`MonaScrollViewMessages`](/api/i18n/MonaScrollViewMessages)

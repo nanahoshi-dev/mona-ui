@@ -12,7 +12,8 @@ A placeholder block standing in for content that has not loaded yet. Size it wit
 It is decorative, so it is hidden from assistive technology. Mark the region it fills with
 `aria-busy` and describe what is loading there instead.
 
-**Selector:** `mona-skeleton`
+**Selector:** `mona-skeleton`  
+**API reference:** [`SkeletonComponent`](/api/skeleton/SkeletonComponent)
 
 #### Inputs
 
@@ -25,10 +26,4 @@ It is decorative, so it is hidden from assistive technology. Mark the region it 
 
 ### Types
 
-#### `ClassInputType`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type ClassInputType = string | string[] | Record<string, unknown> | null | undefined;
-```
+**Related types:** [`ClassInputType`](/api/common/ClassInputType)

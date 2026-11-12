@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/switch`.
 ### `SwitchComponent`
 
 **Selector:** `mona-switch`  
-**Implements:** `FormCheckboxControl`
+**Implements:** `FormCheckboxControl`  
+**API reference:** [`SwitchComponent`](/api/switch/SwitchComponent)
 
 #### Inputs
 
@@ -43,7 +44,8 @@ Everything below is imported from `@nanahoshi/mona-ui/switch`.
 
 ### `SwitchHandleContentTemplateDirective`
 
-**Selector:** `ng-template[monaSwitchHandleContentTemplate]`
+**Selector:** `ng-template[monaSwitchHandleContentTemplate]`  
+**API reference:** [`SwitchHandleContentTemplateDirective`](/api/switch/SwitchHandleContentTemplateDirective)
 
 #### Template context
 
@@ -53,16 +55,16 @@ Everything below is imported from `@nanahoshi/mona-ui/switch`.
 
 ### `SwitchOffLabelTemplateDirective`
 
-**Selector:** `ng-template[monaSwitchOffLabelTemplate]`
+**Selector:** `ng-template[monaSwitchOffLabelTemplate]`  
+**API reference:** [`SwitchOffLabelTemplateDirective`](/api/switch/SwitchOffLabelTemplateDirective)
 
 ### `SwitchOnLabelTemplateDirective`
 
-**Selector:** `ng-template[monaSwitchOnLabelTemplate]`
+**Selector:** `ng-template[monaSwitchOnLabelTemplate]`  
+**API reference:** [`SwitchOnLabelTemplateDirective`](/api/switch/SwitchOnLabelTemplateDirective)
 
 ### Types
 
-#### `SwitchHandleContentTemplateContext`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `$implicit` (read-only) | `boolean` |
+| [`SwitchHandleContentTemplateContext`](/api/switch/SwitchHandleContentTemplateContext) | Interface |

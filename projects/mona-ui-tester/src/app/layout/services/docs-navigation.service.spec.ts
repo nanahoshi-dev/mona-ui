@@ -63,6 +63,24 @@ describe("DocsNavigationService", () => {
         expect(service.nextPage()).toBeNull();
     });
 
+    it("knows where the URL is in the API reference, and takes no page from it", async () => {
+        const { router, service } = setUp();
+        router.resetConfig([{ path: "**", component: EmptyComponent }]);
+
+        await go(router, "/api");
+        expect(service.apiLocation()).toEqual({ entryPoint: undefined, symbol: undefined });
+
+        await go(router, "/api/chart#types");
+        expect(service.apiLocation()).toEqual({ entryPoint: "chart", symbol: undefined });
+        expect(service.currentPage()).toBeNull();
+
+        await go(router, "/api/chart/ChartComponent");
+        expect(service.apiLocation()).toEqual({ entryPoint: "chart", symbol: "ChartComponent" });
+
+        await go(router, "/components/chart");
+        expect(service.apiLocation()).toBeNull();
+    });
+
     it("gives neighbors in reading order, across categories, and none at the ends", async () => {
         const { router, service } = setUp();
         const pages = flattenDocsPages();

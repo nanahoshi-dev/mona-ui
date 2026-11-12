@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/card`.
 
 ### `CardComponent`
 
-**Selector:** `mona-card`
+**Selector:** `mona-card`  
+**API reference:** [`CardComponent`](/api/card/CardComponent)
 
 #### Inputs
 
@@ -18,7 +19,8 @@ Everything below is imported from `@nanahoshi/mona-ui/card`.
 
 ### `CardFooterComponent`
 
-**Selector:** `mona-card-footer`
+**Selector:** `mona-card-footer`  
+**API reference:** [`CardFooterComponent`](/api/card/CardFooterComponent)
 
 #### Inputs
 
@@ -28,7 +30,8 @@ Everything below is imported from `@nanahoshi/mona-ui/card`.
 
 ### `CardHeaderComponent`
 
-**Selector:** `mona-card-header`
+**Selector:** `mona-card-header`  
+**API reference:** [`CardHeaderComponent`](/api/card/CardHeaderComponent)
 
 #### Inputs
 
@@ -38,15 +41,18 @@ Everything below is imported from `@nanahoshi/mona-ui/card`.
 
 ### `CardActionDirective`
 
-**Selector:** `ng-template[monaCardAction]`
+**Selector:** `ng-template[monaCardAction]`  
+**API reference:** [`CardActionDirective`](/api/card/CardActionDirective)
 
 ### `CardContentDirective`
 
-**Selector:** `ng-template[monaCardContent]`
+**Selector:** `ng-template[monaCardContent]`  
+**API reference:** [`CardContentDirective`](/api/card/CardContentDirective)
 
 ### `CardDescriptionDirective`
 
-**Selector:** `ng-template[monaCardDescription]`
+**Selector:** `ng-template[monaCardDescription]`  
+**API reference:** [`CardDescriptionDirective`](/api/card/CardDescriptionDirective)
 
 #### Template context
 
@@ -56,7 +62,8 @@ Everything below is imported from `@nanahoshi/mona-ui/card`.
 
 ### `CardTitleDirective`
 
-**Selector:** `ng-template[monaCardTitle]`
+**Selector:** `ng-template[monaCardTitle]`  
+**API reference:** [`CardTitleDirective`](/api/card/CardTitleDirective)
 
 #### Template context
 
@@ -66,22 +73,9 @@ Everything below is imported from `@nanahoshi/mona-ui/card`.
 
 ### Types
 
-#### `CARD_DEFAULT_MESSAGES`
+| Type | Kind |
+| --- | --- |
+| [`CARD_DEFAULT_MESSAGES`](/api/card/CARD_DEFAULT_MESSAGES) | Constant |
+| [`CardTemplateContext`](/api/card/CardTemplateContext) | Interface |
 
-```typescript
-const CARD_DEFAULT_MESSAGES: { actionsLabel: string; };
-```
-
-#### `CardTemplateContext`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` (read-only) | `string` | An id for the element in the template, if something needs to refer to it. The card doesn't need it for its name. |
-
-#### `ClassInputType`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type ClassInputType = string | string[] | Record<string, unknown> | null | undefined;
-```
+**Related types:** [`ClassInputType`](/api/common/ClassInputType)

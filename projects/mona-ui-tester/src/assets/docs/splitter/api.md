@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/splitter`.
 
 ### `SplitterPaneComponent`
 
-**Selector:** `mona-splitter-pane`
+**Selector:** `mona-splitter-pane`  
+**API reference:** [`SplitterPaneComponent`](/api/splitter/SplitterPaneComponent)
 
 #### Inputs
 
@@ -29,7 +30,8 @@ Everything below is imported from `@nanahoshi/mona-ui/splitter`.
 
 ### `SplitterComponent`
 
-**Selector:** `mona-splitter`
+**Selector:** `mona-splitter`  
+**API reference:** [`SplitterComponent`](/api/splitter/SplitterComponent)
 
 #### Inputs
 
@@ -46,20 +48,8 @@ Everything below is imported from `@nanahoshi/mona-ui/splitter`.
 
 ### Types
 
-#### `SPLITTER_DEFAULT_MESSAGES`
-
-```typescript
-const SPLITTER_DEFAULT_MESSAGES: MonaSplitterMessages;
-```
-
-#### `MonaSplitterMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `collapseDown` (read-only) | `string` |
-| `collapseNext` (read-only) | `string` |
-| `collapsePrevious` (read-only) | `string` |
-| `collapseUp` (read-only) | `string` |
-| `resizer` (read-only) | `string` |
+| [`SPLITTER_DEFAULT_MESSAGES`](/api/splitter/SPLITTER_DEFAULT_MESSAGES) | Constant |
+
+**Related types:** [`MonaSplitterMessages`](/api/i18n/MonaSplitterMessages)

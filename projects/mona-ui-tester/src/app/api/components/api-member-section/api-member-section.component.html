@@ -1,0 +1,70 @@
+@let current = section();
+<section [attr.aria-labelledby]="current.id">
+    <h2 class="text-xl font-bold text-foreground mb-3" [id]="current.id">
+        @if (current.from; as from) {
+            Inherited from
+            @if (links()[from]; as entryPoint) {
+                <a
+                    class="font-mono text-primary underline underline-offset-2"
+                    [routerLink]="['/api', entryPoint, from]"
+                    >{{ from }}</a
+                >
+            } @else {
+                <code class="font-mono">{{ from }}</code>
+            }
+        } @else {
+            {{ current.title }}
+        }
+    </h2>
+    <ul class="rounded-xl border border-border bg-background divide-y divide-border">
+        @for (item of current.items; track item.id) {
+            <li class="px-5 py-4 scroll-mt-6" [id]="item.id">
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <h3 class="font-mono text-sm font-semibold text-foreground break-all">
+                        <a class="hover:underline underline-offset-2" [routerLink]="[]" [fragment]="item.id">{{
+                            item.name
+                        }}</a>
+                    </h3>
+                    @for (flag of item.flags; track flag) {
+                        <span
+                            class="rounded-full border border-border px-2 py-px text-[11px] font-medium leading-4 text-muted-foreground"
+                            >{{ flag }}</span
+                        >
+                    }
+                </div>
+                @if (item.signature) {
+                    <app-api-type
+                        class="mt-2 block text-[0.8125rem] leading-6 text-muted-foreground whitespace-pre-wrap break-words"
+                        [links]="links()"
+                        [self]="self()"
+                        [text]="item.signature"></app-api-type>
+                }
+                @if (item.type) {
+                    <p class="mt-1 text-[0.8125rem] leading-6 text-muted-foreground break-words">
+                        <span class="sr-only">Type: </span>
+                        <app-api-type [links]="links()" [self]="self()" [text]="item.type"></app-api-type>
+                    </p>
+                }
+                @if (item.value) {
+                    <p class="mt-1 text-[0.8125rem] leading-6 text-muted-foreground">
+                        <span class="sr-only">Value: </span><code class="font-mono">{{ item.value }}</code>
+                    </p>
+                }
+                @if (item.description) {
+                    <app-api-prose
+                        class="api-prose mt-2 block text-sm leading-relaxed text-foreground"
+                        [links]="links()"
+                        [markdown]="item.description"></app-api-prose>
+                }
+                @if (item.defaultValue !== undefined) {
+                    <p class="mt-2 text-xs text-muted-foreground">
+                        Default
+                        <code class="ms-1 rounded bg-muted px-1.5 py-0.5 font-mono text-foreground">{{
+                            item.defaultValue
+                        }}</code>
+                    </p>
+                }
+            </li>
+        }
+    </ul>
+</section>

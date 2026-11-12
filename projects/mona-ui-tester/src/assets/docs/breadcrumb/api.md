@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/breadcrumb`.
 
 ### `BreadcrumbComponent`
 
-**Selector:** `mona-breadcrumb`
+**Selector:** `mona-breadcrumb`  
+**API reference:** [`BreadcrumbComponent`](/api/breadcrumb/BreadcrumbComponent)
 
 #### Inputs
 
@@ -23,7 +24,8 @@ Everything below is imported from `@nanahoshi/mona-ui/breadcrumb`.
 Use as a direct child of `<mona-breadcrumb>`. Project any Angular content — text, icons, or elements — into the
 default slot.
 
-**Selector:** `mona-breadcrumb-item`
+**Selector:** `mona-breadcrumb-item`  
+**API reference:** [`BreadcrumbItemComponent`](/api/breadcrumb/BreadcrumbItemComponent)
 
 #### Inputs
 
@@ -42,7 +44,8 @@ default slot.
 Makes a projected anchor the item's link, so the browser and the router treat it as one: ctrl-click, copy link, `href`,
 `routerLink`, `target`. The item then renders no button around it.
 
-**Selector:** `a[monaBreadcrumbLink]`
+**Selector:** `a[monaBreadcrumbLink]`  
+**API reference:** [`BreadcrumbLinkDirective`](/api/breadcrumb/BreadcrumbLinkDirective)
 
 #### Inputs
 
@@ -55,21 +58,13 @@ Makes a projected anchor the item's link, so the browser and the router treat it
 Apply to an `<ng-template>` directly inside `<mona-breadcrumb>` to replace the default `ChevronRight` separator. One
 directive per breadcrumb — the first match is used.
 
-**Selector:** `ng-template[monaBreadcrumbSeparatorTemplate]`
+**Selector:** `ng-template[monaBreadcrumbSeparatorTemplate]`  
+**API reference:** [`BreadcrumbSeparatorTemplateDirective`](/api/breadcrumb/BreadcrumbSeparatorTemplateDirective)
 
 ### Types
 
-#### `BREADCRUMB_DEFAULT_MESSAGES`
-
-```typescript
-const BREADCRUMB_DEFAULT_MESSAGES: MonaBreadcrumbMessages;
-```
-
-#### `MonaBreadcrumbMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `breadcrumb` (read-only) | `string` |
-| `showFullPath` (read-only) | `string` |
+| [`BREADCRUMB_DEFAULT_MESSAGES`](/api/breadcrumb/BREADCRUMB_DEFAULT_MESSAGES) | Constant |
+
+**Related types:** [`MonaBreadcrumbMessages`](/api/i18n/MonaBreadcrumbMessages)

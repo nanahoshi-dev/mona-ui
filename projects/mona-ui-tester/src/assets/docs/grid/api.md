@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridColumnComponent`
 
-**Selector:** `mona-grid-column`
+**Selector:** `mona-grid-column`  
+**API reference:** [`GridColumnComponent`](/api/grid/GridColumnComponent)
 
 #### Inputs
 
@@ -32,7 +33,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 ### `GridComponent`
 
 **Selector:** `mona-grid`  
-**Type parameters:** `T`
+**Type parameters:** `T`  
+**API reference:** [`GridComponent`](/api/grid/GridComponent)
 
 #### Inputs
 
@@ -63,31 +65,39 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridCellTemplateDirective`
 
-**Selector:** `ng-template[monaGridCellTemplate]`
+**Selector:** `ng-template[monaGridCellTemplate]`  
+**API reference:** [`GridCellTemplateDirective`](/api/grid/GridCellTemplateDirective)
 
 ### `GridColumnTitleTemplateDirective`
 
-**Selector:** `[monaGridColumnTitleTemplate]`
+**Selector:** `[monaGridColumnTitleTemplate]`  
+**API reference:** [`GridColumnTitleTemplateDirective`](/api/grid/GridColumnTitleTemplateDirective)
 
 ### `GridContextMenuDirective`
 
-**Selector:** `[monaGridContextMenu]`
+**Selector:** `[monaGridContextMenu]`  
+**API reference:** [`GridContextMenuDirective`](/api/grid/GridContextMenuDirective)
 
 ### `GridHeaderTemplateDirective`
 
-**Selector:** `ng-template[monaGridHeaderTemplate]`
+**Selector:** `ng-template[monaGridHeaderTemplate]`  
+**API reference:** [`GridHeaderTemplateDirective`](/api/grid/GridHeaderTemplateDirective)
 
 ### `GridNoDataTemplateDirective`
 
-**Selector:** `ng-template[monaGridNoDataTemplate]`
+**Selector:** `ng-template[monaGridNoDataTemplate]`  
+**API reference:** [`GridNoDataTemplateDirective`](/api/grid/GridNoDataTemplateDirective)
 
 ### `GridToolbarTemplateDirective`
 
-**Selector:** `ng-template[monaGridToolbarTemplate]`
+**Selector:** `ng-template[monaGridToolbarTemplate]`  
+**API reference:** [`GridToolbarTemplateDirective`](/api/grid/GridToolbarTemplateDirective)
 
 ### `Row`
 
 A row of the grid, wrapping its data item.
+
+**API reference:** [`Row`](/api/grid/Row)
 
 #### Properties
 
@@ -98,128 +108,15 @@ A row of the grid, wrapping its data item.
 
 ### Types
 
-#### `GRID_DEFAULT_MESSAGES`
-
-```typescript
-const GRID_DEFAULT_MESSAGES: { all: string; apply: string; cancel: string; cancelNewRow: string; cancelRowEdit: (rowNumber: number) => string; clearFilter: (column: string) => string; collapseDetail: (rowNumber: number) => string; columnGrouped: (column: string) => string; columnMoved: (column: string, position: number) => string; columns: string; columnsSelected: (count: number) => string; commandColumnTitle: string; delete: string; deleteRowConfirmation: (rowNumber: number) => string; deleteRowTitle: string; details: string; dragColumnHeaderToGroup: string; edit: string; editRow: (rowNumber: number) => string; expandDetail: (rowNumber: number) => string; fieldValidationError: string; filterByColumn: (column: string) => string; filterByColumnFiltered: (column: string) => string; filterOperator: (column: string, operator: string) => string; filterPlaceholder: string; group: string; groupOptions: (column: string) => string; loading: string; modified: string; moveAsNext: string; moveAsPrevious: string; moveRow: string; noData: string; remove: string; removeRow: (rowNumber: number) => string; reorderRow: (rowNumber: number) => string; resizeColumn: (column: string) => string; rowReorder: string; rowReorderDisabled: string; rowReorderDisabledEditing: string; rowReorderDisabledFiltered: string; rowReorderDisabledGrouped: string; rowReorderDisabledServerBinding: string; rowReorderDisabledSingleRow: string; rowReorderDisabledSorted: string; rowReorderDisabledVirtualScroll: string; rowReorderHandleAriaLabel: (rowLabel: string, keyboardHint: string, disabledReason?: string) => string; rowReorderKeyboardHint: string; rowReorderMoved: (fromRowNumber: number, toPosition: number) => string; rowValidationError: string; save: string; saveNewRow: string; saveRow: (rowNumber: number) => string; selectAllRows: string; selectRow: (rowNumber: number) => string; sortOrder: (position: number) => string; toolbar: string; };
-```
-
-#### `GridToolbarContext`
-
-The grid state and actions a toolbar template can use.
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `addRowData` (read-only) | `Record<PropertyKey, unknown> \| null` | The new row's values while a row is being added, otherwise `null`. |
-| `addRowVisible` (read-only) | `boolean` | Whether the add row is open. |
-| `dataState` (read-only) | `GridDataState` | The current paging, sorting and filtering. |
-| `editSession` (read-only) | `GridEditSession \| null` | The current edit, or `null` when nothing is being edited. |
-| `selectedKeys` (read-only) | `readonly unknown[]` | The selected row keys. |
+| [`GRID_DEFAULT_MESSAGES`](/api/grid/GRID_DEFAULT_MESSAGES) | Constant |  |
+| [`GridToolbarContext`](/api/grid/GridToolbarContext) | Interface | The grid state and actions a toolbar template can use. |
+| [`Column`](/api/grid/Column) | Interface | Set `locked` and `lockedPosition` on a `mona-grid-column` (or `mona-grid-command-column`) to keep it fixed while the grid scrolls horizontally. |
+| [`ColumnConfig`](/api/grid/ColumnConfig) | Interface |  |
+| [`GridToolbarTemplateContext`](/api/grid/GridToolbarTemplateContext) | Interface | Context of `monaGridToolbarTemplate`: the toolbar state, also as `$implicit`. |
+| [`ColumnFormat`](/api/grid/ColumnFormat) | Type alias | A date format string, for `date` columns, or a formatter function, for any column. |
+| [`ColumnFormatFunction`](/api/grid/ColumnFormatFunction) | Type alias | Formats a cell's value for display. |
+| [`ColumnKind`](/api/grid/ColumnKind) | Type alias |  |
 
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `cancelAdd(): boolean` | Closes the add row without saving. Returns whether it closed. |
-| `cancelEdit(): boolean` | Ends the current cell or row edit without saving. Returns whether an edit was cancelled. |
-| `saveAdd(): boolean` | Saves the add row. Returns whether it was saved. |
-| `startAdd(): boolean` | Opens the add row. Returns whether it opened. |
-
-#### `Column`
-
-Set `locked` and `lockedPosition` on a `mona-grid-column` (or `mona-grid-command-column`) to keep it fixed while the
-grid scrolls horizontally.
-
-**Extends:** `ColumnConfig`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `calculatedWidth` (read-only) | `number \| null` | The column's currently rendered width. |
-| `columnSortDirection` (read-only) | `SortDirection \| null` | The direction the grid is currently sorted by this column, or `null` when it isn't. |
-| `filtered` (read-only) | `boolean` | Whether a filter is currently applied to this column. |
-| `groupSortDirection` (read-only) | `SortDirection \| null` | The sort direction of the grid's grouping by this column, or `null` when the grid isn't grouped by it. |
-| `hidden` (read-only) | `boolean` | Whether the column is hidden. |
-| `sortIndex` (read-only) | `number \| null` | The column's one-based position among the grid's sorted columns, or `null` when it isn't sorted. |
-
-#### `ColumnConfig`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `aggregate` (read-only) | `AggregateFunction \| null` | The aggregate shown in the grid footer for this column, or `null` for none. |
-| `cellTemplate` (read-only) | `TemplateRef<unknown> \| null` | The column's `monaGridCellTemplate`, which renders its body cells, or `null` for the default text. |
-| `commandTemplate` (read-only) | `TemplateRef<unknown> \| null` | A command column's `monaGridCellTemplate`, which replaces the built-in command buttons, or `null`. |
-| `configuredEditable?` (read-only) | `boolean \| null` | The `editable` input as the consumer set it; `null` leaves it to the default, which is every column but the `rowKey` field. Left out, `editable` is used as given. |
-| `dataType` (read-only) | `DataType` | The column's data type, which picks the editor and the filter. Command columns use `"string"`. |
-| `editable` (read-only) | `boolean` | Whether the column can be edited. The grid resolves it from `configuredEditable` when that is set. |
-| `editTemplate` (read-only) | `TemplateRef<unknown> \| null` | The column's `monaGridEditTemplate`, which renders the cell editor, or `null` for the editor of its data type. |
-| `field` (read-only) | `string` | The data property the column shows. A command column uses its `stateKey`, or `"commands"`. |
-| `filterable` (read-only) | `boolean` | Whether the column can be filtered when the grid's filtering is enabled. |
-| `footerTemplate` (read-only) | `TemplateRef<unknown> \| null` | The column's `monaGridFooterTemplate`, which renders its footer cell, or `null`. |
-| `format` (read-only) | `ColumnFormat \| null` | How cell values are formatted for display, or `null` to show them as they are. |
-| `groupFooterTemplate` (read-only) | `TemplateRef<unknown> \| null` | The column's `monaGridGroupFooterTemplate`, which renders its cell in group footer rows, or `null`. |
-| `headerTemplate` (read-only) | `TemplateRef<unknown> \| null` | The column's `monaGridHeaderTemplate`, which replaces the whole header content and receives the column, or `null`. |
-| `hidden` (read-only) | `boolean` | The column's `hidden` input as set. |
-| `id` (read-only) | `string` | A unique id generated for the column. |
-| `kind` (read-only) | `ColumnKind` | `"data"` for a `mona-grid-column`, `"command"` for a `mona-grid-command-column`. |
-| `locked` (read-only) | `boolean` | Whether the column stays fixed while the grid scrolls horizontally. |
-| `lockedPosition` (read-only) | `GridColumnLockedPosition` | The side of the grid a locked column is fixed to. |
-| `maxWidth` (read-only) | `number \| null` | The column's maximum width in pixels, or `null` for no maximum. |
-| `minWidth` (read-only) | `number \| null` | The column's minimum width in pixels, or `null` for no minimum. |
-| `removeConfirmation` (read-only) | `boolean` | Whether the built-in remove command asks for confirmation before emitting `remove`. Only command columns set it. |
-| `sortable` (read-only) | `boolean` | Whether the column can be sorted from its header when the grid's sorting is enabled. |
-| `sortComparator?` (read-only) | `ColumnSortComparator \| null` | Compares values when the user sorts this column; without it values sort by type, strings by locale. |
-| `stateKey` (read-only) | `string \| null` | The key the column's saved state is stored under, or `null` to use `field`. |
-| `title` (read-only) | `string` | The text shown in the column header. |
-| `titleTemplate` (read-only) | `TemplateRef<unknown> \| null` | The column's `monaGridColumnTitleTemplate`, shown in the header in place of `title` when there is no header template, or `null`. |
-| `width` (read-only) | `number \| null` | The column's configured width in pixels, or `null` to size it automatically. |
-
-#### `GridToolbarTemplateContext`
-
-Context of `monaGridToolbarTemplate`: the toolbar state, also as `$implicit`.
-
-**Extends:** `GridToolbarContext`
-
-| Name | Type |
-| --- | --- |
-| `$implicit` (read-only) | `GridToolbarContext` |
-
-#### `ColumnFormat`
-
-A date format string, for `date` columns, or a formatter function, for any column.
-
-```typescript
-type ColumnFormat = string | ColumnFormatFunction;
-```
-
-#### `ColumnFormatFunction`
-
-Formats a cell's value for display. Written in method form so a formatter typed for the column's own
-value (`(value: number) => string`) is accepted.
-
-```typescript
-type ColumnFormatFunction = { format(value: unknown, row: Record<PropertyKey, unknown>, column: Column): string; }["format"];
-```
-
-#### `ColumnKind`
-
-```typescript
-type ColumnKind = "command" | "data";
-```
-
-#### `DataType`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type DataType = "string" | "number" | "date" | "boolean";
-```
-
-#### `SortDirection`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type SortDirection = "asc" | "desc";
-```
-
-**Documented elsewhere:** [`AggregateFunction`](/components/grid-grouping), [`ColumnSortComparator`](/components/grid-sorting-filtering), [`GridColumnLockedPosition`](/components/grid-columns), [`GridDataState`](/components/grid-server), [`GridEditSession`](/components/grid-editing), [`GridKeySelector`](/components/grid-selection), [`GridRowClass`](/components/grid-rows), [`PageChangeEvent`](/components/pager), [`ResizeMethod`](/components/grid-columns)
+**Related types:** [`AggregateFunction`](/api/grid/AggregateFunction), [`ColumnSortComparator`](/api/grid/ColumnSortComparator), [`DataType`](/api/common/DataType), [`GridColumnLockedPosition`](/api/grid/GridColumnLockedPosition), [`GridDataState`](/api/grid/GridDataState), [`GridEditSession`](/api/grid/GridEditSession), [`GridKeySelector`](/api/grid/GridKeySelector), [`GridRowClass`](/api/grid/GridRowClass), [`PageChangeEvent`](/api/pager/PageChangeEvent), [`ResizeMethod`](/api/grid/ResizeMethod), [`SortDirection`](/api/query/SortDirection)

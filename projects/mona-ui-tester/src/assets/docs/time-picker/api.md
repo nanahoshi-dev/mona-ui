@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/time-picker`.
 ### `TimePickerComponent`
 
 **Selector:** `mona-time-picker`  
-**Implements:** `FormValueControl<Date \| null>`
+**Implements:** `FormValueControl<Date \| null>`  
+**API reference:** [`TimePickerComponent`](/api/time-picker/TimePickerComponent)
 
 #### Inputs
 
@@ -60,63 +61,8 @@ Everything below is imported from `@nanahoshi/mona-ui/time-picker`.
 
 ### Types
 
-#### `TIME_PICKER_DEFAULT_MESSAGES`
-
-```typescript
-const TIME_PICKER_DEFAULT_MESSAGES: MonaTimePickerMessages;
-```
-
-#### `HourFormat`
-
-From `@nanahoshi/mona-ui/date-input`.
-
-```typescript
-type HourFormat = "12" | "24";
-```
-
-#### `ListSizeInputType`
-
-From `@nanahoshi/mona-ui/list`.
-
-```typescript
-type ListSizeInputType = ListSizeType | number;
-```
-
-#### `ListSizeType`
-
-From `@nanahoshi/mona-ui/list`.
-
-A CSS length, or nothing to leave it to the stylesheet.
-
-```typescript
-type ListSizeType = string | null | undefined;
-```
-
-#### `MonaTimePickerMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `openTimePicker` (read-only) | `string` |
-| `timePicker` (read-only) | `string` |
+| [`TIME_PICKER_DEFAULT_MESSAGES`](/api/time-picker/TIME_PICKER_DEFAULT_MESSAGES) | Constant |
 
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
-
-**Documented elsewhere:** [`PopupCloseEvent`](/components/popup)
+**Related types:** [`HourFormat`](/api/date-input/HourFormat), [`ListSizeInputType`](/api/list/ListSizeInputType), [`ListSizeType`](/api/list/ListSizeType), [`MonaTimePickerMessages`](/api/i18n/MonaTimePickerMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`PreventableEvent`](/api/common/PreventableEvent)

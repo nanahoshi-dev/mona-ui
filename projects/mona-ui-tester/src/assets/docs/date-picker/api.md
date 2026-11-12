@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/date-picker`.
 ### `DatePickerComponent`
 
 **Selector:** `mona-date-picker`  
-**Implements:** `FormValueControl<Date \| null>`
+**Implements:** `FormValueControl<Date \| null>`  
+**API reference:** [`DatePickerComponent`](/api/date-picker/DatePickerComponent)
 
 #### Inputs
 
@@ -58,63 +59,8 @@ Everything below is imported from `@nanahoshi/mona-ui/date-picker`.
 
 ### Types
 
-#### `DATE_PICKER_DEFAULT_MESSAGES`
-
-```typescript
-const DATE_PICKER_DEFAULT_MESSAGES: MonaDatePickerMessages;
-```
-
-#### `DateDisabledType`
-
-From `@nanahoshi/mona-ui/date-input`.
-
-```typescript
-type DateDisabledType = Iterable<Date> | Predicate<Date> | null | undefined;
-```
-
-#### `ListSizeInputType`
-
-From `@nanahoshi/mona-ui/list`.
-
-```typescript
-type ListSizeInputType = ListSizeType | number;
-```
-
-#### `ListSizeType`
-
-From `@nanahoshi/mona-ui/list`.
-
-A CSS length, or nothing to leave it to the stylesheet.
-
-```typescript
-type ListSizeType = string | null | undefined;
-```
-
-#### `MonaDatePickerMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `datePicker` (read-only) | `string` |
-| `openCalendar` (read-only) | `string` |
+| [`DATE_PICKER_DEFAULT_MESSAGES`](/api/date-picker/DATE_PICKER_DEFAULT_MESSAGES) | Constant |
 
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
-
-**Documented elsewhere:** [`FirstDayOfWeek`](/components/calendar), [`PopupCloseEvent`](/components/popup)
+**Related types:** [`DateDisabledType`](/api/date-input/DateDisabledType), [`FirstDayOfWeek`](/api/calendar/FirstDayOfWeek), [`ListSizeInputType`](/api/list/ListSizeInputType), [`ListSizeType`](/api/list/ListSizeType), [`MonaDatePickerMessages`](/api/i18n/MonaDatePickerMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`PreventableEvent`](/api/common/PreventableEvent)

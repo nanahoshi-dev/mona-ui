@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/circular-progress-bar`.
 
 ### `CircularProgressBarComponent`
 
-**Selector:** `mona-circular-progress-bar`
+**Selector:** `mona-circular-progress-bar`  
+**API reference:** [`CircularProgressBarComponent`](/api/circular-progress-bar/CircularProgressBarComponent)
 
 #### Inputs
 
@@ -32,7 +33,8 @@ Everything below is imported from `@nanahoshi/mona-ui/circular-progress-bar`.
 Structural template directive that replaces the default percentage label inside the circle. The template is hidden
 when `indeterminate` is `true`.
 
-**Selector:** `ng-template[monaCircularProgressBarLabelTemplate]`
+**Selector:** `ng-template[monaCircularProgressBarLabelTemplate]`  
+**API reference:** [`CircularProgressBarLabelTemplateDirective`](/api/circular-progress-bar/CircularProgressBarLabelTemplateDirective)
 
 #### Template context
 
@@ -45,27 +47,9 @@ when `indeterminate` is `true`.
 
 ### Types
 
-#### `LabelTemplateContext`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `$implicit` | `number` |
-| `max` | `number` |
-| `min` | `number` |
-| `percent` | `number` |
+| [`LabelTemplateContext`](/api/circular-progress-bar/LabelTemplateContext) | Interface |
+| [`CircularProgressBarLineCap`](/api/circular-progress-bar/CircularProgressBarLineCap) | Type alias |
 
-#### `CircularProgressBarLineCap`
-
-```typescript
-type CircularProgressBarLineCap = "flat" | "round";
-```
-
-#### `Action`
-
-From `@nanahoshi/mona-ui/common`.
-
-A function taking a `P` and returning an `R`.
-
-```typescript
-type Action<P = void, R = void> = (arg: P) => R;
-```
+**Related types:** [`Action`](/api/common/Action)

@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridCommandColumnComponent`
 
-**Selector:** `mona-grid-command-column`
+**Selector:** `mona-grid-command-column`  
+**API reference:** [`GridCommandColumnComponent`](/api/grid/GridCommandColumnComponent)
 
 #### Inputs
 
@@ -25,7 +26,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 ### `GridEditableDirective`
 
 **Selector:** `mona-grid[monaGridEditable]`  
-**Type parameters:** `T extends object = Record<PropertyKey, unknown>`
+**Type parameters:** `T extends object = Record<PropertyKey, unknown>`  
+**API reference:** [`GridEditableDirective`](/api/grid/GridEditableDirective)
 
 #### Inputs
 
@@ -54,7 +56,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridEditCommandDirective`
 
-**Selector:** `button[monaGridEditCommand]`
+**Selector:** `button[monaGridEditCommand]`  
+**API reference:** [`GridEditCommandDirective`](/api/grid/GridEditCommandDirective)
 
 #### Inputs
 
@@ -64,7 +67,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridRemoveCommandDirective`
 
-**Selector:** `button[monaGridRemoveCommand]`
+**Selector:** `button[monaGridRemoveCommand]`  
+**API reference:** [`GridRemoveCommandDirective`](/api/grid/GridRemoveCommandDirective)
 
 #### Inputs
 
@@ -74,23 +78,28 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridAddCommandDirective`
 
-**Selector:** `button[monaGridAddCommand]`
+**Selector:** `button[monaGridAddCommand]`  
+**API reference:** [`GridAddCommandDirective`](/api/grid/GridAddCommandDirective)
 
 ### `GridCancelCommandDirective`
 
-**Selector:** `button[monaGridCancelCommand]`
+**Selector:** `button[monaGridCancelCommand]`  
+**API reference:** [`GridCancelCommandDirective`](/api/grid/GridCancelCommandDirective)
 
 ### `GridEditTemplateDirective`
 
-**Selector:** `ng-template[monaGridEditTemplate]`
+**Selector:** `ng-template[monaGridEditTemplate]`  
+**API reference:** [`GridEditTemplateDirective`](/api/grid/GridEditTemplateDirective)
 
 ### `GridSaveCommandDirective`
 
-**Selector:** `button[monaGridSaveCommand]`
+**Selector:** `button[monaGridSaveCommand]`  
+**API reference:** [`GridSaveCommandDirective`](/api/grid/GridSaveCommandDirective)
 
 ### `CellEditEvent`
 
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`CellEditEvent`](/api/grid/CellEditEvent)
 
 #### Properties
 
@@ -104,7 +113,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridAddEvent`
 
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`GridAddEvent`](/api/grid/GridAddEvent)
 
 #### Properties
 
@@ -115,7 +125,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridCancelEvent`
 
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`GridCancelEvent`](/api/grid/GridCancelEvent)
 
 #### Properties
 
@@ -128,7 +139,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridEditEvent`
 
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`GridEditEvent`](/api/grid/GridEditEvent)
 
 #### Properties
 
@@ -139,7 +151,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridRemoveEvent`
 
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`GridRemoveEvent`](/api/grid/GridRemoveEvent)
 
 #### Properties
 
@@ -154,7 +167,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 `T` is the row type, which a typed `schema` or `newRowFactory` on `monaGridEditable` sets.
 
 **Type parameters:** `T extends object = Record<PropertyKey, unknown>`  
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`GridSaveEvent`](/api/grid/GridSaveEvent)
 
 #### Properties
 
@@ -167,7 +181,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `RowEditEvent`
 
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`RowEditEvent`](/api/grid/RowEditEvent)
 
 #### Properties
 
@@ -179,123 +194,16 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### Types
 
-#### `EditableOptions`
-
-`T` is the row type, which a typed `schema` sets.
-
-**Type parameters:** `T extends object = Record<PropertyKey, unknown>`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `commandAriaLabel?` | `( command: GridRowCommand, rowData: Record<PropertyKey, unknown>, absoluteIndex: number ) => string` | Returns the accessible name of a row's command button, such as "Edit order 10248". Without it the buttons are named by position ("Edit row 3"). `absoluteIndex` is the row's 0-based position in the filtered and sorted rows; the add row isn't passed here. |
-| `enabled?` | `boolean` | Whether editing is active. On unless set to `false`; options replace earlier ones. |
-| `mode` | `"cell" \| "row"` | Whether editing commits per cell or per row. |
-| `schema?` | `GridEditSchemaFactory<T>` | Builds a Signal Forms validation schema for the row being edited. |
+| [`EditableOptions`](/api/grid/EditableOptions) | Interface | `T` is the row type, which a typed `schema` sets. |
+| [`GridEditFormContext`](/api/grid/GridEditFormContext) | Interface | What a schema factory is told about the edit. |
+| [`GridEditSession`](/api/grid/GridEditSession) | Interface |  |
+| [`GridEditTemplateContext`](/api/grid/GridEditTemplateContext) | Interface |  |
+| [`GridCancelReason`](/api/grid/GridCancelReason) | Type alias | Why an edit is being canceled: `"command"` for the Cancel button or `cancel()` in a template, `"escape"` for the Escape key, `"switch"` when another edit or the add row starts, `"removed"` when the edited row left the data or the view. |
+| [`GridEditOperation`](/api/grid/GridEditOperation) | Type alias |  |
+| [`GridEditSchemaFactory`](/api/grid/GridEditSchemaFactory) | Type alias | Builds the Signal Forms schema for the row being edited. |
+| [`GridRowCommand`](/api/grid/GridRowCommand) | Type alias | A row command button: Edit, Remove, Save or Cancel. |
+| [`GridSaveOperation`](/api/grid/GridSaveOperation) | Type alias |  |
 
-#### `GridEditFormContext`
-
-What a schema factory is told about the edit. `T` is the row type, untyped unless you give one.
-
-**Type parameters:** `T extends object = Record<PropertyKey, unknown>`
-
-| Name | Type |
-| --- | --- |
-| `column` (read-only) | `Column \| null` |
-| `field` (read-only) | `string \| null` |
-| `isNew` (read-only) | `boolean` |
-| `mode` (read-only) | `"cell" \| "row"` |
-| `operation` (read-only) | `GridEditOperation` |
-| `originalRowData` (read-only) | `T \| null` |
-| `rowData` (read-only) | `T` |
-
-#### `GridEditSession`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `column` (read-only) | `Column \| null` | The column currently being edited, in cell mode. |
-| `field` (read-only) | `string \| null` | The field name currently being edited, in cell mode. |
-| `form` (read-only) | `FieldTree<Record<PropertyKey, unknown>>` | The Signal Forms field tree backing the row being edited. |
-| `isNew` (read-only) | `boolean` | Whether this session represents a new row being added. |
-| `mode` (read-only) | `"cell" \| "row"` | The active editing mode. |
-| `model` (read-only) | `WritableSignal<Record<PropertyKey, unknown>>` | The signal holding the row's current edited values. |
-| `operation` (read-only) | `GridEditOperation` | `"create"` or `"update"`. |
-| `originalRowData` (read-only) | `Record<PropertyKey, unknown> \| null` | The row's data before editing began. |
-| `row` (read-only) | `Row \| null` | The internal row wrapper being edited. |
-| `rowUid` (read-only) | `string \| null` | The stable identifier of the row being edited. |
-
-#### `GridEditTemplateContext`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `cancel` (read-only) | `() => void` | Cancels the current edit. |
-| `column` (read-only) | `string` | The field name of the column being edited. |
-| `commit` (read-only) | `() => void` | Commits the current edit. |
-| `dataField` (read-only) | `string` | Same as `column`; the field name being edited. |
-| `dataItem` (read-only) | `Record<PropertyKey, unknown>` | The row's current edited values. |
-| `errors` (read-only) | `readonly ValidationError.WithFieldTree[]` | Validation errors for this field. |
-| `field` (read-only) | `FieldTree<unknown>` | The Signal Forms field for this column. |
-| `form` (read-only) | `GridEditSession["form"]` | The row's full Signal Forms field tree. |
-| `invalid` (read-only) | `boolean` | Whether this field currently fails validation. |
-| `isNew` (read-only) | `boolean` | Whether this is a new row being added. |
-| `session` (read-only) | `GridEditSession` | The full edit session for this row. |
-| `setValue` (read-only) | `(value: unknown) => void` | Sets this field's value. |
-| `touched` (read-only) | `boolean` | Whether this field has been touched. |
-| `value` (read-only) | `unknown` | This field's current value. |
-
-#### `GridCancelReason`
-
-Why an edit is being canceled: `"command"` for the Cancel button or `cancel()` in a template, `"escape"` for
-the Escape key, `"switch"` when another edit or the add row starts, `"removed"` when the edited row left the
-data or the view. A `"removed"` cancel can't be prevented: the row is gone.
-
-```typescript
-type GridCancelReason = "command" | "escape" | "removed" | "switch";
-```
-
-#### `GridEditOperation`
-
-```typescript
-type GridEditOperation = "create" | "update";
-```
-
-#### `GridEditSchemaFactory`
-
-Builds the Signal Forms schema for the row being edited. `T` is the row type, untyped unless you give one.
-
-```typescript
-type GridEditSchemaFactory<T extends object = Record<PropertyKey, unknown>> = ( context: GridEditFormContext<T> ) => SchemaOrSchemaFn<T> | null | undefined;
-```
-
-#### `GridRowCommand`
-
-A row command button: Edit, Remove, Save or Cancel.
-
-```typescript
-type GridRowCommand = "cancel" | "edit" | "remove" | "save";
-```
-
-#### `GridSaveOperation`
-
-```typescript
-type GridSaveOperation = GridEditOperation;
-```
-
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
-
-**Documented elsewhere:** [`Column`](/components/grid), [`GridColumnLockedPosition`](/components/grid-columns), [`Row`](/components/grid)
+**Related types:** [`Column`](/api/grid/Column), [`GridColumnLockedPosition`](/api/grid/GridColumnLockedPosition), [`PreventableEvent`](/api/common/PreventableEvent), [`Row`](/api/grid/Row)

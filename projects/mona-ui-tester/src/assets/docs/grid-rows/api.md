@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridRowReorderableDirective`
 
-**Selector:** `mona-grid[monaGridRowReorderable]`
+**Selector:** `mona-grid[monaGridRowReorderable]`  
+**API reference:** [`GridRowReorderableDirective`](/api/grid/GridRowReorderableDirective)
 
 #### Inputs
 
@@ -22,12 +23,14 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridDetailTemplateDirective`
 
-**Selector:** `ng-template[monaGridDetailTemplate]`
+**Selector:** `ng-template[monaGridDetailTemplate]`  
+**API reference:** [`GridDetailTemplateDirective`](/api/grid/GridDetailTemplateDirective)
 
 ### `RowReorderEvent`
 
 **Type parameters:** `TData extends Record<PropertyKey, unknown> = Record<PropertyKey, unknown>`  
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`RowReorderEvent`](/api/grid/RowReorderEvent)
 
 #### Properties
 
@@ -42,44 +45,10 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### Types
 
-#### `RowReorderableOptions`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `canReorder?` | `(rowData: Record<PropertyKey, unknown>) => boolean` | Determines whether an individual row may be reordered. Rows for which this returns false must show a disabled handle. |
-| `enabled?` | `boolean` | Enables row reordering. |
-| `rowAriaLabel?` | `(rowData: Record<PropertyKey, unknown>, absoluteIndex: number) => string` | Returns the accessible label fragment for a row's reorder handle. Locale-aware composition supplies sentence punctuation, keyboard instructions, and disabled reasons around this fragment. The default must be positional, such as: "Reorder row 3" |
+| [`RowReorderableOptions`](/api/grid/RowReorderableOptions) | Interface |  |
+| [`GridRowClass`](/api/grid/GridRowClass) | Type alias | Returns the classes to add to the data row that shows the given item. |
+| [`GridRowClassValue`](/api/grid/GridRowClassValue) | Type alias | The classes a `GridRowClass` function adds to a data row. |
 
-#### `GridRowClass`
-
-Returns the classes to add to the data row that shows the given item.
-
-```typescript
-type GridRowClass<TData> = (data: TData) => GridRowClassValue;
-```
-
-#### `GridRowClassValue`
-
-The classes a `GridRowClass` function adds to a data row. Nullish values add nothing.
-
-```typescript
-type GridRowClassValue = string | readonly string[] | null | undefined;
-```
-
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
+**Related types:** [`PreventableEvent`](/api/common/PreventableEvent)

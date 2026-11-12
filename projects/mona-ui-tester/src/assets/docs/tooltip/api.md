@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/tooltip`.
 
 ### `TooltipComponent`
 
-**Selector:** `mona-tooltip`
+**Selector:** `mona-tooltip`  
+**API reference:** [`TooltipComponent`](/api/tooltip/TooltipComponent)
 
 #### Inputs
 
@@ -28,7 +29,8 @@ Everything below is imported from `@nanahoshi/mona-ui/tooltip`.
 
 ### `TooltipDirective`
 
-**Selector:** `[monaTooltip]`
+**Selector:** `[monaTooltip]`  
+**API reference:** [`TooltipDirective`](/api/tooltip/TooltipDirective)
 
 #### Inputs
 
@@ -58,6 +60,8 @@ Everything below is imported from `@nanahoshi/mona-ui/tooltip`.
 `left` and `right` physically in RTL. Kept for existing callers. Gets the appropriate offset for a tooltip based on its position.
 The offset ensures proper spacing between the tooltip and its anchor element.
 
+**API reference:** [`getOffsetForPosition`](/api/tooltip/getOffsetForPosition)
+
 ```typescript
 function getOffsetForPosition(position: Position, arrowVisible: boolean): PopupOffset;
 ```
@@ -66,41 +70,18 @@ function getOffsetForPosition(position: Position, arrowVisible: boolean): PopupO
 
 **Deprecated.** No longer used by the tooltip or popover. Kept for existing callers.
 
+**API reference:** [`getPositionConnectionPoints`](/api/tooltip/getPositionConnectionPoints)
+
 ```typescript
 function getPositionConnectionPoints(position: Position): { anchor: ConnectionPoint; popup: ConnectionPoint };
 ```
 
 ### Types
 
-#### `tooltipArrowThemeVariants`
+| Type | Kind | Description |
+| --- | --- | --- |
+| [`tooltipArrowThemeVariants`](/api/tooltip/tooltipArrowThemeVariants) | Constant |  |
+| [`OverlaySide`](/api/tooltip/OverlaySide) | Type alias | A side of the anchor. |
+| [`TooltipPosition`](/api/tooltip/TooltipPosition) | Type alias | The side of its anchor a tooltip opens on. |
 
-```typescript
-const tooltipArrowThemeVariants: (props?: ClassProp | undefined) => string;
-```
-
-#### `OverlaySide`
-
-A side of the anchor. `start` and `end` follow the direction.
-
-```typescript
-type OverlaySide = "bottom" | "end" | "left" | "right" | "start" | "top";
-```
-
-#### `TooltipPosition`
-
-The side of its anchor a tooltip opens on. `left` and `right` are physical in every direction; `start` and `end`
-follow the text direction.
-
-```typescript
-type TooltipPosition = OverlaySide;
-```
-
-#### `Position`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type Position = "top" | "right" | "bottom" | "left";
-```
-
-**Documented elsewhere:** [`ConnectionPoint`](/components/popup), [`PopupAnchor`](/components/popup), [`PopupOffset`](/components/popup)
+**Related types:** [`ConnectionPoint`](/api/popup/ConnectionPoint), [`PopupAnchor`](/api/popup/PopupAnchor), [`PopupOffset`](/api/popup/PopupOffset), [`Position`](/api/common/Position)

@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/dropdown-button`.
 
 ### `DropdownButtonComponent`
 
-**Selector:** `mona-dropdown-button`
+**Selector:** `mona-dropdown-button`  
+**API reference:** [`DropdownButtonComponent`](/api/dropdown-button/DropdownButtonComponent)
 
 #### Inputs
 
@@ -34,7 +35,8 @@ Everything below is imported from `@nanahoshi/mona-ui/dropdown-button`.
 ### `DropdownButtonCheckboxItemComponent`
 
 **Selector:** `mona-dropdown-button-checkbox-item`  
-**Extends:** `PopupMenuCheckboxItemComponent`
+**Extends:** `PopupMenuCheckboxItemComponent`  
+**API reference:** [`DropdownButtonCheckboxItemComponent`](/api/dropdown-button/DropdownButtonCheckboxItemComponent)
 
 #### Inputs
 
@@ -55,7 +57,8 @@ Everything below is imported from `@nanahoshi/mona-ui/dropdown-button`.
 ### `DropdownButtonItemComponent`
 
 **Selector:** `mona-dropdown-button-item`  
-**Extends:** `PopupMenuItemComponent`
+**Extends:** `PopupMenuItemComponent`  
+**API reference:** [`DropdownButtonItemComponent`](/api/dropdown-button/DropdownButtonItemComponent)
 
 #### Inputs
 
@@ -74,7 +77,8 @@ Everything below is imported from `@nanahoshi/mona-ui/dropdown-button`.
 ### `DropdownButtonRadioItemComponent`
 
 **Selector:** `mona-dropdown-button-radio-item`  
-**Extends:** `PopupMenuRadioItemComponent`
+**Extends:** `PopupMenuRadioItemComponent`  
+**API reference:** [`DropdownButtonRadioItemComponent`](/api/dropdown-button/DropdownButtonRadioItemComponent)
 
 #### Inputs
 
@@ -93,7 +97,8 @@ Everything below is imported from `@nanahoshi/mona-ui/dropdown-button`.
 ### `DropdownButtonRadioGroupComponent`
 
 **Selector:** `mona-dropdown-button-radio-group`  
-**Extends:** `PopupMenuRadioGroupComponent`
+**Extends:** `PopupMenuRadioGroupComponent`  
+**API reference:** [`DropdownButtonRadioGroupComponent`](/api/dropdown-button/DropdownButtonRadioGroupComponent)
 
 #### Inputs
 
@@ -111,7 +116,8 @@ Everything below is imported from `@nanahoshi/mona-ui/dropdown-button`.
 ### `DropdownButtonGroupComponent`
 
 **Selector:** `mona-dropdown-button-group`  
-**Extends:** `PopupMenuGroupComponent`
+**Extends:** `PopupMenuGroupComponent`  
+**API reference:** [`DropdownButtonGroupComponent`](/api/dropdown-button/DropdownButtonGroupComponent)
 
 #### Inputs
 
@@ -124,32 +130,38 @@ Everything below is imported from `@nanahoshi/mona-ui/dropdown-button`.
 Renders a horizontal visual divider between sections.
 
 **Selector:** `mona-dropdown-button-separator`  
-**Extends:** `PopupMenuSeparatorComponent`
+**Extends:** `PopupMenuSeparatorComponent`  
+**API reference:** [`DropdownButtonSeparatorComponent`](/api/dropdown-button/DropdownButtonSeparatorComponent)
 
 ### `DropdownButtonMenuGroupTemplateDirective`
 
 **Selector:** `ng-template[monaDropdownButtonMenuGroupTemplate]`  
-**Extends:** `PopupMenuGroupTemplateDirective`
+**Extends:** `PopupMenuGroupTemplateDirective`  
+**API reference:** [`DropdownButtonMenuGroupTemplateDirective`](/api/dropdown-button/DropdownButtonMenuGroupTemplateDirective)
 
 ### `DropdownButtonMenuItemIconTemplateDirective`
 
 **Selector:** `ng-template[monaDropdownButtonMenuItemIconTemplate]`  
-**Extends:** `PopupMenuIconTemplateDirective`
+**Extends:** `PopupMenuIconTemplateDirective`  
+**API reference:** [`DropdownButtonMenuItemIconTemplateDirective`](/api/dropdown-button/DropdownButtonMenuItemIconTemplateDirective)
 
 ### `DropdownButtonMenuItemShortcutTemplateDirective`
 
 **Selector:** `ng-template[monaDropdownButtonMenuItemShortcutTemplate]`  
-**Extends:** `PopupMenuShortcutTemplateDirective`
+**Extends:** `PopupMenuShortcutTemplateDirective`  
+**API reference:** [`DropdownButtonMenuItemShortcutTemplateDirective`](/api/dropdown-button/DropdownButtonMenuItemShortcutTemplateDirective)
 
 ### `DropdownButtonMenuItemTextTemplateDirective`
 
 **Selector:** `ng-template[monaDropdownButtonMenuItemTextTemplate]`  
-**Extends:** `PopupMenuTextTemplateDirective`
+**Extends:** `PopupMenuTextTemplateDirective`  
+**API reference:** [`DropdownButtonMenuItemTextTemplateDirective`](/api/dropdown-button/DropdownButtonMenuItemTextTemplateDirective)
 
 ### `DropdownButtonTextTemplateDirective`
 
-**Selector:** `ng-template[monaDropdownButtonTextTemplate]`
+**Selector:** `ng-template[monaDropdownButtonTextTemplate]`  
+**API reference:** [`DropdownButtonTextTemplateDirective`](/api/dropdown-button/DropdownButtonTextTemplateDirective)
 
 ### Types
 
-**Documented elsewhere:** [`PopupMenuCheckboxItemComponent`](/components/popup-menu), [`PopupMenuGroupComponent`](/components/popup-menu), [`PopupMenuGroupTemplateDirective`](/components/popup-menu), [`PopupMenuIconTemplateDirective`](/components/popup-menu), [`PopupMenuItemClickEvent`](/components/popup-menu), [`PopupMenuItemComponent`](/components/popup-menu), [`PopupMenuRadioGroupComponent`](/components/popup-menu), [`PopupMenuRadioItemComponent`](/components/popup-menu), [`PopupMenuSeparatorComponent`](/components/popup-menu), [`PopupMenuShortcutTemplateDirective`](/components/popup-menu), [`PopupMenuTextTemplateDirective`](/components/popup-menu)
+**Related types:** [`PopupMenuCheckboxItemComponent`](/api/popup-menu/PopupMenuCheckboxItemComponent), [`PopupMenuGroupComponent`](/api/popup-menu/PopupMenuGroupComponent), [`PopupMenuGroupTemplateDirective`](/api/popup-menu/PopupMenuGroupTemplateDirective), [`PopupMenuIconTemplateDirective`](/api/popup-menu/PopupMenuIconTemplateDirective), [`PopupMenuItemClickEvent`](/api/popup-menu/PopupMenuItemClickEvent), [`PopupMenuItemComponent`](/api/popup-menu/PopupMenuItemComponent), [`PopupMenuRadioGroupComponent`](/api/popup-menu/PopupMenuRadioGroupComponent), [`PopupMenuRadioItemComponent`](/api/popup-menu/PopupMenuRadioItemComponent), [`PopupMenuSeparatorComponent`](/api/popup-menu/PopupMenuSeparatorComponent), [`PopupMenuShortcutTemplateDirective`](/api/popup-menu/PopupMenuShortcutTemplateDirective), [`PopupMenuTextTemplateDirective`](/api/popup-menu/PopupMenuTextTemplateDirective)

@@ -1,0 +1,13 @@
+<code class="font-mono">
+    @for (token of tokens(); track $index) {
+        @if (token.entryPoint; as entryPoint) {
+            <a
+                class="text-primary underline decoration-primary/40 underline-offset-2 hover:decoration-primary"
+                [routerLink]="['/api', entryPoint, token.text]"
+                >{{ token.text }}</a
+            >
+        } @else {
+            <ng-container>{{ token.text }}</ng-container>
+        }
+    }
+</code>

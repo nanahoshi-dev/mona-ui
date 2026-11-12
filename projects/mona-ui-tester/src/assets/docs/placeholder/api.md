@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/placeholder`.
 
 ### `PlaceholderComponent`
 
-**Selector:** `mona-placeholder`
+**Selector:** `mona-placeholder`  
+**API reference:** [`PlaceholderComponent`](/api/placeholder/PlaceholderComponent)
 
 #### Inputs
 
@@ -17,10 +18,4 @@ Everything below is imported from `@nanahoshi/mona-ui/placeholder`.
 
 ### Types
 
-#### `ClassInputType`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type ClassInputType = string | string[] | Record<string, unknown> | null | undefined;
-```
+**Related types:** [`ClassInputType`](/api/common/ClassInputType)

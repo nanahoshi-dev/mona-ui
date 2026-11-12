@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/sheet`.
 
 ### `SheetComponent`
 
-**Selector:** `mona-sheet`
+**Selector:** `mona-sheet`  
+**API reference:** [`SheetComponent`](/api/sheet/SheetComponent)
 
 #### Inputs
 
@@ -33,51 +34,10 @@ Everything below is imported from `@nanahoshi/mona-ui/sheet`.
 
 ### Types
 
-#### `SHEET_DEFAULT_MESSAGES`
+| Type | Kind | Description |
+| --- | --- | --- |
+| [`SHEET_DEFAULT_MESSAGES`](/api/sheet/SHEET_DEFAULT_MESSAGES) | Constant |  |
+| [`SheetPhysicalSide`](/api/sheet/SheetPhysicalSide) | Type alias | A side resolved to a physical edge. |
+| [`SheetSide`](/api/sheet/SheetSide) | Type alias | Edge the sheet opens from. |
 
-```typescript
-const SHEET_DEFAULT_MESSAGES: MonaSheetMessages;
-```
-
-#### `SheetPhysicalSide`
-
-A side resolved to a physical edge.
-
-```typescript
-type SheetPhysicalSide = "bottom" | "left" | "right" | "top";
-```
-
-#### `SheetSide`
-
-Edge the sheet opens from. `left` and `right` are physical, whatever the direction; `start` and `end` follow it
-(`start` is the left edge in LTR and the right edge in RTL).
-
-```typescript
-type SheetSide = "bottom" | "end" | "left" | "right" | "start" | "top";
-```
-
-#### `ClassInputType`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type ClassInputType = string | string[] | Record<string, unknown> | null | undefined;
-```
-
-#### `MonaSheetMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
-| --- | --- |
-| `closeSheet` (read-only) | `string` |
-
-#### `SheetMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-```typescript
-type SheetMessages = MonaSheetMessages;
-```
-
-**Documented elsewhere:** [`PopupCloseEvent`](/components/popup)
+**Related types:** [`ClassInputType`](/api/common/ClassInputType), [`MonaSheetMessages`](/api/i18n/MonaSheetMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`SheetMessages`](/api/i18n/SheetMessages)

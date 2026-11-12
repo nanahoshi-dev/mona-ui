@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridGroupableDirective`
 
-**Selector:** `mona-grid[monaGridGroupable]`
+**Selector:** `mona-grid[monaGridGroupable]`  
+**API reference:** [`GridGroupableDirective`](/api/grid/GridGroupableDirective)
 
 #### Inputs
 
@@ -23,38 +24,20 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridFooterTemplateDirective`
 
-**Selector:** `ng-template[monaGridFooterTemplate]`
+**Selector:** `ng-template[monaGridFooterTemplate]`  
+**API reference:** [`GridFooterTemplateDirective`](/api/grid/GridFooterTemplateDirective)
 
 ### `GridGroupFooterTemplateDirective`
 
-**Selector:** `ng-template[monaGridGroupFooterTemplate]`
+**Selector:** `ng-template[monaGridGroupFooterTemplate]`  
+**API reference:** [`GridGroupFooterTemplateDirective`](/api/grid/GridGroupFooterTemplateDirective)
 
 ### Types
 
-#### `GroupableOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `enabled` | `boolean` | Whether grouping is active. |
-| `showFooter` | `boolean` | Whether a group's aggregate footer also shows while the group is collapsed; expanded groups always show it. |
-
-#### `GroupDescriptor`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `dir?` | `SortDirection` |
-| `field` | `string` |
+| [`GroupableOptions`](/api/grid/GroupableOptions) | Interface |
+| [`GroupDescriptor`](/api/grid/GroupDescriptor) | Interface |
+| [`AggregateFunction`](/api/grid/AggregateFunction) | Type alias |
 
-#### `AggregateFunction`
-
-```typescript
-type AggregateFunction = "sum" | "avg" | "count" | "min" | "max" | "custom";
-```
-
-#### `SortDirection`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type SortDirection = "asc" | "desc";
-```
+**Related types:** [`SortDirection`](/api/query/SortDirection)

@@ -8,7 +8,8 @@ Everything below is imported from `@nanahoshi/mona-ui/chart`.
 
 Renders a matrix of cells colored by value, with a color scale in the legend.
 
-**Selector:** `mona-heatmap-series`
+**Selector:** `mona-heatmap-series`  
+**API reference:** [`HeatmapSeriesComponent`](/api/chart/HeatmapSeriesComponent)
 
 #### Inputs
 
@@ -46,95 +47,15 @@ Renders a matrix of cells colored by value, with a color scale in the legend.
 
 ### Types
 
-#### `ChartColorLegendScale`
+| Type | Kind | Description |
+| --- | --- | --- |
+| [`ChartColorLegendScale`](/api/chart/ChartColorLegendScale) | Interface |  |
+| [`ChartColorLegendStop`](/api/chart/ChartColorLegendStop) | Interface |  |
+| [`ChartColorLegendTick`](/api/chart/ChartColorLegendTick) | Interface |  |
+| [`ChartHeatmapCategory`](/api/chart/ChartHeatmapCategory) | Interface |  |
+| [`ChartHeatmapCellData`](/api/chart/ChartHeatmapCellData) | Interface |  |
+| [`HeatmapCellClickEvent`](/api/chart/HeatmapCellClickEvent) | Interface | **Deprecated.** Nothing emits this. |
+| [`HeatmapColorStop`](/api/chart/HeatmapColorStop) | Interface | **Deprecated.** No chart input takes this. |
+| [`ChartHeatmapColorMode`](/api/chart/ChartHeatmapColorMode) | Type alias |  |
 
-| Name | Type |
-| --- | --- |
-| `formattedMax` (read-only) | `string` |
-| `formattedMidpoint?` (read-only) | `string` |
-| `formattedMin` (read-only) | `string` |
-| `kind` (read-only) | `"color"` |
-| `midpoint?` (read-only) | `number` |
-| `mode` (read-only) | `ChartHeatmapColorMode` |
-| `stops` (read-only) | `readonly ChartColorLegendStop[]` |
-| `ticks` (read-only) | `readonly ChartColorLegendTick[]` |
-| `title` (read-only) | `string` |
-
-#### `ChartColorLegendStop`
-
-| Name | Type |
-| --- | --- |
-| `color` (read-only) | `string` |
-| `offset` (read-only) | `number` |
-| `value` (read-only) | `number` |
-
-#### `ChartColorLegendTick`
-
-| Name | Type |
-| --- | --- |
-| `formattedValue` (read-only) | `string` |
-| `offset` (read-only) | `number` |
-| `value` (read-only) | `number` |
-
-#### `ChartHeatmapCategory`
-
-| Name | Type |
-| --- | --- |
-| `formattedValue` (read-only) | `string` |
-| `index` (read-only) | `number` |
-| `key` (read-only) | `string` |
-| `value` (read-only) | `unknown` |
-
-#### `ChartHeatmapCellData`
-
-**Type parameters:** `TDatum = unknown`
-
-| Name | Type |
-| --- | --- |
-| `categoryX` (read-only) | `string` |
-| `categoryY` (read-only) | `string` |
-| `datum` (read-only) | `TDatum` |
-| `formattedValue` (read-only) | `string` |
-| `formattedX` (read-only) | `string` |
-| `formattedY` (read-only) | `string` |
-| `numericValue` (read-only) | `number \| null` |
-| `rawValue` (read-only) | `unknown` |
-| `xIndex` (read-only) | `number` |
-| `yIndex` (read-only) | `number` |
-
-#### `HeatmapCellClickEvent`
-
-**Deprecated.** Nothing emits this. Use `pointClick` on the chart.
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `categoryX` (read-only) | `string` |
-| `categoryY` (read-only) | `string` |
-| `datum` (read-only) | `T` |
-| `formattedValue` (read-only) | `string` |
-| `rawValue` (read-only) | `unknown` |
-| `seriesId` (read-only) | `string` |
-| `seriesName` (read-only) | `string` |
-| `seriesType` (read-only) | `"heatmap"` |
-| `value` (read-only) | `number \| null` |
-| `xIndex` (read-only) | `number` |
-| `yIndex` (read-only) | `number` |
-
-#### `HeatmapColorStop`
-
-**Deprecated.** No chart input takes this.
-
-| Name | Type |
-| --- | --- |
-| `color` (read-only) | `string` |
-| `offset` (read-only) | `number` |
-
-#### `ChartHeatmapColorMode`
-
-```typescript
-type ChartHeatmapColorMode = "diverging" | "sequential";
-```
-
-**Documented elsewhere:** [`ChartField`](/components/chart), [`ChartValueFormatter`](/components/chart)
+**Related types:** [`ChartField`](/api/chart/ChartField), [`ChartValueFormatter`](/api/chart/ChartValueFormatter)

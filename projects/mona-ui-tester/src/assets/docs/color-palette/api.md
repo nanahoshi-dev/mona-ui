@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/color-palette`.
 ### `ColorPaletteComponent`
 
 **Selector:** `mona-color-palette`  
-**Implements:** `FormValueControl<string \| null>`
+**Implements:** `FormValueControl<string \| null>`  
+**API reference:** [`ColorPaletteComponent`](/api/color-palette/ColorPaletteComponent)
 
 #### Inputs
 
@@ -43,37 +44,8 @@ Everything below is imported from `@nanahoshi/mona-ui/color-palette`.
 
 ### Types
 
-#### `COLOR_PALETTE_DEFAULT_MESSAGES`
-
-```typescript
-const COLOR_PALETTE_DEFAULT_MESSAGES: MonaColorPaletteMessages;
-```
-
-#### `ColorPaletteItem`
-
-From `@nanahoshi/mona-ui/common`.
-
-A swatch with a name of its own, for a palette whose colors mean something, such as brand colors.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `color` (read-only) | `string` | Any CSS color. |
-| `name?` (read-only) | `string` | What the color is called. Assistive technology reads it, and it shows as a tooltip. |
-
-#### `MonaColorPaletteMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `color` (read-only) | `(color: string) => string` |
-| `colorPalette` (read-only) | `string` |
-| `namedColor` (read-only) | `(name: string, color: string) => string` |
+| [`COLOR_PALETTE_DEFAULT_MESSAGES`](/api/color-palette/COLOR_PALETTE_DEFAULT_MESSAGES) | Constant |
 
-#### `PaletteType`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type PaletteType = "flat" | "material" | "websafe";
-```
+**Related types:** [`ColorPaletteItem`](/api/common/ColorPaletteItem), [`MonaColorPaletteMessages`](/api/i18n/MonaColorPaletteMessages), [`PaletteType`](/api/common/PaletteType)

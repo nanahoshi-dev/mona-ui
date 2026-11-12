@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 ### `GridStatePersistenceDirective`
 
 **Selector:** `mona-grid[monaGridStatePersistence]`  
-**Exported as:** `monaGridStatePersistence`
+**Exported as:** `monaGridStatePersistence`  
+**API reference:** [`GridStatePersistenceDirective`](/api/grid/GridStatePersistenceDirective)
 
 #### Inputs
 
@@ -32,7 +33,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 ### `GridExportDirective`
 
 **Selector:** `mona-grid[monaGridExport]`  
-**Exported as:** `monaGridExport`
+**Exported as:** `monaGridExport`  
+**API reference:** [`GridExportDirective`](/api/grid/GridExportDirective)
 
 #### Methods
 
@@ -42,197 +44,17 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### Types
 
-#### `GridColumnState`
-
-| Name | Type |
-| --- | --- |
-| `hidden` | `boolean` |
-| `id` | `string` |
-| `order` | `number` |
-| `width` | `number \| null` |
-
-#### `GridState`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `columns` | `readonly GridColumnState[]` | Persisted per-column hidden/order/width state. |
-| `filter` | `readonly GridStateCompositeFilterDescriptor[]` | Persisted filter descriptors. |
-| `group` | `readonly GroupDescriptor[]` | Persisted group descriptors. |
-| `pageSize?` | `number` | Persisted page size, unless `persistPageSize` is `false`. |
-| `schemaVersion?` | `number \| string` | Consumer-defined version tag used to reject stale persisted state. |
-| `sort` | `readonly GridStateSortDescriptor[]` | Persisted sort descriptors. |
-| `version` | `GridStateVersion` | The state schema version produced by this version of the library. |
+| [`GridColumnState`](/api/grid/GridColumnState) | Interface |  |
+| [`GridState`](/api/grid/GridState) | Interface |  |
+| [`GridStateCompositeFilterDescriptor`](/api/grid/GridStateCompositeFilterDescriptor) | Interface |  |
+| [`GridStateFilterDescriptor`](/api/grid/GridStateFilterDescriptor) | Interface |  |
+| [`GridStateLoadResult`](/api/grid/GridStateLoadResult) | Interface |  |
+| [`GridStatePersistenceOptions`](/api/grid/GridStatePersistenceOptions) | Interface |  |
+| [`GridStateSortDescriptor`](/api/grid/GridStateSortDescriptor) | Interface |  |
+| [`GridStateFilterValue`](/api/grid/GridStateFilterValue) | Type alias |  |
+| [`GridStateLoadStatus`](/api/grid/GridStateLoadStatus) | Type alias | The outcome of loading a state. |
+| [`GridStateVersion`](/api/grid/GridStateVersion) | Type alias |  |
 
-#### `GridStateCompositeFilterDescriptor`
-
-| Name | Type |
-| --- | --- |
-| `filters` | `readonly (GridStateFilterDescriptor \| GridStateCompositeFilterDescriptor)[]` |
-| `logic` | `FilterLogic` |
-
-#### `GridStateFilterDescriptor`
-
-| Name | Type |
-| --- | --- |
-| `field` | `string` |
-| `operator` | `Exclude<FilterOperators, "function">` |
-| `value?` | `GridStateFilterValue` |
-
-#### `GridStateLoadResult`
-
-| Name | Type |
-| --- | --- |
-| `ignoredColumns` | `readonly string[]` |
-| `missingColumns` | `readonly string[]` |
-| `status` | `GridStateLoadStatus` |
-
-#### `GridStatePersistenceOptions`
-
-| Name | Type |
-| --- | --- |
-| `enabled?` | `boolean` |
-| `persistPageSize?` | `boolean` |
-| `schemaVersion?` | `number \| string` |
-
-#### `GridStateSortDescriptor`
-
-| Name | Type |
-| --- | --- |
-| `dir` | `SortDirection` |
-| `field` | `string` |
-
-#### `GridStateFilterValue`
-
-```typescript
-type GridStateFilterValue = boolean | number | string | null | readonly (boolean | number | string | null)[];
-```
-
-#### `GridStateLoadStatus`
-
-The outcome of loading a state. `rejected-invalid`: the state isn't a well-formed `GridState` (a missing
-array, a duplicate column id, an unknown filter operator, a page size or width that isn't a positive
-number), and nothing was changed.
-
-```typescript
-type GridStateLoadStatus = "applied" | "empty" | "rejected-invalid" | "rejected-schema" | "rejected-version";
-```
-
-#### `GridStateVersion`
-
-```typescript
-type GridStateVersion = 1;
-```
-
-#### `ArrayFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type ArrayFilterOperators = "in" | "notin";
-```
-
-#### `BooleanFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type BooleanFilterOperators = "istrue" | "isfalse" | NullFilterOperators;
-```
-
-#### `CommonFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type CommonFilterOperators = "eq" | "neq";
-```
-
-#### `DateFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type DateFilterOperators = NumericFilterOperators | NullFilterOperators;
-```
-
-#### `EmptyFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type EmptyFilterOperators = "isempty" | "isnotempty";
-```
-
-#### `FilterLogic`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type FilterLogic = "and" | "or";
-```
-
-#### `FilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type FilterOperators = | CommonFilterOperators | BooleanFilterOperators | NumericFilterOperators | StringFilterOperators | DateFilterOperators | NullFilterOperators | EmptyFilterOperators | NullOrEmptyFilterOperators | ArrayFilterOperators | RangeFilterOperators | FunctionFilterOperators;
-```
-
-#### `FunctionFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type FunctionFilterOperators = "function";
-```
-
-#### `NullFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type NullFilterOperators = "isnull" | "isnotnull";
-```
-
-#### `NullOrEmptyFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type NullOrEmptyFilterOperators = "isnullorempty" | "isnotnullorempty";
-```
-
-#### `NumericFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type NumericFilterOperators = CommonFilterOperators | "gt" | "gte" | "lt" | "lte" | NullFilterOperators;
-```
-
-#### `RangeFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type RangeFilterOperators = "between" | "notbetween";
-```
-
-#### `SortDirection`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type SortDirection = "asc" | "desc";
-```
-
-#### `StringFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type StringFilterOperators = | CommonFilterOperators | "startswith" | "endswith" | "contains" | "doesnotcontain" | NullFilterOperators | EmptyFilterOperators | NullOrEmptyFilterOperators;
-```
-
-**Documented elsewhere:** [`GroupDescriptor`](/components/grid-grouping)
+**Related types:** [`ArrayFilterOperators`](/api/query/ArrayFilterOperators), [`BooleanFilterOperators`](/api/query/BooleanFilterOperators), [`CommonFilterOperators`](/api/query/CommonFilterOperators), [`DateFilterOperators`](/api/query/DateFilterOperators), [`EmptyFilterOperators`](/api/query/EmptyFilterOperators), [`FilterLogic`](/api/query/FilterLogic), [`FilterOperators`](/api/query/FilterOperators), [`FunctionFilterOperators`](/api/query/FunctionFilterOperators), [`GroupDescriptor`](/api/grid/GroupDescriptor), [`NullFilterOperators`](/api/query/NullFilterOperators), [`NullOrEmptyFilterOperators`](/api/query/NullOrEmptyFilterOperators), [`NumericFilterOperators`](/api/query/NumericFilterOperators), [`RangeFilterOperators`](/api/query/RangeFilterOperators), [`SortDirection`](/api/query/SortDirection), [`StringFilterOperators`](/api/query/StringFilterOperators)

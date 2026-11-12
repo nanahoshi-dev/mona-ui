@@ -76,6 +76,7 @@
                             "projects/mona-ui-tester/src/assets",
                             { "glob": "{forms,theming}.md", "input": "docs", "output": "assets/docs/guides" },
                             { "glob": "**/*", "input": "dist/docs-search", "output": "pagefind" },
+                            { "glob": "**/*", "input": "dist/docs-api", "output": "assets/api" },
                             { "glob": "**/*", "input": "dist/docs-ai", "output": "/" },
                             {
                                 "glob": "**/*.{ts,html}",

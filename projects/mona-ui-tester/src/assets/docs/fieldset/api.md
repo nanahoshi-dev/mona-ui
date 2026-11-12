@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/fieldset`.
 
 ### `FieldsetComponent`
 
-**Selector:** `mona-fieldset`
+**Selector:** `mona-fieldset`  
+**API reference:** [`FieldsetComponent`](/api/fieldset/FieldsetComponent)
 
 #### Inputs
 
@@ -26,4 +27,5 @@ Replaces the string `legend` with projected content inside the `<legend>` elemen
 default legend styling is applied — the consumer is responsible for all visual treatment. The template has no context
 variables.
 
-**Selector:** `ng-template[monaFieldsetLegendTemplate]`
+**Selector:** `ng-template[monaFieldsetLegendTemplate]`  
+**API reference:** [`FieldsetLegendTemplateDirective`](/api/fieldset/FieldsetLegendTemplateDirective)

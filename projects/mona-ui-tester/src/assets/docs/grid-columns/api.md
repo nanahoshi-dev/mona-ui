@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridReorderableDirective`
 
-**Selector:** `mona-grid[monaGridReorderable]`
+**Selector:** `mona-grid[monaGridReorderable]`  
+**API reference:** [`GridReorderableDirective`](/api/grid/GridReorderableDirective)
 
 #### Inputs
 
@@ -22,7 +23,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridResizableDirective`
 
-**Selector:** `mona-grid[monaGridResizable]`
+**Selector:** `mona-grid[monaGridResizable]`  
+**API reference:** [`GridResizableDirective`](/api/grid/GridResizableDirective)
 
 #### Inputs
 
@@ -38,7 +40,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `ColumnReorderEvent`
 
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`ColumnReorderEvent`](/api/grid/ColumnReorderEvent)
 
 #### Properties
 
@@ -50,54 +53,12 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### Types
 
-#### `ColumnResizeEvent`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `column` | `Column` |
-| `newWidth` | `number` |
-| `oldWidth` | `number` |
+| [`ColumnResizeEvent`](/api/grid/ColumnResizeEvent) | Interface |
+| [`ReorderableOptions`](/api/grid/ReorderableOptions) | Interface |
+| [`ResizableOptions`](/api/grid/ResizableOptions) | Interface |
+| [`GridColumnLockedPosition`](/api/grid/GridColumnLockedPosition) | Type alias |
+| [`ResizeMethod`](/api/grid/ResizeMethod) | Type alias |
 
-#### `ReorderableOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `enabled` | `boolean` | Whether column reordering is active. On unless set to `false`; options replace earlier ones. |
-
-#### `ResizableOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `enabled` | `boolean` | Whether column resizing is active. On unless set to `false`; options replace earlier ones. |
-
-#### `GridColumnLockedPosition`
-
-```typescript
-type GridColumnLockedPosition = "left" | "right";
-```
-
-#### `ResizeMethod`
-
-```typescript
-type ResizeMethod = "auto" | "fitView" | number;
-```
-
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
-
-**Documented elsewhere:** [`Column`](/components/grid)
+**Related types:** [`Column`](/api/grid/Column), [`PreventableEvent`](/api/common/PreventableEvent)

@@ -17,6 +17,8 @@ A server-rendered application gets the default state in its markup and the remem
 hydration, which shows as a flash. Storage that the server can read too — a cookie, or state
 transferred from the request — avoids it; supply it through `provideSidebarStorage()`.
 
+**API reference:** [`LocalStorageSidebarStorage`](/api/sidebar/LocalStorageSidebarStorage)
+
 #### Methods
 
 | Signature |
@@ -37,6 +39,8 @@ on `mona-sidebar`, and writing them from a descendant would only desynchronise t
 In a layout it follows the sidebar rather than holding it, because the caller may be created first. Until there is
 one, it reads as closed and its commands do nothing.
 
+**API reference:** [`injectSidebar`](/api/sidebar/injectSidebar)
+
 ```typescript
 function injectSidebar(options: InjectSidebarOptions & { optional: true }): SidebarController | null;
 function injectSidebar(options?: InjectSidebarOptions): SidebarController;
@@ -48,95 +52,21 @@ Replaces where sidebars remember whether they were left open. The default is `lo
 the server cannot read; supply a cookie- or request-backed storage here to have a server-rendered
 application render the remembered state rather than correcting it on hydration.
 
+**API reference:** [`provideSidebarStorage`](/api/sidebar/provideSidebarStorage)
+
 ```typescript
 function provideSidebarStorage(storage: SidebarStorage | (() => SidebarStorage)): EnvironmentProviders;
 ```
 
 ### Types
 
-#### `SIDEBAR_STORAGE`
-
-Where sidebars given a `persistKey` remember whether they were left open. Defaults to
-`localStorage`. Replace it with `provideSidebarStorage()` — with something the server can read too,
-for an application that renders there.
-
-```typescript
-const SIDEBAR_STORAGE: InjectionToken<SidebarStorage>;
-```
-
-#### `SidebarController`
-
-The safe, read-and-command view of one sidebar, returned by `injectSidebar()`.
-
-Structural facts — side, variant, collapsible mode — are readable but not settable. They are
-authored as inputs on `mona-sidebar`, and letting a descendant write them would leave the service
-and the component disagreeing about the same sidebar, with the component winning on the next
-change detection pass. Consumers who need them to change should bind the inputs.
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `collapsible` (read-only) | `Signal<SidebarCollapsibleMode>` | How the sidebar behaves when collapsed, as authored on `mona-sidebar`. |
-| `compact` (read-only) | `Signal<boolean>` | Whether the viewport is narrow enough that the sidebar presents as an overlay drawer rather than as a column in the layout. |
-| `expanded` (read-only) | `Signal<boolean>` | Whether the sidebar is showing at full width. On a compact viewport this reports the drawer's state, so a single binding drives both presentations. |
-| `iconOnly` (read-only) | `Signal<boolean>` | Whether the sidebar is currently reduced to its icon rail, meaning parts that only make sense at full width — labels, trailing actions, submenus — should step aside. Never true while compact, where the drawer always presents at full width. |
-| `mobileOpen` (read-only) | `Signal<boolean>` | Whether the overlay drawer is open. Only meaningful while `compact` is true. |
-| `side` (read-only) | `Signal<SidebarLogicalSide>` | Which edge the sidebar sits on, resolved to a direction-relative side. |
-| `sidebarId` (read-only) | `Signal<string>` | The id of the sidebar element, for `aria-controls` on a custom trigger. |
-| `state` (read-only) | `Signal<"expanded" \| "collapsed">` | The expanded state as a string, for `data-state` bindings and styling hooks. |
-| `variant` (read-only) | `Signal<SidebarVariant>` | The visual treatment of the sidebar, as authored on `mona-sidebar`. |
+| [`SIDEBAR_STORAGE`](/api/sidebar/SIDEBAR_STORAGE) | Constant | Where sidebars given a `persistKey` remember whether they were left open. |
+| [`SidebarController`](/api/sidebar/SidebarController) | Interface | The safe, read-and-command view of one sidebar, returned by `injectSidebar()`. |
+| [`SidebarStorage`](/api/sidebar/SidebarStorage) | Interface | Where a sidebar remembers whether it was left open. |
+| [`InjectSidebarOptions`](/api/sidebar/InjectSidebarOptions) | Interface |  |
+| [`SidebarCollapsibleMode`](/api/sidebar/SidebarCollapsibleMode) | Type alias | How the sidebar behaves when it is collapsed. |
+| [`SidebarModalScope`](/api/sidebar/SidebarModalScope) | Type alias | How far an open drawer's modality reaches. - `"page"` makes everything outside the drawer inert and locks the page's scroll, and the drawer is `aria-modal`. - `"layout"` does that within `mona-sidebar-layout` only, for a sidebar embedded in part of a page. |
 
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `collapse(): void` | Closes the sidebar. On a compact viewport this closes the drawer instead. |
-| `expand(): void` | Opens the sidebar. On a compact viewport this opens the drawer instead. |
-| `toggle(): void` | Flips the sidebar between open and closed, on whichever presentation is current. |
-
-#### `SidebarStorage`
-
-Where a sidebar remembers whether it was left open. Supplied through `SIDEBAR_STORAGE`, and only
-ever consulted for a sidebar that was given a `persistKey`.
-
-Only the docked state is ever handed to it. A drawer on a compact viewport is deliberately never
-persisted: restoring one open would cover the page on load, in front of the content the reader
-asked for.
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `read(key: string): boolean \| null` | The remembered state for `key`, or `null` when nothing has been stored under it — including when this storage cannot answer, such as on the server. A `null` leaves the sidebar on whatever its `expanded` input says. |
-| `write(key: string, expanded: boolean): void` | Records the docked state for `key`. Failing to store it must not throw. |
-
-#### `InjectSidebarOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `for?` (read-only) | `string` | Reads the sidebar with this id in the enclosing layout, rather than the nearest one. Needs a layout. |
-| `optional?` (read-only) | `boolean` | Returns `null` instead of throwing when there is no enclosing sidebar or layout. |
-
-#### `SidebarCollapsibleMode`
-
-How the sidebar behaves when it is collapsed.
-
-- `offcanvas` — the sidebar collapses to zero width and leaves the layout.
-- `icon` — the sidebar shrinks to a narrow rail that keeps icons visible.
-- `none` — the sidebar cannot be collapsed and stays at its full width.
-
-```typescript
-type SidebarCollapsibleMode = "offcanvas" | "icon" | "none";
-```
-
-#### `SidebarModalScope`
-
-How far an open drawer's modality reaches.
-- `"page"` makes everything outside the drawer inert and locks the page's scroll, and the drawer is `aria-modal`.
-- `"layout"` does that within `mona-sidebar-layout` only, for a sidebar embedded in part of a page. What's around the
-  layout stays usable, so the drawer isn't `aria-modal`.
-
-```typescript
-type SidebarModalScope = "page" | "layout";
-```
-
-**Documented elsewhere:** [`SidebarLogicalSide`](/components/sidebar), [`SidebarVariant`](/components/sidebar)
+**Related types:** [`SidebarLogicalSide`](/api/sidebar/SidebarLogicalSide), [`SidebarVariant`](/api/sidebar/SidebarVariant)

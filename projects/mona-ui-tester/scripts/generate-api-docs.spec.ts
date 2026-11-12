@@ -3,7 +3,13 @@ import { describe, expect, it } from "vitest";
 import type { DocsPage } from "../src/app/layout/docs-manifest";
 import { readEntryPoint } from "./api-extractor";
 import type { ApiSymbol } from "./api-extractor";
-import { renderApiPage, selectPageEntries, sortSymbols } from "./generate-api-docs";
+import {
+    buildApiReference,
+    renderApiPage,
+    renderApiReference,
+    selectPageEntries,
+    sortSymbols
+} from "./generate-api-docs";
 import type { ApiIndex } from "./generate-api-docs";
 
 function readSource(source: string): ApiSymbol[] {
@@ -285,8 +291,8 @@ describe("renderApiPage", () => {
         const markdown = render([
             {
                 description: "Adds <title> and `<desc>` when a < b.",
-                kind: "interface",
-                name: "DemoOptions",
+                kind: "class",
+                name: "DemoWriter",
                 properties: [
                     { description: "Writes <title>, not ``<desc>``, every n<sup>th</sup>.", name: "a", type: "boolean" }
                 ]
@@ -301,7 +307,7 @@ describe("renderApiPage", () => {
         const markdown = render([
             {
                 description: "",
-                kind: "interface",
+                kind: "class",
                 name: "DemoOptions",
                 properties: [{ description: "", name: "a", type: "string" }]
             }
@@ -310,22 +316,29 @@ describe("renderApiPage", () => {
         expect(markdown).toContain("| Name | Type |\n| --- | --- |\n| `a` | `string` |");
     });
 
-    it("groups types under one heading", () => {
+    it("links each component to its reference page", () => {
+        expect(render([component])).toContain("**API reference:** [`DemoComponent`](/api/demo/DemoComponent)");
+    });
+
+    it("lists the page's types in one table, each linking to its reference page", () => {
         const markdown = render([
             component,
             {
-                description: "A position.",
+                description: "A position. Either end.",
                 kind: "type",
                 name: "DemoPosition",
                 signature: 'type DemoPosition = "start";'
             }
         ]);
 
-        expect(markdown).toContain("### Types\n\n#### `DemoPosition`\n\nA position.");
-        expect(markdown).toContain('```typescript\ntype DemoPosition = "start";\n```');
+        expect(markdown).toContain(
+            "### Types\n\n| Type | Kind | Description |\n| --- | --- | --- |\n" +
+                "| [`DemoPosition`](/api/demo/DemoPosition) | Type alias | A position. |"
+        );
+        expect(markdown).not.toContain("type DemoPosition =");
     });
 
-    it("shows a type with no page where it's used, and links one that has a page", () => {
+    it("links the types a page uses from elsewhere, and what a type with no page uses in turn", () => {
         const noPage: ApiSymbol = { description: "", kind: "type", name: "Shared", signature: "type Shared = Nested;" };
         const nested: ApiSymbol = { description: "", kind: "type", name: "Nested", signature: "type Nested = string;" };
         const elsewhere: ApiSymbol = {
@@ -351,9 +364,9 @@ describe("renderApiPage", () => {
             index
         );
 
-        expect(markdown).toContain("#### `Shared`\n\nFrom `@nanahoshi/mona-ui/common`.");
-        expect(markdown).toContain("#### `Nested`");
-        expect(markdown).toContain("**Documented elsewhere:** [`Other`](/components/popup)");
+        expect(markdown).toContain(
+            "**Related types:** [`Nested`](/api/common/Nested), [`Other`](/api/popup/Other), [`Shared`](/api/common/Shared)"
+        );
     });
 
     it("reports a type no entry point exports", () => {
@@ -445,5 +458,70 @@ describe("selectPageEntries", () => {
             "shared:B",
             "extra:C"
         ]);
+    });
+});
+
+describe("buildApiReference", () => {
+    const base: ApiSymbol = {
+        description: "Shared options. More detail.",
+        kind: "interface",
+        name: "BaseOptions",
+        properties: [{ description: "The width.", name: "width", optional: true, type: "number" }]
+    };
+    const derived: ApiSymbol = {
+        description: "PNG options.",
+        extends: ["BaseOptions"],
+        kind: "interface",
+        name: "PngOptions",
+        properties: [{ description: "See `Mode`.", name: "mode", type: "Mode" }]
+    };
+    const mode: ApiSymbol = { description: "", kind: "type", name: "Mode", signature: 'type Mode = "a";' };
+    const otherMode: ApiSymbol = { description: "", kind: "type", name: "Mode", signature: 'type Mode = "b";' };
+    const symbolsByEntry = new Map<string, readonly ApiSymbol[]>([
+        ["export", [base, derived, mode]],
+        ["other", [otherMode]],
+        ["src", []]
+    ]);
+    const index: ApiIndex = new Map([
+        ["BaseOptions", { entryPoint: "export", page: "exporting", symbol: base }],
+        ["Mode", { entryPoint: "other", symbol: otherMode }],
+        ["PngOptions", { entryPoint: "export", page: "exporting", symbol: derived }]
+    ]);
+    const pages: DocsPage[] = [
+        { description: "", entryPoint: "export", kind: "component", path: "exporting", title: "Exporting" }
+    ];
+    const reference = buildApiReference(symbolsByEntry, index, pages);
+    const exported = reference.entryPoints.find(entryPoint => entryPoint.name === "export");
+    const symbol = (name: string) => exported?.symbols.find(item => item.name === name);
+
+    it("leaves out an entry point that exports nothing", () => {
+        expect(reference.entryPoints.map(entryPoint => entryPoint.name)).toEqual(["export", "other"]);
+    });
+
+    it("gives a symbol the members of its exported base, and the base the names that use it", () => {
+        expect(symbol("PngOptions")?.inherited).toEqual([{ from: "BaseOptions", properties: base.properties }]);
+        expect(symbol("BaseOptions")?.usedBy).toEqual(["PngOptions"]);
+    });
+
+    it("links a name to its own entry point's export before another entry point's", () => {
+        expect(exported?.links).toEqual({ BaseOptions: "export", Mode: "export", PngOptions: "export" });
+    });
+
+    it("names the guide page, and summarizes each symbol in the index", () => {
+        expect(symbol("BaseOptions")?.page).toEqual({ path: "exporting", title: "Exporting" });
+        expect(exported?.pages).toEqual([{ path: "exporting", title: "Exporting" }]);
+        expect(reference.index.entryPoints[0].symbols.find(item => item.name === "BaseOptions")?.summary).toBe(
+            "Shared options."
+        );
+    });
+
+    it("renders an entry point's whole reference as markdown", () => {
+        const markdown = exported ? renderApiReference(exported) : "";
+
+        expect(markdown).toContain("# `@nanahoshi/mona-ui/export`");
+        expect(markdown).toContain("**Guides:** [Exporting](/components/exporting)");
+        expect(markdown).toContain("## `PngOptions`\n\nInterface.\n\nPNG options.");
+        expect(markdown).toContain("### Inherited from `BaseOptions`");
+        expect(markdown).toContain("**Used by:** [`PngOptions`](/api/export/PngOptions)");
     });
 });

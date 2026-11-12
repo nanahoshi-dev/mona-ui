@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridSortableDirective`
 
-**Selector:** `mona-grid[monaGridSortable]`
+**Selector:** `mona-grid[monaGridSortable]`  
+**API reference:** [`GridSortableDirective`](/api/grid/GridSortableDirective)
 
 #### Inputs
 
@@ -24,7 +25,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `GridFilterableDirective`
 
-**Selector:** `mona-grid[monaGridFilterable]`
+**Selector:** `mona-grid[monaGridFilterable]`  
+**API reference:** [`GridFilterableDirective`](/api/grid/GridFilterableDirective)
 
 #### Inputs
 
@@ -41,7 +43,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### `ColumnSortEvent`
 
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`ColumnSortEvent`](/api/grid/ColumnSortEvent)
 
 #### Properties
 
@@ -51,294 +54,10 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`.
 
 ### Types
 
-#### `FilterableOptions`
-
-| Name | Type |
-| --- | --- |
-| `enabled` | `boolean` |
-| `type` | `"menu" \| "row" \| "menu, row"` |
-
-#### `SortableOptions`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `allowUnsort?` | `boolean` | Whether a third click on a sorted column clears its sort. |
-| `enabled?` | `boolean` | Whether sorting is active. On unless set to `false`; options replace earlier ones. |
-| `mode?` | `"single" \| "multiple"` | Whether one or several columns can be sorted at once. |
-| `showIndices?` | `boolean` | Whether sort order indices are displayed on header cells. |
-
-#### `ColumnSortComparator`
-
-Compares two cell values for sorting: negative, zero or positive, as for `Array.prototype.sort`.
-
-```typescript
-type ColumnSortComparator = { compare(left: unknown, right: unknown): number }["compare"];
-```
-
-#### `ArrayFilterDescriptor`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type ArrayFilterDescriptor = FieldDefinition & { operator: ArrayFilterOperators; value: readonly unknown[] };
-```
-
-#### `ArrayFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type ArrayFilterOperators = "in" | "notin";
-```
-
-#### `BooleanFilterDescriptor`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type BooleanFilterDescriptor = FieldDefinition & ({ operator: BooleanFilterOperators } | NullFilterDescriptor);
-```
-
-#### `BooleanFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type BooleanFilterOperators = "istrue" | "isfalse" | NullFilterOperators;
-```
-
-#### `CommonFilterDescriptor`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type CommonFilterDescriptor = FieldDefinition & { operator: CommonFilterOperators; value: unknown };
-```
-
-#### `CommonFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type CommonFilterOperators = "eq" | "neq";
-```
-
-#### `CompositeFilterDescriptor`
-
-From `@nanahoshi/mona-ui/query`.
-
-An empty `filters` list matches every item, whatever the logic.
-
-| Name | Type |
-| --- | --- |
-| `filters` | `Array<FilterDescriptor \| CompositeFilterDescriptor>` |
-| `logic` | `FilterLogic` |
-
-#### `DateFilterDescriptor`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type DateFilterDescriptor = FieldDefinition & ( | { operator: DateFilterOperators; value: Date; } | NullFilterDescriptor );
-```
-
-#### `DateFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type DateFilterOperators = NumericFilterOperators | NullFilterOperators;
-```
-
-#### `EmptyFilterDescriptor`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type EmptyFilterDescriptor = FieldDefinition & { operator: EmptyFilterOperators };
-```
-
-#### `EmptyFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type EmptyFilterOperators = "isempty" | "isnotempty";
-```
-
-#### `FieldDefinition`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type FieldDefinition = { field: string };
-```
-
-#### `FilterDescriptor`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type FilterDescriptor = | CommonFilterDescriptor | BooleanFilterDescriptor | NumericFilterDescriptor | StringFilterDescriptor | DateFilterDescriptor | NullFilterDescriptor | EmptyFilterDescriptor | NullOrEmptyFilterDescriptor | ArrayFilterDescriptor | RangeFilterDescriptor | FunctionFilterDescriptor;
-```
-
-#### `FilterLogic`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type FilterLogic = "and" | "or";
-```
-
-#### `FunctionFilterDescriptor`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type FunctionFilterDescriptor = FieldDefinition & { operator: FunctionFilterOperators; predicate(value: unknown): boolean; };
-```
-
-#### `FunctionFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type FunctionFilterOperators = "function";
-```
-
-#### `NullFilterDescriptor`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type NullFilterDescriptor = FieldDefinition & { operator: NullFilterOperators };
-```
-
-#### `NullFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type NullFilterOperators = "isnull" | "isnotnull";
-```
-
-#### `NullOrEmptyFilterDescriptor`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type NullOrEmptyFilterDescriptor = FieldDefinition & { operator: NullOrEmptyFilterOperators };
-```
-
-#### `NullOrEmptyFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type NullOrEmptyFilterOperators = "isnullorempty" | "isnotnullorempty";
-```
-
-#### `NumericFilterDescriptor`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type NumericFilterDescriptor = FieldDefinition & ( | { operator: NumericFilterOperators; value: number; } | NullFilterDescriptor );
-```
-
-#### `NumericFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type NumericFilterOperators = CommonFilterOperators | "gt" | "gte" | "lt" | "lte" | NullFilterOperators;
-```
-
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
-
-#### `RangeFilterBound`
-
-From `@nanahoshi/mona-ui/query`.
-
-A bound of a range filter. `null` leaves that end open.
-
-```typescript
-type RangeFilterBound = number | Date | string | null;
-```
-
-#### `RangeFilterDescriptor`
-
-From `@nanahoshi/mona-ui/query`.
-
-`between` and `notbetween` include both bounds.
-
-```typescript
-type RangeFilterDescriptor = FieldDefinition & { operator: RangeFilterOperators; value: readonly [from: RangeFilterBound, to: RangeFilterBound]; };
-```
-
-#### `RangeFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type RangeFilterOperators = "between" | "notbetween";
-```
-
-#### `SortDescriptor`
-
-From `@nanahoshi/mona-ui/query`.
-
-**Type parameters:** `TValue = unknown`
-
-| Name | Type |
-| --- | --- |
-| `dir` | `SortDirection` |
-| `field` | `string` |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `sort(left: TValue, right: TValue): number` | Compares two values of `field` (not two rows). Return a negative number when `left` comes first in ascending order; `dir: "desc"` reverses the result. Empty values are passed in as they are. |
-
-#### `SortDirection`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type SortDirection = "asc" | "desc";
-```
-
-#### `StringFilterDescriptor`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type StringFilterDescriptor = FieldDefinition & ( | { operator: StringFilterOperators; value: string; } | NullFilterDescriptor | EmptyFilterDescriptor | NullOrEmptyFilterDescriptor );
-```
-
-#### `StringFilterOperators`
-
-From `@nanahoshi/mona-ui/query`.
-
-```typescript
-type StringFilterOperators = | CommonFilterOperators | "startswith" | "endswith" | "contains" | "doesnotcontain" | NullFilterOperators | EmptyFilterOperators | NullOrEmptyFilterOperators;
-```
-
-**Documented elsewhere:** [`Column`](/components/grid)
+| [`FilterableOptions`](/api/grid/FilterableOptions) | Interface |  |
+| [`SortableOptions`](/api/grid/SortableOptions) | Interface |  |
+| [`ColumnSortComparator`](/api/grid/ColumnSortComparator) | Type alias | Compares two cell values for sorting: negative, zero or positive, as for `Array.prototype.sort`. |
+
+**Related types:** [`ArrayFilterDescriptor`](/api/query/ArrayFilterDescriptor), [`ArrayFilterOperators`](/api/query/ArrayFilterOperators), [`BooleanFilterDescriptor`](/api/query/BooleanFilterDescriptor), [`BooleanFilterOperators`](/api/query/BooleanFilterOperators), [`Column`](/api/grid/Column), [`CommonFilterDescriptor`](/api/query/CommonFilterDescriptor), [`CommonFilterOperators`](/api/query/CommonFilterOperators), [`CompositeFilterDescriptor`](/api/query/CompositeFilterDescriptor), [`DateFilterDescriptor`](/api/query/DateFilterDescriptor), [`DateFilterOperators`](/api/query/DateFilterOperators), [`EmptyFilterDescriptor`](/api/query/EmptyFilterDescriptor), [`EmptyFilterOperators`](/api/query/EmptyFilterOperators), [`FieldDefinition`](/api/query/FieldDefinition), [`FilterDescriptor`](/api/query/FilterDescriptor), [`FilterLogic`](/api/query/FilterLogic), [`FunctionFilterDescriptor`](/api/query/FunctionFilterDescriptor), [`FunctionFilterOperators`](/api/query/FunctionFilterOperators), [`NullFilterDescriptor`](/api/query/NullFilterDescriptor), [`NullFilterOperators`](/api/query/NullFilterOperators), [`NullOrEmptyFilterDescriptor`](/api/query/NullOrEmptyFilterDescriptor), [`NullOrEmptyFilterOperators`](/api/query/NullOrEmptyFilterOperators), [`NumericFilterDescriptor`](/api/query/NumericFilterDescriptor), [`NumericFilterOperators`](/api/query/NumericFilterOperators), [`PreventableEvent`](/api/common/PreventableEvent), [`RangeFilterBound`](/api/query/RangeFilterBound), [`RangeFilterDescriptor`](/api/query/RangeFilterDescriptor), [`RangeFilterOperators`](/api/query/RangeFilterOperators), [`SortDescriptor`](/api/query/SortDescriptor), [`SortDirection`](/api/query/SortDirection), [`StringFilterDescriptor`](/api/query/StringFilterDescriptor), [`StringFilterOperators`](/api/query/StringFilterOperators)

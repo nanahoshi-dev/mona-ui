@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/menubar`.
 
 ### `MenubarComponent`
 
-**Selector:** `mona-menubar`
+**Selector:** `mona-menubar`  
+**API reference:** [`MenubarComponent`](/api/menubar/MenubarComponent)
 
 #### Inputs
 
@@ -28,7 +29,8 @@ Everything below is imported from `@nanahoshi/mona-ui/menubar`.
 ### `MenuCheckboxItemComponent`
 
 **Selector:** `mona-menu-checkbox-item`  
-**Extends:** `PopupMenuCheckboxItemComponent`
+**Extends:** `PopupMenuCheckboxItemComponent`  
+**API reference:** [`MenuCheckboxItemComponent`](/api/menubar/MenuCheckboxItemComponent)
 
 #### Inputs
 
@@ -49,7 +51,8 @@ Everything below is imported from `@nanahoshi/mona-ui/menubar`.
 ### `MenuItemComponent`
 
 **Selector:** `mona-menu-item`  
-**Extends:** `PopupMenuItemComponent`
+**Extends:** `PopupMenuItemComponent`  
+**API reference:** [`MenuItemComponent`](/api/menubar/MenuItemComponent)
 
 #### Inputs
 
@@ -68,7 +71,8 @@ Everything below is imported from `@nanahoshi/mona-ui/menubar`.
 ### `MenuRadioItemComponent`
 
 **Selector:** `mona-menu-radio-item`  
-**Extends:** `PopupMenuRadioItemComponent`
+**Extends:** `PopupMenuRadioItemComponent`  
+**API reference:** [`MenuRadioItemComponent`](/api/menubar/MenuRadioItemComponent)
 
 #### Inputs
 
@@ -89,7 +93,8 @@ Everything below is imported from `@nanahoshi/mona-ui/menubar`.
 A top-level menu. Its `text` is displayed on the menubar; its projected items (or `items` input) become the popup
 content.
 
-**Selector:** `mona-menu`
+**Selector:** `mona-menu`  
+**API reference:** [`MenuComponent`](/api/menubar/MenuComponent)
 
 #### Inputs
 
@@ -102,7 +107,8 @@ content.
 ### `MenuRadioGroupComponent`
 
 **Selector:** `mona-menu-radio-group`  
-**Extends:** `PopupMenuRadioGroupComponent`
+**Extends:** `PopupMenuRadioGroupComponent`  
+**API reference:** [`MenuRadioGroupComponent`](/api/menubar/MenuRadioGroupComponent)
 
 #### Inputs
 
@@ -120,7 +126,8 @@ content.
 ### `MenuGroupComponent`
 
 **Selector:** `mona-menu-group`  
-**Extends:** `PopupMenuGroupComponent`
+**Extends:** `PopupMenuGroupComponent`  
+**API reference:** [`MenuGroupComponent`](/api/menubar/MenuGroupComponent)
 
 #### Inputs
 
@@ -133,44 +140,49 @@ content.
 Renders a horizontal visual divider between items.
 
 **Selector:** `mona-menu-separator`  
-**Extends:** `PopupMenuSeparatorComponent`
+**Extends:** `PopupMenuSeparatorComponent`  
+**API reference:** [`MenuSeparatorComponent`](/api/menubar/MenuSeparatorComponent)
 
 ### `MenuGroupTemplateDirective`
 
 Customizes a group header's content.
 
 **Selector:** `ng-template[monaMenuGroupTemplate]`  
-**Extends:** `PopupMenuGroupTemplateDirective`
+**Extends:** `PopupMenuGroupTemplateDirective`  
+**API reference:** [`MenuGroupTemplateDirective`](/api/menubar/MenuGroupTemplateDirective)
 
 ### `MenuIconTemplateDirective`
 
-**Selector:** `ng-template[monaMenuIconTemplate]`
+**Selector:** `ng-template[monaMenuIconTemplate]`  
+**API reference:** [`MenuIconTemplateDirective`](/api/menubar/MenuIconTemplateDirective)
 
 ### `MenuItemIconTemplateDirective`
 
 **Selector:** `ng-template[monaMenuItemIconTemplate]`  
-**Extends:** `PopupMenuIconTemplateDirective`
+**Extends:** `PopupMenuIconTemplateDirective`  
+**API reference:** [`MenuItemIconTemplateDirective`](/api/menubar/MenuItemIconTemplateDirective)
 
 ### `MenuItemShortcutTemplateDirective`
 
 **Selector:** `ng-template[monaMenuItemShortcutTemplate]`  
-**Extends:** `PopupMenuShortcutTemplateDirective`
+**Extends:** `PopupMenuShortcutTemplateDirective`  
+**API reference:** [`MenuItemShortcutTemplateDirective`](/api/menubar/MenuItemShortcutTemplateDirective)
 
 ### `MenuItemTextTemplateDirective`
 
 **Selector:** `ng-template[monaMenuItemTextTemplate]`  
-**Extends:** `PopupMenuTextTemplateDirective`
+**Extends:** `PopupMenuTextTemplateDirective`  
+**API reference:** [`MenuItemTextTemplateDirective`](/api/menubar/MenuItemTextTemplateDirective)
 
 ### `MenuTextTemplateDirective`
 
-**Selector:** `ng-template[monaMenuTextTemplate]`
+**Selector:** `ng-template[monaMenuTextTemplate]`  
+**API reference:** [`MenuTextTemplateDirective`](/api/menubar/MenuTextTemplateDirective)
 
 ### Types
 
-#### `MenuItemClickEvent`
+| Type | Kind |
+| --- | --- |
+| [`MenuItemClickEvent`](/api/menubar/MenuItemClickEvent) | Type alias |
 
-```typescript
-type MenuItemClickEvent = PopupMenuItemClickEvent;
-```
-
-**Documented elsewhere:** [`MenuItem`](/components/popup-menu), [`PopupMenuCheckboxItemComponent`](/components/popup-menu), [`PopupMenuGroupComponent`](/components/popup-menu), [`PopupMenuGroupTemplateDirective`](/components/popup-menu), [`PopupMenuIconTemplateDirective`](/components/popup-menu), [`PopupMenuItemClickEvent`](/components/popup-menu), [`PopupMenuItemComponent`](/components/popup-menu), [`PopupMenuRadioGroupComponent`](/components/popup-menu), [`PopupMenuRadioItemComponent`](/components/popup-menu), [`PopupMenuSeparatorComponent`](/components/popup-menu), [`PopupMenuShortcutTemplateDirective`](/components/popup-menu), [`PopupMenuTextTemplateDirective`](/components/popup-menu)
+**Related types:** [`MenuItem`](/api/popup-menu/MenuItem), [`PopupMenuCheckboxItemComponent`](/api/popup-menu/PopupMenuCheckboxItemComponent), [`PopupMenuGroupComponent`](/api/popup-menu/PopupMenuGroupComponent), [`PopupMenuGroupTemplateDirective`](/api/popup-menu/PopupMenuGroupTemplateDirective), [`PopupMenuIconTemplateDirective`](/api/popup-menu/PopupMenuIconTemplateDirective), [`PopupMenuItemClickEvent`](/api/popup-menu/PopupMenuItemClickEvent), [`PopupMenuItemComponent`](/api/popup-menu/PopupMenuItemComponent), [`PopupMenuRadioGroupComponent`](/api/popup-menu/PopupMenuRadioGroupComponent), [`PopupMenuRadioItemComponent`](/api/popup-menu/PopupMenuRadioItemComponent), [`PopupMenuSeparatorComponent`](/api/popup-menu/PopupMenuSeparatorComponent), [`PopupMenuShortcutTemplateDirective`](/api/popup-menu/PopupMenuShortcutTemplateDirective), [`PopupMenuTextTemplateDirective`](/api/popup-menu/PopupMenuTextTemplateDirective)

@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/split-button`.
 
 ### `SplitButtonComponent`
 
-**Selector:** `mona-split-button`
+**Selector:** `mona-split-button`  
+**API reference:** [`SplitButtonComponent`](/api/split-button/SplitButtonComponent)
 
 #### Inputs
 
@@ -35,7 +36,8 @@ Everything below is imported from `@nanahoshi/mona-ui/split-button`.
 ### `SplitButtonCheckboxItemComponent`
 
 **Selector:** `mona-split-button-checkbox-item`  
-**Extends:** `PopupMenuCheckboxItemComponent`
+**Extends:** `PopupMenuCheckboxItemComponent`  
+**API reference:** [`SplitButtonCheckboxItemComponent`](/api/split-button/SplitButtonCheckboxItemComponent)
 
 #### Inputs
 
@@ -56,7 +58,8 @@ Everything below is imported from `@nanahoshi/mona-ui/split-button`.
 ### `SplitButtonItemComponent`
 
 **Selector:** `mona-split-button-item`  
-**Extends:** `PopupMenuItemComponent`
+**Extends:** `PopupMenuItemComponent`  
+**API reference:** [`SplitButtonItemComponent`](/api/split-button/SplitButtonItemComponent)
 
 #### Inputs
 
@@ -75,7 +78,8 @@ Everything below is imported from `@nanahoshi/mona-ui/split-button`.
 ### `SplitButtonRadioItemComponent`
 
 **Selector:** `mona-split-button-radio-item`  
-**Extends:** `PopupMenuRadioItemComponent`
+**Extends:** `PopupMenuRadioItemComponent`  
+**API reference:** [`SplitButtonRadioItemComponent`](/api/split-button/SplitButtonRadioItemComponent)
 
 #### Inputs
 
@@ -94,7 +98,8 @@ Everything below is imported from `@nanahoshi/mona-ui/split-button`.
 ### `SplitButtonRadioGroupComponent`
 
 **Selector:** `mona-split-button-radio-group`  
-**Extends:** `PopupMenuRadioGroupComponent`
+**Extends:** `PopupMenuRadioGroupComponent`  
+**API reference:** [`SplitButtonRadioGroupComponent`](/api/split-button/SplitButtonRadioGroupComponent)
 
 #### Inputs
 
@@ -112,7 +117,8 @@ Everything below is imported from `@nanahoshi/mona-ui/split-button`.
 ### `SplitButtonGroupComponent`
 
 **Selector:** `mona-split-button-group`  
-**Extends:** `PopupMenuGroupComponent`
+**Extends:** `PopupMenuGroupComponent`  
+**API reference:** [`SplitButtonGroupComponent`](/api/split-button/SplitButtonGroupComponent)
 
 #### Inputs
 
@@ -123,52 +129,47 @@ Everything below is imported from `@nanahoshi/mona-ui/split-button`.
 ### `SplitButtonSeparatorComponent`
 
 **Selector:** `mona-split-button-separator`  
-**Extends:** `PopupMenuSeparatorComponent`
+**Extends:** `PopupMenuSeparatorComponent`  
+**API reference:** [`SplitButtonSeparatorComponent`](/api/split-button/SplitButtonSeparatorComponent)
 
 ### `SplitButtonMenuButtonTemplateDirective`
 
-**Selector:** `ng-template[monaSplitButtonMenuButtonTemplate]`
+**Selector:** `ng-template[monaSplitButtonMenuButtonTemplate]`  
+**API reference:** [`SplitButtonMenuButtonTemplateDirective`](/api/split-button/SplitButtonMenuButtonTemplateDirective)
 
 ### `SplitButtonMenuGroupTemplateDirective`
 
 **Selector:** `ng-template[monaSplitButtonMenuGroupTemplate]`  
-**Extends:** `PopupMenuGroupTemplateDirective`
+**Extends:** `PopupMenuGroupTemplateDirective`  
+**API reference:** [`SplitButtonMenuGroupTemplateDirective`](/api/split-button/SplitButtonMenuGroupTemplateDirective)
 
 ### `SplitButtonMenuItemIconTemplateDirective`
 
 **Selector:** `ng-template[monaSplitButtonMenuItemIconTemplate]`  
-**Extends:** `PopupMenuIconTemplateDirective`
+**Extends:** `PopupMenuIconTemplateDirective`  
+**API reference:** [`SplitButtonMenuItemIconTemplateDirective`](/api/split-button/SplitButtonMenuItemIconTemplateDirective)
 
 ### `SplitButtonMenuItemShortcutTemplateDirective`
 
 **Selector:** `ng-template[monaSplitButtonMenuItemShortcutTemplate]`  
-**Extends:** `PopupMenuShortcutTemplateDirective`
+**Extends:** `PopupMenuShortcutTemplateDirective`  
+**API reference:** [`SplitButtonMenuItemShortcutTemplateDirective`](/api/split-button/SplitButtonMenuItemShortcutTemplateDirective)
 
 ### `SplitButtonMenuItemTextTemplateDirective`
 
 **Selector:** `ng-template[monaSplitButtonMenuItemTextTemplate]`  
-**Extends:** `PopupMenuTextTemplateDirective`
+**Extends:** `PopupMenuTextTemplateDirective`  
+**API reference:** [`SplitButtonMenuItemTextTemplateDirective`](/api/split-button/SplitButtonMenuItemTextTemplateDirective)
 
 ### `SplitButtonTextTemplateDirective`
 
-**Selector:** `ng-template[monaSplitButtonTextTemplate]`
+**Selector:** `ng-template[monaSplitButtonTextTemplate]`  
+**API reference:** [`SplitButtonTextTemplateDirective`](/api/split-button/SplitButtonTextTemplateDirective)
 
 ### Types
 
-#### `SPLIT_BUTTON_DEFAULT_MESSAGES`
+| Type | Kind |
+| --- | --- |
+| [`SPLIT_BUTTON_DEFAULT_MESSAGES`](/api/split-button/SPLIT_BUTTON_DEFAULT_MESSAGES) | Constant |
 
-```typescript
-const SPLIT_BUTTON_DEFAULT_MESSAGES: MonaSplitButtonMessages;
-```
-
-#### `MonaSplitButtonMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `menuButtonAriaLabel` (read-only) | `string` | The arrow button's name when the main button has no `text` (it shows a template instead). |
-| `menuButtonWithText` (read-only) | `(text: string) => string` | The arrow button's name, from the main button's `text`. |
-| `splitButton` (read-only) | `(text: string) => string` | **Deprecated.** No longer rendered; the main button is named by its content or by `aria-label`. |
-
-**Documented elsewhere:** [`PopupMenuCheckboxItemComponent`](/components/popup-menu), [`PopupMenuGroupComponent`](/components/popup-menu), [`PopupMenuGroupTemplateDirective`](/components/popup-menu), [`PopupMenuIconTemplateDirective`](/components/popup-menu), [`PopupMenuItemClickEvent`](/components/popup-menu), [`PopupMenuItemComponent`](/components/popup-menu), [`PopupMenuRadioGroupComponent`](/components/popup-menu), [`PopupMenuRadioItemComponent`](/components/popup-menu), [`PopupMenuSeparatorComponent`](/components/popup-menu), [`PopupMenuShortcutTemplateDirective`](/components/popup-menu), [`PopupMenuTextTemplateDirective`](/components/popup-menu)
+**Related types:** [`MonaSplitButtonMessages`](/api/i18n/MonaSplitButtonMessages), [`PopupMenuCheckboxItemComponent`](/api/popup-menu/PopupMenuCheckboxItemComponent), [`PopupMenuGroupComponent`](/api/popup-menu/PopupMenuGroupComponent), [`PopupMenuGroupTemplateDirective`](/api/popup-menu/PopupMenuGroupTemplateDirective), [`PopupMenuIconTemplateDirective`](/api/popup-menu/PopupMenuIconTemplateDirective), [`PopupMenuItemClickEvent`](/api/popup-menu/PopupMenuItemClickEvent), [`PopupMenuItemComponent`](/api/popup-menu/PopupMenuItemComponent), [`PopupMenuRadioGroupComponent`](/api/popup-menu/PopupMenuRadioGroupComponent), [`PopupMenuRadioItemComponent`](/api/popup-menu/PopupMenuRadioItemComponent), [`PopupMenuSeparatorComponent`](/api/popup-menu/PopupMenuSeparatorComponent), [`PopupMenuShortcutTemplateDirective`](/api/popup-menu/PopupMenuShortcutTemplateDirective), [`PopupMenuTextTemplateDirective`](/api/popup-menu/PopupMenuTextTemplateDirective)

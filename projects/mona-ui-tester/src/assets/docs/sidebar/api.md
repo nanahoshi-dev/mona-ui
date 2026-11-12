@@ -14,7 +14,8 @@ inside it while open, restored to whatever opened it on close, and everything ou
 inert, as far as the layout's `modalScope` says. It is not a navigation landmark by itself — wrap
 the menus in a labelled `nav`, or set `role` and `aria-label` if the whole region is navigation.
 
-**Selector:** `mona-sidebar`
+**Selector:** `mona-sidebar`  
+**API reference:** [`SidebarComponent`](/api/sidebar/SidebarComponent)
 
 #### Inputs
 
@@ -52,7 +53,8 @@ own open state, so a sidebar collapsed on a desktop does not come back open on a
 reset whenever the viewport crosses the breakpoint. Only one drawer is open at a time: opening one
 closes any other, and they share the single backdrop this layout paints behind them.
 
-**Selector:** `mona-sidebar-layout`
+**Selector:** `mona-sidebar-layout`  
+**API reference:** [`SidebarLayoutComponent`](/api/sidebar/SidebarLayoutComponent)
 
 #### Inputs
 
@@ -67,7 +69,8 @@ closes any other, and they share the single backdrop this layout paints behind t
 The region at the bottom of the sidebar, below its content. Holds what stays put while the content
 scrolls — a profile menu, a sign-out.
 
-**Selector:** `[monaSidebarFooter]`
+**Selector:** `[monaSidebarFooter]`  
+**API reference:** [`SidebarFooterDirective`](/api/sidebar/SidebarFooterDirective)
 
 #### Inputs
 
@@ -80,7 +83,8 @@ scrolls — a profile menu, a sign-out.
 The region at the top of the sidebar, above its content. Holds what stays put while the content
 scrolls — a workspace switcher, a search box.
 
-**Selector:** `[monaSidebarHeader]`
+**Selector:** `[monaSidebarHeader]`  
+**API reference:** [`SidebarHeaderDirective`](/api/sidebar/SidebarHeaderDirective)
 
 #### Inputs
 
@@ -97,7 +101,8 @@ It sits beside the sidebars rather than inside one, so it answers to the layout 
 out of the way for whichever drawer is open, and where a layout holds more than one sidebar it takes
 its surface from the first one in author order.
 
-**Selector:** `[monaSidebarInset]`
+**Selector:** `[monaSidebarInset]`  
+**API reference:** [`SidebarInsetDirective`](/api/sidebar/SidebarInsetDirective)
 
 #### Inputs
 
@@ -114,7 +119,8 @@ Deliberately outside the tab order: it is a pointer shortcut for what `monaSideb
 does, and a second tab stop onto a 4px strip would be noise for keyboard users. Provide a
 `monaSidebarTrigger` as well — the rail is not a substitute for it.
 
-**Selector:** `button[monaSidebarRail]`
+**Selector:** `button[monaSidebarRail]`  
+**API reference:** [`SidebarRailDirective`](/api/sidebar/SidebarRailDirective)
 
 #### Inputs
 
@@ -126,7 +132,8 @@ does, and a second tab stop onto a 4px strip would be noise for keyboard users. 
 
 A horizontal rule between sidebar regions. Tightens its inset on the icon rail.
 
-**Selector:** `[monaSidebarSeparator]`
+**Selector:** `[monaSidebarSeparator]`  
+**API reference:** [`SidebarSeparatorDirective`](/api/sidebar/SidebarSeparatorDirective)
 
 #### Inputs
 
@@ -152,7 +159,8 @@ A sidebar that can't collapse has nothing for a trigger to do on a wide viewport
 reports itself as disabled there rather than as an open disclosure.
 
 **Selector:** `[monaSidebarTrigger]`  
-**Exported as:** `monaSidebarTrigger`
+**Exported as:** `monaSidebarTrigger`  
+**API reference:** [`SidebarTriggerDirective`](/api/sidebar/SidebarTriggerDirective)
 
 #### Inputs
 
@@ -162,67 +170,16 @@ reports itself as disabled there rather than as an open disclosure.
 
 ### `SidebarContentDirective`
 
-**Selector:** `[monaSidebarContent]`
+**Selector:** `[monaSidebarContent]`  
+**API reference:** [`SidebarContentDirective`](/api/sidebar/SidebarContentDirective)
 
 ### Types
 
-#### `SIDEBAR_DEFAULT_MESSAGES`
+| Type | Kind | Description |
+| --- | --- | --- |
+| [`SIDEBAR_DEFAULT_MESSAGES`](/api/sidebar/SIDEBAR_DEFAULT_MESSAGES) | Constant |  |
+| [`SidebarLogicalSide`](/api/sidebar/SidebarLogicalSide) | Type alias | The direction-relative side, once the `left`/`right` aliases have been folded in. |
+| [`SidebarSide`](/api/sidebar/SidebarSide) | Type alias | Which edge of the layout the sidebar sits on. |
+| [`SidebarVariant`](/api/sidebar/SidebarVariant) | Type alias | The visual treatment of the sidebar region. |
 
-```typescript
-const SIDEBAR_DEFAULT_MESSAGES: MonaSidebarMessages;
-```
-
-#### `SidebarLogicalSide`
-
-The direction-relative side, once the `left`/`right` aliases have been folded in.
-
-```typescript
-type SidebarLogicalSide = "start" | "end";
-```
-
-#### `SidebarSide`
-
-Which edge of the layout the sidebar sits on. Also determines its order within the layout
-and which side its rail and border are drawn on.
-
-`start` and `end` are the preferred values: they follow the document's writing direction, so a
-`start` sidebar sits on the left in LTR and on the right in RTL without the consumer branching.
-
-`left` and `right` are retained as aliases of `start` and `end`. They were always a poor
-description of the behaviour — the layout orders the sidebar with flexbox, which is
-direction-relative, so `side="left"` already rendered on the right under RTL.
-
-```typescript
-type SidebarSide = "start" | "end" | "left" | "right";
-```
-
-#### `SidebarVariant`
-
-The visual treatment of the sidebar region.
-
-- `sidebar` — flush against the edge of the layout, separated by a single border.
-- `floating` — detached from the edge, with its own rounded, bordered surface.
-- `inset` — the sidebar itself is plain, and the inset region beside it becomes the raised surface.
-
-```typescript
-type SidebarVariant = "sidebar" | "floating" | "inset";
-```
-
-#### `ClassInputType`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type ClassInputType = string | string[] | Record<string, unknown> | null | undefined;
-```
-
-#### `MonaSidebarMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
-| --- | --- |
-| `drawerLabel` (read-only) | `string` |
-| `rail` (read-only) | `string` |
-
-**Documented elsewhere:** [`SidebarCollapsibleMode`](/components/sidebar/state), [`SidebarModalScope`](/components/sidebar/state)
+**Related types:** [`ClassInputType`](/api/common/ClassInputType), [`MonaSidebarMessages`](/api/i18n/MonaSidebarMessages), [`SidebarCollapsibleMode`](/api/sidebar/SidebarCollapsibleMode), [`SidebarModalScope`](/api/sidebar/SidebarModalScope)

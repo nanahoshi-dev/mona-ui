@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/contextmenu`.
 
 ### `ContextMenuComponent`
 
-**Selector:** `mona-contextmenu`
+**Selector:** `mona-contextmenu`  
+**API reference:** [`ContextMenuComponent`](/api/contextmenu/ContextMenuComponent)
 
 #### Inputs
 
@@ -29,7 +30,8 @@ Everything below is imported from `@nanahoshi/mona-ui/contextmenu`.
 ### `ContextMenuCheckboxItemComponent`
 
 **Selector:** `mona-contextmenu-checkbox-item`  
-**Extends:** `PopupMenuCheckboxItemComponent`
+**Extends:** `PopupMenuCheckboxItemComponent`  
+**API reference:** [`ContextMenuCheckboxItemComponent`](/api/contextmenu/ContextMenuCheckboxItemComponent)
 
 #### Inputs
 
@@ -50,7 +52,8 @@ Everything below is imported from `@nanahoshi/mona-ui/contextmenu`.
 ### `ContextMenuItemComponent`
 
 **Selector:** `mona-contextmenu-item`  
-**Extends:** `PopupMenuItemComponent`
+**Extends:** `PopupMenuItemComponent`  
+**API reference:** [`ContextMenuItemComponent`](/api/contextmenu/ContextMenuItemComponent)
 
 #### Inputs
 
@@ -69,7 +72,8 @@ Everything below is imported from `@nanahoshi/mona-ui/contextmenu`.
 ### `ContextMenuRadioItemComponent`
 
 **Selector:** `mona-contextmenu-radio-item`  
-**Extends:** `PopupMenuRadioItemComponent`
+**Extends:** `PopupMenuRadioItemComponent`  
+**API reference:** [`ContextMenuRadioItemComponent`](/api/contextmenu/ContextMenuRadioItemComponent)
 
 #### Inputs
 
@@ -88,7 +92,8 @@ Everything below is imported from `@nanahoshi/mona-ui/contextmenu`.
 ### `ContextMenuRadioGroupComponent`
 
 **Selector:** `mona-contextmenu-radio-group`  
-**Extends:** `PopupMenuRadioGroupComponent`
+**Extends:** `PopupMenuRadioGroupComponent`  
+**API reference:** [`ContextMenuRadioGroupComponent`](/api/contextmenu/ContextMenuRadioGroupComponent)
 
 #### Inputs
 
@@ -106,7 +111,8 @@ Everything below is imported from `@nanahoshi/mona-ui/contextmenu`.
 ### `ContextMenuGroupComponent`
 
 **Selector:** `mona-contextmenu-group`  
-**Extends:** `PopupMenuGroupComponent`
+**Extends:** `PopupMenuGroupComponent`  
+**API reference:** [`ContextMenuGroupComponent`](/api/contextmenu/ContextMenuGroupComponent)
 
 #### Inputs
 
@@ -119,30 +125,35 @@ Everything below is imported from `@nanahoshi/mona-ui/contextmenu`.
 Renders a horizontal visual divider between items.
 
 **Selector:** `mona-contextmenu-separator`  
-**Extends:** `PopupMenuSeparatorComponent`
+**Extends:** `PopupMenuSeparatorComponent`  
+**API reference:** [`ContextMenuSeparatorComponent`](/api/contextmenu/ContextMenuSeparatorComponent)
 
 ### `ContextMenuGroupTemplateDirective`
 
 Customizes a group header's content.
 
 **Selector:** `ng-template[monaContextMenuGroupTemplate]`  
-**Extends:** `PopupMenuGroupTemplateDirective`
+**Extends:** `PopupMenuGroupTemplateDirective`  
+**API reference:** [`ContextMenuGroupTemplateDirective`](/api/contextmenu/ContextMenuGroupTemplateDirective)
 
 ### `ContextMenuIconTemplateDirective`
 
 **Selector:** `ng-template[monaContextMenuIconTemplate]`  
-**Extends:** `PopupMenuIconTemplateDirective`
+**Extends:** `PopupMenuIconTemplateDirective`  
+**API reference:** [`ContextMenuIconTemplateDirective`](/api/contextmenu/ContextMenuIconTemplateDirective)
 
 ### `ContextMenuShortcutTemplateDirective`
 
 **Selector:** `ng-template[monaContextMenuShortcutTemplate]`  
-**Extends:** `PopupMenuShortcutTemplateDirective`
+**Extends:** `PopupMenuShortcutTemplateDirective`  
+**API reference:** [`ContextMenuShortcutTemplateDirective`](/api/contextmenu/ContextMenuShortcutTemplateDirective)
 
 ### `ContextMenuTextTemplateDirective`
 
 **Selector:** `ng-template[monaContextMenuTextTemplate]`  
-**Extends:** `PopupMenuTextTemplateDirective`
+**Extends:** `PopupMenuTextTemplateDirective`  
+**API reference:** [`ContextMenuTextTemplateDirective`](/api/contextmenu/ContextMenuTextTemplateDirective)
 
 ### Types
 
-**Documented elsewhere:** [`PopupMenuCheckboxItemComponent`](/components/popup-menu), [`PopupMenuGroupComponent`](/components/popup-menu), [`PopupMenuGroupTemplateDirective`](/components/popup-menu), [`PopupMenuIconTemplateDirective`](/components/popup-menu), [`PopupMenuItem`](/components/popup-menu), [`PopupMenuItemClickEvent`](/components/popup-menu), [`PopupMenuItemComponent`](/components/popup-menu), [`PopupMenuRadioGroupComponent`](/components/popup-menu), [`PopupMenuRadioItemComponent`](/components/popup-menu), [`PopupMenuSeparatorComponent`](/components/popup-menu), [`PopupMenuShortcutTemplateDirective`](/components/popup-menu), [`PopupMenuTextTemplateDirective`](/components/popup-menu)
+**Related types:** [`PopupMenuCheckboxItemComponent`](/api/popup-menu/PopupMenuCheckboxItemComponent), [`PopupMenuGroupComponent`](/api/popup-menu/PopupMenuGroupComponent), [`PopupMenuGroupTemplateDirective`](/api/popup-menu/PopupMenuGroupTemplateDirective), [`PopupMenuIconTemplateDirective`](/api/popup-menu/PopupMenuIconTemplateDirective), [`PopupMenuItem`](/api/popup-menu/PopupMenuItem), [`PopupMenuItemClickEvent`](/api/popup-menu/PopupMenuItemClickEvent), [`PopupMenuItemComponent`](/api/popup-menu/PopupMenuItemComponent), [`PopupMenuRadioGroupComponent`](/api/popup-menu/PopupMenuRadioGroupComponent), [`PopupMenuRadioItemComponent`](/api/popup-menu/PopupMenuRadioItemComponent), [`PopupMenuSeparatorComponent`](/api/popup-menu/PopupMenuSeparatorComponent), [`PopupMenuShortcutTemplateDirective`](/api/popup-menu/PopupMenuShortcutTemplateDirective), [`PopupMenuTextTemplateDirective`](/api/popup-menu/PopupMenuTextTemplateDirective)

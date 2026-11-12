@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/button`.
 
 ### `ButtonDirective`
 
-**Selector:** `button[monaButton]`
+**Selector:** `button[monaButton]`  
+**API reference:** [`ButtonDirective`](/api/button/ButtonDirective)
 
 #### Inputs
 
@@ -42,35 +43,9 @@ Everything below is imported from `@nanahoshi/mona-ui/button`.
 
 ### Types
 
-#### `BUTTON_GROUP_MEMBER`
-
-Provided by a component that implements `ButtonGroupMember`, so a `mona-button-group` can find it among its
-content children.
-
-```typescript
-const BUTTON_GROUP_MEMBER: InjectionToken<ButtonGroupMember>;
-```
-
-#### `ButtonGroupMember`
-
-A component whose own buttons join the `mona-button-group` it is placed in, such as a dropdown or split button.
-Those buttons follow the group's look, size, rounding and disabled state, but they aren't toggleable and take no
-part in the group's selection.
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `groupButtons` (read-only) | `Signal<readonly ButtonDirective[]>` | The component's buttons that join the group. |
-
-#### `ButtonAriaHasPopup`
-
-Values accepted by the `aria-haspopup` input of `ButtonDirective`. `"false"` (the default) omits the attribute.
-
-```typescript
-type ButtonAriaHasPopup = "dialog" | "false" | "grid" | "listbox" | "menu" | "tree" | "true";
-```
-
-#### `ButtonVariantsInput`
-
-```typescript
-type ButtonVariantsInput = VariantInputs<ButtonVariantProps>;
-```
+| [`BUTTON_GROUP_MEMBER`](/api/button/BUTTON_GROUP_MEMBER) | Constant | Provided by a component that implements `ButtonGroupMember`, so a `mona-button-group` can find it among its content children. |
+| [`ButtonGroupMember`](/api/button/ButtonGroupMember) | Interface | A component whose own buttons join the `mona-button-group` it is placed in, such as a dropdown or split button. |
+| [`ButtonAriaHasPopup`](/api/button/ButtonAriaHasPopup) | Type alias | Values accepted by the `aria-haspopup` input of `ButtonDirective`. |
+| [`ButtonVariantsInput`](/api/button/ButtonVariantsInput) | Type alias |  |

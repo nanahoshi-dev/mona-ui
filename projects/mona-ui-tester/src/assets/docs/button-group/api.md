@@ -8,7 +8,8 @@ Everything below is imported from `@nanahoshi/mona-ui/button-group`.
 
 **Selector:** `mona-button-group`  
 **Type parameters:** `T = unknown`  
-**Implements:** `FormValueControl<T \| readonly T[] \| null \| undefined>`
+**Implements:** `FormValueControl<T \| readonly T[] \| null \| undefined>`  
+**API reference:** [`ButtonGroupComponent`](/api/button-group/ButtonGroupComponent)
 
 #### Inputs
 
@@ -44,28 +45,9 @@ Everything below is imported from `@nanahoshi/mona-ui/button-group`.
 
 ### Types
 
-#### `BUTTON_GROUP_DEFAULT_MESSAGES`
-
-```typescript
-const BUTTON_GROUP_DEFAULT_MESSAGES: { buttonGroup: string; };
-```
-
-#### `ButtonGroupClickEvent`
-
-What `mona-button-group` reports about a clicked button.
-
-**Type parameters:** `T = unknown`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `button` (read-only) | `HTMLButtonElement` | The button's element. |
-| `selected` (read-only) | `boolean` | Whether the button is selected now that the group has applied its selection. |
-| `value` (read-only) | `T \| undefined` | The button's `value`, if it has one. |
+| [`BUTTON_GROUP_DEFAULT_MESSAGES`](/api/button-group/BUTTON_GROUP_DEFAULT_MESSAGES) | Constant |  |
+| [`ButtonGroupClickEvent`](/api/button-group/ButtonGroupClickEvent) | Interface | What `mona-button-group` reports about a clicked button. |
 
-#### `SelectionMode`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type SelectionMode = "single" | "multiple";
-```
+**Related types:** [`SelectionMode`](/api/common/SelectionMode)

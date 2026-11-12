@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/list-box`.
 ### `ListBoxComponent`
 
 **Selector:** `mona-list-box`  
-**Type parameters:** `T = unknown`, `K = unknown`
+**Type parameters:** `T = unknown`, `K = unknown`  
+**API reference:** [`ListBoxComponent`](/api/list-box/ListBoxComponent)
 
 #### Inputs
 
@@ -59,7 +60,8 @@ Template for each item of a list box. The data item is the template's implicit v
 box's items to `monaListBoxItemTemplateOf` to type it; without it, the item is `any` in templates.
 
 **Selector:** `ng-template[monaListBoxItemTemplate]`  
-**Type parameters:** `T = any`
+**Type parameters:** `T = any`  
+**API reference:** [`ListBoxItemTemplateDirective`](/api/list-box/ListBoxItemTemplateDirective)
 
 #### Inputs
 
@@ -75,20 +77,24 @@ box's items to `monaListBoxItemTemplateOf` to type it; without it, the item is `
 
 ### `ListBoxFooterTemplateDirective`
 
-**Selector:** `ng-template[monaListBoxFooterTemplate]`
+**Selector:** `ng-template[monaListBoxFooterTemplate]`  
+**API reference:** [`ListBoxFooterTemplateDirective`](/api/list-box/ListBoxFooterTemplateDirective)
 
 ### `ListBoxHeaderTemplateDirective`
 
-**Selector:** `ng-template[monaListBoxHeaderTemplate]`
+**Selector:** `ng-template[monaListBoxHeaderTemplate]`  
+**API reference:** [`ListBoxHeaderTemplateDirective`](/api/list-box/ListBoxHeaderTemplateDirective)
 
 ### `ListBoxNoDataTemplateDirective`
 
-**Selector:** `ng-template[monaListBoxNoDataTemplate]`
+**Selector:** `ng-template[monaListBoxNoDataTemplate]`  
+**API reference:** [`ListBoxNoDataTemplateDirective`](/api/list-box/ListBoxNoDataTemplateDirective)
 
 ### `ListBoxClearEvent`
 
 **Type parameters:** `T = any`  
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`ListBoxClearEvent`](/api/list-box/ListBoxClearEvent)
 
 #### Properties
 
@@ -100,7 +106,8 @@ box's items to `monaListBoxItemTemplateOf` to type it; without it, the item is `
 ### `ListBoxMoveEvent`
 
 **Type parameters:** `T = any`  
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`ListBoxMoveEvent`](/api/list-box/ListBoxMoveEvent)
 
 #### Properties
 
@@ -115,7 +122,8 @@ box's items to `monaListBoxItemTemplateOf` to type it; without it, the item is `
 ### `ListBoxRemoveEvent`
 
 **Type parameters:** `T = any`  
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`ListBoxRemoveEvent`](/api/list-box/ListBoxRemoveEvent)
 
 #### Properties
 
@@ -127,7 +135,8 @@ box's items to `monaListBoxItemTemplateOf` to type it; without it, the item is `
 ### `ListBoxTransferEvent`
 
 **Type parameters:** `T = any`  
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`ListBoxTransferEvent`](/api/list-box/ListBoxTransferEvent)
 
 #### Properties
 
@@ -138,126 +147,14 @@ box's items to `monaListBoxItemTemplateOf` to type it; without it, the item is `
 
 ### Types
 
-#### `LIST_BOX_DEFAULT_MESSAGES`
-
-```typescript
-const LIST_BOX_DEFAULT_MESSAGES: MonaListBoxMessages;
-```
-
-#### `ListBoxItemTemplateContext`
-
-The context of a `monaListBoxItemTemplate`: the data item, as `let-item`.
-
-**Type parameters:** `T = unknown`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `$implicit` (read-only) | `T` | The raw data item being rendered. |
+| [`LIST_BOX_DEFAULT_MESSAGES`](/api/list-box/LIST_BOX_DEFAULT_MESSAGES) | Constant |  |
+| [`ListBoxItemTemplateContext`](/api/list-box/ListBoxItemTemplateContext) | Interface | The context of a `monaListBoxItemTemplate`: the data item, as `let-item`. |
+| [`ListBoxSelectionEvent`](/api/list-box/ListBoxSelectionEvent) | Interface |  |
+| [`ToolbarOptions`](/api/list-box/ToolbarOptions) | Interface |  |
+| [`ListBoxActionEvent`](/api/list-box/ListBoxActionEvent) | Type alias |  |
+| [`ListBoxTransferAction`](/api/list-box/ListBoxTransferAction) | Type alias | The toolbar actions that move items between list boxes. |
+| [`ToolbarAction`](/api/list-box/ToolbarAction) | Type alias |  |
 
-#### `ListBoxSelectionEvent`
-
-**Type parameters:** `T = any`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `deselectedItems` (read-only) | `T[]` | Items that were deselected (read-only). |
-| `selectedItems` (read-only) | `T[]` | Items that are now selected (read-only). |
-
-#### `ToolbarOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `actions` | `ToolbarAction[]` | Which toolbar buttons to show. They appear in a fixed order. |
-| `position` | `Position` | Which side of the list the toolbar renders on; `"right"` and `"left"` are the inline end and start, so they swap in RTL. |
-
-#### `ListBoxActionEvent`
-
-```typescript
-type ListBoxActionEvent<T = any> = ListBoxClearEvent<T> | ListBoxMoveEvent<T> | ListBoxRemoveEvent<T> | ListBoxTransferEvent<T>;
-```
-
-#### `ListBoxTransferAction`
-
-The toolbar actions that move items between list boxes.
-
-```typescript
-type ListBoxTransferAction = Extract<ToolbarAction, "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo">;
-```
-
-#### `ToolbarAction`
-
-```typescript
-type ToolbarAction = "clear" | "moveDown" | "moveUp" | "remove" | "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo";
-```
-
-#### `ListKeySelector`
-
-From `@nanahoshi/mona-ui/list`.
-
-```typescript
-type ListKeySelector<T, K = unknown> = string | Selector<T, K> | null;
-```
-
-#### `MonaListBoxMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `clearSelection` (read-only) | `string` | Label of the Clear Selection toolbar button. |
-| `moveDown` (read-only) | `string` | Label of the Move Down toolbar button. |
-| `moveUp` (read-only) | `string` | Label of the Move Up toolbar button. |
-| `remove` (read-only) | `string` | Label of the Remove toolbar button. |
-| `selectionCleared` (read-only) | `string` | Announced after Clear Selection. |
-| `transferAllFrom` (read-only) | `string` | Label of Transfer All From when the connected list box has no accessible name. |
-| `transferAllTo` (read-only) | `string` | Label of Transfer All To when the connected list box has no accessible name. |
-| `transferFrom` (read-only) | `string` | Label of Transfer From when the connected list box has no accessible name. |
-| `transferTo` (read-only) | `string` | Label of Transfer To when the connected list box has no accessible name. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `itemsMoved(position: number, total: number): string` | Announced after Move Up or Move Down, with the new position of the first moved item ("Moved to position 2 of 5"). |
-| `itemsRemoved(count: number): string` | Announced after Remove, with the number of items removed. |
-| `itemsTransferred(count: number, list: string): string` | Announced after a transfer, with the number of items moved and the name of the list they moved to. |
-| `itemsTransferredToOtherList(count: number): string` | Announced after a transfer to a list box that has no accessible name. |
-| `toolbarLabel(list: string): string` | Accessible name of the toolbar, from the list box's name ("Available foods actions"). |
-| `transferAllFromList(list: string): string` | Label of Transfer All From, naming the connected list box. |
-| `transferAllToList(list: string): string` | Label of Transfer All To, naming the connected list box. |
-| `transferFromList(list: string): string` | Label of Transfer From, naming the connected list box. |
-| `transferToList(list: string): string` | Label of Transfer To, naming the connected list box. |
-
-#### `Position`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type Position = "top" | "right" | "bottom" | "left";
-```
-
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
-
-#### `SelectionMode`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type SelectionMode = "single" | "multiple";
-```
+**Related types:** [`ListKeySelector`](/api/list/ListKeySelector), [`MonaListBoxMessages`](/api/i18n/MonaListBoxMessages), [`Position`](/api/common/Position), [`PreventableEvent`](/api/common/PreventableEvent), [`SelectionMode`](/api/common/SelectionMode)

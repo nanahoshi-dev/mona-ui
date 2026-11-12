@@ -8,7 +8,8 @@ Everything below is imported from `@nanahoshi/mona-ui/multi-select`, `@nanahoshi
 
 **Selector:** `mona-multi-select`  
 **Type parameters:** `TData = unknown`, `TValue = TData`  
-**Implements:** `FormValueControl<Iterable<TValue>>`
+**Implements:** `FormValueControl<Iterable<TValue>>`  
+**API reference:** [`MultiSelectComponent`](/api/multi-select/MultiSelectComponent)
 
 #### Inputs
 
@@ -61,7 +62,8 @@ Everything below is imported from `@nanahoshi/mona-ui/multi-select`, `@nanahoshi
 
 From `@nanahoshi/mona-ui/dropdowns`.
 
-**Selector:** `mona-auto-complete[monaDropDownFilterable], mona-dropdown-list[monaDropDownFilterable], mona-combo-box[monaDropDownFilterable], mona-multi-select[monaDropDownFilterable]`
+**Selector:** `mona-auto-complete[monaDropDownFilterable], mona-dropdown-list[monaDropDownFilterable], mona-combo-box[monaDropDownFilterable], mona-multi-select[monaDropDownFilterable]`  
+**API reference:** [`DropdownFilterableDirective`](/api/dropdowns/DropdownFilterableDirective)
 
 #### Inputs
 
@@ -82,7 +84,8 @@ From `@nanahoshi/mona-ui/dropdowns`.
 From `@nanahoshi/mona-ui/dropdowns`.
 
 **Selector:** `mona-auto-complete[monaDropDownGroupable], mona-combo-box[monaDropDownGroupable], mona-dropdown-list[monaDropDownGroupable], mona-multi-select[monaDropDownGroupable]`  
-**Type parameters:** `TData`
+**Type parameters:** `TData`  
+**API reference:** [`DropdownGroupableDirective`](/api/dropdowns/DropdownGroupableDirective)
 
 #### Inputs
 
@@ -95,7 +98,8 @@ From `@nanahoshi/mona-ui/dropdowns`.
 
 From `@nanahoshi/mona-ui/dropdowns`.
 
-**Selector:** `mona-auto-complete[monaDropDownVirtualScroll], mona-dropdown-list[monaDropDownVirtualScroll], mona-combo-box[monaDropDownVirtualScroll], mona-multi-select[monaDropDownVirtualScroll]`
+**Selector:** `mona-auto-complete[monaDropDownVirtualScroll], mona-dropdown-list[monaDropDownVirtualScroll], mona-combo-box[monaDropDownVirtualScroll], mona-multi-select[monaDropDownVirtualScroll]`  
+**API reference:** [`DropdownVirtualScrollDirective`](/api/dropdowns/DropdownVirtualScrollDirective)
 
 #### Inputs
 
@@ -105,7 +109,8 @@ From `@nanahoshi/mona-ui/dropdowns`.
 
 ### `MultiSelectSummaryTagDirective`
 
-**Selector:** `mona-multi-select[monaMultiSelectSummaryTag]`
+**Selector:** `mona-multi-select[monaMultiSelectSummaryTag]`  
+**API reference:** [`MultiSelectSummaryTagDirective`](/api/multi-select/MultiSelectSummaryTagDirective)
 
 #### Inputs
 
@@ -117,37 +122,43 @@ From `@nanahoshi/mona-ui/dropdowns`.
 
 From `@nanahoshi/mona-ui/dropdowns`.
 
-**Selector:** `[monaDropdownDataHandler]`
+**Selector:** `[monaDropdownDataHandler]`  
+**API reference:** [`DropdownDataHandlerDirective`](/api/dropdowns/DropdownDataHandlerDirective)
 
 ### `DropdownFooterTemplateDirective`
 
 From `@nanahoshi/mona-ui/dropdowns`.
 
-**Selector:** `ng-template[monaDropDownFooterTemplate], ng-template[monaAutoCompleteFooterTemplate], ng-template[monaDropDownListFooterTemplate], ng-template[monaDropDownTreeFooterTemplate], ng-template[monaComboBoxFooterTemplate], ng-template[monaMultiSelectFooterTemplate]`
+**Selector:** `ng-template[monaDropDownFooterTemplate], ng-template[monaAutoCompleteFooterTemplate], ng-template[monaDropDownListFooterTemplate], ng-template[monaDropDownTreeFooterTemplate], ng-template[monaComboBoxFooterTemplate], ng-template[monaMultiSelectFooterTemplate]`  
+**API reference:** [`DropdownFooterTemplateDirective`](/api/dropdowns/DropdownFooterTemplateDirective)
 
 ### `DropdownGroupHeaderTemplateDirective`
 
 From `@nanahoshi/mona-ui/dropdowns`.
 
-**Selector:** `ng-template[monaDropDownGroupHeaderTemplate], ng-template[monaAutoCompleteGroupHeaderTemplate], ng-template[monaDropDownListGroupHeaderTemplate], ng-template[monaComboBoxGroupHeaderTemplate], ng-template[monaMultiSelectGroupHeaderTemplate]`
+**Selector:** `ng-template[monaDropDownGroupHeaderTemplate], ng-template[monaAutoCompleteGroupHeaderTemplate], ng-template[monaDropDownListGroupHeaderTemplate], ng-template[monaComboBoxGroupHeaderTemplate], ng-template[monaMultiSelectGroupHeaderTemplate]`  
+**API reference:** [`DropdownGroupHeaderTemplateDirective`](/api/dropdowns/DropdownGroupHeaderTemplateDirective)
 
 ### `DropdownHeaderTemplateDirective`
 
 From `@nanahoshi/mona-ui/dropdowns`.
 
-**Selector:** `ng-template[monaDropDownHeaderTemplate], ng-template[monaAutoCompleteHeaderTemplate], ng-template[monaDropDownListHeaderTemplate], ng-template[monaDropDownTreeHeaderTemplate], ng-template[monaComboBoxHeaderTemplate], ng-template[monaMultiSelectHeaderTemplate]`
+**Selector:** `ng-template[monaDropDownHeaderTemplate], ng-template[monaAutoCompleteHeaderTemplate], ng-template[monaDropDownListHeaderTemplate], ng-template[monaDropDownTreeHeaderTemplate], ng-template[monaComboBoxHeaderTemplate], ng-template[monaMultiSelectHeaderTemplate]`  
+**API reference:** [`DropdownHeaderTemplateDirective`](/api/dropdowns/DropdownHeaderTemplateDirective)
 
 ### `DropdownItemTemplateDirective`
 
 From `@nanahoshi/mona-ui/dropdowns`.
 
-**Selector:** `ng-template[monaDropDownItemTemplate], ng-template[monaAutoCompleteItemTemplate], ng-template[monaDropDownListItemTemplate], ng-template[monaComboBoxItemTemplate], ng-template[monaMultiSelectItemTemplate]`
+**Selector:** `ng-template[monaDropDownItemTemplate], ng-template[monaAutoCompleteItemTemplate], ng-template[monaDropDownListItemTemplate], ng-template[monaComboBoxItemTemplate], ng-template[monaMultiSelectItemTemplate]`  
+**API reference:** [`DropdownItemTemplateDirective`](/api/dropdowns/DropdownItemTemplateDirective)
 
 ### `DropdownListPopupHandlerDirective`
 
 From `@nanahoshi/mona-ui/dropdowns`.
 
-**Selector:** `[monaDropdownListPopupHandler]`
+**Selector:** `[monaDropdownListPopupHandler]`  
+**API reference:** [`DropdownListPopupHandlerDirective`](/api/dropdowns/DropdownListPopupHandlerDirective)
 
 ### `DropdownLiveRegionDirective`
 
@@ -160,45 +171,53 @@ The announcement goes through the CDK `LiveAnnouncer`, whose live region lives a
 never becomes part of the combobox's content. The highlighted option isn't announced here:
 `aria-activedescendant` already does that.
 
-**Selector:** `[monaDropdownLiveRegion]`
+**Selector:** `[monaDropdownLiveRegion]`  
+**API reference:** [`DropdownLiveRegionDirective`](/api/dropdowns/DropdownLiveRegionDirective)
 
 ### `DropdownNoDataTemplateDirective`
 
 From `@nanahoshi/mona-ui/dropdowns`.
 
-**Selector:** `ng-template[monaDropDownNoDataTemplate], ng-template[monaAutoCompleteNoDataTemplate], ng-template[monaDropDownListNoDataTemplate], ng-template[monaDropDownTreeNoDataTemplate], ng-template[monaComboBoxNoDataTemplate], ng-template[monaMultiSelectNoDataTemplate]`
+**Selector:** `ng-template[monaDropDownNoDataTemplate], ng-template[monaAutoCompleteNoDataTemplate], ng-template[monaDropDownListNoDataTemplate], ng-template[monaDropDownTreeNoDataTemplate], ng-template[monaComboBoxNoDataTemplate], ng-template[monaMultiSelectNoDataTemplate]`  
+**API reference:** [`DropdownNoDataTemplateDirective`](/api/dropdowns/DropdownNoDataTemplateDirective)
 
 ### `DropdownPopupHandlerDirective`
 
 From `@nanahoshi/mona-ui/dropdowns`.
 
-**Selector:** `[monaDropdownPopupHandler]`
+**Selector:** `[monaDropdownPopupHandler]`  
+**API reference:** [`DropdownPopupHandlerDirective`](/api/dropdowns/DropdownPopupHandlerDirective)
 
 ### `DropdownPrefixTemplateDirective`
 
 From `@nanahoshi/mona-ui/dropdowns`.
 
-**Selector:** `ng-template[monaDropdownPrefixTemplate]`
+**Selector:** `ng-template[monaDropdownPrefixTemplate]`  
+**API reference:** [`DropdownPrefixTemplateDirective`](/api/dropdowns/DropdownPrefixTemplateDirective)
 
 ### `DropdownSuffixTemplateDirective`
 
 From `@nanahoshi/mona-ui/dropdowns`.
 
-**Selector:** `ng-template[monaDropdownSuffixTemplate]`
+**Selector:** `ng-template[monaDropdownSuffixTemplate]`  
+**API reference:** [`DropdownSuffixTemplateDirective`](/api/dropdowns/DropdownSuffixTemplateDirective)
 
 ### `MultiSelectSummaryTagTemplateDirective`
 
-**Selector:** `ng-template[monaMultiSelectSummaryTagTemplate]`
+**Selector:** `ng-template[monaMultiSelectSummaryTagTemplate]`  
+**API reference:** [`MultiSelectSummaryTagTemplateDirective`](/api/multi-select/MultiSelectSummaryTagTemplateDirective)
 
 ### `MultiSelectTagTemplateDirective`
 
-**Selector:** `ng-template[monaMultiSelectTagTemplate]`
+**Selector:** `ng-template[monaMultiSelectTagTemplate]`  
+**API reference:** [`MultiSelectTagTemplateDirective`](/api/multi-select/MultiSelectTagTemplateDirective)
 
 ### `DropdownListService`
 
 From `@nanahoshi/mona-ui/dropdowns`.
 
-**Type parameters:** `TData = unknown`
+**Type parameters:** `TData = unknown`  
+**API reference:** [`DropdownListService`](/api/dropdowns/DropdownListService)
 
 #### Properties
 
@@ -208,160 +227,17 @@ From `@nanahoshi/mona-ui/dropdowns`.
 
 ### Types
 
-#### `DROPDOWN_DATA_INPUT_TOKEN`
-
-```typescript
-const DROPDOWN_DATA_INPUT_TOKEN: InjectionToken<DropdownDataInput<unknown>>;
-```
-
-#### `DROPDOWN_POPUP_INPUT_TOKEN`
-
-```typescript
-const DROPDOWN_POPUP_INPUT_TOKEN: InjectionToken<DropdownPopupInput>;
-```
-
-#### `DropdownDataInputToken`
-
-**Deprecated.** Use `DROPDOWN_DATA_INPUT_TOKEN`.
-
-```typescript
-const DropdownDataInputToken: InjectionToken<DropdownDataInput<unknown>>;
-```
-
-#### `dropdownPopupThemeVariants`
-
-```typescript
-const dropdownPopupThemeVariants: (props?: ({ rounded?: "none" | "small" | "medium" | "large" | "full" | null | undefined; size?: "small" | "medium" | "large" | null | undefined; } & ClassProp) | undefined) => string;
-```
-
-#### `DROPDOWNS_DEFAULT_MESSAGES`
-
-```typescript
-const DROPDOWNS_DEFAULT_MESSAGES: MonaDropdownsMessages;
-```
-
-#### `MULTI_SELECT_DEFAULT_MESSAGES`
-
-```typescript
-const MULTI_SELECT_DEFAULT_MESSAGES: MonaMultiSelectMessages;
-```
-
-#### `DropdownDataInput`
-
-**Type parameters:** `TData`
-
-| Name | Type |
-| --- | --- |
-| `data` (read-only) | `InputSignal<Iterable<TData>>` |
-| `itemDisabled` (read-only) | `InputSignal<DropdownFieldPredicateType<TData>>` |
-| `textField` (read-only) | `InputSignal<DropdownFieldSelectorType<TData, string>>` |
-| `valueField` (read-only) | `InputSignal<DropdownFieldSelectorType<TData, unknown>>` |
-
-#### `DropdownPopupInput`
-
-| Name | Type |
-| --- | --- |
-| `close` (read-only) | `OutputEmitterRef<PopupCloseEvent>` |
-| `closed` (read-only) | `OutputEmitterRef<void>` |
-| `disabled` (read-only) | `Signal<boolean>` |
-| `open` (read-only) | `OutputEmitterRef<PreventableEvent>` |
-| `opened` (read-only) | `OutputEmitterRef<void>` |
-| `popupHeight` (read-only) | `InputSignal<ListSizeInputType>` |
-| `popupWidth` (read-only) | `InputSignal<ListSizeInputType>` |
-| `readonly` (read-only) | `Signal<boolean>` |
-| `touch` (read-only) | `OutputEmitterRef<void>` |
-
-#### `DropdownFieldPredicateType`
-
-```typescript
-type DropdownFieldPredicateType<TData> = string | Predicate<TData> | null | undefined;
-```
-
-#### `DropdownFieldSelectorType`
-
-```typescript
-type DropdownFieldSelectorType<TData, TResult = unknown> = string | Selector<TData, TResult> | null | undefined;
-```
-
-#### `FilterChangeEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Extends:** `PreventableEvent`
-
-| Name | Type |
-| --- | --- |
-| `filter` (read-only) | `string` |
-
-#### `ListItem`
-
-From `@nanahoshi/mona-ui/list`.
-
-An item of a list, wrapping its data item.
-
-**Type parameters:** `TData`
-
-| Name | Type |
-| --- | --- |
-| `data` (read-only) | `TData` |
-| `header` (read-only) | `string` |
-| `isHeader` (read-only) | `boolean` |
-| `uid` (read-only) | `string` |
-
-#### `ListSizeInputType`
-
-From `@nanahoshi/mona-ui/list`.
-
-```typescript
-type ListSizeInputType = ListSizeType | number;
-```
-
-#### `ListSizeType`
-
-From `@nanahoshi/mona-ui/list`.
-
-A CSS length, or nothing to leave it to the stylesheet.
-
-```typescript
-type ListSizeType = string | null | undefined;
-```
-
-#### `MonaDropdownsMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
-| --- | --- |
-| `itemPosition` (read-only) | `(text: string, position: number, total: number) => string` |
-| `noResultsFound` (read-only) | `string` |
-| `resultsAvailable` (read-only) | `(count: number) => string` |
-
-#### `MonaMultiSelectMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
-| --- | --- |
-| `clear` (read-only) | `string` |
-| `itemsCount` (read-only) | `(count: number) => string` |
-| `removeMoreItems` (read-only) | `(count: number) => string` |
-
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
+| [`DROPDOWN_DATA_INPUT_TOKEN`](/api/dropdowns/DROPDOWN_DATA_INPUT_TOKEN) | Constant |  |
+| [`DROPDOWN_POPUP_INPUT_TOKEN`](/api/dropdowns/DROPDOWN_POPUP_INPUT_TOKEN) | Constant |  |
+| [`DropdownDataInputToken`](/api/dropdowns/DropdownDataInputToken) | Constant | **Deprecated.** Use `DROPDOWN_DATA_INPUT_TOKEN`. |
+| [`dropdownPopupThemeVariants`](/api/dropdowns/dropdownPopupThemeVariants) | Constant |  |
+| [`DROPDOWNS_DEFAULT_MESSAGES`](/api/dropdowns/DROPDOWNS_DEFAULT_MESSAGES) | Constant |  |
+| [`MULTI_SELECT_DEFAULT_MESSAGES`](/api/multi-select/MULTI_SELECT_DEFAULT_MESSAGES) | Constant |  |
+| [`DropdownDataInput`](/api/dropdowns/DropdownDataInput) | Interface |  |
+| [`DropdownPopupInput`](/api/dropdowns/DropdownPopupInput) | Interface |  |
+| [`DropdownFieldPredicateType`](/api/dropdowns/DropdownFieldPredicateType) | Type alias |  |
+| [`DropdownFieldSelectorType`](/api/dropdowns/DropdownFieldSelectorType) | Type alias |  |
 
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
-
-**Documented elsewhere:** [`FilterableOptions`](/components/grid-sorting-filtering), [`GroupableOptions`](/components/list-view), [`PopupCloseEvent`](/components/popup), [`VirtualScrollOptions`](/components/list-view)
+**Related types:** [`FilterableOptions`](/api/common/FilterableOptions), [`FilterChangeEvent`](/api/common/FilterChangeEvent), [`GroupableOptions`](/api/grid/GroupableOptions), [`ListItem`](/api/list/ListItem), [`ListSizeInputType`](/api/list/ListSizeInputType), [`ListSizeType`](/api/list/ListSizeType), [`MonaDropdownsMessages`](/api/i18n/MonaDropdownsMessages), [`MonaMultiSelectMessages`](/api/i18n/MonaMultiSelectMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`PreventableEvent`](/api/common/PreventableEvent), [`VirtualScrollOptions`](/api/common/VirtualScrollOptions)

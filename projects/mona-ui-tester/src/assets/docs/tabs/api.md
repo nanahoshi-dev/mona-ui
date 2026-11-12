@@ -6,7 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/tabs`.
 
 ### `TabsComponent`
 
-**Selector:** `mona-tabs`
+**Selector:** `mona-tabs`  
+**API reference:** [`TabsComponent`](/api/tabs/TabsComponent)
 
 #### Inputs
 
@@ -32,7 +33,8 @@ Everything below is imported from `@nanahoshi/mona-ui/tabs`.
 
 ### `TabComponent`
 
-**Selector:** `mona-tab`
+**Selector:** `mona-tab`  
+**API reference:** [`TabComponent`](/api/tabs/TabComponent)
 
 #### Inputs
 
@@ -51,15 +53,18 @@ Everything below is imported from `@nanahoshi/mona-ui/tabs`.
 
 ### `TabContentTemplateDirective`
 
-**Selector:** `ng-template[monaTabContentTemplate]`
+**Selector:** `ng-template[monaTabContentTemplate]`  
+**API reference:** [`TabContentTemplateDirective`](/api/tabs/TabContentTemplateDirective)
 
 ### `TabTitleTemplateDirective`
 
-**Selector:** `ng-template[monaTabTitleTemplate]`
+**Selector:** `ng-template[monaTabTitleTemplate]`  
+**API reference:** [`TabTitleTemplateDirective`](/api/tabs/TabTitleTemplateDirective)
 
 ### `TabCloseEvent`
 
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`TabCloseEvent`](/api/tabs/TabCloseEvent)
 
 #### Properties
 
@@ -70,7 +75,8 @@ Everything below is imported from `@nanahoshi/mona-ui/tabs`.
 
 ### `TabSelectEvent`
 
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`TabSelectEvent`](/api/tabs/TabSelectEvent)
 
 #### Properties
 
@@ -80,42 +86,9 @@ Everything below is imported from `@nanahoshi/mona-ui/tabs`.
 
 ### Types
 
-#### `TABS_DEFAULT_MESSAGES`
-
-```typescript
-const TABS_DEFAULT_MESSAGES: MonaTabsMessages;
-```
-
-#### `TabsPosition`
-
-```typescript
-type TabsPosition = | "top" | "bottom" | "left" | "right";
-```
-
-#### `MonaTabsMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `closeTab` (read-only) | `string` |
-| `scrollNext` (read-only) | `string` |
-| `scrollPrevious` (read-only) | `string` |
+| [`TABS_DEFAULT_MESSAGES`](/api/tabs/TABS_DEFAULT_MESSAGES) | Constant |
+| [`TabsPosition`](/api/tabs/TabsPosition) | Type alias |
 
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
+**Related types:** [`MonaTabsMessages`](/api/i18n/MonaTabsMessages), [`PreventableEvent`](/api/common/PreventableEvent)

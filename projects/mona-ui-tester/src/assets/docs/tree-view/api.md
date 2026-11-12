@@ -7,7 +7,8 @@ Everything below is imported from `@nanahoshi/mona-ui/tree-view`.
 ### `TreeViewComponent`
 
 **Selector:** `mona-tree-view`  
-**Type parameters:** `T`
+**Type parameters:** `T`  
+**API reference:** [`TreeViewComponent`](/api/tree-view/TreeViewComponent)
 
 #### Inputs
 
@@ -44,7 +45,8 @@ Everything below is imported from `@nanahoshi/mona-ui/tree-view`.
 
 **Selector:** `mona-tree-view[monaTreeViewCheckable]`  
 **Exported as:** `monaTreeViewCheckable`  
-**Type parameters:** `T`, `K = T`
+**Type parameters:** `T`, `K = T`  
+**API reference:** [`TreeViewCheckableDirective`](/api/tree-view/TreeViewCheckableDirective)
 
 #### Inputs
 
@@ -66,7 +68,8 @@ Everything below is imported from `@nanahoshi/mona-ui/tree-view`.
 
 **Selector:** `mona-tree-view[monaTreeViewExpandable]`  
 **Exported as:** `monaTreeViewExpandable`  
-**Type parameters:** `T`, `K = T`
+**Type parameters:** `T`, `K = T`  
+**API reference:** [`TreeViewExpandableDirective`](/api/tree-view/TreeViewExpandableDirective)
 
 #### Inputs
 
@@ -88,7 +91,8 @@ Everything below is imported from `@nanahoshi/mona-ui/tree-view`.
 
 **Selector:** `mona-tree-view[monaTreeViewSelectable]`  
 **Exported as:** `monaTreeViewSelectable`  
-**Type parameters:** `T`, `K = T`
+**Type parameters:** `T`, `K = T`  
+**API reference:** [`TreeViewSelectableDirective`](/api/tree-view/TreeViewSelectableDirective)
 
 #### Inputs
 
@@ -110,7 +114,8 @@ Everything below is imported from `@nanahoshi/mona-ui/tree-view`.
 
 **Selector:** `mona-tree-view[monaTreeViewDragAndDrop]`  
 **Exported as:** `monaTreeViewDragAndDrop`  
-**Type parameters:** `T`
+**Type parameters:** `T`  
+**API reference:** [`TreeViewDragAndDropDirective`](/api/tree-view/TreeViewDragAndDropDirective)
 
 #### Inputs
 
@@ -131,7 +136,8 @@ Everything below is imported from `@nanahoshi/mona-ui/tree-view`.
 
 **Selector:** `mona-tree-view[monaTreeViewFilterable]`  
 **Exported as:** `monaTreeViewFilterable`  
-**Type parameters:** `T`
+**Type parameters:** `T`  
+**API reference:** [`TreeViewFilterableDirective`](/api/tree-view/TreeViewFilterableDirective)
 
 #### Inputs
 
@@ -152,7 +158,8 @@ Everything below is imported from `@nanahoshi/mona-ui/tree-view`.
 
 **Selector:** `mona-tree-view[monaTreeViewDisable]`  
 **Exported as:** `monaTreeViewDisable`  
-**Type parameters:** `T`, `K = T`
+**Type parameters:** `T`, `K = T`  
+**API reference:** [`TreeViewDisableDirective`](/api/tree-view/TreeViewDisableDirective)
 
 #### Inputs
 
@@ -169,7 +176,8 @@ element is `element`. Bind the tree view's data to `monaTreeViewNodeTemplateOf` 
 the data item is `any` in templates.
 
 **Selector:** `ng-template[monaTreeViewNodeTemplate]`  
-**Type parameters:** `T = any`
+**Type parameters:** `T = any`  
+**API reference:** [`TreeViewNodeTemplateDirective`](/api/tree-view/TreeViewNodeTemplateDirective)
 
 #### Inputs
 
@@ -187,7 +195,8 @@ the data item is `any` in templates.
 ### `NodeCheckEvent`
 
 **Type parameters:** `T`  
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`NodeCheckEvent`](/api/tree-view/NodeCheckEvent)
 
 #### Properties
 
@@ -198,7 +207,8 @@ the data item is `any` in templates.
 ### `NodeClickEvent`
 
 **Type parameters:** `T`  
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`NodeClickEvent`](/api/tree-view/NodeClickEvent)
 
 #### Properties
 
@@ -208,7 +218,8 @@ the data item is `any` in templates.
 
 ### `NodeDragEndEvent`
 
-**Type parameters:** `T`
+**Type parameters:** `T`  
+**API reference:** [`NodeDragEndEvent`](/api/tree-view/NodeDragEndEvent)
 
 #### Properties
 
@@ -218,7 +229,8 @@ the data item is `any` in templates.
 
 ### `NodeDragEvent`
 
-**Type parameters:** `T`
+**Type parameters:** `T`  
+**API reference:** [`NodeDragEvent`](/api/tree-view/NodeDragEvent)
 
 #### Properties
 
@@ -231,7 +243,8 @@ the data item is `any` in templates.
 
 ### `NodeDragStartEvent`
 
-**Type parameters:** `T`
+**Type parameters:** `T`  
+**API reference:** [`NodeDragStartEvent`](/api/tree-view/NodeDragStartEvent)
 
 #### Properties
 
@@ -244,7 +257,8 @@ the data item is `any` in templates.
 A request to move a node: a drop, or a keyboard move (Ctrl+Shift+Arrow), whose original event is then the
 `KeyboardEvent`.
 
-**Type parameters:** `T`
+**Type parameters:** `T`  
+**API reference:** [`NodeDropEvent`](/api/tree-view/NodeDropEvent)
 
 #### Properties
 
@@ -259,7 +273,8 @@ A request to move a node: a drop, or a keyboard move (Ctrl+Shift+Arrow), whose o
 ### `NodeSelectEvent`
 
 **Type parameters:** `T`  
-**Extends:** `PreventableEvent`
+**Extends:** `PreventableEvent`  
+**API reference:** [`NodeSelectEvent`](/api/tree-view/NodeSelectEvent)
 
 #### Properties
 
@@ -272,7 +287,8 @@ A request to move a node: a drop, or a keyboard move (Ctrl+Shift+Arrow), whose o
 A node of a tree, wrapping its data item. Read `data`, `uid` and `nodeItem`; the tree keeps the rest, and writing to it
 would put the node out of step with the tree.
 
-**Type parameters:** `T`
+**Type parameters:** `T`  
+**API reference:** [`TreeNode`](/api/tree-view/TreeNode)
 
 #### Properties
 
@@ -286,6 +302,8 @@ would put the node out of step with the tree.
 
 Moves a node within a generic flat tree structure that uses parentId references.
 
+**API reference:** [`moveFlatTreeNode`](/api/tree-view/moveFlatTreeNode)
+
 ```typescript
 function moveFlatTreeNode<T extends object>(treeData: Iterable<T>, event: NodeDropEvent<T>, idKey: keyof T, parentIdKey: keyof T): T[];
 ```
@@ -294,212 +312,34 @@ function moveFlatTreeNode<T extends object>(treeData: Iterable<T>, event: NodeDr
 
 Moves a node within a generic hierarchical tree structure.
 
+**API reference:** [`moveTreeNode`](/api/tree-view/moveTreeNode)
+
 ```typescript
 function moveTreeNode<T extends object>(treeData: Iterable<T>, event: NodeDropEvent<T>, idKey: keyof T, childrenKey: keyof T): T[];
 ```
 
 ### Types
 
-#### `TREE_VIEW_DEFAULT_MESSAGES`
-
-```typescript
-const TREE_VIEW_DEFAULT_MESSAGES: MonaTreeViewMessages;
-```
-
-#### `ITreeView`
-
-**Type parameters:** `T`
-
-**Methods**
-
-| Signature |
-| --- |
-| `moveNode(source: NodeItem<T>, target: NodeItem<T>, position: DropPosition): NodeMoveSnapshot \| null` |
-| `undoMoveNode(snapshot: NodeMoveSnapshot): void` |
-
-#### `CheckableOptions`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `checkChildren?` | `boolean` | Determines whether checking a node should also check its children. Only applicable when `mode` is set to `multiple`. |
-| `checkDisabledChildren?` | `boolean` | Determines whether checking a node should also check its disabled children. Only applicable when `mode` is set to `multiple`. |
-| `checkParents?` | `boolean` | Determines whether checking a node should also check its parents. Only applicable when `mode` is set to `multiple`. |
-| `childrenOnly?` | `boolean` | Determines whether only the children of the node should be checkable. |
-| `enabled?` | `boolean` | Determines if the checkboxes are enabled. |
-| `mode?` | `"multiple" \| "single"` | Specifies the check mode. |
+| [`TREE_VIEW_DEFAULT_MESSAGES`](/api/tree-view/TREE_VIEW_DEFAULT_MESSAGES) | Constant |  |
+| [`ITreeView`](/api/tree-view/ITreeView) | Interface |  |
+| [`CheckableOptions`](/api/tree-view/CheckableOptions) | Interface |  |
+| [`ChildrenLoadErrorEvent`](/api/tree-view/ChildrenLoadErrorEvent) | Interface | Reports that the children of a node couldn't be loaded from an asynchronous children selector. |
+| [`DisableOptions`](/api/tree-view/DisableOptions) | Interface |  |
+| [`DraggableOptions`](/api/tree-view/DraggableOptions) | Interface |  |
+| [`DropPositionChangeEvent`](/api/tree-view/DropPositionChangeEvent) | Interface |  |
+| [`ExpandableOptions`](/api/tree-view/ExpandableOptions) | Interface |  |
+| [`MultipleSelectionConfig`](/api/tree-view/MultipleSelectionConfig) | Interface |  |
+| [`NodeItem`](/api/tree-view/NodeItem) | Interface |  |
+| [`NodeMoveSnapshot`](/api/tree-view/NodeMoveSnapshot) | Interface |  |
+| [`SingleSelectionConfig`](/api/tree-view/SingleSelectionConfig) | Interface |  |
+| [`TreeViewNodeTemplateContext`](/api/tree-view/TreeViewNodeTemplateContext) | Interface | The context of a `monaTreeViewNodeTemplate`. |
+| [`ChildrenSelector`](/api/tree-view/ChildrenSelector) | Type alias |  |
+| [`DataStructure`](/api/tree-view/DataStructure) | Type alias |  |
+| [`DropPosition`](/api/tree-view/DropPosition) | Type alias |  |
+| [`NodeDropOriginalEvent`](/api/tree-view/NodeDropOriginalEvent) | Type alias | The event behind a `nodeDrop`: the pointer event of a drop, or the key press of a keyboard move. |
+| [`NodeKeySelector`](/api/tree-view/NodeKeySelector) | Type alias |  |
+| [`SelectableOptions`](/api/tree-view/SelectableOptions) | Type alias |  |
 
-#### `ChildrenLoadErrorEvent`
-
-Reports that the children of a node couldn't be loaded from an asynchronous children selector. The node is
-collapsed again, and expanding it retries the load.
-
-**Type parameters:** `T`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `error` (read-only) | `unknown` | What the children observable errored with. |
-| `node` (read-only) | `NodeItem<T>` | The node whose children failed to load. |
-
-#### `DisableOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `disableChildren` | `boolean` | Determines whether the children of the node should be disabled as well. |
-| `enabled` | `boolean` | Determines if the disabling is enabled. |
-
-#### `DraggableOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `enabled` | `boolean` | Determines if the dragging is enabled. |
-
-#### `DropPositionChangeEvent`
-
-**Type parameters:** `T`
-
-| Name | Type |
-| --- | --- |
-| `position` | `DropPosition` |
-| `targetNode` | `TreeNode<T> \| null` |
-
-#### `ExpandableOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `enabled` | `boolean` | Determines if the expanding is enabled. |
-
-#### `MultipleSelectionConfig`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `mode` | `"multiple"` | Allows multiple items to be selected simultaneously. |
-
-#### `NodeItem`
-
-**Type parameters:** `T`
-
-| Name | Type |
-| --- | --- |
-| `data` | `T` |
-| `hasChildren` | `boolean` |
-| `uid` | `string` |
-
-#### `NodeMoveSnapshot`
-
-| Name | Type |
-| --- | --- |
-| `originalIndex` (read-only) | `number` |
-| `originalParentUid` (read-only) | `string \| null` |
-| `sourceNodeUid` (read-only) | `string` |
-
-#### `SingleSelectionConfig`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `mode` | `"single"` | Allows only one item to be selected at a time. |
-| `toggleable?` | `boolean` | Determines if clicking an already selected item will deselect it. |
-
-#### `TreeViewNodeTemplateContext`
-
-The context of a `monaTreeViewNodeTemplate`.
-
-**Type parameters:** `T`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` (read-only) | `T` | The node's data item (`let-dataItem`). |
-| `element` (read-only) | `HTMLElement` | The node's element (`let-element="element"`). |
-
-#### `ChildrenSelector`
-
-```typescript
-type ChildrenSelector<T> = string | Selector<T, Iterable<T> | Observable<Iterable<T>>>;
-```
-
-#### `DataStructure`
-
-```typescript
-type DataStructure = "flat" | "hierarchical";
-```
-
-#### `DropPosition`
-
-```typescript
-type DropPosition = "before" | "after" | "inside" | "outside";
-```
-
-#### `NodeDropOriginalEvent`
-
-The event behind a `nodeDrop`: the pointer event of a drop, or the key press of a keyboard move.
-
-```typescript
-type NodeDropOriginalEvent = MouseEvent | TouchEvent | KeyboardEvent;
-```
-
-#### `NodeKeySelector`
-
-```typescript
-type NodeKeySelector<T, K = unknown> = string | Selector<T, K> | null;
-```
-
-#### `SelectableOptions`
-
-```typescript
-type SelectableOptions = { enabled: boolean; childrenOnly: boolean; } & (SingleSelectionConfig | MultipleSelectionConfig);
-```
-
-#### `FilterChangeEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Extends:** `PreventableEvent`
-
-| Name | Type |
-| --- | --- |
-| `filter` (read-only) | `string` |
-
-#### `MonaTreeViewMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `collapse` (read-only) | `string` | Start of an expanded node's expander name, followed by the node's text ("Collapse Documents"). |
-| `expand` (read-only) | `string` | Start of a collapsed node's expander name, followed by the node's text ("Expand Documents"). |
-| `filter` (read-only) | `string` | **Deprecated.** No longer rendered; the filter input's name comes from `filterLabel`. |
-| `filterTree` (read-only) | `string` | Accessible name of the filter input when the tree view has no `aria-label`. |
-| `noData` (read-only) | `string` | Shown, and describes the tree, when the tree view has no data. |
-| `noMatches` (read-only) | `string` | Shown, describes the tree and is announced, when no node matches the filter. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `filterLabel(tree: string): string` | Accessible name of the filter input, from the tree view's name ("Filter Files"). |
-| `loadError(node: string): string` | Announced, and read with the node, when a node's children couldn't be loaded. |
-| `loadingNode(node: string): string` | Announced while a node's children take a while to load, and the expander's name meanwhile. |
-| `movedAfter(node: string, target: string): string` | Announced when a keyboard move (Ctrl+Shift+Arrow) put a node after another node. |
-| `movedBefore(node: string, target: string): string` | Announced when a keyboard move put a node before another node. |
-| `movedInto(node: string, target: string): string` | Announced when a keyboard move put a node inside another node, as its last child. |
-| `results(count: number): string` | Announced after the user filters, with the number of nodes that match. |
-| `retryLoading(node: string): string` | Name of the expander of a node whose children couldn't be loaded. |
-
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
-
-**Documented elsewhere:** [`FilterableOptions`](/components/grid-sorting-filtering)
+**Related types:** [`FilterableOptions`](/api/common/FilterableOptions), [`FilterChangeEvent`](/api/common/FilterChangeEvent), [`MonaTreeViewMessages`](/api/i18n/MonaTreeViewMessages), [`PreventableEvent`](/api/common/PreventableEvent)
