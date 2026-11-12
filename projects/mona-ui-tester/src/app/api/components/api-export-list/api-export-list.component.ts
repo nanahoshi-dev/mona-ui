@@ -2,28 +2,12 @@ import { DOCUMENT } from "@angular/common";
 import { Component, DestroyRef, computed, inject, input, signal } from "@angular/core";
 import { RouterLink } from "@angular/router";
 import { LucideCheck, LucideCopy } from "@lucide/angular";
-import type { ApiPageExport, ApiSymbolKind } from "../../api-model";
+import { KIND_HUES } from "../../api-kind-hues";
+import type { ApiPageExport } from "../../api-model";
 import { KIND_LABELS, selectorAlternatives } from "../../api-text";
 import { ApiProseComponent } from "../api-prose/api-prose.component";
 
 const COPIED_FOR_MS = 2000;
-
-/**
- * The hue of each kind. A card mixes it with the theme's background and text colors rather than using it as it is, so
- * the tint stays faint and the label readable in every theme, light or dark.
- */
-const KIND_HUES: Readonly<Record<ApiSymbolKind, string>> = {
-    class: "oklch(60% 0.035 260)",
-    component: "oklch(66% 0.14 235)",
-    constant: "oklch(70% 0.16 50)",
-    directive: "oklch(76% 0.16 75)",
-    enum: "oklch(64% 0.22 330)",
-    function: "oklch(64% 0.2 15)",
-    interface: "oklch(60% 0.18 270)",
-    pipe: "oklch(62% 0.2 300)",
-    service: "oklch(66% 0.15 160)",
-    type: "oklch(66% 0.12 190)"
-};
 
 interface ExportUse {
     /** The use split before each attribute, so a long one wraps between them rather than mid-word. */
@@ -47,8 +31,7 @@ interface ExportCard {
 @Component({
     selector: "app-api-export-list",
     imports: [ApiProseComponent, LucideCheck, LucideCopy, RouterLink],
-    templateUrl: "./api-export-list.component.html",
-    styleUrl: "./api-export-list.component.css"
+    templateUrl: "./api-export-list.component.html"
 })
 export class ApiExportListComponent {
     readonly #document = inject(DOCUMENT);

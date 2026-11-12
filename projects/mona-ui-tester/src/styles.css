@@ -281,6 +281,42 @@ markdown.block {
     }
 }
 
+/*
+ * The API reference tints each kind of export with its hue, which `api-kind-hues.ts` sets as --api-kind, mixed with the
+ * theme's own colors: a faint wash and border, the hue itself on the leading edge, and a label mixed toward the text
+ * color, so it stays readable on a dark theme too. Forced colors drop the tint and draw the borders in the system's text
+ * color, and the label or heading says the kind.
+ */
+.api-kind-card {
+    --api-kind-border: color-mix(in oklab, var(--api-kind) 30%, var(--color-border));
+    background-color: color-mix(in oklab, var(--api-kind) 6%, var(--color-background));
+    border: 1px solid var(--api-kind-border);
+    border-inline-start: 4px solid var(--api-kind);
+    transition: border-color 150ms ease;
+
+    &:hover {
+        --api-kind-border: color-mix(in oklab, var(--api-kind) 55%, var(--color-border));
+    }
+
+    /* A card whose name link covers it keeps the links in its description above that link. */
+    & .api-prose a {
+        position: relative;
+        z-index: 1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+}
+
+.api-kind-label {
+    color: color-mix(in oklab, var(--api-kind) 50%, var(--color-foreground));
+}
+
+.api-kind-dot {
+    background-color: var(--api-kind);
+}
+
 .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;

@@ -1,11 +1,11 @@
 <ul class="space-y-3.5">
     @for (card of cards(); track card.key) {
-        <li class="api-export-card rounded-xl px-4 py-3.5 sm:px-5 sm:py-4" [style.--api-kind]="card.hue">
+        <li class="api-kind-card rounded-xl px-4 py-3.5 sm:px-5 sm:py-4" [style.--api-kind]="card.hue">
             <div class="flex flex-wrap items-start justify-between gap-3 sm:items-center">
                 <div class="flex min-w-0 flex-col items-start gap-1">
                     <span
-                        class="api-export-kind inline-flex items-center gap-1.5 text-[0.625rem] leading-none font-semibold tracking-widest uppercase">
-                        <span class="api-export-dot size-1.5 rounded-full" aria-hidden="true"></span>
+                        class="api-kind-label inline-flex items-center gap-1.5 text-[0.625rem] leading-none font-semibold tracking-widest uppercase">
+                        <span class="api-kind-dot size-1.5 rounded-full" aria-hidden="true"></span>
                         {{ card.label }}
                     </span>
                     <a
