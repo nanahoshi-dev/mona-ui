@@ -551,8 +551,17 @@ function readConstant(name: string, declaration: VariableDeclaration): ApiSymbol
     };
 }
 
+/**
+ * Whether an export is marked to stay out of the docs. A constant's comment is on its statement, and an overloaded
+ * function's on its first signature, as their descriptions are.
+ */
 function isInternal(declaration: Node): boolean {
-    return Node.isJSDocable(declaration) && readDoc(declaration).internal;
+    const documented = Node.isVariableDeclaration(declaration)
+        ? declaration.getVariableStatement()
+        : Node.isFunctionDeclaration(declaration)
+          ? (declaration.getOverloads().at(0) ?? declaration)
+          : declaration;
+    return documented !== undefined && Node.isJSDocable(documented) && readDoc(documented).internal;
 }
 
 /** Reads everything a `public-api.ts` exports. A name exported as both a type and a value appears once. */
@@ -561,7 +570,7 @@ export function readEntryPoint(sourceFile: SourceFile, isPublicClass: IsPublicCl
     for (const [name, declarations] of sourceFile.getExportedDeclarations()) {
         const declaration = declarations.at(0);
         // Styling exports are derived from the inputs, which the reference already lists.
-        if (!declaration || isInternal(declaration) || /Variant(Input|Props)$/.test(name)) {
+        if (!declaration || isInternal(declaration) || /Variants?(Input|Props)$/.test(name)) {
             continue;
         }
         if (declaration instanceof ClassDeclaration) {

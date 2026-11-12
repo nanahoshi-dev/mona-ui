@@ -15,4 +15,3 @@ Everything below is imported from `@nanahoshi/mona-ui/button`. Each name links t
 | [`BUTTON_GROUP_MEMBER`](/api/button/BUTTON_GROUP_MEMBER) | Constant | Provided by a component that implements `ButtonGroupMember`, so a `mona-button-group` can find it among its content children. |
 | [`ButtonGroupMember`](/api/button/ButtonGroupMember) | Interface | A component whose own buttons join the `mona-button-group` it is placed in, such as a dropdown or split button. |
 | [`ButtonAriaHasPopup`](/api/button/ButtonAriaHasPopup) | Type alias | Values accepted by the `aria-haspopup` input of `ButtonDirective`. |
-| [`ButtonVariantsInput`](/api/button/ButtonVariantsInput) | Type alias |  |

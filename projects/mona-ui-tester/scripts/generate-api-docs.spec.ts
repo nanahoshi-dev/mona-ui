@@ -207,6 +207,26 @@ describe("readEntryPoint", () => {
         expect(symbol.templateContext?.members[0].description).toBe("The item.");
     });
 
+    it("leaves out a hidden constant, overloaded function or class, and a plural styling type", () => {
+        const symbols = readSource(`
+            /** @hidden Shared with other entry points. */
+            export const DEMO_TOKEN = "demo";
+            /** @hidden Shared with other entry points. */
+            export function share(value: string): string;
+            export function share(value: number): number;
+            export function share(value: unknown): unknown {
+                return value;
+            }
+            /** @hidden Shared with other entry points. */
+            export class DemoService {}
+            export type DemoVariantsInput = { size?: string };
+            /** Shown. */
+            export const DEMO_SHOWN = "shown";
+        `);
+
+        expect(symbols.map(symbol => symbol.name)).toEqual(["DEMO_SHOWN"]);
+    });
+
     it("reads types and leaves out internal and styling exports", () => {
         const symbols = readSource(`
             /** A position. */
