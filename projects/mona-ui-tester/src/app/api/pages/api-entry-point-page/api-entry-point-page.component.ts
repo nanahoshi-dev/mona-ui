@@ -2,8 +2,7 @@ import { DOCUMENT } from "@angular/common";
 import { Component, DestroyRef, computed, inject, linkedSignal, signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { ActivatedRoute, RouterLink } from "@angular/router";
-import { LucideArrowRight, LucideBookOpen, LucideCheck, LucideCopy, LucideSearch } from "@lucide/angular";
-import { TextBoxComponent, TextBoxPrefixTemplateDirective } from "@nanahoshi/mona-ui/text-box";
+import { LucideArrowRight, LucideBookOpen, LucideCheck, LucideCopy } from "@lucide/angular";
 import { catchError, map, of, startWith, switchMap } from "rxjs";
 import { slugifyHeading } from "../../../layout/docs-heading-id";
 import { KIND_HUES } from "../../api-kind-hues";
@@ -11,6 +10,7 @@ import type { ApiEntryPointReference, ApiSymbolKind } from "../../api-model";
 import { syncPageOutline } from "../../api-outline";
 import { ApiReferenceService } from "../../api-reference.service";
 import { KIND_GROUP_TITLES, KIND_ORDER, PACKAGE_NAME, summarize } from "../../api-text";
+import { ApiFilterBarComponent, type ApiFilterGroup } from "../../components/api-filter-bar/api-filter-bar.component";
 import { ApiProseComponent } from "../../components/api-prose/api-prose.component";
 
 const COPIED_FOR_MS = 2000;
@@ -45,15 +45,13 @@ function matches(symbol: SymbolEntry, query: string): boolean {
 @Component({
     selector: "app-api-entry-point-page",
     imports: [
+        ApiFilterBarComponent,
         ApiProseComponent,
         LucideArrowRight,
         LucideBookOpen,
         LucideCheck,
         LucideCopy,
-        LucideSearch,
-        RouterLink,
-        TextBoxComponent,
-        TextBoxPrefixTemplateDirective
+        RouterLink
     ],
     templateUrl: "./api-entry-point-page.component.html",
     host: {
@@ -66,6 +64,14 @@ export class ApiEntryPointPageComponent {
     readonly #route = inject(ActivatedRoute);
     #copiedTimer: ReturnType<typeof setTimeout> | undefined;
     protected readonly copied = signal(false);
+    protected readonly filterGroups = computed(() =>
+        this.groups().map((group): ApiFilterGroup<ApiSymbolKind> => ({
+            count: group.symbols.length,
+            hue: group.hue,
+            key: group.kind,
+            title: group.title
+        }))
+    );
     protected readonly filterId = "entry-point-filter";
     /** Every kind the entry point exports, in order, with its exports by name. */
     protected readonly groups = computed((): SymbolGroup[] => {
