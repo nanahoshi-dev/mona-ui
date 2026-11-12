@@ -232,6 +232,14 @@ markdown.block {
         border-bottom: 1px solid var(--color-border);
         color: var(--color-muted-foreground);
     }
+
+    /*
+     * A long selector or type has nowhere to break, and would push the table past the page's column. The first
+     * column, which names each row, stays whole.
+     */
+    & td:not(:first-child) code:not(app-example *) {
+        overflow-wrap: anywhere;
+    }
 }
 
 /* Descriptions on the API reference pages, rendered from the library's JSDoc */
