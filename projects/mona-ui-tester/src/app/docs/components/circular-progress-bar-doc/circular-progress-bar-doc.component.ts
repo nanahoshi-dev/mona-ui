@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core";
+import { ApiSectionComponent } from "../../../api/components/api-section/api-section.component";
 import { CircularProgressBarDemoComponent } from "../../../demo/components/circular-progress-bar-demo/circular-progress-bar-demo.component";
 import { MarkdownDocComponent } from "../../../layout/components/markdown-doc/markdown-doc.component";
 
 @Component({
     selector: "app-circular-progress-bar-doc",
-    imports: [CircularProgressBarDemoComponent, MarkdownDocComponent],
+    imports: [ApiSectionComponent, CircularProgressBarDemoComponent, MarkdownDocComponent],
     templateUrl: "./circular-progress-bar-doc.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
