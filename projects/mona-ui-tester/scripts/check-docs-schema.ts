@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { flattenDocsPages } from "../src/app/layout/docs-manifest";
+import { docsPageSlug, flattenDocsPages } from "../src/app/layout/docs-manifest";
 import type { DocsPage } from "../src/app/layout/docs-manifest";
 
 /**
@@ -194,6 +194,11 @@ export function checkManifest(
         if (page.entryPoint && !entryPointExists(page.entryPoint)) {
             problems.push(`Page "${page.path}" names unknown entry point "${page.entryPoint}".`);
         }
+        for (const child of page.children ?? []) {
+            if (!new RegExp(`^${page.path}/[a-z0-9-]+$`).test(child.path)) {
+                problems.push(`Page "${child.path}" is nested under "${page.path}", so its path should be "${page.path}/<name>".`);
+            }
+        }
     }
     return problems;
 }
@@ -234,8 +239,8 @@ function main(): void {
             .filter(file => existsSync(file))
             .flatMap(file => extractH2Headings(readFileSync(file, "utf8")));
         const findings = checkComponentPage(headings, /<app-[a-z0-9-]+-demo\b/.test(template));
-        if (!template.includes(generatedApi(page.path))) {
-            problems.push(`Page "${page.path}" doesn't render its generated ${generatedApi(page.path)}.`);
+        if (!template.includes(generatedApi(docsPageSlug(page)))) {
+            problems.push(`Page "${page.path}" doesn't render its generated ${generatedApi(docsPageSlug(page))}.`);
         }
 
         if (findings.length === 0) {

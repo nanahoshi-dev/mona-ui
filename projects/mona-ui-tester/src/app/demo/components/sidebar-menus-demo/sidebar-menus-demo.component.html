@@ -1,0 +1,116 @@
+@let l = layout();
+@let s = sidebar();
+@let i = item();
+@let b = button();
+@let k = skeleton();
+@let itemFeatureData = itemFeatures();
+@let sidebarFeatureData = sidebarFeatures();
+
+<app-parts-demo-container
+    eventsHint="Activate a row, or toggle the sidebar, to see what happens."
+    [eventLog]="eventLog"
+    [parts]="parts()"
+    [(values)]="values">
+    @if (ready()) {
+        <mona-sidebar-layout
+            class="h-112 border border-border"
+            modalScope="layout"
+            [mobileBreakpoint]="l.mobileBreakpoint">
+            <mona-sidebar
+                [collapsible]="s.collapsible"
+                [expanded]="s.expanded"
+                (expandedChange)="onExpandedChange($event)">
+                @if (sidebarFeatureData["search"]?.active) {
+                    <input monaSidebarInput aria-label="Search mail" placeholder="Search" />
+                }
+                <nav monaSidebarContent aria-label="Mail">
+                    <ul monaSidebarMenu>
+                        <li monaSidebarMenuItem [active]="i.active">
+                            <a
+                                monaSidebarMenuButton
+                                href="/mail/inbox"
+                                [closeOnSelect]="b.closeOnSelect"
+                                [disabled]="b.disabled"
+                                [size]="b.size"
+                                [tooltip]="b.tooltip"
+                                (click)="onRowClick($event, 'Inbox')">
+                                <svg lucideInbox aria-hidden="true" [size]="16"></svg>
+                                <span>Inbox</span>
+                            </a>
+                            @if (itemFeatureData["badge"]?.active) {
+                                <span monaSidebarMenuBadge>12</span>
+                            }
+                            @if (itemFeatureData["action"]?.active) {
+                                <button #inboxActions monaSidebarMenuAction aria-label="Inbox actions" type="button">
+                                    <svg lucideEllipsis aria-hidden="true" [size]="14"></svg>
+                                </button>
+                                <mona-popup-menu [target]="inboxActions">
+                                    <mona-popup-menu-item label="Mark all as read"></mona-popup-menu-item>
+                                </mona-popup-menu>
+                            }
+                        </li>
+                        <li monaSidebarMenuItem>
+                            <a
+                                monaSidebarMenuButton
+                                href="/mail/sent"
+                                tooltip="Sent"
+                                (click)="onRowClick($event, 'Sent')">
+                                <svg lucideSend aria-hidden="true" [size]="16"></svg>
+                                <span>Sent</span>
+                            </a>
+                        </li>
+                        <li #projects="monaCollapsible" monaCollapsible monaSidebarMenuItem>
+                            <button monaCollapsibleTrigger monaSidebarMenuButton tooltip="Projects" type="button">
+                                <svg lucideFolder aria-hidden="true" [size]="16"></svg>
+                                <span>Projects</span>
+                                <svg
+                                    class="ms-auto transition-transform"
+                                    lucideChevronRight
+                                    aria-hidden="true"
+                                    [size]="16"
+                                    [style.rotate]="projects.expanded() ? '90deg' : '0deg'"></svg>
+                            </button>
+                            <ul monaCollapsibleContent monaSidebarMenuSub>
+                                <li monaSidebarMenuItem>
+                                    <a
+                                        monaSidebarMenuButton
+                                        href="/projects/website"
+                                        (click)="onRowClick($event, 'Website')">
+                                        Website
+                                    </a>
+                                </li>
+                                <li monaSidebarMenuItem>
+                                    <a
+                                        monaSidebarMenuButton
+                                        href="/projects/mobile"
+                                        (click)="onRowClick($event, 'Mobile app')">
+                                        Mobile app
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul aria-busy="true" monaSidebarMenu>
+                        <li monaSidebarMenuItem>
+                            <mona-sidebar-menu-skeleton
+                                [labelWidth]="k.labelWidth"
+                                [showIcon]="k.showIcon"></mona-sidebar-menu-skeleton>
+                        </li>
+                    </ul>
+                </nav>
+            </mona-sidebar>
+
+            <main class="gap-2 p-4" monaSidebarInset>
+                <button
+                    monaButton
+                    monaSidebarTrigger
+                    aria-label="Toggle sidebar"
+                    look="ghost"
+                    type="button"
+                    [iconOnly]="true">
+                    <svg lucidePanelLeft aria-hidden="true" [size]="16"></svg>
+                </button>
+            </main>
+        </mona-sidebar-layout>
+    }
+</app-parts-demo-container>

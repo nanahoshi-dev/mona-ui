@@ -1,0 +1,33 @@
+<table class="w-full max-w-md text-sm">
+    <caption class="pb-1 text-start font-medium">
+        What injectSidebar() reports
+    </caption>
+    <thead>
+        <tr class="border-b border-border text-start">
+            <th class="py-1 pe-3 text-start font-medium" scope="col">Sidebar</th>
+            <th class="py-1 pe-3 text-start font-medium" scope="col">state</th>
+            <th class="py-1 pe-3 text-start font-medium" scope="col">iconOnly</th>
+            <th class="py-1 pe-3 text-start font-medium" scope="col">compact</th>
+            <th class="py-1 pe-3 text-start font-medium" scope="col">mobileOpen</th>
+            <th class="py-1 text-start font-medium" scope="col"><span class="sr-only">Commands</span></th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (sidebar of sidebars; track sidebar.label) {
+            <tr class="border-b border-border">
+                <th class="py-1 pe-3 text-start font-normal" scope="row">
+                    <code>{{ sidebar.label }}</code>
+                </th>
+                <td class="py-1 pe-3">{{ sidebar.controller.state() }}</td>
+                <td class="py-1 pe-3">{{ sidebar.controller.iconOnly() }}</td>
+                <td class="py-1 pe-3">{{ sidebar.controller.compact() }}</td>
+                <td class="py-1 pe-3">{{ sidebar.controller.mobileOpen() }}</td>
+                <td class="py-1">
+                    <button monaButton look="ghost" size="small" type="button" (click)="sidebar.controller.toggle()">
+                        toggle()<span class="sr-only">, {{ sidebar.label }}</span>
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

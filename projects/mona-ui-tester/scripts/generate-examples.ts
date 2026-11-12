@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { flattenDocsPages } from "../src/app/layout/docs-manifest";
+import { docsPageSlug, flattenDocsPages } from "../src/app/layout/docs-manifest";
 import { readExampleComponent } from "../src/app/layout/example-project";
 
 /**
@@ -135,7 +135,7 @@ function checkReferences(examples: readonly ExampleDescription[], docsRoot: stri
 function main(): void {
     const testerRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
     const examplesRoot = join(testerRoot, "src/app/examples");
-    const pages = new Set(flattenDocsPages().map(page => page.path));
+    const pages = new Set(flattenDocsPages().map(docsPageSlug));
     const { examples, problems } = readExamples(examplesRoot, pages);
     problems.push(...checkReferences(examples, join(testerRoot, "src/assets/docs")));
     if (problems.length > 0) {

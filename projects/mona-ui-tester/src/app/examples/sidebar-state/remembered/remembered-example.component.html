@@ -1,0 +1,26 @@
+<mona-sidebar-layout class="h-72 border border-border" modalScope="layout">
+    <mona-sidebar collapsible="icon" persistKey="mona-docs-remembered-sidebar" [(expanded)]="expanded">
+        <nav monaSidebarContent aria-label="Workspace">
+            <ul monaSidebarMenu>
+                @for (page of pages; track page.label) {
+                    <li monaSidebarMenuItem [active]="$first">
+                        <a
+                            monaSidebarMenuButton
+                            href="/workspace"
+                            [tooltip]="page.label"
+                            (click)="$event.preventDefault()">
+                            <svg aria-hidden="true" [lucideIcon]="page.icon" [size]="16"></svg>
+                            <span>{{ page.label }}</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+        <button monaSidebarRail type="button"></button>
+    </mona-sidebar>
+
+    <div class="gap-3 p-4" monaSidebarInset>
+        <app-sidebar-status></app-sidebar-status>
+        <p class="text-sm">Bound <code>expanded</code>: {{ expanded() }}. Reload the page and it stays this way.</p>
+    </div>
+</mona-sidebar-layout>

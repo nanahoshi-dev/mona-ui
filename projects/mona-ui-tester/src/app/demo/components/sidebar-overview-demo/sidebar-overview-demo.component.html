@@ -1,0 +1,86 @@
+@let l = layout();
+@let s = sidebar();
+@let features = sidebarFeatures();
+
+<app-parts-demo-container
+    eventsHint="Toggle the sidebar with the trigger or the rail to see the event it emits."
+    [eventLog]="eventLog"
+    [parts]="parts()"
+    [(values)]="values">
+    @if (ready()) {
+        <mona-sidebar-layout
+            class="h-112 border border-border"
+            modalScope="layout"
+            [mobileBreakpoint]="l.mobileBreakpoint">
+            <mona-sidebar
+                [aria-label]="s.ariaLabel"
+                [collapsible]="s.collapsible"
+                [iconWidth]="s.iconWidth"
+                [mobileWidth]="s.mobileWidth"
+                [role]="s.role"
+                [side]="s.side"
+                [variant]="s.variant"
+                [width]="s.width"
+                (expandedChange)="eventLog.record('expandedChange', $event)">
+                @if (features["header"]?.active) {
+                    <header monaSidebarHeader>
+                        <ul monaSidebarMenu>
+                            <li monaSidebarMenuItem>
+                                <button monaSidebarMenuButton tooltip="Acme Inc.">
+                                    <svg lucideCommand aria-hidden="true" [size]="16"></svg>
+                                    <span class="font-semibold">Acme Inc.</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </header>
+                }
+                @if (features["separator"]?.active) {
+                    <div monaSidebarSeparator></div>
+                }
+                <nav monaSidebarContent aria-label="Main">
+                    <ul monaSidebarMenu>
+                        @for (page of pages; track page.label) {
+                            <li monaSidebarMenuItem [active]="$first">
+                                <a
+                                    monaSidebarMenuButton
+                                    href="/{{ page.label.toLowerCase() }}"
+                                    [tooltip]="page.label"
+                                    (click)="$event.preventDefault()">
+                                    <svg aria-hidden="true" [lucideIcon]="page.icon" [size]="16"></svg>
+                                    <span>{{ page.label }}</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+                @if (features["footer"]?.active) {
+                    <footer monaSidebarFooter>
+                        <ul monaSidebarMenu>
+                            <li monaSidebarMenuItem>
+                                <button monaSidebarMenuButton size="large" tooltip="Grace Hopper">
+                                    <mona-avatar label="GH" [height]="32" [width]="32"></mona-avatar>
+                                    <span>Grace Hopper</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </footer>
+                }
+                @if (features["rail"]?.active) {
+                    <button monaSidebarRail type="button"></button>
+                }
+            </mona-sidebar>
+
+            <main class="gap-2 p-4" monaSidebarInset>
+                <button
+                    monaButton
+                    monaSidebarTrigger
+                    aria-label="Toggle sidebar"
+                    look="ghost"
+                    type="button"
+                    [iconOnly]="true">
+                    <svg lucidePanelLeft aria-hidden="true" [size]="16"></svg>
+                </button>
+            </main>
+        </mona-sidebar-layout>
+    }
+</app-parts-demo-container>

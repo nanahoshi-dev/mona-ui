@@ -43,6 +43,12 @@ describe("generate-ai-docs", () => {
         );
     });
 
+    it("points a link to a nested page at its file, named with dashes", () => {
+        expect(cleanPageMarkdown("See [state](/components/sidebar/state#where-it-is-kept).")).toBe(
+            "See [state](sidebar-state.md#where-it-is-kept)."
+        );
+    });
+
     it("heads a page with its title, description and entry point", () => {
         const page = renderPage(button, ["## Overview\n\nText"]);
 

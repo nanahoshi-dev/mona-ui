@@ -99,6 +99,11 @@ export interface ComponentConfigFeatureItemOptions<TDropdown = any> {
     active: boolean;
     code?: string;
     clearable?: boolean;
+    /**
+     * Where a parts playground's code sample writes this feature's `code` among its element's content: `"start"` before
+     * everything else, such as a header region, or `"end"` after it, the default.
+     */
+    codePosition?: "end" | "start";
     codeVisible?: boolean;
     description: string;
     /**

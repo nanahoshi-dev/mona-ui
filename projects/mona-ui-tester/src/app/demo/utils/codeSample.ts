@@ -98,31 +98,41 @@ export function buildActiveFeatureAttributes(
  * template feature (e.g. a group header template) is often a sub-feature of a parent toggle like
  * "Grouping" - that has a hand-authored `code` sample and isn't already represented as an
  * attribute by {@link buildActiveFeatureAttributes}. Each block is dedented so it composes
- * cleanly as nested content in the top-level sample.
+ * cleanly as nested content in the top-level sample. Given a `position`, only the features whose
+ * `codePosition` is that one, with `"end"` for those that set none.
  */
 export function buildActiveFeatureContent(
     features: ComponentConfigFeatureItem,
-    metadataInputNames: ReadonlySet<string>
+    metadataInputNames: ReadonlySet<string>,
+    position?: "end" | "start"
 ): string[] {
     const content: string[] = [];
-    collectActiveFeatureContent(features, metadataInputNames, content);
+    collectActiveFeatureContent(features, metadataInputNames, content, position);
     return content;
 }
 
 function collectActiveFeatureContent(
     features: ComponentConfigFeatureItem,
     metadataInputNames: ReadonlySet<string>,
-    content: string[]
+    content: string[],
+    position: "end" | "start" | undefined
 ): void {
     for (const [key, item] of Object.entries(features)) {
         if (!item.active) {
             continue;
         }
-        if (!item.directiveBinding && !metadataInputNames.has(key) && item.code && item.code.trim().length > 0) {
+        const placed = position === undefined || (item.codePosition ?? "end") === position;
+        if (
+            placed &&
+            !item.directiveBinding &&
+            !metadataInputNames.has(key) &&
+            item.code &&
+            item.code.trim().length > 0
+        ) {
             content.push(dedent(item.code));
         }
         if (item.subFeatures) {
-            collectActiveFeatureContent(item.subFeatures, metadataInputNames, content);
+            collectActiveFeatureContent(item.subFeatures, metadataInputNames, content, position);
         }
     }
 }

@@ -1,10 +1,10 @@
 import { Component } from "@angular/core";
-import { SidebarDemoComponent } from "../../../demo/components/sidebar-demo/sidebar-demo.component";
+import { SidebarOverviewDemoComponent } from "../../../demo/components/sidebar-overview-demo/sidebar-overview-demo.component";
 import { MarkdownDocComponent } from "../../../layout/components/markdown-doc/markdown-doc.component";
 
 @Component({
     selector: "app-sidebar-doc",
-    imports: [MarkdownDocComponent, SidebarDemoComponent],
+    imports: [MarkdownDocComponent, SidebarOverviewDemoComponent],
     templateUrl: "./sidebar-doc.component.html"
 })
 export class SidebarDocComponent {}

@@ -20,32 +20,49 @@
     @if (expanded()) {
         <ul class="w-full flex flex-col gap-0.5" [id]="listId">
             @for (page of category().pages; track page.path) {
-                @let current = page === navigation.currentPage();
                 <li>
-                    <a
-                        class="group flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm transition-all cursor-pointer"
-                        [attr.aria-current]="current ? 'page' : null"
-                        [class.bg-selected]="current"
-                        [class.font-medium]="!current"
-                        [class.font-semibold]="current"
-                        [class.forced-colors:bg-[Highlight]]="current"
-                        [class.forced-colors:text-[HighlightText]]="current"
-                        [class.hover:bg-hover]="!current"
-                        [class.hover:text-foreground]="!current"
-                        [class.text-foreground]="current"
-                        [class.text-muted-foreground]="!current"
-                        [routerLink]="['/components', page.path]">
-                        @if (icons[page.path]; as icon) {
-                            <svg
-                                class="text-muted-foreground group-hover:text-foreground group-[.bg-selected]:text-primary transition-colors flex-shrink-0"
-                                aria-hidden="true"
-                                [lucideIcon]="icon"
-                                [size]="16"></svg>
-                        }
-                        <span>{{ page.title }}</span>
-                    </a>
+                    <ng-container
+                        [ngTemplateOutlet]="pageLink"
+                        [ngTemplateOutletContext]="{ $implicit: page }"></ng-container>
+                    @if (page.children?.length) {
+                        <ul class="ms-4 mt-0.5 flex flex-col gap-0.5 border-s border-border ps-2">
+                            @for (child of page.children; track child.path) {
+                                <li>
+                                    <ng-container
+                                        [ngTemplateOutlet]="pageLink"
+                                        [ngTemplateOutletContext]="{ $implicit: child }"></ng-container>
+                                </li>
+                            }
+                        </ul>
+                    }
                 </li>
             }
         </ul>
     }
 </div>
+
+<ng-template #pageLink let-page>
+    @let current = page === navigation.currentPage();
+    <a
+        class="group flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm transition-all cursor-pointer"
+        [attr.aria-current]="current ? 'page' : null"
+        [class.bg-selected]="current"
+        [class.font-medium]="!current"
+        [class.font-semibold]="current"
+        [class.forced-colors:bg-[Highlight]]="current"
+        [class.forced-colors:text-[HighlightText]]="current"
+        [class.hover:bg-hover]="!current"
+        [class.hover:text-foreground]="!current"
+        [class.text-foreground]="current"
+        [class.text-muted-foreground]="!current"
+        [routerLink]="'/components/' + page.path">
+        @if (icons[page.path]; as icon) {
+            <svg
+                class="text-muted-foreground group-hover:text-foreground group-[.bg-selected]:text-primary transition-colors flex-shrink-0"
+                aria-hidden="true"
+                [lucideIcon]="icon"
+                [size]="16"></svg>
+        }
+        <span>{{ page.navTitle ?? page.title }}</span>
+    </a>
+</ng-template>

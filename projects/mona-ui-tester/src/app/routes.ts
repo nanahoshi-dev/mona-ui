@@ -433,6 +433,20 @@ export const routes: Routes = [
                     import("./docs/components/sidebar-doc/sidebar-doc.component").then(m => m.SidebarDocComponent)
             },
             {
+                path: "sidebar/menus",
+                loadComponent: () =>
+                    import("./docs/components/sidebar-menus-doc/sidebar-menus-doc.component").then(
+                        m => m.SidebarMenusDocComponent
+                    )
+            },
+            {
+                path: "sidebar/state",
+                loadComponent: () =>
+                    import("./docs/components/sidebar-state-doc/sidebar-state-doc.component").then(
+                        m => m.SidebarStateDocComponent
+                    )
+            },
+            {
                 path: "sheet",
                 loadComponent: () =>
                     import("./docs/components/sheet-doc/sheet-doc.component").then(m => m.SheetDocComponent)

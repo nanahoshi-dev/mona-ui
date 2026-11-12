@@ -1,0 +1,71 @@
+<mona-sidebar-layout class="h-96 border border-border" modalScope="layout">
+    <mona-sidebar collapsible="icon">
+        <nav monaSidebarContent aria-label="Mail">
+            <div monaSidebarGroup>
+                <div monaSidebarGroupHeader>
+                    <div monaSidebarGroupLabel>Mail</div>
+                    <button monaSidebarGroupAction aria-label="New folder" type="button">
+                        <svg lucideCirclePlus aria-hidden="true" [size]="14"></svg>
+                    </button>
+                </div>
+                <div monaSidebarGroupContent>
+                    <ul monaSidebarMenu>
+                        <li monaSidebarMenuItem [active]="current() === 'Inbox'">
+                            <a monaSidebarMenuButton href="/mail/inbox" tooltip="Inbox" (click)="open($event, 'Inbox')">
+                                <svg lucideInbox aria-hidden="true" [size]="16"></svg>
+                                <span>Inbox</span>
+                            </a>
+                            <span monaSidebarMenuBadge>12</span>
+                            <button #inboxActions monaSidebarMenuAction aria-label="Inbox actions" type="button">
+                                <svg lucideEllipsis aria-hidden="true" [size]="14"></svg>
+                            </button>
+                            <mona-popup-menu [target]="inboxActions">
+                                <mona-popup-menu-item label="Mark all as read"></mona-popup-menu-item>
+                                <mona-popup-menu-item label="Rename"></mona-popup-menu-item>
+                            </mona-popup-menu>
+                        </li>
+                        <li monaSidebarMenuItem [active]="current() === 'Sent'">
+                            <a monaSidebarMenuButton href="/mail/sent" tooltip="Sent" (click)="open($event, 'Sent')">
+                                <svg lucideSend aria-hidden="true" [size]="16"></svg>
+                                <span>Sent</span>
+                            </a>
+                        </li>
+                        <li monaSidebarMenuItem>
+                            <a monaSidebarMenuButton href="/mail/archive" tooltip="Archive" [disabled]="true">
+                                <svg lucideArchive aria-hidden="true" [size]="16"></svg>
+                                <span>Archive</span>
+                            </a>
+                        </li>
+                        <li monaSidebarMenuItem [active]="current() === 'Trash'">
+                            <a monaSidebarMenuButton href="/mail/trash" tooltip="Trash" (click)="open($event, 'Trash')">
+                                <svg lucideTrash2 aria-hidden="true" [size]="16"></svg>
+                                <span>Trash</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div monaSidebarGroup>
+                <div monaSidebarGroupHeader>
+                    <div monaSidebarGroupLabel>Labels</div>
+                </div>
+                <div monaSidebarGroupContent aria-busy="true">
+                    <ul monaSidebarMenu>
+                        @for (width of labelWidths; track $index) {
+                            <li monaSidebarMenuItem>
+                                <mona-sidebar-menu-skeleton [labelWidth]="width"></mona-sidebar-menu-skeleton>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </mona-sidebar>
+
+    <div class="gap-2 p-4" monaSidebarInset>
+        <button monaButton monaSidebarTrigger aria-label="Toggle sidebar" look="ghost" type="button" [iconOnly]="true">
+            <svg lucidePanelLeft aria-hidden="true" [size]="16"></svg>
+        </button>
+        <p class="text-sm">Showing {{ current() }}</p>
+    </div>
+</mona-sidebar-layout>
