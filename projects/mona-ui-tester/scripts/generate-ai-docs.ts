@@ -61,10 +61,13 @@ export function inlineExamples(
     });
 }
 
-/** Points links to the `/api` pages at the reference files, in the folder `base` leads to. */
+/**
+ * Points links to the `/api` pages at the reference files, in the folder `base` leads to. A link to a member goes to
+ * its symbol, since the files list members in tables rather than under headings.
+ */
 function linkApiReference(markdown: string, base: string): string {
     return markdown.replace(
-        /\]\(\/api\/([a-z0-9-]+)(?:\/(\w+))?\)/g,
+        /\]\(\/api\/([a-z0-9-]+)(?:\/(\w+))?(?:#[\w-]*)?\)/g,
         (_link, entryPoint: string, name: string | undefined) =>
             `](${base}${entryPoint}.md${name ? `#${slugifyHeading(name)}` : ""})`
     );

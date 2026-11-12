@@ -62,6 +62,12 @@ describe("generate-ai-docs", () => {
         );
     });
 
+    it("points a link to an API member at its symbol's heading", () => {
+        expect(cleanPageMarkdown("Pass [`items`](/api/menubar/MenuComponent#items).")).toBe(
+            "Pass [`items`](api/menubar.md#menucomponent)."
+        );
+    });
+
     it("points a reference file's links at the files next to it and at the pages one folder up", () => {
         expect(cleanReferenceMarkdown("[Chart](/components/sidebar/state) uses [`Point`](/api/chart/Point).")).toBe(
             "[Chart](../sidebar-state.md) uses [`Point`](chart.md#point)."
