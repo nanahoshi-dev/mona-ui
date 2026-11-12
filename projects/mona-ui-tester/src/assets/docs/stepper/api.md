@@ -2,72 +2,15 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/stepper`.
+Everything below is imported from `@nanahoshi/mona-ui/stepper`. Each name links to its reference page, with every input, output, property and method.
 
-### `StepperComponent`
-
-**Selector:** `mona-stepper`  
-**API reference:** [`StepperComponent`](/api/stepper/StepperComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | Sets the accessible label for the stepper group. |
-| `linear` | `boolean` | `true` | Sets the flow of the stepper. If set to true, the user will only be able to navigate to the previous or the next step. |
-| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | Sets the orientation of the stepper. |
-| `progressAriaLabel` | `string` | `""` | Sets the accessible label for the progress bar element. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"full"` | Sets the roundness of the stepper steps. |
-| `step` (two-way) | `number` | `0` | Sets the active step of the stepper. |
-| `steps` | `Iterable<StepOptions>` | `[]` | Sets the steps of the stepper. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `stepChange` | `number` | Emitted when `step` changes. |
-| `stepSelect` | `StepSelectEvent<unknown>` | Emitted before a click or key changes the step. Call `preventDefault()` to stay on the current step, for example while its form is invalid. It doesn't fire when `step` is written from outside. |
-
-### `StepperIndicatorTemplateDirective`
-
-Marks an ng-template as the custom indicator template for mona-stepper.
-The template context provides the step options, index, active state, and current step index.
-
-**Selector:** `ng-template[monaStepperIndicatorTemplate]`  
-**API reference:** [`StepperIndicatorTemplateDirective`](/api/stepper/StepperIndicatorTemplateDirective)
-
-### `StepperLabelTemplateDirective`
-
-Marks an ng-template as the custom label template for mona-stepper.
-The template context provides the step options, index, active state, and current step index.
-
-**Selector:** `ng-template[monaStepperLabelTemplate]`  
-**API reference:** [`StepperLabelTemplateDirective`](/api/stepper/StepperLabelTemplateDirective)
-
-### `StepperStepTemplateDirective`
-
-Marks an ng-template as the custom step template for mona-stepper.
-When provided, this template replaces the entire default step indicator and label for each step.
-The template context provides the step options, index, active state, and current step index.
-
-**Selector:** `ng-template[monaStepperStepTemplate]`  
-**API reference:** [`StepperStepTemplateDirective`](/api/stepper/StepperStepTemplateDirective)
-
-### `StepSelectEvent`
-
-What `mona-stepper` reports before a click or key changes the step. Call `preventDefault()` to stay on the current step.
-
-**Type parameters:** `T = unknown`  
-**Extends:** `PreventableEvent`  
-**API reference:** [`StepSelectEvent`](/api/stepper/StepSelectEvent)
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` (read-only) | `number` | Zero-based index of the step being selected. |
-| `previousIndex` (read-only) | `number` | Zero-based index of the step that is current now. |
-| `step` (read-only) | `StepOptions<T>` | The options of the step being selected. |
+| [`StepperComponent`](/api/stepper/StepperComponent) | Component |  |
+| [`StepperIndicatorTemplateDirective`](/api/stepper/StepperIndicatorTemplateDirective) | Directive | Marks an ng-template as the custom indicator template for mona-stepper. |
+| [`StepperLabelTemplateDirective`](/api/stepper/StepperLabelTemplateDirective) | Directive | Marks an ng-template as the custom label template for mona-stepper. |
+| [`StepperStepTemplateDirective`](/api/stepper/StepperStepTemplateDirective) | Directive | Marks an ng-template as the custom step template for mona-stepper. |
+| [`StepSelectEvent`](/api/stepper/StepSelectEvent) | Class | What `mona-stepper` reports before a click or key changes the step. |
 
 ### Types
 

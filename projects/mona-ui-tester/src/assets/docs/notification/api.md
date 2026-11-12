@@ -2,30 +2,12 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/notification`.
+Everything below is imported from `@nanahoshi/mona-ui/notification`. Each name links to its reference page, with every input, output, property and method.
 
-### `NotificationService`
-
-**API reference:** [`NotificationService`](/api/notification/NotificationService)
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `hide(id: string): void` | Closes the notification with the given `id`, wherever its container is positioned. No-op if no notification with that `id` is currently shown. |
-| `hideAll(): void` | Closes every currently visible notification, across all positions. |
-| `show(options: NotificationOptions): NotificationRef` | Creates a notification and returns a `NotificationRef`. If a notification with the same `id` already exists at the resolved `position`, returns a ref to that existing notification instead of creating a duplicate. |
-
-### `provideNotificationDefaults`
-
-Sets application-wide notification behavior: whether timed notifications close on their own, how much longer they
-stay, how many show at once, and whether the countdown pauses while the window is in the background.
-
-**API reference:** [`provideNotificationDefaults`](/api/notification/provideNotificationDefaults)
-
-```typescript
-function provideNotificationDefaults(defaults: Partial<NotificationDefaults>): EnvironmentProviders;
-```
+| Name | Kind | Description |
+| --- | --- | --- |
+| [`NotificationService`](/api/notification/NotificationService) | Service |  |
+| [`provideNotificationDefaults`](/api/notification/provideNotificationDefaults) | Function | Sets application-wide notification behavior: whether timed notifications close on their own, how much longer they stay, how many show at once, and whether the countdown pauses while the window is in the background. |
 
 ### Types
 

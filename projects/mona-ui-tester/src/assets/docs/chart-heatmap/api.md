@@ -2,48 +2,11 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/chart`.
+Everything below is imported from `@nanahoshi/mona-ui/chart`. Each name links to its reference page, with every input, output, property and method.
 
-### `HeatmapSeriesComponent`
-
-Renders a matrix of cells colored by value, with a color scale in the legend.
-
-**Selector:** `mona-heatmap-series`  
-**API reference:** [`HeatmapSeriesComponent`](/api/chart/HeatmapSeriesComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `borderRadius` | `number \| undefined` | `undefined` | Corner radius in pixels for each individual heat cell. |
-| `cellGap` | `number` | `1` | Spacing gap in pixels between adjacent cells. |
-| `class` | `string` | `""` | Additional CSS classes applied to the series host element. |
-| `color` | `string` | `""` | Explicit primary base color used to derive the heat palette. |
-| `colorMode` | `ChartHeatmapColorMode` | `"sequential"` | Color scale mapping mode: 'sequential' for continuous single-hue intensity or 'diverging' for dual-pole deviations. |
-| `colors` | `readonly string[] \| undefined` | `undefined` | Explicit array of color stops defining the gradient palette. |
-| `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding root chart data. |
-| `field` (required) | `ChartField` | — | Property key or accessor extracting the numeric heat value for each cell. |
-| `fillOpacity` | `number \| undefined` | `undefined` | Fill opacity applied to the heat cells (0 to 1). |
-| `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
-| `max` | `number \| undefined` | `undefined` | Explicit upper bound for the numeric value color domain. |
-| `midpoint` | `number \| undefined` | `undefined` | Explicit central midpoint for diverging color scales. |
-| `min` | `number \| undefined` | `undefined` | Explicit lower bound for the numeric value color domain. |
-| `name` | `string` | `"Heatmap"` | Name of the series displayed in legends, tooltips, and live region announcements. |
-| `showValues` | `boolean` | `false` | Whether to render numeric value labels inside individual heat cells on Canvas. |
-| `strokeColor` | `string` | `""` | Explicit border stroke color for individual heat cells. |
-| `strokeWidth` | `number \| undefined` | `undefined` | Stroke width in pixels for cell borders. |
-| `valueFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Custom formatter for raw cell values in labels, tooltips, and live regions. |
-| `visible` (two-way) | `boolean` | `true` | Whether the series is currently visible on the chart and in calculations. |
-| `xCategories` | `readonly unknown[] \| undefined` | `undefined` | Explicit category ordering for the X axis columns. |
-| `xField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting the X column category for each cell. |
-| `yCategories` | `readonly unknown[] \| undefined` | `undefined` | Explicit category ordering for the Y axis rows. |
-| `yField` (required) | `ChartField` | — | Property key or accessor extracting the Y row category for each cell. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `visibleChange` | `boolean` | Emitted when `visible` changes. |
+| [`HeatmapSeriesComponent`](/api/chart/HeatmapSeriesComponent) | Component | Renders a matrix of cells colored by value, with a color scale in the legend. |
 
 ### Types
 

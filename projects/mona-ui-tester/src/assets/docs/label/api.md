@@ -2,34 +2,12 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/label`.
+Everything below is imported from `@nanahoshi/mona-ui/label`. Each name links to its reference page, with every input, output, property and method.
 
-### `LabelComponent`
-
-**Selector:** `mona-label`  
-**API reference:** [`LabelComponent`](/api/label/LabelComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes merged onto the rendered `<label>` element via `tailwind-merge`. |
-| `for` | `LabelTarget` | `undefined` | Associates the label with a native control ID or a target that exposes a public `focus()` method. String values are reflected as the native `for` attribute. Object targets receive focus when the label is clicked. |
-| `optional` | `boolean` | `false` | Whether to display optional-field text next to the caption. |
-| `optionalText` | `string` | `""` | Text displayed when `optional` is enabled. |
-| `text` | `string` | `""` | Visible label caption text. |
-
-### `LabelDirective`
-
-**Selector:** `label[monaLabel]`  
-**API reference:** [`LabelDirective`](/api/label/LabelDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes merged onto the native label element via `tailwind-merge`. |
-| `for` | `LabelTarget` | `undefined` | Associates the label with a native control ID or a target that exposes a public `focus()` method. String values are reflected as the native `for` attribute. Object targets receive focus when the label is clicked. |
+| Name | Kind |
+| --- | --- |
+| [`LabelComponent`](/api/label/LabelComponent) | Component |
+| [`LabelDirective`](/api/label/LabelDirective) | Directive |
 
 ### Types
 

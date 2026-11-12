@@ -2,44 +2,12 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/grid`.
+Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to its reference page, with every input, output, property and method.
 
-### `GridServerBindingDirective`
-
-**Selector:** `mona-grid[monaGridServerBinding]`  
-**API reference:** [`GridServerBindingDirective`](/api/grid/GridServerBindingDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `loading` | `boolean` | `false` | Shows a loading overlay while the application requests server data. |
-| `skip` | `number` | `0` | Zero-based offset of the supplied server page. External changes do not request data. |
-| `total` (required) | `number` | — | Total matching server records before paging. Must be a non-negative integer. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `dataStateChange` | `GridDataState` | Emitted once per user paging, sorting, or filtering action with the requested server state. |
-
-### `GridVirtualScrollDirective`
-
-**Selector:** `mona-grid[monaGridVirtualScroll]`  
-**API reference:** [`GridVirtualScrollDirective`](/api/grid/GridVirtualScrollDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaGridVirtualScroll` | `Partial<VirtualScrollOptions> \| "" \| undefined` | `undefined` | Enables row virtualization on the grid. Pass a `VirtualScrollOptions` object to configure the fixed row height. |
-| `scrollEndThreshold` | `number` | `5` | Distance, in rows, from the bottom of the virtualized list at which `scrollEnd` is emitted. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `scrollEnd` | `void` | Emitted when the scroll position reaches the configured threshold from the bottom of the virtualized list. |
+| Name | Kind |
+| --- | --- |
+| [`GridServerBindingDirective`](/api/grid/GridServerBindingDirective) | Directive |
+| [`GridVirtualScrollDirective`](/api/grid/GridVirtualScrollDirective) | Directive |
 
 ### Types
 

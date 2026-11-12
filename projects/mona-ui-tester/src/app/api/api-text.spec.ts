@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import type { ApiSymbolReference } from "./api-model";
-import { apiSections, importStatement, mentionedNames, prose, summarize, typeTokens } from "./api-text";
+import {
+    apiSections,
+    importStatement,
+    mentionedNames,
+    prose,
+    selectorAlternatives,
+    summarize,
+    typeTokens
+} from "./api-text";
 
 describe("api-text", () => {
     it("escapes a tag in a description, and keeps code spans and formatting tags", () => {
@@ -69,5 +77,12 @@ describe("api-text", () => {
         expect(importStatement({ kind: "component", name: "ChartComponent" }, "chart")).toBe(
             'import { ChartComponent } from "@nanahoshi/mona-ui/chart";'
         );
+    });
+
+    it("splits a selector list into its selectors, leaving a comma inside brackets alone", () => {
+        expect(selectorAlternatives("mona-a[monaD],  b[type='x,y'][monaD]")).toEqual([
+            "mona-a[monaD]",
+            "b[type='x,y'][monaD]"
+        ]);
     });
 });

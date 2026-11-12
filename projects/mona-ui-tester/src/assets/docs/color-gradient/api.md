@@ -2,47 +2,11 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/color-gradient`.
+Everything below is imported from `@nanahoshi/mona-ui/color-gradient`. Each name links to its reference page, with every input, output, property and method.
 
-### `ColorGradientComponent`
-
-**Selector:** `mona-color-gradient`  
-**Implements:** `FormValueControl<string \| null \| undefined>`  
-**API reference:** [`ColorGradientComponent`](/api/color-gradient/ColorGradientComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | Accessible name of the group of controls. |
-| `aria-labelledby` | `string` | `""` | Id of the element that names the group of controls. |
-| `disabled` | `boolean` | `false` | Sets the disabled state of the color gradient. |
-| `format` | `ColorOutputFormat` | `"hex"` | Specifies the format of the color output. |
-| `invalid` | `boolean` | `false` | Marks the color gradient as invalid. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `opacity` | `boolean` | `true` | Specifies whether the color picker should display the alpha slider. |
-| `readonly` | `boolean` | `false` | Prevents value changes while the control stays focusable and readable. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `required` | `boolean` | `false` | Marks the color gradient as required for form validation. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Specifies the rounded variant of the color picker. |
-| `showButtons` | `boolean` | `true` | Specifies whether the color picker should display the buttons. When set to true, the color picker will display the "Apply" and "Cancel" buttons. When set to false, the color picker will not display the buttons and will emit the color value on change. |
-| `showColorInputs` | `boolean` | `true` | Specifies whether the color picker should display the channel inputs (RGB or HSV). |
-| `showHexInput` | `boolean` | `true` | Specifies whether the color picker should display the hex input. |
-| `touched` | `boolean` | `false` | Marks the color gradient as touched. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `value` (two-way) | `string \| null \| undefined` | `undefined` | Two-way bindable current color value. When undefined, the component keeps its default internal color state (white, #ffffffff). |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `apply` | `void` | Emits when the Apply button is clicked. The `Apply` button is only displayed when `showButtons` is set to true. |
-| `cancel` | `void` | Emits when the Cancel button is clicked, after the controls go back to the current value. The `Cancel` button is only displayed when `showButtons` is set to true. |
-| `touch` | `void` | Emitted when focus leaves the color gradient. Moving between its own parts doesn't count. The `FormField` directive listens to this to mark the field as touched. |
-| `valueChange` | `string \| null \| undefined` | Emitted when `value` changes. |
-
-#### Methods
-
-| Signature | Description |
+| Name | Kind |
 | --- | --- |
-| `focus(options?: FocusOptions): void` | Moves focus to the saturation and value handle. |
+| [`ColorGradientComponent`](/api/color-gradient/ColorGradientComponent) | Component |
 
 ### Types
 

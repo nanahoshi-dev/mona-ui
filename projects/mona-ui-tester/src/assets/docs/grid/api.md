@@ -2,109 +2,19 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/grid`.
+Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to its reference page, with every input, output, property and method.
 
-### `GridColumnComponent`
-
-**Selector:** `mona-grid-column`  
-**API reference:** [`GridColumnComponent`](/api/grid/GridColumnComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aggregate` | `AggregateFunction \| null` | `null` | The aggregate shown in the grid footer for this column. |
-| `editable` | `boolean \| null` | `null` | Whether this column is editable when the grid is in edit mode. Left unset, every column is editable except the one whose `field` is the grid's `rowKey`. |
-| `field` | `string` | `""` | The field name of the data property to display in this column. |
-| `filterable` | `boolean` | `true` | Whether this column can be filtered when grid filtering is enabled. Has no effect if filtering is disabled on the grid. |
-| `format` | `ColumnFormat \| null` | — | Formats the displayed cell value. String formats apply to date columns and their date filters; formatter functions replace the cell text. |
-| `hidden` | `boolean` | `false` | Whether this column is hidden from the rendered grid. |
-| `locked` | `boolean` | `false` | Whether this column remains fixed while the grid scrolls horizontally. |
-| `lockedPosition` | `GridColumnLockedPosition` | `"left"` | The side of the grid where this locked column is fixed. |
-| `maxWidth` | `number \| null` | `null` | The maximum width of this column in pixels. |
-| `minWidth` | `number` | `40` | The minimum width of this column in pixels. |
-| `sortable` | `boolean` | `true` | Whether this column can be sorted through its header when grid sorting is enabled. Has no effect if sorting is disabled on the grid. |
-| `sortComparator` | `ColumnSortComparator \| null` | `null` | Compares two values of this column when the user sorts it, returning a negative number, zero or a positive number. Without it, values sort by type (empty values first) and strings by the locale. |
-| `stateKey` | `string \| null` | `null` | A stable key used to persist state for columns whose field is empty or unstable. |
-| `title` | `string` | `""` | The title displayed in the column header. |
-| `type` | `DataType` | `"string"` | The data type of the column. Determines the edit component and filter behavior. |
-| `width` | `number \| null` | — | The fixed width of this column in pixels. If not set, the column width is calculated automatically. |
-
-### `GridComponent`
-
-**Selector:** `mona-grid`  
-**Type parameters:** `T`  
-**API reference:** [`GridComponent`](/api/grid/GridComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string \| null` | `null` | The grid's accessible name, such as "Orders". Use it, or `aria-labelledby`. The grid moves the name to its `role="grid"` element, so the host keeps no `aria-label` attribute. |
-| `aria-labelledby` | `string \| null` | `null` | The id of the element that names the grid, such as a heading above it. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `data` | `Iterable<T>` | `[]` | The row data to be displayed in the grid. |
-| `expandedKeys` (two-way) | `unknown[]` | `[]` | Keys of the rows whose detail row is open: `rowKey` values, or the data items when the grid has no `rowKey`. Supports two-way binding; `expandedKeysChange` emits when the user opens or closes one. |
-| `pageSize` (two-way) | `number` | — | The number of items to be displayed on a page. Values that aren't positive integers are ignored. A new size keeps the first row of the current page in view. Supports two-way binding. |
-| `pageSizeValues` | `number[]` | `[]` | The page sizes that the user can select from. These values will be displayed in the page size dropdown. |
-| `resizeMethod` | `ResizeMethod` | `"fitView"` | The method to be used to set initial column widths. It can be the following values: - `fitView`: The columns will be resized to fit the available width. - `auto`: The columns will be resized based on the content. - A number representing the width of the columns. All columns except the columns with a specified width will have the same width. |
-| `responsivePager` | `boolean` | `true` | Whether the pager is responsive. If set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller. |
-| `rounded` | `"large" \| "medium" \| "none" \| "small"` | `"medium"` | The border radius of the grid. |
-| `rowClass` | `GridRowClass<T> \| null` | `null` | Returns extra CSS classes for the data row that shows an item, merged onto the row's own classes via `tailwind-merge`. It runs again whenever the item's row is rebound. Group, group footer and detail rows are not affected. To dim a row, prefer a text style such as `text-muted-foreground` over `opacity`: locked cells stay opaque so scrolled cells pass beneath them, and opacity on the row or its cells would let those show through. |
-| `rowKey` | `GridKeySelector<unknown> \| null` | `null` | Field name or selector used to derive a stable identity for each row. The resolved value must be unique within the grid data. |
-| `skip` (two-way) | `number` | `0` | The number of rows before the current page, in client paging. Supports two-way binding. With `monaGridServerBinding`, the directive's `skip` sets the page and this model reports user changes. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `expandedKeysChange` | `unknown[]` | Emitted when `expandedKeys` changes. |
-| `pageChange` | `PageChangeEvent` | Emitted when the user changes the page or the page size, when the user's sort or filter moves a client-side grid back to the first page, and when the grid moves back to the last page because the data shrank. Not emitted for `skip` or `pageSize` values set from code. |
-| `pageSizeChange` | `number` | Emitted when `pageSize` changes. |
-| `skipChange` | `number` | Emitted when `skip` changes. |
-
-### `GridCellTemplateDirective`
-
-**Selector:** `ng-template[monaGridCellTemplate]`  
-**API reference:** [`GridCellTemplateDirective`](/api/grid/GridCellTemplateDirective)
-
-### `GridColumnTitleTemplateDirective`
-
-**Selector:** `[monaGridColumnTitleTemplate]`  
-**API reference:** [`GridColumnTitleTemplateDirective`](/api/grid/GridColumnTitleTemplateDirective)
-
-### `GridContextMenuDirective`
-
-**Selector:** `[monaGridContextMenu]`  
-**API reference:** [`GridContextMenuDirective`](/api/grid/GridContextMenuDirective)
-
-### `GridHeaderTemplateDirective`
-
-**Selector:** `ng-template[monaGridHeaderTemplate]`  
-**API reference:** [`GridHeaderTemplateDirective`](/api/grid/GridHeaderTemplateDirective)
-
-### `GridNoDataTemplateDirective`
-
-**Selector:** `ng-template[monaGridNoDataTemplate]`  
-**API reference:** [`GridNoDataTemplateDirective`](/api/grid/GridNoDataTemplateDirective)
-
-### `GridToolbarTemplateDirective`
-
-**Selector:** `ng-template[monaGridToolbarTemplate]`  
-**API reference:** [`GridToolbarTemplateDirective`](/api/grid/GridToolbarTemplateDirective)
-
-### `Row`
-
-A row of the grid, wrapping its data item.
-
-**API reference:** [`Row`](/api/grid/Row)
-
-#### Properties
-
-| Name | Type |
-| --- | --- |
-| `data` (read-only) | `Record<PropertyKey, unknown>` |
-| `uid` (read-only) | `string` |
+| [`GridColumnComponent`](/api/grid/GridColumnComponent) | Component |  |
+| [`GridComponent`](/api/grid/GridComponent) | Component |  |
+| [`GridCellTemplateDirective`](/api/grid/GridCellTemplateDirective) | Directive |  |
+| [`GridColumnTitleTemplateDirective`](/api/grid/GridColumnTitleTemplateDirective) | Directive |  |
+| [`GridContextMenuDirective`](/api/grid/GridContextMenuDirective) | Directive |  |
+| [`GridHeaderTemplateDirective`](/api/grid/GridHeaderTemplateDirective) | Directive |  |
+| [`GridNoDataTemplateDirective`](/api/grid/GridNoDataTemplateDirective) | Directive |  |
+| [`GridToolbarTemplateDirective`](/api/grid/GridToolbarTemplateDirective) | Directive |  |
+| [`Row`](/api/grid/Row) | Class | A row of the grid, wrapping its data item. |
 
 ### Types
 

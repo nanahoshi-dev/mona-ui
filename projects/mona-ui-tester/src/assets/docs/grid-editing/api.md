@@ -2,195 +2,25 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/grid`.
+Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to its reference page, with every input, output, property and method.
 
-### `GridCommandColumnComponent`
-
-**Selector:** `mona-grid-command-column`  
-**API reference:** [`GridCommandColumnComponent`](/api/grid/GridCommandColumnComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `hidden` | `boolean` | `false` | Whether this command column is hidden from the rendered grid. |
-| `locked` | `boolean` | `false` | Whether this command column remains fixed while the grid scrolls horizontally. |
-| `lockedPosition` | `GridColumnLockedPosition` | `"left"` | The side of the grid where this locked command column is fixed. |
-| `maxWidth` | `number \| null` | `null` | The maximum width of this command column in pixels. |
-| `minWidth` | `number \| null` | `null` | The minimum width of this command column in pixels. |
-| `removeConfirmation` | `boolean` | `false` | Whether removing a row asks for confirmation before emitting `remove`: from the built-in Remove button, or from a `monaGridRemoveCommand` button in this column's template. |
-| `stateKey` | `string \| null` | `"commands"` | A stable key used to persist state for this command column. |
-| `title` | `string \| null` | `null` | The title displayed in the command column header. Without one, the localized `commandColumnTitle` message ("Commands"). |
-| `width` | `number \| null` | `160` | The fixed width of this command column in pixels. |
-
-### `GridEditableDirective`
-
-**Selector:** `mona-grid[monaGridEditable]`  
-**Type parameters:** `T extends object = Record<PropertyKey, unknown>`  
-**API reference:** [`GridEditableDirective`](/api/grid/GridEditableDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaGridEditable` | `EditableOptions<T> \| ""` | `""` | Enables inline editing. An empty string enables cell-mode editing with default settings; pass an object to choose `"cell"` or `"row"` mode and an optional validation `schema`. |
-| `newRowFactory` | `() => T` | — | Creates the initial data object used by the add-row editor. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `add` | `GridAddEvent` | Emitted before the grid displays the new-row editor. |
-| `cancel` | `GridCancelEvent` | Emitted before an edit operation is canceled; `reason` says why. Prevent it to keep editing, except for `"removed"`, when the edited row left the data or the view. |
-| `cellEdit` | `CellEditEvent` | Emitted before a changed cell is saved in cell mode; not when the value didn't change. `rowData` is the row as it was; persist from `save`, whose `rowData` holds the edited values. |
-| `edit` | `GridEditEvent` | Emitted before a row enters edit mode. |
-| `remove` | `GridRemoveEvent` | Emitted when a row remove command is triggered, with the row's `key` and `index`. |
-| `rowEdit` | `RowEditEvent` | Emitted after a changed row is saved (row mode only). |
-| `save` | `GridSaveEvent<T>` | Emitted before an edited or new row is saved; not when an edit changed nothing. `rowData` holds the edited values and `originalRowData` the row as it was. Prevent it to keep the editor open, for example while saving on the server, then call `endEdit()`. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `endEdit(): void` | Closes the current edit without reporting it, such as after a `save` that was prevented to save on the server has finished. |
-
-### `GridEditCommandDirective`
-
-**Selector:** `button[monaGridEditCommand]`  
-**API reference:** [`GridEditCommandDirective`](/api/grid/GridEditCommandDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaGridEditCommand` | `Row \| null` | `null` | The row the button puts into row edit mode when clicked, usually the command template's `row`. Does nothing while `null` or when the grid isn't in row edit mode. |
-
-### `GridRemoveCommandDirective`
-
-**Selector:** `button[monaGridRemoveCommand]`  
-**API reference:** [`GridRemoveCommandDirective`](/api/grid/GridRemoveCommandDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaGridRemoveCommand` | `Row \| null` | `null` | The row the button removes when clicked, usually the command template's `row`. The click emits the grid's `remove` event for that row. Inside a command column with `removeConfirmation`, it asks first, as the built-in remove command does. Does nothing while `null`. |
-
-### `GridAddCommandDirective`
-
-**Selector:** `button[monaGridAddCommand]`  
-**API reference:** [`GridAddCommandDirective`](/api/grid/GridAddCommandDirective)
-
-### `GridCancelCommandDirective`
-
-**Selector:** `button[monaGridCancelCommand]`  
-**API reference:** [`GridCancelCommandDirective`](/api/grid/GridCancelCommandDirective)
-
-### `GridEditTemplateDirective`
-
-**Selector:** `ng-template[monaGridEditTemplate]`  
-**API reference:** [`GridEditTemplateDirective`](/api/grid/GridEditTemplateDirective)
-
-### `GridSaveCommandDirective`
-
-**Selector:** `button[monaGridSaveCommand]`  
-**API reference:** [`GridSaveCommandDirective`](/api/grid/GridSaveCommandDirective)
-
-### `CellEditEvent`
-
-**Extends:** `PreventableEvent`  
-**API reference:** [`CellEditEvent`](/api/grid/CellEditEvent)
-
-#### Properties
-
-| Name | Type |
-| --- | --- |
-| `field` (read-only) | `string` |
-| `newValue` (read-only) | `unknown` |
-| `oldValue` (read-only) | `unknown` |
-| `rowData` (read-only) | `Record<PropertyKey, unknown>` |
-| `session` (read-only) | `GridEditSession` |
-
-### `GridAddEvent`
-
-**Extends:** `PreventableEvent`  
-**API reference:** [`GridAddEvent`](/api/grid/GridAddEvent)
-
-#### Properties
-
-| Name | Type |
-| --- | --- |
-| `rowData` (read-only) | `Record<PropertyKey, unknown>` |
-| `session` (read-only) | `GridEditSession` |
-
-### `GridCancelEvent`
-
-**Extends:** `PreventableEvent`  
-**API reference:** [`GridCancelEvent`](/api/grid/GridCancelEvent)
-
-#### Properties
-
-| Name | Type |
-| --- | --- |
-| `operation` (read-only) | `GridSaveOperation` |
-| `reason` (read-only) | `GridCancelReason` |
-| `rowData` (read-only) | `Record<PropertyKey, unknown>` |
-| `session` (read-only) | `GridEditSession` |
-
-### `GridEditEvent`
-
-**Extends:** `PreventableEvent`  
-**API reference:** [`GridEditEvent`](/api/grid/GridEditEvent)
-
-#### Properties
-
-| Name | Type |
-| --- | --- |
-| `rowData` (read-only) | `Record<PropertyKey, unknown>` |
-| `session` (read-only) | `GridEditSession` |
-
-### `GridRemoveEvent`
-
-**Extends:** `PreventableEvent`  
-**API reference:** [`GridRemoveEvent`](/api/grid/GridRemoveEvent)
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` (read-only) | `number` | The row's position in the grid's `data`, or -1 when it is no longer there. |
-| `key` (read-only) | `unknown` | The row's `rowKey` value, or the data item when the grid has no `rowKey`. |
-| `rowData` (read-only) | `Record<PropertyKey, unknown>` | The data item of the row being removed. |
-
-### `GridSaveEvent`
-
-`T` is the row type, which a typed `schema` or `newRowFactory` on `monaGridEditable` sets.
-
-**Type parameters:** `T extends object = Record<PropertyKey, unknown>`  
-**Extends:** `PreventableEvent`  
-**API reference:** [`GridSaveEvent`](/api/grid/GridSaveEvent)
-
-#### Properties
-
-| Name | Type |
-| --- | --- |
-| `operation` (read-only) | `GridSaveOperation` |
-| `originalRowData` (read-only) | `T \| null` |
-| `rowData` (read-only) | `T` |
-| `session` (read-only) | `GridEditSession` |
-
-### `RowEditEvent`
-
-**Extends:** `PreventableEvent`  
-**API reference:** [`RowEditEvent`](/api/grid/RowEditEvent)
-
-#### Properties
-
-| Name | Type |
-| --- | --- |
-| `originalRowData` (read-only) | `Record<PropertyKey, unknown> \| null` |
-| `rowData` (read-only) | `Record<PropertyKey, unknown>` |
-| `session` (read-only) | `GridEditSession` |
+| [`GridCommandColumnComponent`](/api/grid/GridCommandColumnComponent) | Component |  |
+| [`GridEditableDirective`](/api/grid/GridEditableDirective) | Directive |  |
+| [`GridEditCommandDirective`](/api/grid/GridEditCommandDirective) | Directive |  |
+| [`GridRemoveCommandDirective`](/api/grid/GridRemoveCommandDirective) | Directive |  |
+| [`GridAddCommandDirective`](/api/grid/GridAddCommandDirective) | Directive |  |
+| [`GridCancelCommandDirective`](/api/grid/GridCancelCommandDirective) | Directive |  |
+| [`GridEditTemplateDirective`](/api/grid/GridEditTemplateDirective) | Directive |  |
+| [`GridSaveCommandDirective`](/api/grid/GridSaveCommandDirective) | Directive |  |
+| [`CellEditEvent`](/api/grid/CellEditEvent) | Class |  |
+| [`GridAddEvent`](/api/grid/GridAddEvent) | Class |  |
+| [`GridCancelEvent`](/api/grid/GridCancelEvent) | Class |  |
+| [`GridEditEvent`](/api/grid/GridEditEvent) | Class |  |
+| [`GridRemoveEvent`](/api/grid/GridRemoveEvent) | Class |  |
+| [`GridSaveEvent`](/api/grid/GridSaveEvent) | Class | `T` is the row type, which a typed `schema` or `newRowFactory` on `monaGridEditable` sets. |
+| [`RowEditEvent`](/api/grid/RowEditEvent) | Class |  |
 
 ### Types
 

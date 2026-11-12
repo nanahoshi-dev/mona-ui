@@ -2,108 +2,14 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/popup`.
+Everything below is imported from `@nanahoshi/mona-ui/popup`. Each name links to its reference page, with every input, output, property and method.
 
-### `PopupComponent`
-
-**Selector:** `mona-popup`  
-**Type parameters:** `T = unknown`  
-**API reference:** [`PopupComponent`](/api/popup/PopupComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `anchor` (required) | `FlexibleConnectedPositionStrategyOrigin` | — | The anchor element or point for the popup. |
-| `anchorConnectionPoint` | `ConnectionPoint` | `"bottomcenter"` | The connection point for the popup anchor. |
-| `animation` | `boolean \| PopupAnimationSettings` | `true` | The animation settings for the popup. |
-| `backdropClass` | `string \| string[]` | `[]` | The class or classes to apply to the backdrop of the popup. |
-| `closeOnBackdropClick` | `boolean` | `true` | Whether to close the popup when clicking on the backdrop. Only applies when the popup has a backdrop. |
-| `closeOnEscape` | `boolean` | `true` | Whether to close the popup when the escape key is pressed. Escape only reaches the topmost open popup. |
-| `closeOnMouseLeave` | `boolean` | `false` | Whether to close the popup when the mouse leaves the anchor element. |
-| `closeOnOutsideClick` | `boolean` | `true` | Whether to close the popup when clicking outside of it. |
-| `closeOnScroll` | `boolean` | `false` | Whether to close the popup when the user scrolls the page or a scrollable container around the anchor. |
-| `data` | `T` | — | Arbitrary data to pass to the popup. |
-| `hasBackdrop` | `boolean` | `false` | Whether the popup should have a backdrop. |
-| `height` | `number \| string` | — | The height of the popup. |
-| `maxHeight` | `number \| string` | — | The maximum height of the popup. |
-| `maxWidth` | `number \| string` | — | The maximum width of the popup. |
-| `minHeight` | `number \| string` | — | The minimum height of the popup. |
-| `minWidth` | `number \| string` | — | The minimum width of the popup. |
-| `offset` | `PopupOffset` | — | The offset of the popup from the anchor. |
-| `popupClass` | `string \| string[]` | `[]` | The class or classes to apply to the popup. |
-| `popupConnectionPoint` | `ConnectionPoint` | `"topcenter"` | The connection point for the popup. |
-| `popupWrapperClass` | `string \| string[]` | `[]` | The class or classes to apply to the popup wrapper. |
-| `positions` | `Array<ConnectedPosition \| ConnectionPositionPair>` | — | The positions to use for the popup. The popup will try to position itself in the first position that fits. This is only used when the `positionStrategy` is set to `connected`. |
-| `positionStrategy` | `"global" \| "connected"` | `"connected"` | The strategy for positioning the popup. `global` means the popup will be positioned relative to the viewport, `connected` means the popup will be positioned relative to the anchor element. |
-| `preventClose` | `Action<PopupCloseEvent, boolean>` | — | Called when the popup is requested to close. This can be used to prevent the popup from closing. |
-| `providers` | `StaticProvider[]` | `[]` | The providers that will be injected into the popup. |
-| `restoreFocus` | `boolean \| "auto"` | `"auto"` | Controls focus restoration when the popup closes. - `true`: always restore focus to the anchor element. - `false`: never restore focus (recommended for tooltips). - `"auto"`: restore focus only if the anchor, or an element inside it, was focused when the popup opened. Focus is left alone if the user moved it outside the popup and the anchor before it closed. |
-| `trigger` | `string` | `"click"` | The trigger event for opening the popup. |
-| `width` | `number \| string \| undefined` | `undefined` | The width of the popup. |
-| `withPush` | `boolean` | `true` | Whether to push the popup into the screen when it is opened. |
-| `withScrollTracking` | `boolean` | `true` | Whether the popup should track scroll events and reposition itself. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `close` | `void` | Emits when the popup is closed. |
-| `open` | `PopupRef` | Emits when the popup is opened. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `closePopup(): void` | Closes the popup if one is currently open. |
-
-### `PopupService`
-
-**API reference:** [`PopupService`](/api/popup/PopupService)
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `create(settings: PopupSettings): PopupRef` | Opens a popup and returns its `PopupRef`. If `settings.anchor` is a CSS selector string, creates a hover-triggered popup for every matching element (see Multi-element popups); otherwise creates a single popup attached to the given element, `ElementRef`, or point. |
-
-### `PopupRef`
-
-Returned by `PopupService.create()` and emitted via `PopupComponent`'s `open` output.
-
-**API reference:** [`PopupRef`](/api/popup/PopupRef)
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `beforeClose` (read-only) | `Observable<PopupCloseEvent>` | Emitted when the popup is about to close. This event can be prevented. If it is prevented, the popup will not close. |
-| `closed` (read-only) | `Observable<PopupCloseEvent>` | Emitted when the popup is closed. This event is emitted after the animation completes. Preventing this event has no effect. |
-| `closeStart` (read-only) | `Observable<PopupCloseEvent>` | Emitted when the popup begins closing, before the leave animation completes. Subscribe to this to react at the moment the close sequence starts — for example, to begin coordinating a transition in the consuming component. The `closed` observable fires after the leave animation finishes. |
-| `component` (read-only) | `ComponentRef<unknown> \| null` | Reference to the component hosted in the popup. This is `null` if the popup does not contain a component. |
-| `opened` (read-only) | `Observable<void>` | Emitted when the popup is opened. |
-| `overlayRef` (read-only) | `OverlayRef` | Reference to the underlying CDK overlay. Use this reference to manipulate the overlay directly, such as to set its size or position. |
-| `positionChanges` (read-only) | `Observable<ConnectionPositionPair>` | Returns the position pair of the popup's anchor element. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `close<R>(result?: R, delay?: number): boolean` | Requests the popup to close. |
-| `closeWithDelay<R>(delay: number = 100, result?: R): void` | Closes the popup after a delay. When the popup is closed, the overlay element is removed from the DOM instantly. This causes the animation of the child elements to not play, therefore, a delay is added to allow the animation to play. |
-
-### `PopupCloseEvent`
-
-**Type parameters:** `R = unknown`  
-**Extends:** `PreventableEvent`  
-**API reference:** [`PopupCloseEvent`](/api/popup/PopupCloseEvent)
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `result` (read-only) | `R \| undefined` | The result value passed to `close()`, if any. |
-| `via` (read-only) | `PopupCloseSource \| undefined` | The source of the close. |
+| [`PopupComponent`](/api/popup/PopupComponent) | Component |  |
+| [`PopupService`](/api/popup/PopupService) | Service |  |
+| [`PopupRef`](/api/popup/PopupRef) | Class | Returned by `PopupService.create()` and emitted via `PopupComponent`'s `open` output. |
+| [`PopupCloseEvent`](/api/popup/PopupCloseEvent) | Class |  |
 
 ### Types
 

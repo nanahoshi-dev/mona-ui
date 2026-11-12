@@ -2,46 +2,13 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/grid`.
+Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to its reference page, with every input, output, property and method.
 
-### `GridRowReorderableDirective`
-
-**Selector:** `mona-grid[monaGridRowReorderable]`  
-**API reference:** [`GridRowReorderableDirective`](/api/grid/GridRowReorderableDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaGridRowReorderable` | `RowReorderableOptions \| ""` | `""` | Enables row reordering via the reorder-handle column. Pass a `RowReorderableOptions` object to configure it explicitly. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `rowReorder` | `RowReorderEvent<Record<PropertyKey, unknown>>` | Emitted when a row is moved to a new position. The event carries the moved row, source- and page-relative indices, and the complete reordered application data. |
-
-### `GridDetailTemplateDirective`
-
-**Selector:** `ng-template[monaGridDetailTemplate]`  
-**API reference:** [`GridDetailTemplateDirective`](/api/grid/GridDetailTemplateDirective)
-
-### `RowReorderEvent`
-
-**Type parameters:** `TData extends Record<PropertyKey, unknown> = Record<PropertyKey, unknown>`  
-**Extends:** `PreventableEvent`  
-**API reference:** [`RowReorderEvent`](/api/grid/RowReorderEvent)
-
-#### Properties
-
-| Name | Type |
+| Name | Kind |
 | --- | --- |
-| `currentIndex` (read-only) | `number` |
-| `currentPageIndex` (read-only) | `number` |
-| `previousIndex` (read-only) | `number` |
-| `previousPageIndex` (read-only) | `number` |
-| `reorderedData` (read-only) | `readonly TData[]` |
-| `rowData` (read-only) | `TData` |
+| [`GridRowReorderableDirective`](/api/grid/GridRowReorderableDirective) | Directive |
+| [`GridDetailTemplateDirective`](/api/grid/GridDetailTemplateDirective) | Directive |
+| [`RowReorderEvent`](/api/grid/RowReorderEvent) | Class |
 
 ### Types
 

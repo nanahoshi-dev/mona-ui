@@ -49,7 +49,7 @@ export function readRouteSources(routes: string, readComponent: (importPath: str
 /**
  * One page as HTML for the index. The manifest gives the title, so an H1 in the markdown is left out. Headings keep the
  * ids the site gives them, and code blocks stay out of the index: their excerpts read badly, and what's worth finding
- * in them, such as selectors and inputs, is also in the prose and the API tables.
+ * in them, such as selectors and inputs, is also in the prose and the API reference.
  */
 export function renderSearchDocument(page: DocsPage, category: string, markdown: readonly string[]): string {
     const ids = new Set<string>();

@@ -2,61 +2,12 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/color-picker`.
+Everything below is imported from `@nanahoshi/mona-ui/color-picker`. Each name links to its reference page, with every input, output, property and method.
 
-### `ColorPickerComponent`
-
-**Selector:** `mona-color-picker`  
-**Implements:** `FormValueControl<string \| null>`  
-**API reference:** [`ColorPickerComponent`](/api/color-picker/ColorPickerComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | Accessible label for the color picker combobox. |
-| `aria-labelledby` | `string` | `""` | Id of the element that names the color picker. |
-| `closeOnSelect` | `boolean` | `true` | Whether to close the color picker when a color is selected. Only applies when the view is set to "palette". |
-| `columns` | `number` | `10` | The number of columns to display in the color palette. Only applies when the view is set to "palette" and the palette is a custom array of colors. |
-| `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction. |
-| `format` | `ColorOutputFormat` | `"hex"` | The format of the value the gradient view writes. Only applies when the view is set to "gradient". |
-| `invalid` | `boolean` | `false` | Marks the color picker as invalid. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `opacity` | `boolean` | `true` | Whether to display the opacity slider. Only applies when the view is set to "gradient". |
-| `palette` | `Iterable<string \| ColorPaletteItem> \| PaletteType` | `"flat"` | The type of color palette to use. This can be a predefined palette type like "flat", "material", or "websafe", or a custom iterable of CSS color strings or `{ color, name }` items. |
-| `readonly` | `boolean` | `false` | Prevents value changes while preserving the component's visual state. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `required` | `boolean` | `false` | Sets whether the color picker is required. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the color picker. |
-| `showButtons` | `boolean` | `true` | Whether the gradient view has Apply and Cancel buttons. Without them, each change writes the value at once. Only applies when the view is set to "gradient". |
-| `showClearButton` | `boolean` | `false` | Whether to show the clear button to reset the color. This is only applicable when the view is set to "palette". |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the color picker's dimensions. |
-| `tileSize` | `number` | `24` | The size of each palette tile, in pixels. Only applies when the view is set to "palette". Below 24, tiles miss the minimum target size of WCAG 2.5.8. |
-| `touched` | `boolean` | `false` | Sets the touched state of the color picker. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `value` (two-way) | `string \| null` | `null` | Two-way bindable current color value. |
-| `view` | `ColorPickerView` | `"gradient"` | The view mode of the color picker. This can be either "palette" or "gradient". |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `touch` | `void` | Emitted when focus leaves the color picker or its popup closes. A color selected with `closeOnSelect` off doesn't emit it until then. The `FormField` directive listens to this to mark the field as touched. |
-| `valueChange` | `string \| null` | Emitted when `value` changes. |
-
-#### Methods
-
-| Signature | Description |
+| Name | Kind |
 | --- | --- |
-| `focus(options?: FocusOptions): void` | Moves focus to the color picker. |
-
-### `ColorPickerValueTemplateDirective`
-
-**Selector:** `ng-template[monaColorPickerValueTemplate]`  
-**API reference:** [`ColorPickerValueTemplateDirective`](/api/color-picker/ColorPickerValueTemplateDirective)
-
-#### Template context
-
-| Name | Type |
-| --- | --- |
-| `$implicit` | `string \| null` |
+| [`ColorPickerComponent`](/api/color-picker/ColorPickerComponent) | Component |
+| [`ColorPickerValueTemplateDirective`](/api/color-picker/ColorPickerValueTemplateDirective) | Directive |
 
 ### Types
 

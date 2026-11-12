@@ -2,29 +2,8 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/avatar`.
+Everything below is imported from `@nanahoshi/mona-ui/avatar`. Each name links to its reference page, with every input, output, property and method.
 
-### `AvatarComponent`
-
-**Selector:** `mona-avatar`  
-**API reference:** [`AvatarComponent`](/api/avatar/AvatarComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `alt` | `string` | `""` | Alternative text for the avatar image. Provide a meaningful description for non-decorative images; an empty string marks the image as decorative. |
-| `aria-label` | `string` | `""` | Accessible name of the avatar. Describe who or what it represents. In label and projected-content modes the host takes it with `role="img"`. While an image shows, it's the image's `alt` unless `alt` is set. |
-| `backgroundColor` | `string` | `"var(--color-primary)"` | Background color of the host element. Ignored in image mode — the background is set to transparent automatically. |
-| `borderColor` | `string` | `"var(--color-border)"` | Border color of the host element. |
-| `borderRadius` | `string \| number` | `"0"` | Border radius of the host element. Accepts a CSS string (`'50%'`, `'8px'`) or a number converted to `px`. In image mode, the image is also clipped to this radius. |
-| `borderWidth` | `string \| number` | `"1px"` | Border width of the host element. Accepts a CSS string or a number converted to `px`. |
-| `class` | `string` | `""` | Additional CSS classes applied to the host element. |
-| `customStyles` | `Partial<CSSStyleDeclaration>` | `{}` | Inline styles applied after all other style inputs, taking precedence over every computed style including `display`, `height`, and `width`. |
-| `height` | `string \| number` | `"64px"` | Height of the host element. A string is used as-is; a number is converted to `px`. |
-| `image` | `string` | `""` | Image URL. When non-empty, renders an `<img>` and suppresses `label` and projected content, until it fails to load. Then the avatar falls back to them, and a new URL tries again. |
-| `label` | `string` | `""` | Text label displayed inside the avatar when there's no image, or the image failed to load. |
-| `labelColor` | `string` | `"var(--color-primary-foreground)"` | Color of the label text. Ignored in image mode. |
-| `labelFontSize` | `string` | `"1rem"` | Font size of the label text. Ignored in image mode. |
-| `labelFontWeight` | `string` | `"700"` | Font weight of the label text. Ignored in image mode. |
-| `width` | `string \| number` | `"64px"` | Width of the host element. A string is used as-is; a number is converted to `px`. |
+| Name | Kind |
+| --- | --- |
+| [`AvatarComponent`](/api/avatar/AvatarComponent) | Component |

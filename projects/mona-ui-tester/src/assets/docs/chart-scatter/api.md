@@ -2,82 +2,12 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/chart`.
+Everything below is imported from `@nanahoshi/mona-ui/chart`. Each name links to its reference page, with every input, output, property and method.
 
-### `BubbleSeriesComponent`
-
-Renders 3-dimensional data points with position (X, Y) and proportionally-scaled circle areas (Size).
-
-**Selector:** `mona-bubble-series`  
-**API reference:** [`BubbleSeriesComponent`](/api/chart/BubbleSeriesComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes applied to the series host element. |
-| `color` | `string` | `""` | Explicit fill color for the bubbles. |
-| `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding the root chart data. |
-| `dataLabels` | `ChartDataLabelsInput` | `false` | Data label display options or boolean flag enabling default labels. |
-| `downsampling` | `ChartDownsamplingInput \| undefined` | `undefined` | Per-series high-density downsampling override. Undefined inherits the chart policy. |
-| `field` | `ChartField` | `"value"` | Property key or accessor extracting the Y value for each data item. |
-| `fillOpacity` | `number \| undefined` | `undefined` | Fill opacity for bubbles between 0 and 1. |
-| `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
-| `maxRadius` | `number \| undefined` | `undefined` | Maximum rendered pixel radius for the largest data size value. When unset, the series reads `--mona-chart-bubble-max-radius`, or uses `24`. |
-| `minRadius` | `number \| undefined` | `undefined` | Minimum rendered pixel radius for the smallest data size value. When unset, the series reads `--mona-chart-bubble-min-radius`, or uses `4`. |
-| `name` | `string` | `"Bubble"` | Name of the series displayed in legends and tooltips. |
-| `seriesKey` | `string \| undefined` | `undefined` | Optional stable key identifying this series for mark identity and selection across updates. |
-| `sizeField` | `ChartField` | `"size"` | Property key or accessor extracting the size magnitude for each bubble. |
-| `sizeFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Optional custom formatter for displaying bubble size values in tooltips. |
-| `strokeColor` | `string` | `""` | Stroke outline color for bubble markers. |
-| `strokeWidth` | `number \| undefined` | `undefined` | Stroke width in pixels for bubble marker outlines. |
-| `valueFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Formats this series' values in tooltips, data labels and announcements, without changing the axis ticks. Takes precedence over the axis formatter. |
-| `visible` (two-way) | `boolean` | `true` | Whether the series is currently visible on the chart and in calculations. |
-| `xAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used. |
-| `xField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting the X value, overriding the root chart X field. |
-| `yAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `visibleChange` | `boolean` | Emitted when `visible` changes. |
-
-### `ScatterSeriesComponent`
-
-Renders individual point markers across continuous numeric (linear) or temporal (time/utc) Cartesian coordinates.
-
-**Selector:** `mona-scatter-series`  
-**API reference:** [`ScatterSeriesComponent`](/api/chart/ScatterSeriesComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes applied to the series host element. |
-| `color` | `string` | `""` | Explicit fill color for the scatter points. |
-| `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding the root chart data. |
-| `dataLabels` | `ChartDataLabelsInput` | `false` | Data label display options or boolean flag enabling default labels. |
-| `downsampling` | `ChartDownsamplingInput \| undefined` | `undefined` | Per-series high-density downsampling override. Undefined inherits the chart policy. |
-| `field` | `ChartField` | `"value"` | Property key or accessor extracting the Y value for each data item. |
-| `fillOpacity` | `number \| undefined` | `undefined` | Fill opacity for scatter points between 0 and 1. |
-| `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
-| `name` | `string` | `"Scatter"` | Name of the series displayed in legends and tooltips. |
-| `pointRadius` | `number \| undefined` | `undefined` | Radius in pixels for scatter point markers. |
-| `seriesKey` | `string \| undefined` | `undefined` | Optional stable key identifying this series for mark identity and selection across updates. |
-| `strokeColor` | `string` | `""` | Stroke outline color for scatter point markers. |
-| `strokeWidth` | `number \| undefined` | `undefined` | Stroke width in pixels for scatter point markers. |
-| `valueFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Formats this series' values in tooltips, data labels and announcements, without changing the axis ticks. Takes precedence over the axis formatter. |
-| `visible` (two-way) | `boolean` | `true` | Whether the series is currently visible on the chart and in calculations. |
-| `xAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used. |
-| `xField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting the X value, overriding the root chart X field. |
-| `yAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `visibleChange` | `boolean` | Emitted when `visible` changes. |
+| [`BubbleSeriesComponent`](/api/chart/BubbleSeriesComponent) | Component | Renders 3-dimensional data points with position (X, Y) and proportionally-scaled circle areas (Size). |
+| [`ScatterSeriesComponent`](/api/chart/ScatterSeriesComponent) | Component | Renders individual point markers across continuous numeric (linear) or temporal (time/utc) Cartesian coordinates. |
 
 ### Types
 

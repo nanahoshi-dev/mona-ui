@@ -2,129 +2,19 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/dialog`.
+Everything below is imported from `@nanahoshi/mona-ui/dialog`. Each name links to its reference page, with every input, output, property and method.
 
-### `DialogComponent`
-
-**Selector:** `mona-dialog`  
-**API reference:** [`DialogComponent`](/api/dialog/DialogComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `actions` | `Iterable<DialogAction>` | `[]` | Sets the actions of the dialog. |
-| `actionsLayout` | `ActionsLayout` | `"end"` | Sets the layout of the actions in the dialog footer. |
-| `aria-label` | `string \| undefined` | `undefined` | Accessible name for the dialog when it has no `title` or title template. |
-| `closable` | `boolean` | `true` | Sets the visibility of the close button in the dialog header. |
-| `closeOnEscape` | `boolean` | `true` | Sets whether the dialog should close when the escape key is pressed. |
-| `description` | `string` | — | Sets the description of the dialog. |
-| `focusedElement` | `HTMLElement \| ElementRef<HTMLElement> \| string \| null` | — | Sets the element that should receive focus when the dialog is opened. When omitted, focus moves to the first focusable element automatically. |
-| `height` | `number` | — | Sets the height of the dialog. |
-| `left` | `number` | — | Sets the left position of the dialog. |
-| `maxHeight` | `number` | — | Sets the maximum height of the dialog. |
-| `maxWidth` | `number` | — | Sets the maximum width of the dialog. |
-| `messages` | `Partial<DialogMessages>` | — | Sets the custom messages for the dialog. |
-| `minHeight` | `number` | — | Sets the minimum height of the dialog. |
-| `minWidth` | `number` | — | Sets the minimum width of the dialog. |
-| `modal` | `boolean` | `true` | Whether the dialog is modal: a backdrop, `aria-modal="true"`, focus kept inside, page scroll locked, and the rest of the page inert. |
-| `rounded` | `"large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the component. |
-| `text` | `string` | — | Primary text content displayed by the component. |
-| `title` | `string` | — | Title text displayed in the component header or trigger. |
-| `top` | `number` | — | Sets the top position of the dialog. |
-| `type` | `"confirm" \| "error" \| "info" \| "success" \| "warning"` | `"info"` | Visual severity type of the dialog, controlling its icon and semantic role. Set to `null` to render the dialog without an icon. |
-| `width` | `number` | — | Sets the width of the dialog. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `action` | `DialogActionEvent<unknown>` | Emitted when the user clicks an action button. Call `event.preventDefault()` on the emitted `DialogActionEvent` to keep the dialog open. |
-| `close` | `PopupCloseEvent<unknown>` | Emits before the dialog closes, whatever closes it: an action, the close button, Escape, or the component being destroyed. Call `preventDefault()` to keep it open (a close caused by destruction can't be kept). |
-| `closed` | `void` | Emits when the dialog has closed and its leave animation has finished. |
-
-### `DialogContentTemplateDirective`
-
-**Selector:** `ng-template[monaDialogContentTemplate]`  
-**API reference:** [`DialogContentTemplateDirective`](/api/dialog/DialogContentTemplateDirective)
-
-### `DialogDescriptionTemplateDirective`
-
-**Selector:** `ng-template[monaDialogDescriptionTemplate]`  
-**API reference:** [`DialogDescriptionTemplateDirective`](/api/dialog/DialogDescriptionTemplateDirective)
-
-### `DialogFooterTemplateDirective`
-
-**Selector:** `ng-template[monaDialogFooterTemplate]`  
-**API reference:** [`DialogFooterTemplateDirective`](/api/dialog/DialogFooterTemplateDirective)
-
-### `DialogIconTemplateDirective`
-
-**Selector:** `ng-template[monaDialogIconTemplate]`  
-**API reference:** [`DialogIconTemplateDirective`](/api/dialog/DialogIconTemplateDirective)
-
-### `DialogTitleTemplateDirective`
-
-**Selector:** `ng-template[monaDialogTitleTemplate]`  
-**API reference:** [`DialogTitleTemplateDirective`](/api/dialog/DialogTitleTemplateDirective)
-
-### `DialogService`
-
-**API reference:** [`DialogService`](/api/dialog/DialogService)
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `alert(settings: DialogPromptSettings): Observable<void>` | Opens a dialog with an OK button. Emits once it closes, however it closes, then completes. The dialog opens when `alert()` is called, whether or not the result is subscribed to. |
-| `confirm(settings: DialogPromptSettings): Observable<boolean>` | Opens a confirmation dialog with OK and Cancel buttons. Emits `true` for OK and `false` for anything else (Cancel, the close button, Escape), then completes. The dialog opens when `confirm()` is called, whether or not the result is subscribed to. |
-| `show<R = unknown, D = unknown>(settings: DialogSettings<D>): DialogRef<R>` | Opens a dialog. |
-
-### `DialogRef`
-
-A handle on an open dialog. The close contract:
-- `action$` emits when an action button is clicked, before the dialog closes; `preventDefault()` keeps it open.
-- `close$` emits before any close, and `preventDefault()` keeps the dialog open.
-- `result` emits how the dialog closed as soon as the close goes ahead, and `closed$` emits the same result once
-  the dialog is gone. All of them complete when it closes.
-
-**Type parameters:** `R = unknown`  
-**API reference:** [`DialogRef`](/api/dialog/DialogRef)
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `action$` (read-only) | `Observable<DialogActionEvent>` | Emits when an action button is clicked, before the dialog closes. Call `preventDefault()` on the event to keep the dialog open. Completes when the dialog closes. |
-| `close$` (read-only) | `Observable<PopupCloseEvent<R>>` | Emits before the dialog closes, whatever closes it. Call `preventDefault()` to keep it open. Completes when the dialog closes. |
-| `closed$` (read-only) | `Observable<DialogResult<R>>` | Emits the dialog's result once it has closed and its leave animation has finished, then completes. |
-| `component` (read-only) | `ComponentRef<unknown> \| null` | The component given as `content`, or `null` for template and text content. |
-| `element` (read-only) | `HTMLElement` | The dialog's overlay element. |
-| `height` (read-only) | `number` | The dialog's current rendered height, in pixels. |
-| `popupRef` (read-only) | `PopupRef` | The underlying `PopupRef`, for advanced overlay access. |
-| `result` (read-only) | `Observable<DialogResult<R>>` | Emits how the dialog closed (an action, the close button, Escape, a backdrop click or `close()`) as soon as the close goes ahead, then completes when the dialog is gone. Late subscribers get the result too. |
-| `width` (read-only) | `number` | The dialog's current rendered width, in pixels. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `close(result?: R): void` | Closes the dialog. The value is the `value` of the result, which reports the close as programmatic. |
-| `update(data: Partial<DialogSettings>): void` | Updates the dialog's content and appearance in place without closing and reopening it. Only the fields provided are changed; anything omitted keeps its current value. |
-
-### `DialogActionEvent`
-
-Emitted when the user clicks a dialog action button. Call `preventDefault()` to keep the dialog open.
-
-**Type parameters:** `T = unknown`  
-**Extends:** `PreventableEvent`  
-**API reference:** [`DialogActionEvent`](/api/dialog/DialogActionEvent)
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `action` (read-only) | `DialogAction<T>` | The action that was clicked. |
+| [`DialogComponent`](/api/dialog/DialogComponent) | Component |  |
+| [`DialogContentTemplateDirective`](/api/dialog/DialogContentTemplateDirective) | Directive |  |
+| [`DialogDescriptionTemplateDirective`](/api/dialog/DialogDescriptionTemplateDirective) | Directive |  |
+| [`DialogFooterTemplateDirective`](/api/dialog/DialogFooterTemplateDirective) | Directive |  |
+| [`DialogIconTemplateDirective`](/api/dialog/DialogIconTemplateDirective) | Directive |  |
+| [`DialogTitleTemplateDirective`](/api/dialog/DialogTitleTemplateDirective) | Directive |  |
+| [`DialogService`](/api/dialog/DialogService) | Service |  |
+| [`DialogRef`](/api/dialog/DialogRef) | Class | A handle on an open dialog. |
+| [`DialogActionEvent`](/api/dialog/DialogActionEvent) | Class | Emitted when the user clicks a dialog action button. |
 
 ### Types
 

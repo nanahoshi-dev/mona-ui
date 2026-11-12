@@ -109,3 +109,26 @@ export interface ApiEntryPointSummary {
 export interface ApiReferenceIndex {
     readonly entryPoints: readonly ApiEntryPointSummary[];
 }
+
+/** One export a guide page's API section lists, with what a template uses it by. */
+export interface ApiPageExport extends ApiSymbolSummary, Pick<ApiSymbol, "pipeName" | "selector"> {
+    readonly entryPoint: string;
+}
+
+/** An exported name, with the entry point that exports it. */
+export interface ApiExportName {
+    readonly entryPoint: string;
+    readonly name: string;
+}
+
+/** What a guide page's API section shows, as `/assets/api/pages/<page>.json`. */
+export interface ApiPageReference {
+    /** The entry points the exports come from, the page's own first. */
+    readonly entryPoints: readonly string[];
+    /** By kind, and within a kind the largest first, which is the page's main component. */
+    readonly exports: readonly ApiPageExport[];
+    /** The exported names the summaries mention, with the entry point that exports each. */
+    readonly links: Readonly<Record<string, string>>;
+    /** The types the page's exports use from elsewhere, and what those use in turn. */
+    readonly related: readonly ApiExportName[];
+}

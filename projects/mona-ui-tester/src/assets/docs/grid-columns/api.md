@@ -2,54 +2,13 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/grid`.
+Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to its reference page, with every input, output, property and method.
 
-### `GridReorderableDirective`
-
-**Selector:** `mona-grid[monaGridReorderable]`  
-**API reference:** [`GridReorderableDirective`](/api/grid/GridReorderableDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaGridReorderable` | `ReorderableOptions \| ""` | `""` | Enables column reordering via drag and drop. Pass a `ReorderableOptions` object to configure it explicitly. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `columnReorder` | `ColumnReorderEvent` | Emitted when a column is dropped into a new position. Call `preventDefault()` on the event to cancel the reorder. |
-
-### `GridResizableDirective`
-
-**Selector:** `mona-grid[monaGridResizable]`  
-**API reference:** [`GridResizableDirective`](/api/grid/GridResizableDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaGridResizable` | `ResizableOptions \| ""` | `""` | Enables column resizing on the grid. Pass a `ResizableOptions` object to configure it explicitly. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `columnResize` | `ColumnResizeEvent` | Emitted when a column resize completes, with the column and its old and new widths. |
-
-### `ColumnReorderEvent`
-
-**Extends:** `PreventableEvent`  
-**API reference:** [`ColumnReorderEvent`](/api/grid/ColumnReorderEvent)
-
-#### Properties
-
-| Name | Type |
+| Name | Kind |
 | --- | --- |
-| `column` (read-only) | `Column` |
-| `newIndex` (read-only) | `number` |
-| `oldIndex` (read-only) | `number` |
+| [`GridReorderableDirective`](/api/grid/GridReorderableDirective) | Directive |
+| [`GridResizableDirective`](/api/grid/GridResizableDirective) | Directive |
+| [`ColumnReorderEvent`](/api/grid/ColumnReorderEvent) | Class |
 
 ### Types
 

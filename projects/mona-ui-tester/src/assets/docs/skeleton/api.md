@@ -2,27 +2,11 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/skeleton`.
+Everything below is imported from `@nanahoshi/mona-ui/skeleton`. Each name links to its reference page, with every input, output, property and method.
 
-### `SkeletonComponent`
-
-A placeholder block standing in for content that has not loaded yet. Size it with `width` and
-`height`, which set inline styles, so utility classes for size have no effect.
-
-It is decorative, so it is hidden from assistive technology. Mark the region it fills with
-`aria-busy` and describe what is loading there instead.
-
-**Selector:** `mona-skeleton`  
-**API reference:** [`SkeletonComponent`](/api/skeleton/SkeletonComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `height` | `string \| number` | `"1rem"` | Height of the placeholder. Numbers are treated as pixels. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the placeholder. |
-| `width` | `string \| number` | `"100%"` | Width of the placeholder. Numbers are treated as pixels. |
+| Name | Kind | Description |
+| --- | --- | --- |
+| [`SkeletonComponent`](/api/skeleton/SkeletonComponent) | Component | A placeholder block standing in for content that has not loaded yet. |
 
 ### Types
 

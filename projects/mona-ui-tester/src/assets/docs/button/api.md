@@ -2,44 +2,11 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/button`.
+Everything below is imported from `@nanahoshi/mona-ui/button`. Each name links to its reference page, with every input, output, property and method.
 
-### `ButtonDirective`
-
-**Selector:** `button[monaButton]`  
-**API reference:** [`ButtonDirective`](/api/button/ButtonDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-haspopup` | `ButtonAriaHasPopup` | `"false"` | Value forwarded to the `aria-haspopup` attribute. Set when this button triggers a popup, menu, listbox, tree, grid, or dialog. Omit or leave as `"false"` for plain action buttons. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction. Accepts the bare attribute form (`<button monaButton disabled>`). When inside a `ButtonGroup`, the button is disabled when either it or the group is disabled. |
-| `iconOnly` | `boolean` | `false` | Removes horizontal padding and fixes a square aspect ratio sized to match `size`. Provide `aria-label` on the host when using icon-only buttons; in dev mode, an icon-only button without an accessible name logs a warning. |
-| `loading` | `boolean` | `false` | Displays a loading indicator and prevents interaction while an operation is in progress. Sets `aria-busy="true"` and `aria-disabled="true"` on the host. The button stays focusable, so keyboard focus isn't lost when loading starts, and clicks (including form submission) are blocked until it ends. |
-| `look` (two-way) | `"clear" \| "default" \| "error" \| "ghost" \| "info" \| "link" \| "outline" \| "primary" \| "secondary" \| "success" \| "warning"` | `"default"` | Visual style variant of the button. When inside a `ButtonGroup`, the group's look takes precedence. `"outline"` looks the same as `"default"`. `"clear"` shows no selected state, so use another look for toggle buttons. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the component. When inside a `ButtonGroup`, the group's value takes precedence. |
-| `selected` (two-way) | `boolean` | `false` | Whether the button is in the selected/pressed state. Drives `aria-pressed` when the button is toggleable. Managed by `toggleable` click handling or by `ButtonGroup` selection policy. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the button's height and horizontal padding. When inside a `ButtonGroup`, the group's value takes precedence. |
-| `tabindex` | `string \| number` | `0` | Tab index of the host element. Automatically overridden to `-1` when the button is disabled. Accepts a numeric string and converts it to a number; a value that is not a number falls back to `0`. |
-| `toggleable` | `boolean \| undefined` | `undefined` | Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed. Accepts the bare attribute form. Buttons in a `ButtonGroup` are toggleable unless this is set to `false`. |
-| `type` | `"button" \| "reset" \| "submit"` | `"button"` | Native `type` attribute of the button. Defaults to `"button"` to prevent accidental form submission; set to `"submit"` or `"reset"` explicitly when that behavior is intended. |
-| `value` | `unknown` | `undefined` | What a `ButtonGroup`'s `value` holds while this button is selected. A button without one takes no part in the group's `value`. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `lookChange` | `"clear" \| "default" \| "error" \| "ghost" \| "info" \| "link" \| "outline" \| "primary" \| "secondary" \| "success" \| "warning"` | Emitted when `look` changes. |
-| `selectedChange` | `boolean` | Emitted when `selected` changes. |
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `effectiveDisabled` (read-only) | `Signal<boolean>` | Whether the button is disabled, by its own input or its group's. A dropdown or split button reads this to close its menu. |
-| `effectiveToggleable` (read-only) | `Signal<boolean>` | Whether a click toggles the button: buttons in a group do unless `toggleable` is `false`. The group reads this to know which buttons take part in its selection. |
+| Name | Kind |
+| --- | --- |
+| [`ButtonDirective`](/api/button/ButtonDirective) | Directive |
 
 ### Types
 

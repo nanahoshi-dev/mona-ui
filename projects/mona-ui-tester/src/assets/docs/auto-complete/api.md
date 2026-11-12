@@ -2,212 +2,42 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/auto-complete`, `@nanahoshi/mona-ui/dropdowns`, as noted.
+Everything below is imported from `@nanahoshi/mona-ui/auto-complete`, unless a table names another entry point. Each name links to its reference page, with every input, output, property and method.
 
-### `AutoCompleteComponent`
-
-**Selector:** `mona-auto-complete`  
-**Type parameters:** `TData = unknown`  
-**Implements:** `FormValueControl<string \| null>`  
-**API reference:** [`AutoCompleteComponent`](/api/auto-complete/AutoCompleteComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-describedby` | `string` | `""` | ID of an element that provides an extended description for the input. Use this to associate error messages or help text with the input. |
-| `aria-label` | `string` | `""` | Accessible name for the input. Describe what the autocomplete represents. Prefer a visible label, linked through `inputId` or `aria-labelledby`; without any of them, browsers fall back to the `placeholder`. |
-| `aria-labelledby` | `string` | `""` | ID of an external element that provides the accessible name for the input. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `data` | `Iterable<TData>` | `[]` | Collection of items to render. |
-| `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction. |
-| `highlightFirst` | `boolean` | `true` | Defines whether the first matching item should be highlighted while typing. |
-| `inputId` | `string` | `generated` | Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the autocomplete. A unique id is generated when it isn't set. |
-| `invalid` | `boolean` | `false` | Marks the autocomplete as invalid. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `itemDisabled` | `DropdownFieldPredicateType<TData>` | `undefined` | Predicate or field name used to determine whether an individual item is disabled. |
-| `loading` | `boolean` | `false` | Shows a loading indicator, in place of the clear button, and marks the field busy. It doesn't block interaction: the field stays usable while data loads. |
-| `placeholder` | `string` | `""` | Placeholder text shown when no value is selected or entered. |
-| `popupClass` | `string` | `""` | Additional CSS classes applied to the popup element. |
-| `popupHeight` | `ListSizeInputType` | `null` | Maximum height of the popup, in pixels or as a CSS length. Shorter lists shrink to fit. When unset, the popup is at most 200 pixels tall. |
-| `popupWidth` | `ListSizeInputType` | `null` | Width of the popup element. |
-| `readonly` | `boolean` | `false` | Prevents value changes while preserving the component's visual state. |
-| `required` | `boolean` | `false` | Marks the field as required for form validation. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the component. |
-| `showClearButton` | `boolean` | `true` | Displays a button that clears the current value when clicked. Unlike the other dropdowns, this defaults to `true`. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the component's dimensions. |
-| `textField` | `DropdownFieldSelectorType<TData, string>` | `null` | Property name or accessor used to derive the display text from a data item. If null, the item itself is used as the display text. |
-| `touched` | `boolean` | `false` | Sets the touched state of the autocomplete. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `value` (two-way) | `string \| null` | `null` | Two-way bindable current autocomplete value. Implements `FormValueControl<string \| null>`, enabling signal forms `[formField]` binding. |
-| `valueField` | `DropdownFieldSelectorType<TData, unknown>` | `null` | Property name or accessor used to derive the value from a data item. If null, the item itself is used as the value. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `close` | `PopupCloseEvent<unknown>` | Emits when the popup is about to close. This event is preventable. |
-| `closed` | `void` | Emits after the popup is closed. |
-| `open` | `PreventableEvent<Event>` | Emits when the popup is about to open. This event is preventable. |
-| `opened` | `void` | Emits after the popup is opened. |
-| `touch` | `void` | Emitted when focus leaves the autocomplete. Moving between its input, clear button and popup doesn't count. The `FormField` directive listens to this to mark the field as touched. |
-| `valueChange` | `string \| null` | Emitted when `value` changes. |
-
-#### Methods
-
-| Signature | Description |
+| Name | Kind |
 | --- | --- |
-| `focus(options?: FocusOptions): void` | Moves focus to the inner input. The caret goes to the end of the text. |
+| [`AutoCompleteComponent`](/api/auto-complete/AutoCompleteComponent) | Component |
 
-### `DropdownFilterableDirective`
+From `@nanahoshi/mona-ui/dropdowns`:
 
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `mona-auto-complete[monaDropDownFilterable], mona-dropdown-list[monaDropDownFilterable], mona-combo-box[monaDropDownFilterable], mona-multi-select[monaDropDownFilterable]`  
-**API reference:** [`DropdownFilterableDirective`](/api/dropdowns/DropdownFilterableDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `filter` | `string` | `""` | Current filter text used to narrow the visible options. |
-| `filterPlaceholder` | `string` | `""` | Placeholder text in the popup's filter row. Auto Complete has no filter row, since its own input is the filter, so it ignores this. |
-| `monaDropDownFilterable` | `Partial<FilterableOptions> \| ""` | `""` | Filter operator, case sensitivity, and debounce delay. An empty string enables filtering with default settings (`operator: "contains"`, `caseSensitive: false`, `debounce: 0`); pass an object to override any field. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `filterChange` | `FilterChangeEvent` | Emitted when the filter value changes. Cancelable. |
-
-### `DropdownGroupableDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `mona-auto-complete[monaDropDownGroupable], mona-combo-box[monaDropDownGroupable], mona-dropdown-list[monaDropDownGroupable], mona-multi-select[monaDropDownGroupable]`  
-**Type parameters:** `TData`  
-**API reference:** [`DropdownGroupableDirective`](/api/dropdowns/DropdownGroupableDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `groupBy` | `string \| Selector<TData, unknown> \| null \| undefined` | `""` | Property name, or accessor, used to derive an option's group. |
-| `monaDropDownGroupable` | `GroupableOptions<TData, unknown> \| ""` | `""` | Group header order, and optional per-group item ordering. An empty string enables grouping with default settings (`headerOrder: "asc"`); pass an object to override any field. |
-
-### `DropdownVirtualScrollDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `mona-auto-complete[monaDropDownVirtualScroll], mona-dropdown-list[monaDropDownVirtualScroll], mona-combo-box[monaDropDownVirtualScroll], mona-multi-select[monaDropDownVirtualScroll]`  
-**API reference:** [`DropdownVirtualScrollDirective`](/api/dropdowns/DropdownVirtualScrollDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaDropDownVirtualScroll` | `Partial<VirtualScrollOptions> \| ""` | `""` | Whether virtual scrolling is enabled and the pixel height of a single option row. An empty string enables virtual scrolling with default settings (`height: 28`); pass an object to override either field. |
-
-### `DropdownDataHandlerDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `[monaDropdownDataHandler]`  
-**API reference:** [`DropdownDataHandlerDirective`](/api/dropdowns/DropdownDataHandlerDirective)
-
-### `DropdownFooterTemplateDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `ng-template[monaDropDownFooterTemplate], ng-template[monaAutoCompleteFooterTemplate], ng-template[monaDropDownListFooterTemplate], ng-template[monaDropDownTreeFooterTemplate], ng-template[monaComboBoxFooterTemplate], ng-template[monaMultiSelectFooterTemplate]`  
-**API reference:** [`DropdownFooterTemplateDirective`](/api/dropdowns/DropdownFooterTemplateDirective)
-
-### `DropdownGroupHeaderTemplateDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `ng-template[monaDropDownGroupHeaderTemplate], ng-template[monaAutoCompleteGroupHeaderTemplate], ng-template[monaDropDownListGroupHeaderTemplate], ng-template[monaComboBoxGroupHeaderTemplate], ng-template[monaMultiSelectGroupHeaderTemplate]`  
-**API reference:** [`DropdownGroupHeaderTemplateDirective`](/api/dropdowns/DropdownGroupHeaderTemplateDirective)
-
-### `DropdownHeaderTemplateDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `ng-template[monaDropDownHeaderTemplate], ng-template[monaAutoCompleteHeaderTemplate], ng-template[monaDropDownListHeaderTemplate], ng-template[monaDropDownTreeHeaderTemplate], ng-template[monaComboBoxHeaderTemplate], ng-template[monaMultiSelectHeaderTemplate]`  
-**API reference:** [`DropdownHeaderTemplateDirective`](/api/dropdowns/DropdownHeaderTemplateDirective)
-
-### `DropdownItemTemplateDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `ng-template[monaDropDownItemTemplate], ng-template[monaAutoCompleteItemTemplate], ng-template[monaDropDownListItemTemplate], ng-template[monaComboBoxItemTemplate], ng-template[monaMultiSelectItemTemplate]`  
-**API reference:** [`DropdownItemTemplateDirective`](/api/dropdowns/DropdownItemTemplateDirective)
-
-### `DropdownListPopupHandlerDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `[monaDropdownListPopupHandler]`  
-**API reference:** [`DropdownListPopupHandlerDirective`](/api/dropdowns/DropdownListPopupHandlerDirective)
-
-### `DropdownLiveRegionDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-Announces how many results a dropdown shows after its list is filtered, or after its items change, while the
-popup is open ("3 results available", "No results found").
-
-The announcement goes through the CDK `LiveAnnouncer`, whose live region lives at the end of the document, so it
-never becomes part of the combobox's content. The highlighted option isn't announced here:
-`aria-activedescendant` already does that.
-
-**Selector:** `[monaDropdownLiveRegion]`  
-**API reference:** [`DropdownLiveRegionDirective`](/api/dropdowns/DropdownLiveRegionDirective)
-
-### `DropdownNoDataTemplateDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `ng-template[monaDropDownNoDataTemplate], ng-template[monaAutoCompleteNoDataTemplate], ng-template[monaDropDownListNoDataTemplate], ng-template[monaDropDownTreeNoDataTemplate], ng-template[monaComboBoxNoDataTemplate], ng-template[monaMultiSelectNoDataTemplate]`  
-**API reference:** [`DropdownNoDataTemplateDirective`](/api/dropdowns/DropdownNoDataTemplateDirective)
-
-### `DropdownPopupHandlerDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `[monaDropdownPopupHandler]`  
-**API reference:** [`DropdownPopupHandlerDirective`](/api/dropdowns/DropdownPopupHandlerDirective)
-
-### `DropdownPrefixTemplateDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `ng-template[monaDropdownPrefixTemplate]`  
-**API reference:** [`DropdownPrefixTemplateDirective`](/api/dropdowns/DropdownPrefixTemplateDirective)
-
-### `DropdownSuffixTemplateDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `ng-template[monaDropdownSuffixTemplate]`  
-**API reference:** [`DropdownSuffixTemplateDirective`](/api/dropdowns/DropdownSuffixTemplateDirective)
-
-### `DropdownListService`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Type parameters:** `TData = unknown`  
-**API reference:** [`DropdownListService`](/api/dropdowns/DropdownListService)
-
-#### Properties
-
-| Name | Type |
-| --- | --- |
-| `navigate$` (read-only) | `Subject<{ item: ListItem<TData>; }>` |
+| [`DropdownFilterableDirective`](/api/dropdowns/DropdownFilterableDirective) | Directive |  |
+| [`DropdownGroupableDirective`](/api/dropdowns/DropdownGroupableDirective) | Directive |  |
+| [`DropdownVirtualScrollDirective`](/api/dropdowns/DropdownVirtualScrollDirective) | Directive |  |
+| [`DropdownDataHandlerDirective`](/api/dropdowns/DropdownDataHandlerDirective) | Directive |  |
+| [`DropdownFooterTemplateDirective`](/api/dropdowns/DropdownFooterTemplateDirective) | Directive |  |
+| [`DropdownGroupHeaderTemplateDirective`](/api/dropdowns/DropdownGroupHeaderTemplateDirective) | Directive |  |
+| [`DropdownHeaderTemplateDirective`](/api/dropdowns/DropdownHeaderTemplateDirective) | Directive |  |
+| [`DropdownItemTemplateDirective`](/api/dropdowns/DropdownItemTemplateDirective) | Directive |  |
+| [`DropdownListPopupHandlerDirective`](/api/dropdowns/DropdownListPopupHandlerDirective) | Directive |  |
+| [`DropdownLiveRegionDirective`](/api/dropdowns/DropdownLiveRegionDirective) | Directive | Announces how many results a dropdown shows after its list is filtered, or after its items change, while the popup is open ("3 results available", "No results found"). |
+| [`DropdownNoDataTemplateDirective`](/api/dropdowns/DropdownNoDataTemplateDirective) | Directive |  |
+| [`DropdownPopupHandlerDirective`](/api/dropdowns/DropdownPopupHandlerDirective) | Directive |  |
+| [`DropdownPrefixTemplateDirective`](/api/dropdowns/DropdownPrefixTemplateDirective) | Directive |  |
+| [`DropdownSuffixTemplateDirective`](/api/dropdowns/DropdownSuffixTemplateDirective) | Directive |  |
+| [`DropdownListService`](/api/dropdowns/DropdownListService) | Service |  |
 
 ### Types
 
+| Type | Kind |
+| --- | --- |
+| [`AUTO_COMPLETE_DEFAULT_MESSAGES`](/api/auto-complete/AUTO_COMPLETE_DEFAULT_MESSAGES) | Constant |
+
+From `@nanahoshi/mona-ui/dropdowns`:
+
 | Type | Kind | Description |
 | --- | --- | --- |
-| [`AUTO_COMPLETE_DEFAULT_MESSAGES`](/api/auto-complete/AUTO_COMPLETE_DEFAULT_MESSAGES) | Constant |  |
 | [`DROPDOWN_DATA_INPUT_TOKEN`](/api/dropdowns/DROPDOWN_DATA_INPUT_TOKEN) | Constant |  |
 | [`DROPDOWN_POPUP_INPUT_TOKEN`](/api/dropdowns/DROPDOWN_POPUP_INPUT_TOKEN) | Constant |  |
 | [`DropdownDataInputToken`](/api/dropdowns/DropdownDataInputToken) | Constant | **Deprecated.** Use `DROPDOWN_DATA_INPUT_TOKEN`. |

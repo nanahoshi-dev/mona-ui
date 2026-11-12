@@ -2,182 +2,24 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/menubar`.
+Everything below is imported from `@nanahoshi/mona-ui/menubar`. Each name links to its reference page, with every input, output, property and method.
 
-### `MenubarComponent`
-
-**Selector:** `mona-menubar`  
-**API reference:** [`MenubarComponent`](/api/menubar/MenubarComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | ARIA label for the menubar. |
-| `aria-labelledby` | `string` | `""` | ARIA labelledby for the menubar. |
-| `class` | `string` | `""` | Additional CSS classes to apply to the menubar, merged with the computed theme classes. |
-| `disabled` | `boolean` | `false` | Sets the disabled state of menubar. |
-| `rounded` | `"large" \| "medium" \| "none" \| "small"` | `"medium"` | Sets the rounded style of the menubar. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Sets the size of the menubar. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `menuItemClick` | `PopupMenuItemClickEvent` | Emits when a menu item is clicked. |
-
-### `MenuCheckboxItemComponent`
-
-**Selector:** `mona-menu-checkbox-item`  
-**Extends:** `PopupMenuCheckboxItemComponent`  
-**API reference:** [`MenuCheckboxItemComponent`](/api/menubar/MenuCheckboxItemComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `checked` (two-way) | `boolean` | `false` | The checked state of the menu item. Activating the item toggles it (unless its `menuClick` is prevented) and emits `checkedChange`, so it works with or without a two-way binding. |
-| `disabled` | `boolean` | `false` | Sets the disabled state of the menu item. |
-| `label` | `string` | `""` | The text of the menu item. |
-| `value` | `unknown` | — | A value that identifies the item. It's the `value` of the item's `menuClick` events. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `checkedChange` | `boolean` | Emitted when `checked` changes. |
-| `menuClick` | `PopupMenuItemClickEvent` | The click event of the menu item. Emits when the menu item is selected by keyboard or mouse. |
-
-### `MenuItemComponent`
-
-**Selector:** `mona-menu-item`  
-**Extends:** `PopupMenuItemComponent`  
-**API reference:** [`MenuItemComponent`](/api/menubar/MenuItemComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `disabled` | `boolean` | `false` | Sets the disabled state of the menu item. |
-| `label` | `string` | `""` | The text of the menu item. |
-| `value` | `unknown` | — | A value that identifies the item. It's the `value` of the item's `menuClick` events, so handlers don't depend on the label's text. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `menuClick` | `PopupMenuItemClickEvent` | The click event of the menu item. Emits when the menu item is selected by keyboard or mouse. |
-
-### `MenuRadioItemComponent`
-
-**Selector:** `mona-menu-radio-item`  
-**Extends:** `PopupMenuRadioItemComponent`  
-**API reference:** [`MenuRadioItemComponent`](/api/menubar/MenuRadioItemComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `disabled` | `boolean` | `false` | Sets the disabled state of the menu item. |
-| `label` | `string` | `""` | The text of the menu item. |
-| `value` (required) | `string` | — | The value of the radio item. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `menuClick` | `PopupMenuItemClickEvent` | The click event of the menu item. Emits when the menu item is selected by keyboard or mouse, before the radio group selects it. Preventing it keeps the group's value and the menu open. |
-
-### `MenuComponent`
-
-A top-level menu. Its `text` is displayed on the menubar; its projected items (or `items` input) become the popup
-content.
-
-**Selector:** `mona-menu`  
-**API reference:** [`MenuComponent`](/api/menubar/MenuComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `disabled` | `boolean` | `false` | Sets the menu as disabled. |
-| `items` | `Iterable<MenuItem>` | `[]` | Sets the items of the menu. If provided, it will override the menu items defined by the menu item components. |
-| `text` | `string` | `""` | The text of the menu. |
-
-### `MenuRadioGroupComponent`
-
-**Selector:** `mona-menu-radio-group`  
-**Extends:** `PopupMenuRadioGroupComponent`  
-**API reference:** [`MenuRadioGroupComponent`](/api/menubar/MenuRadioGroupComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `title` | `string` | `""` | The title of the radio group. |
-| `value` (two-way) | `string` | `""` | The value of the selected radio item. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `valueChange` | `string` | Emitted when `value` changes. |
-
-### `MenuGroupComponent`
-
-**Selector:** `mona-menu-group`  
-**Extends:** `PopupMenuGroupComponent`  
-**API reference:** [`MenuGroupComponent`](/api/menubar/MenuGroupComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `title` | `string` | — | Sets the title of the menu group. |
-
-### `MenuSeparatorComponent`
-
-Renders a horizontal visual divider between items.
-
-**Selector:** `mona-menu-separator`  
-**Extends:** `PopupMenuSeparatorComponent`  
-**API reference:** [`MenuSeparatorComponent`](/api/menubar/MenuSeparatorComponent)
-
-### `MenuGroupTemplateDirective`
-
-Customizes a group header's content.
-
-**Selector:** `ng-template[monaMenuGroupTemplate]`  
-**Extends:** `PopupMenuGroupTemplateDirective`  
-**API reference:** [`MenuGroupTemplateDirective`](/api/menubar/MenuGroupTemplateDirective)
-
-### `MenuIconTemplateDirective`
-
-**Selector:** `ng-template[monaMenuIconTemplate]`  
-**API reference:** [`MenuIconTemplateDirective`](/api/menubar/MenuIconTemplateDirective)
-
-### `MenuItemIconTemplateDirective`
-
-**Selector:** `ng-template[monaMenuItemIconTemplate]`  
-**Extends:** `PopupMenuIconTemplateDirective`  
-**API reference:** [`MenuItemIconTemplateDirective`](/api/menubar/MenuItemIconTemplateDirective)
-
-### `MenuItemShortcutTemplateDirective`
-
-**Selector:** `ng-template[monaMenuItemShortcutTemplate]`  
-**Extends:** `PopupMenuShortcutTemplateDirective`  
-**API reference:** [`MenuItemShortcutTemplateDirective`](/api/menubar/MenuItemShortcutTemplateDirective)
-
-### `MenuItemTextTemplateDirective`
-
-**Selector:** `ng-template[monaMenuItemTextTemplate]`  
-**Extends:** `PopupMenuTextTemplateDirective`  
-**API reference:** [`MenuItemTextTemplateDirective`](/api/menubar/MenuItemTextTemplateDirective)
-
-### `MenuTextTemplateDirective`
-
-**Selector:** `ng-template[monaMenuTextTemplate]`  
-**API reference:** [`MenuTextTemplateDirective`](/api/menubar/MenuTextTemplateDirective)
+| [`MenubarComponent`](/api/menubar/MenubarComponent) | Component |  |
+| [`MenuCheckboxItemComponent`](/api/menubar/MenuCheckboxItemComponent) | Component |  |
+| [`MenuItemComponent`](/api/menubar/MenuItemComponent) | Component |  |
+| [`MenuRadioItemComponent`](/api/menubar/MenuRadioItemComponent) | Component |  |
+| [`MenuComponent`](/api/menubar/MenuComponent) | Component | A top-level menu. |
+| [`MenuRadioGroupComponent`](/api/menubar/MenuRadioGroupComponent) | Component |  |
+| [`MenuGroupComponent`](/api/menubar/MenuGroupComponent) | Component |  |
+| [`MenuSeparatorComponent`](/api/menubar/MenuSeparatorComponent) | Component | Renders a horizontal visual divider between items. |
+| [`MenuGroupTemplateDirective`](/api/menubar/MenuGroupTemplateDirective) | Directive | Customizes a group header's content. |
+| [`MenuIconTemplateDirective`](/api/menubar/MenuIconTemplateDirective) | Directive |  |
+| [`MenuItemIconTemplateDirective`](/api/menubar/MenuItemIconTemplateDirective) | Directive |  |
+| [`MenuItemShortcutTemplateDirective`](/api/menubar/MenuItemShortcutTemplateDirective) | Directive |  |
+| [`MenuItemTextTemplateDirective`](/api/menubar/MenuItemTextTemplateDirective) | Directive |  |
+| [`MenuTextTemplateDirective`](/api/menubar/MenuTextTemplateDirective) | Directive |  |
 
 ### Types
 

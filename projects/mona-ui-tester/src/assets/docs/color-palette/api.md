@@ -2,45 +2,11 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/color-palette`.
+Everything below is imported from `@nanahoshi/mona-ui/color-palette`. Each name links to its reference page, with every input, output, property and method.
 
-### `ColorPaletteComponent`
-
-**Selector:** `mona-color-palette`  
-**Implements:** `FormValueControl<string \| null>`  
-**API reference:** [`ColorPaletteComponent`](/api/color-palette/ColorPaletteComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | Accessible label for the color palette grid. |
-| `aria-labelledby` | `string` | `""` | Id of the element that names the color palette grid. |
-| `clearable` | `boolean` | `true` | Whether activating the selected tile clears the value. A required palette never clears. |
-| `columns` | `number` | `10` | The number of columns in the color palette grid. Only applicable when using a custom palette. A value below 1 shows one column. |
-| `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction. |
-| `invalid` | `boolean` | `false` | Marks the color palette as invalid. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `palette` | `PaletteType \| Iterable<string \| ColorPaletteItem>` | `[]` | The palette to display — one of the built-in `"flat"`, `"material"`, or `"websafe"` schemes, or a custom iterable of colors. A custom color is a CSS color string, or a `{ color, name }` item when it has a name of its own. An empty custom palette falls back to the flat scheme. |
-| `readonly` | `boolean` | `false` | Prevents value changes while preserving the component's visual state. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `required` | `boolean` | `false` | Sets whether the color palette is required. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"none"` | Border-radius preset applied to the color palette items. |
-| `tileSize` | `number` | `24` | The size of each tile in the color palette grid, in pixels. Below 24, tiles miss the minimum target size of WCAG 2.5.8. |
-| `touched` | `boolean` | `false` | Sets the touched state of the color palette. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `value` (two-way) | `string \| null` | `null` | Two-way bindable current color value. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `colorSelect` | `string` | Emitted with the tile's color each time a tile is activated, also when it's already selected, which doesn't change `value`. |
-| `touch` | `void` | Emitted when focus leaves the color palette or a color is selected. The `FormField` directive listens to this to mark the field as touched. |
-| `valueChange` | `string \| null` | Emitted when `value` changes. |
-
-#### Methods
-
-| Signature | Description |
+| Name | Kind |
 | --- | --- |
-| `focus(options?: FocusOptions): void` | Moves focus to the palette's active tile. |
+| [`ColorPaletteComponent`](/api/color-palette/ColorPaletteComponent) | Component |
 
 ### Types
 

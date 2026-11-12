@@ -2,87 +2,16 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/tabs`.
+Everything below is imported from `@nanahoshi/mona-ui/tabs`. Each name links to its reference page, with every input, output, property and method.
 
-### `TabsComponent`
-
-**Selector:** `mona-tabs`  
-**API reference:** [`TabsComponent`](/api/tabs/TabsComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | Accessible name for the tab list. |
-| `aria-labelledby` | `string` | `""` | The id of an element that names the tab list. Takes precedence over `aria-label`. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `closable` | `boolean` | `false` | Displays a close button on each tab. A tab's own `closable` can add a button, not remove this one. |
-| `disabled` | `boolean` | `false` | Renders every tab with reduced visual emphasis and removes pointer and keyboard interaction. |
-| `keepTabContent` | `boolean` | `true` | Keeps a tab's content in the DOM after it is deselected instead of removing it. |
-| `position` | `"bottom" \| "left" \| "right" \| "top"` | `"top"` | Placement of the tab list relative to the tab content. |
-| `selectedIndex` (two-way) | `number` | `0` | The zero-based index of the selected tab. Writing it selects that tab, unless it's disabled or out of range, in which case the value goes back to the selected tab's index. It also changes when the component moves the selection itself, such as when the selected tab is removed. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the tabs' dimensions. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `selectedIndexChange` | `number` | Emitted when `selectedIndex` changes. |
-| `tabClose` | `TabCloseEvent` | Emitted with a `TabCloseEvent` when a close is requested. The component doesn't remove the tab: remove it from whatever renders the `mona-tab` elements. |
-| `tabSelect` | `TabSelectEvent` | Emitted with a `TabSelectEvent` before a click or key selects a tab. This event is preventable. It doesn't fire for selections made through `selectedIndex` or `selected`, or when the selected tab is removed. |
-
-### `TabComponent`
-
-**Selector:** `mona-tab`  
-**API reference:** [`TabComponent`](/api/tabs/TabComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `closable` | `boolean` | `false` | Displays a close button on this tab. Turning it on here shows the button even when the parent `mona-tabs` has `closable` off; turning it off here doesn't hide a button the parent asked for. |
-| `disabled` | `boolean` | `false` | Renders this tab with reduced visual emphasis and removes pointer and keyboard interaction. A tab is disabled when this or the parent `mona-tabs` component's `disabled` input is on. |
-| `selected` (two-way) | `boolean` | `false` | Whether the tab is selected. Setting it to `true` selects the tab unless it's disabled, and it follows the selection, so `[(selected)]` stays current. Setting it to `false` doesn't clear the selection, because a group of tabs always keeps one selected. |
-| `title` | `string` | `""` | Title text displayed on the tab. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `selectedChange` | `boolean` | Emitted when `selected` changes. |
-
-### `TabContentTemplateDirective`
-
-**Selector:** `ng-template[monaTabContentTemplate]`  
-**API reference:** [`TabContentTemplateDirective`](/api/tabs/TabContentTemplateDirective)
-
-### `TabTitleTemplateDirective`
-
-**Selector:** `ng-template[monaTabTitleTemplate]`  
-**API reference:** [`TabTitleTemplateDirective`](/api/tabs/TabTitleTemplateDirective)
-
-### `TabCloseEvent`
-
-**Extends:** `PreventableEvent`  
-**API reference:** [`TabCloseEvent`](/api/tabs/TabCloseEvent)
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` (read-only) | `number` | Index of the tab a close was requested for. |
-| `selected` (read-only) | `boolean` | Whether the tab a close was requested for was the selected tab. |
-
-### `TabSelectEvent`
-
-**Extends:** `PreventableEvent`  
-**API reference:** [`TabSelectEvent`](/api/tabs/TabSelectEvent)
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` (read-only) | `number` | Index of the tab being selected. |
+| Name | Kind |
+| --- | --- |
+| [`TabsComponent`](/api/tabs/TabsComponent) | Component |
+| [`TabComponent`](/api/tabs/TabComponent) | Component |
+| [`TabContentTemplateDirective`](/api/tabs/TabContentTemplateDirective) | Directive |
+| [`TabTitleTemplateDirective`](/api/tabs/TabTitleTemplateDirective) | Directive |
+| [`TabCloseEvent`](/api/tabs/TabCloseEvent) | Class |
+| [`TabSelectEvent`](/api/tabs/TabSelectEvent) | Class |
 
 ### Types
 

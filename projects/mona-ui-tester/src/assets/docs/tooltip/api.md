@@ -2,79 +2,14 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/tooltip`.
+Everything below is imported from `@nanahoshi/mona-ui/tooltip`. Each name links to its reference page, with every input, output, property and method.
 
-### `TooltipComponent`
-
-**Selector:** `mona-tooltip`  
-**API reference:** [`TooltipComponent`](/api/tooltip/TooltipComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `disabled` | `boolean` | `false` | Whether the tooltip is disabled. When disabled, the tooltip will not be shown, and an open one closes. |
-| `hideDelay` | `number` | `0` | The delay in milliseconds before hiding the tooltip after the pointer or focus leaves. A pointer that leaves always gets a short grace, so it can move onto the tooltip. |
-| `position` | `TooltipPosition` | `"top"` | The side of the target the tooltip opens on. `left` and `right` are physical; `start` and `end` follow the text direction. It flips to the opposite side when there isn't room. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | The border radius of the tooltip. |
-| `showDelay` | `number` | `0` | The delay in milliseconds before showing the tooltip after the trigger event. |
-| `target` (required) | `PopupAnchor` | — | The target element(s) to which the tooltip is attached. Can be an Element, ElementRef, or CSS selector string. A selector matches elements anywhere in the document, including ones added later. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `hidden` | `void` | Emitted when the tooltip popup is hidden. |
-| `shown` | `void` | Emitted when the tooltip popup is shown. |
-
-### `TooltipDirective`
-
-**Selector:** `[monaTooltip]`  
-**API reference:** [`TooltipDirective`](/api/tooltip/TooltipDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `contentOf` | `((element: HTMLElement) => string) \| null` | `null` | Reads the tooltip's text from the matched element, in place of its `title`, which then stays where it is. An empty result shows nothing. |
-| `disabled` | `boolean` | `false` | Whether the tooltip is disabled. When disabled, the tooltip will not be shown, and an open one closes. On a button or another control, `[disabled]` also reaches the control, so use `tooltipDisabled` there. |
-| `filter` | `string` | `"[title]"` | The filter to select elements that will have tooltips. It can be a CSS selector that matches elements within the host element, including ones added later. Only applies when `mode` is set to `content`. |
-| `hideDelay` | `number` | `0` | The delay in milliseconds before hiding the tooltip after the pointer or focus leaves. A pointer that leaves always gets a short grace, so it can move onto the tooltip. |
-| `mode` | `"host" \| "content"` | `"host"` | The mode of the tooltip. "host" mode shows the host's tooltip content, or its title attribute. "content" mode uses the title attribute of elements matching the filter. |
-| `monaTooltip` | `string \| TemplateRef<unknown> \| null \| undefined` | `""` | The tooltip's content in host mode: text, or a template. Without it, the host's `title` is shown. |
-| `position` | `TooltipPosition` | `"top"` | The side of the target the tooltip opens on. `left` and `right` are physical; `start` and `end` follow the text direction. It flips to the opposite side when there isn't room. |
-| `showDelay` | `number` | `0` | The delay in milliseconds before showing the tooltip after the trigger event. |
-| `tooltipDisabled` | `boolean` | `false` | Disables only the tooltip, like `disabled`, on an element whose own `disabled` would take the same binding, such as a `monaButton` or a native control. |
-| `tooltipRounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | The border radius of the tooltip. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `hidden` | `void` | Emitted when the tooltip popup is hidden. |
-| `shown` | `void` | Emitted when the tooltip popup is shown. |
-
-### `getOffsetForPosition`
-
-**Deprecated.** No longer used by the tooltip or popover, which keep the gap on the side they flip to and place
-`left` and `right` physically in RTL. Kept for existing callers. Gets the appropriate offset for a tooltip based on its position.
-The offset ensures proper spacing between the tooltip and its anchor element.
-
-**API reference:** [`getOffsetForPosition`](/api/tooltip/getOffsetForPosition)
-
-```typescript
-function getOffsetForPosition(position: Position, arrowVisible: boolean): PopupOffset;
-```
-
-### `getPositionConnectionPoints`
-
-**Deprecated.** No longer used by the tooltip or popover. Kept for existing callers.
-
-**API reference:** [`getPositionConnectionPoints`](/api/tooltip/getPositionConnectionPoints)
-
-```typescript
-function getPositionConnectionPoints(position: Position): { anchor: ConnectionPoint; popup: ConnectionPoint };
-```
+| [`TooltipComponent`](/api/tooltip/TooltipComponent) | Component |  |
+| [`TooltipDirective`](/api/tooltip/TooltipDirective) | Directive |  |
+| [`getOffsetForPosition`](/api/tooltip/getOffsetForPosition) | Function | **Deprecated.** No longer used by the tooltip or popover, which keep the gap on the side they flip to and place `left` and `right` physically in RTL. |
+| [`getPositionConnectionPoints`](/api/tooltip/getPositionConnectionPoints) | Function | **Deprecated.** No longer used by the tooltip or popover. |
 
 ### Types
 

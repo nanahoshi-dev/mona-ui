@@ -2,22 +2,11 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/text-box`.
+Everything below is imported from `@nanahoshi/mona-ui/text-box`. Each name links to its reference page, with every input, output, property and method.
 
-### `TextBoxDirective`
-
-**Selector:** `input[monaTextBox]`  
-**API reference:** [`TextBoxDirective`](/api/text-box/TextBoxDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `invalid` | `boolean` | `false` | Marks the input as invalid, triggering error border and ring styling. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the component. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the component's dimensions. |
-| `touched` | `boolean` | `false` | Marks the input as touched. Error styling is only shown when both `invalid` and `touched` are `true`. |
+| Name | Kind |
+| --- | --- |
+| [`TextBoxDirective`](/api/text-box/TextBoxDirective) | Directive |
 
 ### Types
 

@@ -2,57 +2,11 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/editor`.
+Everything below is imported from `@nanahoshi/mona-ui/editor`. Each name links to its reference page, with every input, output, property and method.
 
-### `EditorComponent`
-
-**Selector:** `mona-editor`  
-**Implements:** `FormValueControl<string>`  
-**API reference:** [`EditorComponent`](/api/editor/EditorComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-describedby` | `string` | `""` | The id of an element that describes the content, such as a hint or an error message. |
-| `aria-label` | `string` | `""` | The accessible name of the content. Without it or `aria-labelledby`, the content is named "Rich text editor" (translated). |
-| `aria-labelledby` | `string` | `""` | The id of a visible label for the content, such as a `<label>` next to the editor. |
-| `class` | `string` | `""` | CSS classes applied to the host element. |
-| `content` | `string \| JSONContent` | — | **Deprecated.** Use `value` (HTML), or `[formField]` with a signal form. To read the JSON, use the `update` event or the `json` property. The initial content of the editor, as HTML or a `JSONContent` document. A later change replaces the document, unless it is the content the editor already has. |
-| `disabled` | `boolean` | `false` | Disables the editor: the content can't be edited or focused for editing, and the toolbar is inert. When bound to a signal form field via `[formField]`, the form sets it. |
-| `invalid` | `boolean` | `false` | Marks the editor as invalid once it has been touched. When bound to a signal form field via `[formField]`, the form sets it. |
-| `placeholder` | `string` | `""` | Text shown in the empty editor, and given to assistive technology as `aria-placeholder`. It is not a name: use a label or `aria-label` too. |
-| `readonly` | `boolean` | `false` | Makes the content read-only and hides the toolbar. When bound to a signal form field via `[formField]`, the form sets it. |
-| `required` | `boolean` | `false` | Marks the editor as required: once touched, an empty editor is invalid. |
-| `settings` | `Partial<EditorSettings>` | — | The settings of the editor. Changing them rebuilds the editor and keeps its document. |
-| `touched` | `boolean` | `false` | Sets the touched state. When bound to a signal form field via `[formField]`, the form sets it. |
-| `value` (two-way) | `string` | `""` | The content of the editor as HTML. An empty editor has the value `""`. Use `[(value)]`, or `[formField]` with a signal form. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `blur` | `void` | **Deprecated.** Use `editorBlur`. Emits when the editor loses focus. |
-| `create` | `void` | Emits when the editor is created and ready to be used, and again when it is rebuilt for new `settings`. |
-| `editorBlur` | `void` | Emits when the editor loses focus. |
-| `editorFocus` | `void` | Emits when the editor gains focus. |
-| `selectionUpdate` | `void` | Emits when the selection of the editor changes. |
-| `touch` | `void` | Emits when the editor loses focus. Form directives (`[formField]`, `ngModel`, `formControl`) listen to this to mark the field as touched. |
-| `update` | `ContentChangeEvent` | Emits when the user changes the content. It isn't emitted when `value` or `content` is set from outside. |
-| `valueChange` | `string` | Emitted when `value` changes. |
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `html` (read-only) | `string` | Returns the HTML content of the editor, or `""` before the editor is created. It can be used to save the content of the editor in a database and restore it later. |
-| `json` (read-only) | `JSONContent` | Returns the JSON content of the editor in the `JSONContent` format, or an empty document before the editor is created. It can be used to save the content of the editor in a database and restore it later. |
-
-#### Methods
-
-| Signature | Description |
+| Name | Kind |
 | --- | --- |
-| `focus(options?: FocusOptions): void` | Moves focus into the editor, keeping the selection it had. |
+| [`EditorComponent`](/api/editor/EditorComponent) | Component |
 
 ### Types
 

@@ -2,110 +2,14 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/rating`.
+Everything below is imported from `@nanahoshi/mona-ui/rating`. Each name links to its reference page, with every input, output, property and method.
 
-### `RatingComponent`
-
-**Selector:** `mona-rating`  
-**Implements:** `FormValueControl<number>`  
-**API reference:** [`RatingComponent`](/api/rating/RatingComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-describedby` | `string \| null` | `null` | Associates help text or an error description with the focusable rating control. |
-| `aria-label` | `string \| null` | `null` | Explicit accessible name for the rating control. Provide `aria-label`, `aria-labelledby`, or `label` so assistive technology can announce the control. |
-| `aria-labelledby` | `string \| null` | `null` | IDs of external elements providing the accessible name for the rating control. |
-| `ariaValueText` | `((value: number, maximum: number) => string) \| null` | `null` | Custom screen-reader value announcement. Receives the normalized value and the item count and returns the string to expose through `aria-valuetext`. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `clearable` | `boolean` | `false` | Lets a click on the current value clear the rating, so pointer and touch users can undo one. The keyboard can always clear it with Home. |
-| `color` | `string \| null` | `undefined` | CSS color for selected and hovered rating visuals. Empty, `null`, and `undefined` values use the primary theme color. |
-| `disabled` | `boolean` | `false` | Disables pointer and keyboard interaction and removes the control from the tab sequence. When bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive. |
-| `icon` | `RatingIconName` | `"star"` | Built-in icon used for the default rating visuals. Choose `star`, `heart`, `circle`, `diamond`, or `flame`; use item templates to supply a custom icon. |
-| `invalid` | `boolean` | `false` | Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`. When bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive. |
-| `itemsCount` | `number` | `5` | Number of rating items. Fractional values are floored and values below one are raised to one. |
-| `label` | `string \| null` | `null` | Optional visible label rendered before or after the rating items. When no explicit `aria-label` or `aria-labelledby` is supplied, the label provides the accessible name. |
-| `labelPosition` | `RatingLabelPosition` | `"after"` | Places the visible label before or after the item group. |
-| `precision` | `RatingPrecision` | `"item"` | Selection granularity of the rating. |
-| `readonly` | `boolean` | `false` | Prevents value changes while preserving focusability and normal visual emphasis. |
-| `required` | `boolean` | `false` | Shows the invalid state while the rating is `0` and the control is touched. The `required` rule of signal forms doesn't treat `0` as empty, so it won't fail the form by itself: use `min(path, 1)` to reject an unrated value. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `selection` | `RatingSelectionMode` | `"continuous"` | Controls cumulative or single-item filling. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the icon dimensions, item hitboxes, spacing, and label typography. |
-| `tabindex` | `string \| number` | `0` | Tab index applied to the focusable rating control when not disabled. Accepts a numeric string and converts it to a number. |
-| `touched` | `boolean` | `false` | Marks the component as touched. When bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive. |
-| `value` (two-way) | `number` | `0` | Current rating value. `0` represents an unrated state. Values are normalized for rendering but are not rewritten until the user interacts with the component. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `touch` | `void` | Emitted when the control loses focus or a pointer commits a rating, marking the field as touched. |
-| `valueChange` | `number` | Emitted when `value` changes. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `blur(): void` | Blurs the inner slider control if focused. |
-| `focus(options?: FocusOptions): void` | Focuses the inner slider control. Does nothing while disabled. |
-
-### `RatingHoveredItemTemplateDirective`
-
-Renders the pointer-preview visual for rating items. Overrides the default preset
-overlay whenever the visible state comes from pointer preview.
-
-**Selector:** `ng-template[monaRatingHoveredItemTemplate]`  
-**API reference:** [`RatingHoveredItemTemplateDirective`](/api/rating/RatingHoveredItemTemplateDirective)
-
-#### Template context
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `number` | Zero-based item index. |
-| `fill` | `number` | Visible fill amount between 0 and 1. |
-| `hovered` | `boolean` | Whether the visible state comes from pointer preview. |
-| `index` | `number` | Zero-based item index. |
-| `itemValue` | `number` | One-based value represented by this item. |
-| `selected` | `boolean` | Whether the visible state comes from the committed value. |
-
-### `RatingItemTemplateDirective`
-
-Renders the default (unselected) visual for every rating item. Overrides the
-default preset icon for the base layer of each item.
-
-**Selector:** `ng-template[monaRatingItemTemplate]`  
-**API reference:** [`RatingItemTemplateDirective`](/api/rating/RatingItemTemplateDirective)
-
-#### Template context
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `number` | Zero-based item index. |
-| `fill` | `number` | Visible fill amount between 0 and 1. |
-| `hovered` | `boolean` | Whether the visible state comes from pointer preview. |
-| `index` | `number` | Zero-based item index. |
-| `itemValue` | `number` | One-based value represented by this item. |
-| `selected` | `boolean` | Whether the visible state comes from the committed value. |
-
-### `RatingSelectedItemTemplateDirective`
-
-Renders the committed selected visual for rating items. Overrides the default
-preset overlay whenever the visible state comes from the committed value.
-
-**Selector:** `ng-template[monaRatingSelectedItemTemplate]`  
-**API reference:** [`RatingSelectedItemTemplateDirective`](/api/rating/RatingSelectedItemTemplateDirective)
-
-#### Template context
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `number` | Zero-based item index. |
-| `fill` | `number` | Visible fill amount between 0 and 1. |
-| `hovered` | `boolean` | Whether the visible state comes from pointer preview. |
-| `index` | `number` | Zero-based item index. |
-| `itemValue` | `number` | One-based value represented by this item. |
-| `selected` | `boolean` | Whether the visible state comes from the committed value. |
+| [`RatingComponent`](/api/rating/RatingComponent) | Component |  |
+| [`RatingHoveredItemTemplateDirective`](/api/rating/RatingHoveredItemTemplateDirective) | Directive | Renders the pointer-preview visual for rating items. |
+| [`RatingItemTemplateDirective`](/api/rating/RatingItemTemplateDirective) | Directive | Renders the default (unselected) visual for every rating item. |
+| [`RatingSelectedItemTemplateDirective`](/api/rating/RatingSelectedItemTemplateDirective) | Directive | Renders the committed selected visual for rating items. |
 
 ### Types
 

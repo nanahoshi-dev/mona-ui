@@ -2,74 +2,17 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/card`.
+Everything below is imported from `@nanahoshi/mona-ui/card`. Each name links to its reference page, with every input, output, property and method.
 
-### `CardComponent`
-
-**Selector:** `mona-card`  
-**API reference:** [`CardComponent`](/api/card/CardComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `role` | `"article" \| "group" \| "region"` | `"group"` | The role the card takes when it has a title, which then names it. Use `article` for self-contained content or `region` for a landmark. |
-| `rounded` | `"large" \| "medium" \| "none" \| "small" \| "xlarge" \| "xxlarge"` | `"medium"` | Controls the border radius applied to the card and its header/footer regions. |
-
-### `CardFooterComponent`
-
-**Selector:** `mona-card-footer`  
-**API reference:** [`CardFooterComponent`](/api/card/CardFooterComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the rendered footer element via `tailwind-merge`. |
-
-### `CardHeaderComponent`
-
-**Selector:** `mona-card-header`  
-**API reference:** [`CardHeaderComponent`](/api/card/CardHeaderComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the rendered header element via `tailwind-merge`. |
-
-### `CardActionDirective`
-
-**Selector:** `ng-template[monaCardAction]`  
-**API reference:** [`CardActionDirective`](/api/card/CardActionDirective)
-
-### `CardContentDirective`
-
-**Selector:** `ng-template[monaCardContent]`  
-**API reference:** [`CardContentDirective`](/api/card/CardContentDirective)
-
-### `CardDescriptionDirective`
-
-**Selector:** `ng-template[monaCardDescription]`  
-**API reference:** [`CardDescriptionDirective`](/api/card/CardDescriptionDirective)
-
-#### Template context
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `string` | An id for the element in the template, if something needs to refer to it. The card doesn't need it for its name. |
-
-### `CardTitleDirective`
-
-**Selector:** `ng-template[monaCardTitle]`  
-**API reference:** [`CardTitleDirective`](/api/card/CardTitleDirective)
-
-#### Template context
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `string` | An id for the element in the template, if something needs to refer to it. The card doesn't need it for its name. |
+| Name | Kind |
+| --- | --- |
+| [`CardComponent`](/api/card/CardComponent) | Component |
+| [`CardFooterComponent`](/api/card/CardFooterComponent) | Component |
+| [`CardHeaderComponent`](/api/card/CardHeaderComponent) | Component |
+| [`CardActionDirective`](/api/card/CardActionDirective) | Directive |
+| [`CardContentDirective`](/api/card/CardContentDirective) | Directive |
+| [`CardDescriptionDirective`](/api/card/CardDescriptionDirective) | Directive |
+| [`CardTitleDirective`](/api/card/CardTitleDirective) | Directive |
 
 ### Types
 

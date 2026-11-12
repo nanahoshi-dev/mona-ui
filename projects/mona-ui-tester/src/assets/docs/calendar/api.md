@@ -2,61 +2,14 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/calendar`.
+Everything below is imported from `@nanahoshi/mona-ui/calendar`. Each name links to its reference page, with every input, output, property and method.
 
-### `CalendarComponent`
-
-**Selector:** `mona-calendar`  
-**Implements:** `FormValueControl<Date \| Date[] \| null>`  
-**API reference:** [`CalendarComponent`](/api/calendar/CalendarComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Adds custom CSS classes to the calendar host element. |
-| `disabled` | `boolean` | `false` | Sets the disabled state of the calendar. |
-| `disabledDates` | `DateDisabledType` | — | Sets the disabled dates of the calendar. Accepts either an iterable of Date objects or a predicate function. |
-| `firstDay` | `FirstDayOfWeek \| null` | `null` | Sets the first day of the week. If not specified, derives from the active locale. |
-| `focusOnMount` | `boolean` | `false` | Moves focus to the active day when the calendar first renders. An inline calendar on a page should leave focus where it is; a calendar that opens in a popup sets this so focus moves into it. |
-| `invalid` | `boolean` | `false` | Marks the calendar as invalid. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `maxDate` | `Date \| null` | — | Sets the maximum date that can be selected. |
-| `minDate` | `Date \| null` | — | Sets the minimum date that can be selected. |
-| `readonly` | `boolean` | `false` | Sets the readonly state of the calendar. |
-| `required` | `boolean` | `false` | Sets whether the calendar is required. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Sets the border radius of the calendar. |
-| `selection` | `CalendarSelection` | `"single"` | Sets the selection mode of the calendar. |
-| `touched` | `boolean` | `false` | Sets the touched state of the calendar. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `value` (two-way) | `Date \| Date[] \| null` | `null` | The current value of the calendar: a `Date` in single selection, the selected dates in multiple selection, and `[start, end]` in range selection. A range is written once both ends are picked. |
-| `weekNumber` | `boolean` | `false` | Enables the display of week numbers in the calendar. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `touch` | `void` | Emitted when focus leaves the calendar, as a native input is touched on blur. Moving between its buttons and days doesn't count. The `FormField` directive listens to this to mark the field as touched. |
-| `valueChange` | `Date \| Date[] \| null` | Emitted when `value` changes. |
-
-### `CalendarDecadeCellTemplateDirective`
-
-Provides a custom template for each year cell in the decade view.
-
-**Selector:** `ng-template[monaCalendarDecadeCellTemplate]`  
-**API reference:** [`CalendarDecadeCellTemplateDirective`](/api/calendar/CalendarDecadeCellTemplateDirective)
-
-### `CalendarMonthCellTemplateDirective`
-
-Provides a custom template for each day cell in the month view.
-
-**Selector:** `ng-template[monaCalendarMonthCellTemplate]`  
-**API reference:** [`CalendarMonthCellTemplateDirective`](/api/calendar/CalendarMonthCellTemplateDirective)
-
-### `CalendarYearCellTemplateDirective`
-
-Provides a custom template for each month cell in the year (month-selection) view.
-
-**Selector:** `ng-template[monaCalendarYearCellTemplate]`  
-**API reference:** [`CalendarYearCellTemplateDirective`](/api/calendar/CalendarYearCellTemplateDirective)
+| [`CalendarComponent`](/api/calendar/CalendarComponent) | Component |  |
+| [`CalendarDecadeCellTemplateDirective`](/api/calendar/CalendarDecadeCellTemplateDirective) | Directive | Provides a custom template for each year cell in the decade view. |
+| [`CalendarMonthCellTemplateDirective`](/api/calendar/CalendarMonthCellTemplateDirective) | Directive | Provides a custom template for each day cell in the month view. |
+| [`CalendarYearCellTemplateDirective`](/api/calendar/CalendarYearCellTemplateDirective) | Directive | Provides a custom template for each month cell in the year (month-selection) view. |
 
 ### Types
 

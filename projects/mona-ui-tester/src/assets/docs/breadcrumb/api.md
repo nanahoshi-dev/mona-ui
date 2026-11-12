@@ -2,64 +2,14 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/breadcrumb`.
+Everything below is imported from `@nanahoshi/mona-ui/breadcrumb`. Each name links to its reference page, with every input, output, property and method.
 
-### `BreadcrumbComponent`
-
-**Selector:** `mona-breadcrumb`  
-**API reference:** [`BreadcrumbComponent`](/api/breadcrumb/BreadcrumbComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | Accessible name for the breadcrumb navigation landmark. Override when multiple breadcrumb components appear on the same page. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the breadcrumb list via `tailwind-merge`. |
-| `disabled` | `boolean` | `false` | Renders the entire breadcrumb with reduced visual emphasis and removes pointer interaction from all items. |
-| `lastItemCurrent` | `boolean` | `true` | Treats the last item as the current page: not a button, and marked `aria-current="page"`. Turn it off for a trail that ends before the page you're on. |
-| `maxItems` | `number \| null` | `null` | The most items to show before the middle of the trail collapses behind a button that shows it again. The first and last items always stay, so anything below 2 counts as 2. `null` never collapses. |
-
-### `BreadcrumbItemComponent`
-
-Use as a direct child of `<mona-breadcrumb>`. Project any Angular content — text, icons, or elements — into the
-default slot.
-
-**Selector:** `mona-breadcrumb-item`  
-**API reference:** [`BreadcrumbItemComponent`](/api/breadcrumb/BreadcrumbItemComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `disabled` | `boolean` | `false` | Renders this item with reduced visual emphasis and removes pointer interaction. Has no visual effect when the parent breadcrumb is also disabled. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `itemClick` | `MouseEvent` | Emitted with the click when the item is clicked or activated via keyboard. Not emitted when this is the current-page item or when the item is disabled. |
-
-### `BreadcrumbLinkDirective`
-
-Makes a projected anchor the item's link, so the browser and the router treat it as one: ctrl-click, copy link, `href`,
-`routerLink`, `target`. The item then renders no button around it.
-
-**Selector:** `a[monaBreadcrumbLink]`  
-**API reference:** [`BreadcrumbLinkDirective`](/api/breadcrumb/BreadcrumbLinkDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes merged onto the link via `tailwind-merge`. |
-
-### `BreadcrumbSeparatorTemplateDirective`
-
-Apply to an `<ng-template>` directly inside `<mona-breadcrumb>` to replace the default `ChevronRight` separator. One
-directive per breadcrumb — the first match is used.
-
-**Selector:** `ng-template[monaBreadcrumbSeparatorTemplate]`  
-**API reference:** [`BreadcrumbSeparatorTemplateDirective`](/api/breadcrumb/BreadcrumbSeparatorTemplateDirective)
+| [`BreadcrumbComponent`](/api/breadcrumb/BreadcrumbComponent) | Component |  |
+| [`BreadcrumbItemComponent`](/api/breadcrumb/BreadcrumbItemComponent) | Component | Use as a direct child of `<mona-breadcrumb>`. |
+| [`BreadcrumbLinkDirective`](/api/breadcrumb/BreadcrumbLinkDirective) | Directive | Makes a projected anchor the item's link, so the browser and the router treat it as one: ctrl-click, copy link, `href`, `routerLink`, `target`. |
+| [`BreadcrumbSeparatorTemplateDirective`](/api/breadcrumb/BreadcrumbSeparatorTemplateDirective) | Directive | Apply to an `<ng-template>` directly inside `<mona-breadcrumb>` to replace the default `ChevronRight` separator. |
 
 ### Types
 

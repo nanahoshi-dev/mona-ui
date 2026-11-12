@@ -2,157 +2,23 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/sidebar`.
+Everything below is imported from `@nanahoshi/mona-ui/sidebar`. Each name links to its reference page, with every input, output, property and method.
 
-### `SidebarMenuSkeletonComponent`
-
-A loading placeholder shaped like a menu item. Its label bar is clipped on the icon rail, where the
-real labels are not visible either.
-
-**Selector:** `mona-sidebar-menu-skeleton`  
-**API reference:** [`SidebarMenuSkeletonComponent`](/api/sidebar/SidebarMenuSkeletonComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `labelWidth` | `string \| number` | `"60%"` | Width of the label bar. Varying it across a list keeps the placeholder from looking like a rigid grid. Numbers are treated as pixels. |
-| `showIcon` | `boolean` | `true` | Renders a square standing in for the item's icon. |
-
-### `SidebarMenuButtonDirective`
-
-A row in a sidebar menu. Applies to a `button` for an action and to an `a` for a destination —
-an anchor keeps `href`, `routerLink`, middle-click, open-in-new-tab and the browser's own status
-bar preview, none of which a button can offer.
-
-On a compact viewport, following a link closes the drawer, since the destination it navigates to is
-underneath it. A row that opens a submenu leaves the drawer open, and on the icon rail it expands the
-sidebar, since that's the only place the submenu can open.
-
-**Selector:** `a[monaSidebarMenuButton], button[monaSidebarMenuButton]`  
-**Exported as:** `monaSidebarMenuButton`  
-**API reference:** [`SidebarMenuButtonDirective`](/api/sidebar/SidebarMenuButtonDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `closeOnSelect` | `boolean \| undefined` | `undefined` | Closes the overlay drawer after this row is activated. Only applies on compact viewports, where the drawer covers the destination being navigated to. Set to `false` for rows that do not navigate. Leave it unset on a `monaCollapsibleTrigger`, which keeps the drawer open. |
-| `disabled` | `boolean` | `false` | Renders the row as unavailable and suppresses activation, including a `routerLink` and any `click` handler on it. A disabled anchor gives up its `href`. |
-| `size` | `SidebarMenuButtonSize` | `"medium"` | How much room this row's leading visual needs. Use `"large"` when it opens with something avatar sized, so the icon rail lets it fill the square instead of insetting and clipping it. |
-| `tooltip` | `string` | `""` | Text identifying this item while the sidebar is collapsed to its icon rail, where the label is clipped away. Shown as a tooltip on hover and on keyboard focus, on the rail only. |
-
-### `SidebarMenuItemDirective`
-
-**Selector:** `li[monaSidebarMenuItem]`  
-**API reference:** [`SidebarMenuItemDirective`](/api/sidebar/SidebarMenuItemDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `active` | `boolean` | `false` | Marks this row as the current sidebar destination. The row owns the selected surface so trailing badges and actions remain inside one continuous highlight. |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-
-### `SidebarMenuBadgeDirective`
-
-A trailing count or status badge on a menu item. Stands down on the icon rail, where it would
-crowd out the icon it belongs to.
-
-**Selector:** `[monaSidebarMenuBadge]`  
-**API reference:** [`SidebarMenuBadgeDirective`](/api/sidebar/SidebarMenuBadgeDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-
-### `SidebarMenuDirective`
-
-**Selector:** `ul[monaSidebarMenu]`  
-**API reference:** [`SidebarMenuDirective`](/api/sidebar/SidebarMenuDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-
-### `SidebarMenuSubDirective`
-
-An indented submenu inside a `monaSidebarMenuItem` that is also a `monaCollapsible`.
-
-It carries no hiding of its own on the icon rail. `SidebarMenuItemDirective` closes the disclosure
-there instead, which leaves the trigger's `aria-expanded` truthful and lets the collapsible content
-directive apply its own `inert`. Hiding it here as well used to produce the opposite: a submenu the
-trigger still described as expanded, with focusable items, that nobody could see.
-
-**Selector:** `ul[monaSidebarMenuSub]`  
-**API reference:** [`SidebarMenuSubDirective`](/api/sidebar/SidebarMenuSubDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-
-### `SidebarGroupActionDirective`
-
-A control in the corner of a group header — an add or overflow button. Stands down on the icon
-rail, where there is no header row left to sit in. Give it an `aria-label`: it is icon-only.
-
-**Selector:** `button[monaSidebarGroupAction]`  
-**API reference:** [`SidebarGroupActionDirective`](/api/sidebar/SidebarGroupActionDirective)
-
-### `SidebarGroupContentDirective`
-
-The body of a `monaSidebarGroup`, below its header. Wraps the menu itself.
-
-**Selector:** `[monaSidebarGroupContent]`  
-**API reference:** [`SidebarGroupContentDirective`](/api/sidebar/SidebarGroupContentDirective)
-
-### `SidebarGroupDirective`
-
-A titled section of the sidebar, grouping a label and its menu. Stack as many as the sidebar
-needs; each is an ordinary block, so a `monaSidebarSeparator` between them is optional. A
-`monaSidebarGroupLabel` inside it names the group.
-
-**Selector:** `[monaSidebarGroup]`  
-**API reference:** [`SidebarGroupDirective`](/api/sidebar/SidebarGroupDirective)
-
-### `SidebarGroupHeaderDirective`
-
-The row above a group's content, holding its label and any group action. Collapses to nothing on
-the icon rail rather than leaving an empty gap where the label used to be.
-
-**Selector:** `[monaSidebarGroupHeader]`  
-**API reference:** [`SidebarGroupHeaderDirective`](/api/sidebar/SidebarGroupHeaderDirective)
-
-### `SidebarGroupLabelDirective`
-
-The name of a group, which the enclosing `monaSidebarGroup` is labelled by. Fades out on the icon
-rail, where there is no width to read it in.
-
-**Selector:** `[monaSidebarGroupLabel]`  
-**API reference:** [`SidebarGroupLabelDirective`](/api/sidebar/SidebarGroupLabelDirective)
-
-### `SidebarInputDirective`
-
-A text input sized for the sidebar, composing `monaTextBox`. Stands down on the icon rail,
-where there is no room to type.
-
-**Selector:** `input[monaSidebarInput]`  
-**API reference:** [`SidebarInputDirective`](/api/sidebar/SidebarInputDirective)
-
-### `SidebarMenuActionDirective`
-
-A trailing control on a menu item — an overflow menu, a pin. Sits inside the row's highlight and
-stands down on the icon rail. Give it an `aria-label`: it is icon-only.
-
-**Selector:** `button[monaSidebarMenuAction]`  
-**API reference:** [`SidebarMenuActionDirective`](/api/sidebar/SidebarMenuActionDirective)
+| Name | Kind | Description |
+| --- | --- | --- |
+| [`SidebarMenuSkeletonComponent`](/api/sidebar/SidebarMenuSkeletonComponent) | Component | A loading placeholder shaped like a menu item. |
+| [`SidebarMenuButtonDirective`](/api/sidebar/SidebarMenuButtonDirective) | Directive | A row in a sidebar menu. |
+| [`SidebarMenuItemDirective`](/api/sidebar/SidebarMenuItemDirective) | Directive |  |
+| [`SidebarMenuBadgeDirective`](/api/sidebar/SidebarMenuBadgeDirective) | Directive | A trailing count or status badge on a menu item. |
+| [`SidebarMenuDirective`](/api/sidebar/SidebarMenuDirective) | Directive |  |
+| [`SidebarMenuSubDirective`](/api/sidebar/SidebarMenuSubDirective) | Directive | An indented submenu inside a `monaSidebarMenuItem` that is also a `monaCollapsible`. |
+| [`SidebarGroupActionDirective`](/api/sidebar/SidebarGroupActionDirective) | Directive | A control in the corner of a group header — an add or overflow button. |
+| [`SidebarGroupContentDirective`](/api/sidebar/SidebarGroupContentDirective) | Directive | The body of a `monaSidebarGroup`, below its header. |
+| [`SidebarGroupDirective`](/api/sidebar/SidebarGroupDirective) | Directive | A titled section of the sidebar, grouping a label and its menu. |
+| [`SidebarGroupHeaderDirective`](/api/sidebar/SidebarGroupHeaderDirective) | Directive | The row above a group's content, holding its label and any group action. |
+| [`SidebarGroupLabelDirective`](/api/sidebar/SidebarGroupLabelDirective) | Directive | The name of a group, which the enclosing `monaSidebarGroup` is labelled by. |
+| [`SidebarInputDirective`](/api/sidebar/SidebarInputDirective) | Directive | A text input sized for the sidebar, composing `monaTextBox`. |
+| [`SidebarMenuActionDirective`](/api/sidebar/SidebarMenuActionDirective) | Directive | A trailing control on a menu item — an overflow menu, a pin. |
 
 ### Types
 

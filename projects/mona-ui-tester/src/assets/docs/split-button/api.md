@@ -2,169 +2,23 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/split-button`.
+Everything below is imported from `@nanahoshi/mona-ui/split-button`. Each name links to its reference page, with every input, output, property and method.
 
-### `SplitButtonComponent`
-
-**Selector:** `mona-split-button`  
-**API reference:** [`SplitButtonComponent`](/api/split-button/SplitButtonComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | Accessible name for the main action button. Leave it empty when the button shows its name as text; set it (or `aria-labelledby`) when it shows only an icon. The pair of buttons is a group named by the main button. |
-| `aria-labelledby` | `string` | `""` | ID of an external element that provides the accessible name for the main action button. Takes precedence over `aria-label` when both are set. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction from both the main button and the menu toggle button. Disabling it closes the open menu. |
-| `iconOnly` | `boolean` | `false` | Renders the main button as a square for icon-only content, removing horizontal text padding. Set `aria-label` so the main button has a name. |
-| `loading` | `boolean` | `false` | Shows a loading indicator on the main button and keeps the menu from opening while an operation is in progress. Starting to load closes the open menu. |
-| `look` | `"default" \| "error" \| "ghost" \| "info" \| "outline" \| "primary" \| "secondary" \| "success" \| "warning"` | `"default"` | Visual style preset applied to the button. |
-| `menuButtonAriaLabel` | `string` | `""` | Accessible name for the menu toggle button. If not provided, it's the localized "More {text} options", or "Show menu options" when the main button has no `text` or `aria-label`. |
-| `popupWidth` | `number` | `0` | Minimum width of the popup menu in pixels. A value of `0` means no minimum width is applied. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the button. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the button's dimensions. |
-| `text` | `string` | `""` | Primary text content displayed in the main action button. Ignored when a `monaSplitButtonTextTemplate` is provided. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `buttonClick` | `MouseEvent` | Emitted when the main action button is clicked. |
-| `menuItemClick` | `PopupMenuItemClickEvent` | Emitted when a menu item in the popup is clicked. |
-
-### `SplitButtonCheckboxItemComponent`
-
-**Selector:** `mona-split-button-checkbox-item`  
-**Extends:** `PopupMenuCheckboxItemComponent`  
-**API reference:** [`SplitButtonCheckboxItemComponent`](/api/split-button/SplitButtonCheckboxItemComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `checked` (two-way) | `boolean` | `false` | The checked state of the menu item. Activating the item toggles it (unless its `menuClick` is prevented) and emits `checkedChange`, so it works with or without a two-way binding. |
-| `disabled` | `boolean` | `false` | Sets the disabled state of the menu item. |
-| `label` | `string` | `""` | The text of the menu item. |
-| `value` | `unknown` | — | A value that identifies the item. It's the `value` of the item's `menuClick` events. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `checkedChange` | `boolean` | Emitted when `checked` changes. |
-| `menuClick` | `PopupMenuItemClickEvent` | The click event of the menu item. Emits when the menu item is selected by keyboard or mouse. |
-
-### `SplitButtonItemComponent`
-
-**Selector:** `mona-split-button-item`  
-**Extends:** `PopupMenuItemComponent`  
-**API reference:** [`SplitButtonItemComponent`](/api/split-button/SplitButtonItemComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `disabled` | `boolean` | `false` | Sets the disabled state of the menu item. |
-| `label` | `string` | `""` | The text of the menu item. |
-| `value` | `unknown` | — | A value that identifies the item. It's the `value` of the item's `menuClick` events, so handlers don't depend on the label's text. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `menuClick` | `PopupMenuItemClickEvent` | The click event of the menu item. Emits when the menu item is selected by keyboard or mouse. |
-
-### `SplitButtonRadioItemComponent`
-
-**Selector:** `mona-split-button-radio-item`  
-**Extends:** `PopupMenuRadioItemComponent`  
-**API reference:** [`SplitButtonRadioItemComponent`](/api/split-button/SplitButtonRadioItemComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `disabled` | `boolean` | `false` | Sets the disabled state of the menu item. |
-| `label` | `string` | `""` | The text of the menu item. |
-| `value` (required) | `string` | — | The value of the radio item. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `menuClick` | `PopupMenuItemClickEvent` | The click event of the menu item. Emits when the menu item is selected by keyboard or mouse, before the radio group selects it. Preventing it keeps the group's value and the menu open. |
-
-### `SplitButtonRadioGroupComponent`
-
-**Selector:** `mona-split-button-radio-group`  
-**Extends:** `PopupMenuRadioGroupComponent`  
-**API reference:** [`SplitButtonRadioGroupComponent`](/api/split-button/SplitButtonRadioGroupComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `title` | `string` | `""` | The title of the radio group. |
-| `value` (two-way) | `string` | `""` | The value of the selected radio item. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `valueChange` | `string` | Emitted when `value` changes. |
-
-### `SplitButtonGroupComponent`
-
-**Selector:** `mona-split-button-group`  
-**Extends:** `PopupMenuGroupComponent`  
-**API reference:** [`SplitButtonGroupComponent`](/api/split-button/SplitButtonGroupComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `title` | `string` | — | Sets the title of the menu group. |
-
-### `SplitButtonSeparatorComponent`
-
-**Selector:** `mona-split-button-separator`  
-**Extends:** `PopupMenuSeparatorComponent`  
-**API reference:** [`SplitButtonSeparatorComponent`](/api/split-button/SplitButtonSeparatorComponent)
-
-### `SplitButtonMenuButtonTemplateDirective`
-
-**Selector:** `ng-template[monaSplitButtonMenuButtonTemplate]`  
-**API reference:** [`SplitButtonMenuButtonTemplateDirective`](/api/split-button/SplitButtonMenuButtonTemplateDirective)
-
-### `SplitButtonMenuGroupTemplateDirective`
-
-**Selector:** `ng-template[monaSplitButtonMenuGroupTemplate]`  
-**Extends:** `PopupMenuGroupTemplateDirective`  
-**API reference:** [`SplitButtonMenuGroupTemplateDirective`](/api/split-button/SplitButtonMenuGroupTemplateDirective)
-
-### `SplitButtonMenuItemIconTemplateDirective`
-
-**Selector:** `ng-template[monaSplitButtonMenuItemIconTemplate]`  
-**Extends:** `PopupMenuIconTemplateDirective`  
-**API reference:** [`SplitButtonMenuItemIconTemplateDirective`](/api/split-button/SplitButtonMenuItemIconTemplateDirective)
-
-### `SplitButtonMenuItemShortcutTemplateDirective`
-
-**Selector:** `ng-template[monaSplitButtonMenuItemShortcutTemplate]`  
-**Extends:** `PopupMenuShortcutTemplateDirective`  
-**API reference:** [`SplitButtonMenuItemShortcutTemplateDirective`](/api/split-button/SplitButtonMenuItemShortcutTemplateDirective)
-
-### `SplitButtonMenuItemTextTemplateDirective`
-
-**Selector:** `ng-template[monaSplitButtonMenuItemTextTemplate]`  
-**Extends:** `PopupMenuTextTemplateDirective`  
-**API reference:** [`SplitButtonMenuItemTextTemplateDirective`](/api/split-button/SplitButtonMenuItemTextTemplateDirective)
-
-### `SplitButtonTextTemplateDirective`
-
-**Selector:** `ng-template[monaSplitButtonTextTemplate]`  
-**API reference:** [`SplitButtonTextTemplateDirective`](/api/split-button/SplitButtonTextTemplateDirective)
+| Name | Kind |
+| --- | --- |
+| [`SplitButtonComponent`](/api/split-button/SplitButtonComponent) | Component |
+| [`SplitButtonCheckboxItemComponent`](/api/split-button/SplitButtonCheckboxItemComponent) | Component |
+| [`SplitButtonItemComponent`](/api/split-button/SplitButtonItemComponent) | Component |
+| [`SplitButtonRadioItemComponent`](/api/split-button/SplitButtonRadioItemComponent) | Component |
+| [`SplitButtonRadioGroupComponent`](/api/split-button/SplitButtonRadioGroupComponent) | Component |
+| [`SplitButtonGroupComponent`](/api/split-button/SplitButtonGroupComponent) | Component |
+| [`SplitButtonSeparatorComponent`](/api/split-button/SplitButtonSeparatorComponent) | Component |
+| [`SplitButtonMenuButtonTemplateDirective`](/api/split-button/SplitButtonMenuButtonTemplateDirective) | Directive |
+| [`SplitButtonMenuGroupTemplateDirective`](/api/split-button/SplitButtonMenuGroupTemplateDirective) | Directive |
+| [`SplitButtonMenuItemIconTemplateDirective`](/api/split-button/SplitButtonMenuItemIconTemplateDirective) | Directive |
+| [`SplitButtonMenuItemShortcutTemplateDirective`](/api/split-button/SplitButtonMenuItemShortcutTemplateDirective) | Directive |
+| [`SplitButtonMenuItemTextTemplateDirective`](/api/split-button/SplitButtonMenuItemTextTemplateDirective) | Directive |
+| [`SplitButtonTextTemplateDirective`](/api/split-button/SplitButtonTextTemplateDirective) | Directive |
 
 ### Types
 

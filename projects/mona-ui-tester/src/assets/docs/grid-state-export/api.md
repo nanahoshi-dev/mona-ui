@@ -2,45 +2,12 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/grid`.
+Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to its reference page, with every input, output, property and method.
 
-### `GridStatePersistenceDirective`
-
-**Selector:** `mona-grid[monaGridStatePersistence]`  
-**Exported as:** `monaGridStatePersistence`  
-**API reference:** [`GridStatePersistenceDirective`](/api/grid/GridStatePersistenceDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaGridStatePersistence` | `GridStatePersistenceOptions \| ""` | `""` | State persistence options such as schema version and page size persistence. |
-| `state` (two-way) | `GridState \| null` | `null` | The persisted grid state to apply and update when the grid state changes. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `stateChange` | `GridState \| null` | Emitted when `state` changes. |
-
-#### Methods
-
-| Signature | Description |
+| Name | Kind |
 | --- | --- |
-| `captureState(): GridState` | Captures the grid's current state (columns, sort, filter, group) without waiting for the next change cycle. |
-| `loadState(state: GridState \| null, options: GridStatePersistenceOptions = this.#resolveOptions()): GridStateLoadResult` | Applies a previously captured state to the grid. A state that isn't well formed (a missing array, a duplicate column id, an unknown filter operator, a page size or width that isn't a positive number) returns `rejected-invalid` and changes nothing. |
-
-### `GridExportDirective`
-
-**Selector:** `mona-grid[monaGridExport]`  
-**Exported as:** `monaGridExport`  
-**API reference:** [`GridExportDirective`](/api/grid/GridExportDirective)
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `exportCsv(filename?: string): void` | Exports the visible columns of the current view as CSV (only the loaded page with server binding). |
+| [`GridStatePersistenceDirective`](/api/grid/GridStatePersistenceDirective) | Directive |
+| [`GridExportDirective`](/api/grid/GridExportDirective) | Directive |
 
 ### Types
 

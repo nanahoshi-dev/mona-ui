@@ -2,61 +2,13 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/sidebar`.
+Everything below is imported from `@nanahoshi/mona-ui/sidebar`. Each name links to its reference page, with every input, output, property and method.
 
-### `LocalStorageSidebarStorage`
-
-The default `SidebarStorage`: `localStorage`, under the sidebar's `persistKey`.
-
-Reads report `null` anywhere `localStorage` cannot answer, and writes are dropped there. That
-covers the server, where there is no such thing, and a browser that refuses it — Safari's private
-mode throws on access rather than returning empty, and a full quota throws on write. None of that
-is worth taking an application down over: the sidebar simply opens the way its input says.
-
-A server-rendered application gets the default state in its markup and the remembered one on
-hydration, which shows as a flash. Storage that the server can read too — a cookie, or state
-transferred from the request — avoids it; supply it through `provideSidebarStorage()`.
-
-**API reference:** [`LocalStorageSidebarStorage`](/api/sidebar/LocalStorageSidebarStorage)
-
-#### Methods
-
-| Signature |
-| --- |
-| `read(key: string): boolean \| null` |
-| `write(key: string, expanded: boolean): void` |
-
-### `injectSidebar`
-
-Reads a sidebar from an injection context: the one that encloses the caller, or from elsewhere in a
-`mona-sidebar-layout`, such as a toolbar in the inset, the layout's first sidebar. Name another one with `for`.
-
-Returns the sidebar's state and the commands that are safe to issue from anywhere — opening,
-closing and toggling, each routed to whichever presentation is current. Structural facts such as
-the side, variant and collapsible mode are readable but not settable; those are authored as inputs
-on `mona-sidebar`, and writing them from a descendant would only desynchronise the two.
-
-In a layout it follows the sidebar rather than holding it, because the caller may be created first. Until there is
-one, it reads as closed and its commands do nothing.
-
-**API reference:** [`injectSidebar`](/api/sidebar/injectSidebar)
-
-```typescript
-function injectSidebar(options: InjectSidebarOptions & { optional: true }): SidebarController | null;
-function injectSidebar(options?: InjectSidebarOptions): SidebarController;
-```
-
-### `provideSidebarStorage`
-
-Replaces where sidebars remember whether they were left open. The default is `localStorage`, which
-the server cannot read; supply a cookie- or request-backed storage here to have a server-rendered
-application render the remembered state rather than correcting it on hydration.
-
-**API reference:** [`provideSidebarStorage`](/api/sidebar/provideSidebarStorage)
-
-```typescript
-function provideSidebarStorage(storage: SidebarStorage | (() => SidebarStorage)): EnvironmentProviders;
-```
+| Name | Kind | Description |
+| --- | --- | --- |
+| [`LocalStorageSidebarStorage`](/api/sidebar/LocalStorageSidebarStorage) | Class | The default `SidebarStorage`: `localStorage`, under the sidebar's `persistKey`. |
+| [`injectSidebar`](/api/sidebar/injectSidebar) | Function | Reads a sidebar from an injection context: the one that encloses the caller, or from elsewhere in a `mona-sidebar-layout`, such as a toolbar in the inset, the layout's first sidebar. |
+| [`provideSidebarStorage`](/api/sidebar/provideSidebarStorage) | Function | Replaces where sidebars remember whether they were left open. |
 
 ### Types
 

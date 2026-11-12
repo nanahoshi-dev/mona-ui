@@ -2,61 +2,12 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/scroll-view`.
+Everything below is imported from `@nanahoshi/mona-ui/scroll-view`. Each name links to its reference page, with every input, output, property and method.
 
-### `ScrollViewComponent`
-
-**Selector:** `mona-scroll-view`  
-**API reference:** [`ScrollViewComponent`](/api/scroll-view/ScrollViewComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `animate` | `boolean \| number` | `true` | Sets whether page transitions are animated. Pass a boolean for default duration (500ms) or a number for custom duration in milliseconds. |
-| `aria-label` | `string` | `""` | Accessible name of the carousel, saying what it shows. Use this or `aria-labelledby`; with neither, the host is a plain group and a warning is logged in development. |
-| `aria-labelledby` | `string` | `""` | The id of the element that names the carousel. |
-| `arrows` | `boolean` | `false` | Shows the previous and next arrows. A swipe is a gesture, so give pointer users arrows or a pager too. |
-| `class` | `string` | `""` | Sets custom CSS classes on the component host element. Merged with base classes via tailwind-merge. |
-| `data` | `Iterable<unknown>` | `[]` | Sets the data of the scroll view. |
-| `height` (required) | `string \| number` | — | Sets the height of the scroll view. This property is required. |
-| `index` (two-way) | `number` | `0` | Sets the active page of the scroll view. |
-| `infinite` | `boolean` | `false` | Sets whether the scroll view is infinite. |
-| `pageable` | `boolean` | `false` | Shows the pager. A swipe is a gesture, so give pointer users arrows or a pager too. |
-| `pagerBlur` | `number` | `3` | Sets the background blur of the pager in pixels. It doesn't apply with `pagerOverlay` set to `"none"`. |
-| `pagerOverlay` | `PagerOverlay` | `"dark"` | Sets the color of the pager. |
-| `pagerRounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Sets the border radius of the pager items. |
-| `rounded` | `"large" \| "medium" \| "none" \| "small"` | `"medium"` | Sets the border radius of the scroll view. |
-| `width` (required) | `string \| number` | — | Sets the width of the scroll view. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `indexChange` | `number` | Emitted when `index` changes. |
-
-### `ScrollViewSlideDirective`
-
-Marks the template that renders each slide. Bind `[monaScrollViewSlide]` to the same data as the scroll
-view, and `let-item` takes its type from it.
-
-**Selector:** `ng-template[monaScrollViewSlide]`  
-**Type parameters:** `T = unknown`  
-**API reference:** [`ScrollViewSlideDirective`](/api/scroll-view/ScrollViewSlideDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaScrollViewSlide` | `Iterable<T> \| ""` | `""` | The scroll view's data, bound only so that `let-item` takes its type from it. Leave it empty for `unknown`. |
-
-#### Template context
-
-| Name | Type |
-| --- | --- |
-| `$implicit` | `T` |
-| `height` | `number` |
-| `width` | `number` |
+| [`ScrollViewComponent`](/api/scroll-view/ScrollViewComponent) | Component |  |
+| [`ScrollViewSlideDirective`](/api/scroll-view/ScrollViewSlideDirective) | Directive | Marks the template that renders each slide. |
 
 ### Types
 

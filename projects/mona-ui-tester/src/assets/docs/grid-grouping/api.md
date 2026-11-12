@@ -2,35 +2,13 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/grid`.
+Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to its reference page, with every input, output, property and method.
 
-### `GridGroupableDirective`
-
-**Selector:** `mona-grid[monaGridGroupable]`  
-**API reference:** [`GridGroupableDirective`](/api/grid/GridGroupableDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `group` (two-way) | `GroupDescriptor[]` | `[]` | Current group descriptors applied to the grid. A repeated field keeps its last descriptor; a field without a column is grouped once its column appears. Supports two-way binding: `groupChange` emits after the user groups, ungroups, reorders or re-sorts groups, and after a grid state is restored, never for a value set here. |
-| `monaGridGroupable` | `Partial<GroupableOptions> \| "" \| undefined` | `undefined` | Enables column grouping on the grid. Pass a `GroupableOptions` object to configure group footer display. Grouping is on unless the object sets `enabled: false`. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `groupChange` | `GroupDescriptor[]` | Emitted when `group` changes. |
-
-### `GridFooterTemplateDirective`
-
-**Selector:** `ng-template[monaGridFooterTemplate]`  
-**API reference:** [`GridFooterTemplateDirective`](/api/grid/GridFooterTemplateDirective)
-
-### `GridGroupFooterTemplateDirective`
-
-**Selector:** `ng-template[monaGridGroupFooterTemplate]`  
-**API reference:** [`GridGroupFooterTemplateDirective`](/api/grid/GridGroupFooterTemplateDirective)
+| Name | Kind |
+| --- | --- |
+| [`GridGroupableDirective`](/api/grid/GridGroupableDirective) | Directive |
+| [`GridFooterTemplateDirective`](/api/grid/GridFooterTemplateDirective) | Directive |
+| [`GridGroupFooterTemplateDirective`](/api/grid/GridGroupFooterTemplateDirective) | Directive |
 
 ### Types
 

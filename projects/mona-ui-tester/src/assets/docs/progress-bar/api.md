@@ -2,48 +2,12 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/progress-bar`.
+Everything below is imported from `@nanahoshi/mona-ui/progress-bar`. Each name links to its reference page, with every input, output, property and method.
 
-### `ProgressBarComponent`
-
-**Selector:** `mona-progress-bar`  
-**API reference:** [`ProgressBarComponent`](/api/progress-bar/ProgressBarComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `animate` | `boolean` | `true` | Enables CSS transitions on fill and color changes. Set to `false` when updating `value` at high frequency (e.g., a real-time byte counter). |
-| `aria-label` | `string` | `""` | Accessible label for the progress bar host element. Use to describe what is being measured (e.g., "Upload progress"). When empty, falls back to the localized "Progress". An `aria-labelledby` on the host takes precedence over both. |
-| `aria-valuetext` | `string` | `""` | Overrides the numeric aria-valuenow announcement for assistive technology. Particularly useful in indeterminate mode — set to a localized string such as "Loading" so screen readers announce state rather than silence. When empty, assistive technology falls back to the numeric value. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `color` | `string \| Action<number, string>` | `""` | Fill color of the progress track. Pass a CSS color string, or a function that receives the current percentage (0–100) and returns a color string. When empty, falls back to the primary theme color. |
-| `disabled` | `boolean` | `false` | Renders the bar with reduced visual emphasis and removes pointer interaction. `color` doesn't apply while disabled. |
-| `indeterminate` | `boolean` | `false` | Switches to indeterminate mode: plays a looping animation and hides the label. ARIA value attributes are removed. |
-| `labelPosition` | `LabelPosition` | `"center"` | Horizontal alignment of the label within the bar. |
-| `labelStyles` | `Partial<CSSStyleDeclaration>` | `{}` | Inline styles applied to the default label span. Has no effect when a custom `monaProgressBarLabelTemplate` is provided. |
-| `labelVisible` | `boolean` | `true` | Controls label visibility in determinate mode. Has no effect in indeterminate mode — the label is always hidden there. |
-| `max` | `number` | `100` | Upper bound of the value range. Must be greater than `min`; otherwise the bar reports no values and a warning is logged in development. |
-| `min` | `number` | `0` | Lower bound of the value range. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the bar. |
-| `value` | `number` | `0` | Current progress value within `[min, max]`. Values outside the range are clamped, for the bar and for `aria-valuenow`; non-finite values count as `min`. |
-
-### `ProgressBarLabelTemplateDirective`
-
-Structural template directive that replaces the default percentage label. The template is hidden when `indeterminate`
-is `true`.
-
-**Selector:** `ng-template[monaProgressBarLabelTemplate]`  
-**API reference:** [`ProgressBarLabelTemplateDirective`](/api/progress-bar/ProgressBarLabelTemplateDirective)
-
-#### Template context
-
-| Name | Type |
-| --- | --- |
-| `$implicit` | `number` |
-| `max` | `number` |
-| `min` | `number` |
-| `percent` | `number` |
+| Name | Kind | Description |
+| --- | --- | --- |
+| [`ProgressBarComponent`](/api/progress-bar/ProgressBarComponent) | Component |  |
+| [`ProgressBarLabelTemplateDirective`](/api/progress-bar/ProgressBarLabelTemplateDirective) | Directive | Structural template directive that replaces the default percentage label. |
 
 ### Types
 

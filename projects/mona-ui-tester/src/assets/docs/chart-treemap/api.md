@@ -2,93 +2,12 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/chart`.
+Everything below is imported from `@nanahoshi/mona-ui/chart`. Each name links to its reference page, with every input, output, property and method.
 
-### `TreemapSeriesComponent`
-
-Renders hierarchical treemap visualizations using nested squarified, binary, dice, or slice-dice rectangles.
-
-**Selector:** `mona-treemap-series`  
-**API reference:** [`TreemapSeriesComponent`](/api/chart/TreemapSeriesComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `borderRadius` | `number \| undefined` | `undefined` | Corner radius in pixels applied to leaf node rectangles. |
-| `categoryFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Formatter callback for node labels. |
-| `childrenField` | `ChartField` | `"children"` | Property key or accessor function extracting child nodes from a hierarchical data object. |
-| `class` | `string` | `""` | Additional CSS classes applied to the series. |
-| `color` | `string` | `""` | Fallback base fill color applied to series or root branches. |
-| `colorField` | `ChartField \| undefined` | `undefined` | Accessor function or property key extracting an explicit fill color for a node. |
-| `colors` | `readonly string[] \| undefined` | `undefined` | Explicit array of colors assigned to top-level branches and inherited down subtrees. |
-| `data` | `readonly unknown[] \| unknown \| undefined` | `undefined` | Hierarchical root object or array of root nodes overriding chart-level data. |
-| `field` | `ChartField` | `"value"` | Property key or accessor function extracting the numeric value for a leaf node. |
-| `fillOpacity` | `number \| undefined` | `undefined` | Opacity of leaf node fills (0 to 1). |
-| `hiddenNodeIds` (two-way) | `readonly string[]` | `[]` | The hidden top-level node IDs. Bind `[(hiddenNodeIds)]` for two-way binding; legend toggles write to it. With `keyField`, build an ID with `chartItemKeyId(key)`; otherwise read IDs from `nodeVisibilityChange`. |
-| `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across data updates. |
-| `labelField` | `ChartField` | `"name"` | Property key or accessor extracting the display label for a node. |
-| `labelFormatter` | `ChartValueFormatter \| undefined` | `undefined` | **Deprecated.** Use `categoryFormatter`, as on the other series. Formatter callback for node display labels. |
-| `maxDepth` | `number \| undefined` | `undefined` | Maximum tree depth to layout and render. Normalized: finite \<= 0 becomes 1, finite > 0 is floored, undefined/NaN/Infinity is unlimited. |
-| `maxLabels` | `number` | `100` | Maximum number of DOM label candidates to render (prioritizing parent headers and largest leaf areas). |
-| `minLabelHeight` | `number \| undefined` | `undefined` | Minimum pixel height required for a node to display a DOM label (defaults to 16 when showValues is false, 24 when true). |
-| `minLabelWidth` | `number \| undefined` | `undefined` | Minimum pixel width required for a node to display a DOM label (defaults to 30). |
-| `name` | `string` | `"Treemap"` | Series name used in tooltips and accessibility announcements. |
-| `paddingInner` | `number` | `2` | Inner padding in pixels between sibling treemap rectangles. |
-| `paddingOuter` | `number` | `4` | Outer padding in pixels around parent boundaries. |
-| `parentFillOpacity` | `number \| undefined` | `undefined` | Fill opacity applied to non-leaf parent group background rectangles. |
-| `parentHeaderHeight` | `number \| undefined` | `undefined` | Header height in pixels reserved for parent node header labels. |
-| `showLabels` | `boolean` | `true` | Whether to display DOM labels for leaf and terminal nodes. |
-| `showParentLabels` | `boolean` | `true` | Whether to reserve header space and display labels for parent grouping nodes. |
-| `showValues` | `boolean` | `false` | Whether to display numeric values in default leaf labels. |
-| `sort` | `ChartTreemapSort` | `"descending"` | Sort order for sibling nodes: "descending", "ascending", or "none". |
-| `strokeColor` | `string` | `""` | Color of node boundary stroke borders. |
-| `strokeWidth` | `number \| undefined` | `undefined` | Stroke width in pixels for node boundary borders. |
-| `tile` | `ChartTreemapTile` | `"squarify"` | D3 treemap tiling algorithm: "squarify", "binary", "dice", "slice", or "slice-dice". |
-| `valueFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Formatter callback for numeric values in labels and tooltips. |
-| `visible` (two-way) | `boolean` | `true` | Two-way bindable visibility of the series. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `hiddenNodeIdsChange` | `readonly string[]` | Emitted when `hiddenNodeIds` changes. |
-| `nodeVisibilityChange` | `ChartTreemapNodeVisibilityEvent<unknown>` | Emits when an individual node or branch's visibility is toggled via the legend. |
-| `visibleChange` | `boolean` | Emitted when `visible` changes. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `toggleNode(nodeId: string): boolean` | Shows or hides the node with this id, and returns whether it's now visible. |
-
-### `ChartTreemapLabelTemplateDirective`
-
-**Selector:** `ng-template[monaChartTreemapLabelTemplate]`  
-**API reference:** [`ChartTreemapLabelTemplateDirective`](/api/chart/ChartTreemapLabelTemplateDirective)
-
-#### Template context
-
-| Name | Type |
-| --- | --- |
-| `$implicit` | `ChartHierarchyNodeContext<unknown>` |
-| `bounds` | `ChartRect` |
-| `color` | `string` |
-| `datum` | `unknown` |
-| `depth` | `number` |
-| `formattedLabel` | `string` |
-| `formattedPath` | `readonly string[]` |
-| `formattedValue` | `string` |
-| `isCollapsed` | `boolean` |
-| `isLeaf` | `boolean` |
-| `label` | `unknown` |
-| `node` | `ChartHierarchyNodeContext<unknown>` |
-| `nodeId` | `string` |
-| `path` | `readonly unknown[]` |
-| `percentageOfParent?` | `number \| undefined` |
-| `percentageOfRoot?` | `number \| undefined` |
-| `textColor` | `string` |
-| `value` | `number` |
+| [`TreemapSeriesComponent`](/api/chart/TreemapSeriesComponent) | Component | Renders hierarchical treemap visualizations using nested squarified, binary, dice, or slice-dice rectangles. |
+| [`ChartTreemapLabelTemplateDirective`](/api/chart/ChartTreemapLabelTemplateDirective) | Directive |  |
 
 ### Types
 

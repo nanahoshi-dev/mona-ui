@@ -2,123 +2,17 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/window`.
+Everything below is imported from `@nanahoshi/mona-ui/window`. Each name links to its reference page, with every input, output, property and method.
 
-### `WindowComponent`
-
-**Selector:** `mona-window`  
-**API reference:** [`WindowComponent`](/api/window/WindowComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string \| undefined` | `undefined` | Accessible name for the window when it has no `title` or title template. |
-| `closable` | `boolean` | `true` | Sets the visibility of the close button in the window header. |
-| `closeOnEscape` | `boolean` | `true` | Sets whether the window should close when the escape key is pressed. |
-| `draggable` | `boolean` | `true` | Sets whether the window can be dragged by the user. |
-| `focusedElement` | `HTMLElement \| ElementRef<HTMLElement> \| string \| null` | — | Sets the element that should receive focus when the window is opened. Accepts an element reference or a query selector string. |
-| `height` (two-way) | `number` | — | Sets the height of the window. |
-| `left` (two-way) | `number` | — | Sets the left position of the window. |
-| `look` | `"default" \| "primary"` | `"default"` | Sets the look of the window. |
-| `maxHeight` | `number` | — | Sets the maximum height of the window. |
-| `maximizable` | `boolean` | `true` | Sets whether the user can maximize the window. |
-| `maxWidth` | `number` | — | Sets the maximum width of the window. |
-| `messages` | `Partial<WindowMessages>` | — | Internationalization message overrides for accessible labels. |
-| `minHeight` | `number` | — | Sets the minimum height of the window. |
-| `minimizable` | `boolean` | `true` | Sets whether the user can minimize the window. |
-| `minWidth` | `number` | — | Sets the minimum width of the window. |
-| `modal` | `boolean` | `false` | Sets whether the window should have an overlay behind it. |
-| `resizable` | `boolean` | `false` | Sets whether the user can resize the window. |
-| `rounded` | `"large" \| "medium" \| "none" \| "small"` | `"medium"` | Sets the border radius of the window. |
-| `title` | `string` | — | Sets the title of the window. |
-| `top` (two-way) | `number` | — | Sets the top position of the window. |
-| `width` (two-way) | `number` | — | Sets the width of the window. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `close` | `PopupCloseEvent<unknown>` | Emits before the window closes, whatever closes it: the close button, Escape, a programmatic close, or the component being destroyed. Call `preventDefault()` to keep it open (a close caused by destruction can't be kept). |
-| `closed` | `void` | Emitted after the window has fully closed (post-animation). Preventing this event has no effect. |
-| `dragEnd` | `void` | Emits when the window dragging ends. |
-| `dragStart` | `void` | Emits when the window dragging starts. |
-| `heightChange` | `number` | Emitted when `height` changes. |
-| `leftChange` | `number` | Emitted when `left` changes. |
-| `topChange` | `number` | Emitted when `top` changes. |
-| `widthChange` | `number` | Emitted when `width` changes. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `closeWindow(): void` | Closes the window. |
-| `move(position: { top?: number; left?: number }): void` | Moves the window, in pixels. An axis that isn't given keeps its place. |
-| `openWindow(): void` | Opens the window. Called once after the first render; call it again to reopen a window that was closed. Does nothing while the window is open. |
-| `resize(dimensions: { width?: number; height?: number }): void` | Resizes the window, in pixels. A dimension that isn't given keeps its size. |
-
-### `WindowActionTemplateDirective`
-
-**Selector:** `ng-template[monaWindowActionTemplate]`  
-**API reference:** [`WindowActionTemplateDirective`](/api/window/WindowActionTemplateDirective)
-
-### `WindowContentTemplateDirective`
-
-**Selector:** `ng-template[monaWindowContentTemplate]`  
-**API reference:** [`WindowContentTemplateDirective`](/api/window/WindowContentTemplateDirective)
-
-### `WindowFooterTemplateDirective`
-
-**Selector:** `ng-template[monaWindowFooterTemplate]`  
-**API reference:** [`WindowFooterTemplateDirective`](/api/window/WindowFooterTemplateDirective)
-
-### `WindowTitleTemplateDirective`
-
-**Selector:** `ng-template[monaWindowTitleTemplate]`  
-**API reference:** [`WindowTitleTemplateDirective`](/api/window/WindowTitleTemplateDirective)
-
-### `WindowService`
-
-**API reference:** [`WindowService`](/api/window/WindowService)
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `open<R = unknown, D = unknown>(settings: WindowSettings<D>): WindowRef<R>` | Opens a window. |
-
-### `WindowRef`
-
-A handle on an open window.
-
-**Type parameters:** `R = unknown`  
-**API reference:** [`WindowRef`](/api/window/WindowRef)
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `close$` (read-only) | `Observable<PopupCloseEvent<R>>` | Emits before the window closes, whatever closes it. Call `preventDefault()` to keep it open. Completes once the window has closed. |
-| `closed$` (read-only) | `Observable<WindowResult<R>>` | Emits how the window closed, once it has closed, then completes. Replays to late subscribers. |
-| `component` (read-only) | `ComponentRef<unknown> \| null` | The hosted component, when `content` is a component rather than a `TemplateRef`. |
-| `drag$` (read-only) | `Observable<MoveEvent>` | Emits while the window is dragged. Completes when it closes. |
-| `dragEnd$` (read-only) | `Observable<void>` | Emits when a drag ends. Completes when the window closes. |
-| `dragStart$` (read-only) | `Observable<void>` | Emits when a drag starts. Completes when the window closes. |
-| `element` (read-only) | `HTMLElement` | The window's overlay element. |
-| `height` (read-only) | `number` | The window's current rendered height, in pixels. |
-| `popupRef` (read-only) | `PopupRef` | The underlying `PopupRef`, for advanced overlay access. |
-| `resize$` (read-only) | `Observable<ResizeEvent>` | Emits while the window is resized by the user. Completes when it closes. |
-| `width` (read-only) | `number` | The window's current rendered width, in pixels. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `center(): void` | Centers the window in the viewport. It stays centered as its size changes, until it is moved. |
-| `close(result?: R): void` | Closes the window. `close$` can still prevent it. |
-| `closeWithDelay(delay: number, result?: R): void` | Closes the window after the given delay, in milliseconds. |
-| `move(params: { top?: number; left?: number }): void` | Moves the window, in pixels from the viewport's top-left corner. An axis that isn't given keeps its place. |
-| `resize(params: { width?: number; height?: number; center?: boolean }): void` | Resizes the window, in pixels. A dimension that isn't given keeps its size; `center` centers the window afterward. |
+| [`WindowComponent`](/api/window/WindowComponent) | Component |  |
+| [`WindowActionTemplateDirective`](/api/window/WindowActionTemplateDirective) | Directive |  |
+| [`WindowContentTemplateDirective`](/api/window/WindowContentTemplateDirective) | Directive |  |
+| [`WindowFooterTemplateDirective`](/api/window/WindowFooterTemplateDirective) | Directive |  |
+| [`WindowTitleTemplateDirective`](/api/window/WindowTitleTemplateDirective) | Directive |  |
+| [`WindowService`](/api/window/WindowService) | Service |  |
+| [`WindowRef`](/api/window/WindowRef) | Class | A handle on an open window. |
 
 ### Types
 

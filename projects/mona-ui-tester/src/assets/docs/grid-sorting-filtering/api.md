@@ -2,55 +2,13 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/grid`.
+Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to its reference page, with every input, output, property and method.
 
-### `GridSortableDirective`
-
-**Selector:** `mona-grid[monaGridSortable]`  
-**API reference:** [`GridSortableDirective`](/api/grid/GridSortableDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaGridSortable` | `SortableOptions \| ""` | `""` | Enables column sorting on the grid. Pass a `SortableOptions` object to configure sort mode, unsort behavior, or sort-index display. Sorting is on unless the object sets `enabled: false`. |
-| `sort` (two-way) | `SortDescriptor[]` | `[]` | Current sort descriptors applied to the grid. Descriptors are kept even when no column shows the field, and a repeated field keeps its last descriptor. Supports two-way binding; a restored grid state updates it too. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `columnSort` | `ColumnSortEvent` | Emitted when a column header is activated to change its sort direction. Call `preventDefault()` on the event to cancel the sort. |
-| `sortChange` | `SortDescriptor[]` | Emitted when `sort` changes. |
-
-### `GridFilterableDirective`
-
-**Selector:** `mona-grid[monaGridFilterable]`  
-**API reference:** [`GridFilterableDirective`](/api/grid/GridFilterableDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `filter` (two-way) | `CompositeFilterDescriptor[]` | `[]` | Current filter descriptors applied to the grid. Conditions on one field show in that column's filter menu (repeated fields are combined with `and`); filters across fields, such as an `or` of two columns, are still applied and reported. Conditions with an unknown operator are ignored. Supports two-way binding. |
-| `monaGridFilterable` | `Partial<FilterableOptions> \| ""` | `""` | Enables column filtering on the grid. Pass a `FilterableOptions` object to configure whether filters render in the header menu, a filter row, or both. Filtering is on unless the object sets `enabled: false`. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `filterChange` | `CompositeFilterDescriptor[]` | Emitted when `filter` changes. |
-
-### `ColumnSortEvent`
-
-**Extends:** `PreventableEvent`  
-**API reference:** [`ColumnSortEvent`](/api/grid/ColumnSortEvent)
-
-#### Properties
-
-| Name | Type |
+| Name | Kind |
 | --- | --- |
-| `column` (read-only) | `Column` |
+| [`GridSortableDirective`](/api/grid/GridSortableDirective) | Directive |
+| [`GridFilterableDirective`](/api/grid/GridFilterableDirective) | Directive |
+| [`ColumnSortEvent`](/api/grid/ColumnSortEvent) | Class |
 
 ### Types
 

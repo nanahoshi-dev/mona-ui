@@ -50,6 +50,17 @@ export const KIND_ORDER: readonly ApiSymbolKind[] = [
     "enum"
 ];
 
+/** The kinds a guide page lists under Types, after its components, services and functions. */
+export const TYPE_KINDS: ReadonlySet<ApiSymbolKind> = new Set(["constant", "enum", "interface", "type"]);
+
+/** Each selector of a selector list, such as `a[monaD], b[monaD]`, leaving a comma inside brackets alone. */
+export function selectorAlternatives(selector: string): string[] {
+    return selector
+        .split(/,(?![^[(]*[\])])/)
+        .map(alternative => alternative.trim())
+        .filter(Boolean);
+}
+
 export type ApiFlag = "optional" | "read-only" | "required" | "two-way";
 
 /** One member in a section of a symbol's page. */

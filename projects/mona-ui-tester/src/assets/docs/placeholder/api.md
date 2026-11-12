@@ -2,19 +2,11 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/placeholder`.
+Everything below is imported from `@nanahoshi/mona-ui/placeholder`. Each name links to its reference page, with every input, output, property and method.
 
-### `PlaceholderComponent`
-
-**Selector:** `mona-placeholder`  
-**API reference:** [`PlaceholderComponent`](/api/placeholder/PlaceholderComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. Bind this input with the public `class` alias. |
-| `text` | `string` | `""` | The text to display inside the placeholder. Takes precedence over projected content if both are provided. |
+| Name | Kind |
+| --- | --- |
+| [`PlaceholderComponent`](/api/placeholder/PlaceholderComponent) | Component |
 
 ### Types
 

@@ -2,165 +2,22 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/dropdown-button`.
+Everything below is imported from `@nanahoshi/mona-ui/dropdown-button`. Each name links to its reference page, with every input, output, property and method.
 
-### `DropdownButtonComponent`
-
-**Selector:** `mona-dropdown-button`  
-**API reference:** [`DropdownButtonComponent`](/api/dropdown-button/DropdownButtonComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | Accessible name for the dropdown button. Leave it empty when the button shows its name as text; set it (or `aria-labelledby`) when the button shows only an icon. |
-| `aria-labelledby` | `string` | `""` | ID of an external element that provides the accessible name for the dropdown button. Takes precedence over `aria-label` when both are set. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled` | `boolean` | `false` | Renders the button with reduced visual emphasis and removes pointer interaction. Disabling the button closes its open menu. |
-| `iconOnly` | `boolean` | `false` | Renders the button as a square for icon-only usage, removing horizontal text padding and the arrow. Set `aria-label` when no visible text is present to ensure an accessible name. |
-| `loading` | `boolean` | `false` | Displays a loading indicator and prevents interaction while an operation is in progress. Starting to load closes the open menu. |
-| `look` | `"clear" \| "default" \| "error" \| "ghost" \| "info" \| "link" \| "outline" \| "primary" \| "secondary" \| "success" \| "warning"` | `"default"` | Visual style preset applied to the button. |
-| `popupWidth` | `number` | `0` | Minimum width of the popup menu in pixels. A value of `0` makes the menu at least as wide as the button. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the button. The menu follows it (`"full"` gives it large corners). |
-| `showArrow` | `boolean` | `true` | Shows a down arrow after the text, so the button reads as one that opens a menu. Icon-only buttons never show it. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the button's dimensions. |
-| `text` | `string` | `""` | Primary text content displayed inside the dropdown button. Passed as `$implicit` to a `monaDropdownButtonTextTemplate` when one is provided. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `menuItemClick` | `PopupMenuItemClickEvent` | Emitted when a menu item in the dropdown menu is clicked. |
-
-### `DropdownButtonCheckboxItemComponent`
-
-**Selector:** `mona-dropdown-button-checkbox-item`  
-**Extends:** `PopupMenuCheckboxItemComponent`  
-**API reference:** [`DropdownButtonCheckboxItemComponent`](/api/dropdown-button/DropdownButtonCheckboxItemComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `checked` (two-way) | `boolean` | `false` | The checked state of the menu item. Activating the item toggles it (unless its `menuClick` is prevented) and emits `checkedChange`, so it works with or without a two-way binding. |
-| `disabled` | `boolean` | `false` | Sets the disabled state of the menu item. |
-| `label` | `string` | `""` | The text of the menu item. |
-| `value` | `unknown` | — | A value that identifies the item. It's the `value` of the item's `menuClick` events. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `checkedChange` | `boolean` | Emitted when `checked` changes. |
-| `menuClick` | `PopupMenuItemClickEvent` | The click event of the menu item. Emits when the menu item is selected by keyboard or mouse. |
-
-### `DropdownButtonItemComponent`
-
-**Selector:** `mona-dropdown-button-item`  
-**Extends:** `PopupMenuItemComponent`  
-**API reference:** [`DropdownButtonItemComponent`](/api/dropdown-button/DropdownButtonItemComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `disabled` | `boolean` | `false` | Sets the disabled state of the menu item. |
-| `label` | `string` | `""` | The text of the menu item. |
-| `value` | `unknown` | — | A value that identifies the item. It's the `value` of the item's `menuClick` events, so handlers don't depend on the label's text. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `menuClick` | `PopupMenuItemClickEvent` | The click event of the menu item. Emits when the menu item is selected by keyboard or mouse. |
-
-### `DropdownButtonRadioItemComponent`
-
-**Selector:** `mona-dropdown-button-radio-item`  
-**Extends:** `PopupMenuRadioItemComponent`  
-**API reference:** [`DropdownButtonRadioItemComponent`](/api/dropdown-button/DropdownButtonRadioItemComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `disabled` | `boolean` | `false` | Sets the disabled state of the menu item. |
-| `label` | `string` | `""` | The text of the menu item. |
-| `value` (required) | `string` | — | The value of the radio item. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `menuClick` | `PopupMenuItemClickEvent` | The click event of the menu item. Emits when the menu item is selected by keyboard or mouse, before the radio group selects it. Preventing it keeps the group's value and the menu open. |
-
-### `DropdownButtonRadioGroupComponent`
-
-**Selector:** `mona-dropdown-button-radio-group`  
-**Extends:** `PopupMenuRadioGroupComponent`  
-**API reference:** [`DropdownButtonRadioGroupComponent`](/api/dropdown-button/DropdownButtonRadioGroupComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `title` | `string` | `""` | The title of the radio group. |
-| `value` (two-way) | `string` | `""` | The value of the selected radio item. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `valueChange` | `string` | Emitted when `value` changes. |
-
-### `DropdownButtonGroupComponent`
-
-**Selector:** `mona-dropdown-button-group`  
-**Extends:** `PopupMenuGroupComponent`  
-**API reference:** [`DropdownButtonGroupComponent`](/api/dropdown-button/DropdownButtonGroupComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `title` | `string` | — | Sets the title of the menu group. |
-
-### `DropdownButtonSeparatorComponent`
-
-Renders a horizontal visual divider between sections.
-
-**Selector:** `mona-dropdown-button-separator`  
-**Extends:** `PopupMenuSeparatorComponent`  
-**API reference:** [`DropdownButtonSeparatorComponent`](/api/dropdown-button/DropdownButtonSeparatorComponent)
-
-### `DropdownButtonMenuGroupTemplateDirective`
-
-**Selector:** `ng-template[monaDropdownButtonMenuGroupTemplate]`  
-**Extends:** `PopupMenuGroupTemplateDirective`  
-**API reference:** [`DropdownButtonMenuGroupTemplateDirective`](/api/dropdown-button/DropdownButtonMenuGroupTemplateDirective)
-
-### `DropdownButtonMenuItemIconTemplateDirective`
-
-**Selector:** `ng-template[monaDropdownButtonMenuItemIconTemplate]`  
-**Extends:** `PopupMenuIconTemplateDirective`  
-**API reference:** [`DropdownButtonMenuItemIconTemplateDirective`](/api/dropdown-button/DropdownButtonMenuItemIconTemplateDirective)
-
-### `DropdownButtonMenuItemShortcutTemplateDirective`
-
-**Selector:** `ng-template[monaDropdownButtonMenuItemShortcutTemplate]`  
-**Extends:** `PopupMenuShortcutTemplateDirective`  
-**API reference:** [`DropdownButtonMenuItemShortcutTemplateDirective`](/api/dropdown-button/DropdownButtonMenuItemShortcutTemplateDirective)
-
-### `DropdownButtonMenuItemTextTemplateDirective`
-
-**Selector:** `ng-template[monaDropdownButtonMenuItemTextTemplate]`  
-**Extends:** `PopupMenuTextTemplateDirective`  
-**API reference:** [`DropdownButtonMenuItemTextTemplateDirective`](/api/dropdown-button/DropdownButtonMenuItemTextTemplateDirective)
-
-### `DropdownButtonTextTemplateDirective`
-
-**Selector:** `ng-template[monaDropdownButtonTextTemplate]`  
-**API reference:** [`DropdownButtonTextTemplateDirective`](/api/dropdown-button/DropdownButtonTextTemplateDirective)
+| [`DropdownButtonComponent`](/api/dropdown-button/DropdownButtonComponent) | Component |  |
+| [`DropdownButtonCheckboxItemComponent`](/api/dropdown-button/DropdownButtonCheckboxItemComponent) | Component |  |
+| [`DropdownButtonItemComponent`](/api/dropdown-button/DropdownButtonItemComponent) | Component |  |
+| [`DropdownButtonRadioItemComponent`](/api/dropdown-button/DropdownButtonRadioItemComponent) | Component |  |
+| [`DropdownButtonRadioGroupComponent`](/api/dropdown-button/DropdownButtonRadioGroupComponent) | Component |  |
+| [`DropdownButtonGroupComponent`](/api/dropdown-button/DropdownButtonGroupComponent) | Component |  |
+| [`DropdownButtonSeparatorComponent`](/api/dropdown-button/DropdownButtonSeparatorComponent) | Component | Renders a horizontal visual divider between sections. |
+| [`DropdownButtonMenuGroupTemplateDirective`](/api/dropdown-button/DropdownButtonMenuGroupTemplateDirective) | Directive |  |
+| [`DropdownButtonMenuItemIconTemplateDirective`](/api/dropdown-button/DropdownButtonMenuItemIconTemplateDirective) | Directive |  |
+| [`DropdownButtonMenuItemShortcutTemplateDirective`](/api/dropdown-button/DropdownButtonMenuItemShortcutTemplateDirective) | Directive |  |
+| [`DropdownButtonMenuItemTextTemplateDirective`](/api/dropdown-button/DropdownButtonMenuItemTextTemplateDirective) | Directive |  |
+| [`DropdownButtonTextTemplateDirective`](/api/dropdown-button/DropdownButtonTextTemplateDirective) | Directive |  |
 
 ### Types
 

@@ -2,92 +2,16 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/popover`.
+Everything below is imported from `@nanahoshi/mona-ui/popover`. Each name links to its reference page, with every input, output, property and method.
 
-### `PopoverComponent`
-
-**Selector:** `mona-popover`  
-**Exported as:** `monaPopover`  
-**API reference:** [`PopoverComponent`](/api/popover/PopoverComponent)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string \| undefined` | `undefined` | Accessible name for the popover when it has no `title` or title template. |
-| `autoFocus` | `boolean \| undefined` | `undefined` | Whether focus moves into the popover when it opens: to its first focusable element, or to the popover itself. Defaults to `true`, except for the `hover` trigger. |
-| `closeOnEscape` | `boolean` | `true` | Whether pressing Escape closes the popover. |
-| `closeOnOutsideClick` | `boolean` | `true` | Whether a click outside the popover and its target closes it. |
-| `displayArrow` | `boolean` | `false` | Display the arrow of the popover. |
-| `position` | `PopoverPosition` | `"top"` | The side of the target the popover opens on. `left` and `right` are physical; `start` and `end` follow the text direction. It flips to the opposite side when there isn't room. |
-| `rounded` | `"large" \| "medium" \| "none" \| "small"` | `"medium"` | The border radius of the popover. |
-| `target` (required) | `Element \| ElementRef` | — | The target element or ElementRef to which the popover is attached. |
-| `title` | `string` | `""` | The title of the popover. |
-| `trigger` | `PopoverTrigger` | `"click"` | The trigger that opens/closes the popover. "click" toggles on click, "hover" opens while the pointer is on the target or the popover, or focus is on the target, "none" disables automatic triggering (use `open()`/`close()` instead). Any other DOM event name is also accepted and used as-is. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `hidden` | `void` | Emits when the popover is hidden. |
-| `hide` | `PopoverHideEvent` | Emits when the popover is about to be closed. This event is preventable. |
-| `show` | `PopoverShowEvent` | Emits when the popover is about to be shown. This event is preventable. |
-| `shown` | `PopoverShownEvent` | Emits once the popover has opened. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `close(): void` | Closes the popover if one is currently open. Emits `hide` and respects `preventDefault()` — if canceled, the popup stays open and the component's internal state remains consistent with that. |
-| `open(): void` | Opens the popover directly. No-op if it is already open. Does not emit `show`; emits `shown` once open. |
-
-### `PopoverFooterTemplateDirective`
-
-Marks an `ng-template` as the popover's custom footer content.
-
-**Selector:** `ng-template[monaPopoverFooterTemplate]`  
-**API reference:** [`PopoverFooterTemplateDirective`](/api/popover/PopoverFooterTemplateDirective)
-
-### `PopoverTitleTemplateDirective`
-
-Marks an `ng-template` as the popover's custom title content.
-
-**Selector:** `ng-template[monaPopoverTitleTemplate]`  
-**API reference:** [`PopoverTitleTemplateDirective`](/api/popover/PopoverTitleTemplateDirective)
-
-### `PopoverHideEvent`
-
-**Extends:** `PreventableEvent`  
-**API reference:** [`PopoverHideEvent`](/api/popover/PopoverHideEvent)
-
-#### Properties
-
-| Name | Type |
-| --- | --- |
-| `popupRef` (read-only) | `PopupRef` |
-| `target` (read-only) | `Element` |
-
-### `PopoverShowEvent`
-
-**Extends:** `PreventableEvent`  
-**API reference:** [`PopoverShowEvent`](/api/popover/PopoverShowEvent)
-
-#### Properties
-
-| Name | Type |
-| --- | --- |
-| `target` (read-only) | `Element` |
-
-### `PopoverShownEvent`
-
-**API reference:** [`PopoverShownEvent`](/api/popover/PopoverShownEvent)
-
-#### Properties
-
-| Name | Type |
-| --- | --- |
-| `popupRef` (read-only) | `PopupRef` |
-| `target` (read-only) | `Element` |
+| [`PopoverComponent`](/api/popover/PopoverComponent) | Component |  |
+| [`PopoverFooterTemplateDirective`](/api/popover/PopoverFooterTemplateDirective) | Directive | Marks an `ng-template` as the popover's custom footer content. |
+| [`PopoverTitleTemplateDirective`](/api/popover/PopoverTitleTemplateDirective) | Directive | Marks an `ng-template` as the popover's custom title content. |
+| [`PopoverHideEvent`](/api/popover/PopoverHideEvent) | Class |  |
+| [`PopoverShowEvent`](/api/popover/PopoverShowEvent) | Class |  |
+| [`PopoverShownEvent`](/api/popover/PopoverShownEvent) | Class |  |
 
 ### Types
 

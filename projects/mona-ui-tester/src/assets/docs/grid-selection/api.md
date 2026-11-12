@@ -2,26 +2,11 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/grid`.
+Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to its reference page, with every input, output, property and method.
 
-### `GridSelectableDirective`
-
-**Selector:** `mona-grid[monaGridSelectable]`  
-**API reference:** [`GridSelectableDirective`](/api/grid/GridSelectableDirective)
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaGridSelectable` | `SelectableOptions \| ""` | `""` | Enables row selection on the grid. Pass a `SelectableOptions` object to configure single or multiple selection mode. Selection is on unless the object sets `enabled: false`. |
-| `selectBy` | `GridKeySelector<unknown>` | `""` | Field name or function that gives a row's selection key. Without it, rows are selected by the grid's `rowKey` value, or by the data item when there's no `rowKey`. |
-| `selectedKeys` | `Iterable<unknown>` | `[]` | Currently selected row keys. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `selectedKeysChange` | `unknown[]` | Emitted when the user changes the selection. Not emitted for a `selectedKeys` value set from code. |
+| Name | Kind |
+| --- | --- |
+| [`GridSelectableDirective`](/api/grid/GridSelectableDirective) | Directive |
 
 ### Types
 
