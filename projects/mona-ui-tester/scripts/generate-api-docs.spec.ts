@@ -281,6 +281,22 @@ describe("renderApiPage", () => {
         expect(render([{ description: "See {@link DemoRef}.", kind: "class", name: "A" }])).toContain("See `DemoRef`.");
     });
 
+    it("escapes a tag in a description, and leaves one in code or for formatting alone", () => {
+        const markdown = render([
+            {
+                description: "Adds <title> and `<desc>` when a < b.",
+                kind: "interface",
+                name: "DemoOptions",
+                properties: [
+                    { description: "Writes <title>, not ``<desc>``, every n<sup>th</sup>.", name: "a", type: "boolean" }
+                ]
+            }
+        ]);
+
+        expect(markdown).toContain("Adds \\<title> and `<desc>` when a \\< b.");
+        expect(markdown).toContain("| `a` | `boolean` | Writes \\<title>, not ``<desc>``, every n<sup>th</sup>. |");
+    });
+
     it("leaves out a description column nothing fills", () => {
         const markdown = render([
             {

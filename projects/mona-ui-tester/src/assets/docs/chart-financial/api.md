@@ -22,7 +22,7 @@ open ticks, right-facing close ticks, and directional color coding.
 | `color` | `string \| undefined` | `undefined` | Optional color override applied uniformly across all OHLC ticks and stems. |
 | `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding the root chart data. |
 | `dataLabels` | `ChartDataLabelsInput` | `false` | Data label display options or boolean flag enabling default labels. |
-| `fallingColor` | `string` | `""` | Color for falling / bearish bars (close < open). |
+| `fallingColor` | `string` | `""` | Color for falling / bearish bars (close \< open). |
 | `fillOpacity` | `number \| undefined` | `undefined` | Fill and stroke opacity ratio (0 to 1). |
 | `highField` (required) | `ChartField` | — | Property key or accessor extracting the highest price for each data item. |
 | `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
@@ -68,7 +68,7 @@ rising/falling/neutral color coding, and solid or hollow rising bodies.
 | `color` | `string \| undefined` | `undefined` | Optional color override applied uniformly across all candle bodies. |
 | `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding the root chart data. |
 | `dataLabels` | `ChartDataLabelsInput` | `false` | Data label display options or boolean flag enabling default labels. |
-| `fallingColor` | `string` | `""` | Color for falling / bearish candles (close < open). |
+| `fallingColor` | `string` | `""` | Color for falling / bearish candles (close \< open). |
 | `fillMode` | `ChartFinancialFillMode` | `"hollow"` | Visual fill mode for candle bodies: 'filled' (solid fill) or 'hollow' (rising hollow, falling filled). |
 | `fillOpacity` | `number \| undefined` | `undefined` | Fill and stroke opacity ratio (0 to 1). |
 | `highField` (required) | `ChartField` | — | Property key or accessor extracting the highest price for each data item. |

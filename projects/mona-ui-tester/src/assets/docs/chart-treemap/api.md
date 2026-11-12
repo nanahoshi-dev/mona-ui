@@ -28,7 +28,7 @@ Renders hierarchical treemap visualizations using nested squarified, binary, dic
 | `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across data updates. |
 | `labelField` | `ChartField` | `"name"` | Property key or accessor extracting the display label for a node. |
 | `labelFormatter` | `ChartValueFormatter \| undefined` | `undefined` | **Deprecated.** Use `categoryFormatter`, as on the other series. Formatter callback for node display labels. |
-| `maxDepth` | `number \| undefined` | `undefined` | Maximum tree depth to layout and render. Normalized: finite <= 0 becomes 1, finite > 0 is floored, undefined/NaN/Infinity is unlimited. |
+| `maxDepth` | `number \| undefined` | `undefined` | Maximum tree depth to layout and render. Normalized: finite \<= 0 becomes 1, finite > 0 is floored, undefined/NaN/Infinity is unlimited. |
 | `maxLabels` | `number` | `100` | Maximum number of DOM label candidates to render (prioritizing parent headers and largest leaf areas). |
 | `minLabelHeight` | `number \| undefined` | `undefined` | Minimum pixel height required for a node to display a DOM label (defaults to 16 when showValues is false, 24 when true). |
 | `minLabelWidth` | `number \| undefined` | `undefined` | Minimum pixel width required for a node to display a DOM label (defaults to 30). |

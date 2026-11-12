@@ -1216,7 +1216,7 @@ Options for exporting a chart as a standalone SVG vector document.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `accessibility?` (read-only) | `boolean` | Whether to include accessibility metadata (<title>, <desc>, and ARIA attributes). Default: true. |
+| `accessibility?` (read-only) | `boolean` | Whether to include accessibility metadata (\<title>, \<desc>, and ARIA attributes). Default: true. |
 | `format` (read-only) | `"svg"` | Selects export as a SVG document. |
 
 #### `ChartSynchronizationAxisMapping`

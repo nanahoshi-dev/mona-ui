@@ -61,8 +61,18 @@ function code(text: string): string {
     return `${fence}${escapeCell(text)}${fence}`;
 }
 
+/**
+ * A description as markdown: link tags become code, and each `<` outside a code span is escaped, so a description
+ * that names an element (such as `<title>`) shows it as written instead of opening that element in the page. The
+ * inline formatting tags a description may use on purpose, such as `n<sup>th</sup>`, still render.
+ */
 function prose(text: string): string {
-    return text.replace(/\{@link\s+([^}\s]+)[^}]*\}/g, "`$1`").trim();
+    return text
+        .replace(/\{@link\s+([^}\s]+)[^}]*\}/g, "`$1`")
+        .replace(/(`+)[\s\S]*?\1|<(?!\/?(?:b|br|code|em|i|kbd|strong|sub|sup)[\s/>])/g, match =>
+            match === "<" ? "\\<" : match
+        )
+        .trim();
 }
 
 function table(headers: readonly string[], rows: readonly (readonly string[])[]): string {
