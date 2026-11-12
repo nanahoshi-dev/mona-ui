@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import * as PublicApi from "@nanahoshi/mona-ui/chart";
 import type * as Ts from "typescript";
+import type { ApiEntryPointReference, ApiSymbol } from "../../../mona-ui-tester/src/app/api/api-model";
 
 interface DirectoryEntry {
     isDirectory(): boolean;
@@ -8,6 +9,7 @@ interface DirectoryEntry {
 }
 
 interface FsModule {
+    existsSync(path: string): boolean;
     readFileSync(path: string, encoding: string): string;
     readdirSync(path: string, options: { withFileTypes: true }): DirectoryEntry[];
 }
@@ -132,18 +134,6 @@ function readSections(markdown: string): Map<string, string> {
     return sections;
 }
 
-/** Each component's section of the generated reference, by selector, holding only its inputs and outputs. */
-function readApiSections(markdown: string): Map<string, string> {
-    const sections = new Map<string, string>();
-    for (const part of markdown.replace(/\r\n/g, "\n").split(/^### /m).slice(1)) {
-        const selector = /^\*\*Selector:\*\* `(mona-[\w-]+)`/m.exec(part)?.[1];
-        if (selector) {
-            sections.set(selector, part.split(/^#### (?:Template context|Properties|Methods)$/m)[0]);
-        }
-    }
-    return sections;
-}
-
 function readRows(section: string): DocumentedRow[] {
     const rows: DocumentedRow[] = [];
     for (const line of section.split("\n")) {
@@ -243,19 +233,12 @@ describe("Chart documentation", () => {
     let components: SourceComponent[] = [];
     let contexts = new Map<string, string[]>();
     let publicApiSource = "";
+    /** What the API reference shows for the chart entry point, which `npm run build:api-data` writes before `test:lib`. */
+    let reference: readonly ApiSymbol[] = [];
     let sourceText = "";
 
-    function readAllApiSections(): Map<string, string> {
-        const sections = new Map<string, string>();
-        for (const [name, markdown] of docs) {
-            if (name.endsWith("/api.md")) {
-                for (const [selector, section] of readApiSections(markdown)) {
-                    expect(sections.has(selector), `<${selector}> has a section in more than one api.md`).toBe(false);
-                    sections.set(selector, section);
-                }
-            }
-        }
-        return sections;
+    function referenceFor(selector: string): ApiSymbol | undefined {
+        return reference.find(symbol => symbol.selector === selector);
     }
 
     function readDoc(name: string): string {
@@ -316,6 +299,13 @@ describe("Chart documentation", () => {
             docs.set(name.split("/").slice(-2).join("/"), fs.readFileSync(path.resolve(root, name), "utf-8"));
         }
         publicApiSource = fs.readFileSync(path.resolve(chartRoot, "public-api.ts"), "utf-8");
+        const referenceFile = path.resolve(root, "dist/docs-api/chart.json");
+        if (!fs.existsSync(referenceFile)) {
+            throw new Error(
+                `${referenceFile} is missing. Run npm run build:api-data, which npm run test:lib runs first.`
+            );
+        }
+        reference = (JSON.parse(fs.readFileSync(referenceFile, "utf-8")) as ApiEntryPointReference).symbols;
 
         const files: string[] = [];
         const walk = (directory: string): void => {
@@ -468,15 +458,17 @@ describe("Chart documentation", () => {
             }
         });
 
-        it("has an api.md section for every exported component and names each in the README", () => {
-            const sections = readAllApiSections();
+        it("lists every exported component on one page, gives it a reference, and names it in the README", () => {
             const readme = readDoc("chart/README.md");
+            const apiPages = [...docs].filter(([name]) => name.endsWith("/api.md"));
             const exported = components.filter(
                 component => component.selector.startsWith("mona-") && component.className in PublicApi
             );
             expect(exported.length).toBe(33);
-            for (const { selector } of exported) {
-                expect(sections.has(selector), `api.md has no section for <${selector}>`).toBe(true);
+            for (const { className, selector } of exported) {
+                const listing = apiPages.filter(([, markdown]) => markdown.includes(`[\`${className}\`]`));
+                expect(listing.length, `<${selector}> is listed by ${listing.length} api.md files, not one`).toBe(1);
+                expect(referenceFor(selector), `The API reference has no <${selector}>`).toBeTruthy();
                 expect(readme.includes(`<${selector}`), `The README does not mention <${selector}>`).toBe(true);
             }
         });
@@ -502,34 +494,34 @@ describe("Chart documentation", () => {
     });
 
     describe("tables", () => {
-        it("lists exactly the inputs and outputs of each component in api.md", () => {
-            const sections = readAllApiSections();
-            for (const [selector, section] of sections) {
-                const { members } = componentFor(selector);
-                const rows = [...section.matchAll(/^\| `([\w-]+)`( \([^)]*\))? \| (.*) \|$/gm)];
-                for (const [, name] of rows) {
-                    const known = members.some(
-                        member => member.name === name || (member.isModel && `${member.name}Change` === name)
+        it("lists exactly the inputs and outputs of each component in its API reference", () => {
+            const exported = components.filter(
+                component => component.selector.startsWith("mona-") && component.className in PublicApi
+            );
+            for (const { members, selector } of exported) {
+                const symbol = referenceFor(selector);
+                const documented = [...(symbol?.inputs ?? []), ...(symbol?.outputs ?? [])];
+                for (const { alias, name } of documented) {
+                    const known = members.some(member => member.name === (alias ?? name));
+                    expect(known, `The reference of <${selector}> lists ${alias ?? name}, which does not exist`).toBe(
+                        true
                     );
-                    expect(known, `api.md <${selector}> ${name} does not exist`).toBe(true);
                 }
                 for (const member of members) {
-                    const row = rows.find(candidate => candidate[1] === member.name);
-                    const label = `api.md <${selector}> ${member.name}`;
+                    const row = documented.find(candidate => (candidate.alias ?? candidate.name) === member.name);
+                    const label = `The reference of <${selector}> ${member.name}`;
                     expect(row, `${label} is missing`).toBeTruthy();
-                    const flags = row?.[2] ?? "";
                     if (member.required) {
-                        expect(flags, `${label} is required`).toContain("required");
+                        expect(row?.required, `${label} is required`).toBe(true);
                     }
                     if (member.isModel) {
-                        expect(flags, `${label} is a model`).toContain("two-way");
+                        expect(row?.twoWay, `${label} is a model`).toBe(true);
                     }
                     if (member.deprecated) {
-                        expect(row?.[3], `${label} is deprecated`).toContain("**Deprecated.**");
+                        expect(row?.description, `${label} is deprecated`).toContain("**Deprecated.**");
                     }
                     if (!member.required && member.defaultText !== undefined && isLiteralDefault(member.defaultText)) {
-                        const cells = (row?.[3] ?? "").split(/(?<!\\)\|/).map(cell => cell.trim());
-                        expect(cells[1], `Default of ${label}`).toBe(`\`${member.defaultText}\``);
+                        expect(row?.defaultValue, `Default of ${label}`).toBe(member.defaultText);
                     }
                 }
             }
@@ -543,14 +535,13 @@ describe("Chart documentation", () => {
             }
         });
 
-        it("lists only public methods in the api.md method table", () => {
-            const chart = readDoc("chart/api.md").replace(/\r\n/g, "\n").split("### `ChartComponent`\n")[1] ?? "";
-            const section = chart.split(/^### /m)[0].split("#### Methods\n")[1] ?? "";
-            const methods = [...section.split(/^#{2,4} /m)[0].matchAll(/^\|\s*`(\w+)\(/gm)].map(match => match[1]);
+        it("lists only public methods in the reference of ChartComponent", () => {
+            const chart = reference.find(symbol => symbol.name === "ChartComponent");
+            const methods = (chart?.methods ?? []).map(method => method.name);
             expect(methods.length).toBeGreaterThan(8);
             const prototype = PublicApi.ChartComponent.prototype as unknown as Record<string, unknown>;
             for (const method of methods) {
-                expect(typeof prototype[method], `api.md documents ${method}()`).toBe("function");
+                expect(typeof prototype[method], `The reference documents ${method}()`).toBe("function");
             }
         });
     });

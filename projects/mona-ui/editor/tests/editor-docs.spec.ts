@@ -1,8 +1,10 @@
 import { reflectComponentType } from "@angular/core";
 import { describe, expect, it, vi } from "vitest";
 import * as PublicApi from "@nanahoshi/mona-ui/editor";
+import type { ApiEntryPointReference } from "../../../mona-ui-tester/src/app/api/api-model";
 
 interface FsModule {
+    existsSync(path: string): boolean;
     readFileSync(path: string, encoding: string): string;
 }
 
@@ -22,14 +24,28 @@ async function readDoc(name: string): Promise<string> {
     return fs.readFileSync(file, "utf-8").replace(/\r\n/g, "\n");
 }
 
+/** What the API reference shows for the editor entry point, which `npm run build:api-data` writes before `test:lib`. */
+async function readReference(): Promise<ApiEntryPointReference> {
+    const fs = await vi.importActual<FsModule>("node:fs");
+    const path = await vi.importActual<PathModule>("node:path");
+    const nodeProcess = await vi.importActual<ProcessModule>("node:process");
+    const file = path.resolve(nodeProcess.cwd(), "dist/docs-api/editor.json");
+    if (!fs.existsSync(file)) {
+        throw new Error(`${file} is missing. Run npm run build:api-data, which npm run test:lib runs first.`);
+    }
+    return JSON.parse(fs.readFileSync(file, "utf-8")) as ApiEntryPointReference;
+}
+
 describe("Editor documentation", () => {
-    it("lists exactly the inputs and outputs of the editor", async () => {
-        const doc = await readDoc("api.md");
-        const section = doc
-            .split("### `EditorComponent`\n")[1]
-            .split(/^### /m)[0]
-            .split(/^#### (?:Properties|Methods)$/m)[0];
-        const documented = [...section.matchAll(/^\|\s*`([\w-]+)`[^|]*\|/gm)].map(match => match[1]).sort();
+    it("lists exactly the inputs and outputs of the editor in its API reference", async () => {
+        const editor = (await readReference()).symbols.find(symbol => symbol.name === "EditorComponent");
+        const bound = (editor?.inputs ?? []).map(input => input.alias ?? input.name);
+        // A two-way input binds its change event too, which the reference lists with the outputs.
+        const documented = [
+            ...bound,
+            ...(editor?.inputs ?? []).filter(input => input.twoWay).map(input => `${input.alias ?? input.name}Change`),
+            ...(editor?.outputs ?? []).map(output => output.alias ?? output.name)
+        ].sort();
         const mirror = reflectComponentType(PublicApi.EditorComponent);
         const inputs = (mirror?.inputs ?? []).map(input => input.templateName);
         const outputs = (mirror?.outputs ?? []).map(output => output.templateName);
