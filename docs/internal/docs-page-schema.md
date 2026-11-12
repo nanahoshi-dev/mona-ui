@@ -55,7 +55,7 @@ The page itself only lists the exports. `api.md` lists them as tables, for searc
 - **Components, directives, pipes, services, classes and functions:** a card each, with a link to the reference page, the kind, the first sentence of the description, and each selector or the pipe name, copied with a click. Members are on the reference pages, and the examples show them in use, so the page doesn't repeat them.
 - **Types** (interfaces, type aliases, enums and constants): cards of their own under **Types**, the same way. The types the page uses from elsewhere follow as **Related types**, including those of an entry point with no page, such as `common`, and what those use in turn.
 - On a page with more than one entry point, the exports of each other one get a list of their own, named above it.
-- **Kind colors:** each kind has a hue, in `KIND_HUES` in `api-export-list.component.ts`. A card mixes it with the theme's background for its tint and with the text color for its label, so the label stays above 4.5:1 in every theme. Forced colors drop the tint, and the label still names the kind.
+- **Kind colors:** each kind has a hue, in `KIND_HUES` in `src/app/api/api-kind-hues.ts`, which the `api-kind-*` classes in `styles.css` use on the guide pages and the entry point pages alike. A card mixes it with the theme's background for its tint and with the text color for its label, so the label stays above 4.5:1 in every theme. Forced colors drop the tint, and the label still names the kind.
 
 **Pages sharing an entry point** name their exports with `apiExports` in the manifest. A page of that entry point without `apiExports` documents the exports no other page names, so a new export always lands somewhere: the chart family and grid feature pages name theirs, and Chart Overview and Grid Overview take the rest. `apiAlsoFrom` adds another entry point's exports, as the dropdowns do with `dropdowns`.
 
@@ -65,7 +65,7 @@ A description is markdown. A `<` in it is escaped, so naming an element such as 
 
 ## The API reference
 
-Every export has its own page at `/api/<entry point>/<name>`, and every entry point a page at `/api/<entry point>` that lists its exports by kind. `/api` lists the entry points and finds an export by name. The sidebar links to it above the categories.
+Every export has its own page at `/api/<entry point>/<name>`, and every entry point a page at `/api/<entry point>`. That page shows the import path, copied with a click, and the entry point's guides, then its exports as cards in a grid, grouped and tinted by kind like the guide pages' cards. Filters narrow them to one kind, and to the names and descriptions that contain some text; the page outline follows what's shown. `/api` lists the entry points and finds an export by name. The sidebar links to it above the categories.
 
 `npm run build:api-data` (`generate-api-docs.ts --data`) writes what these pages show to `dist/docs-api`: an `index.json`, a file per entry point with its symbols, and under `pages/` what each page's API section lists, served at `/assets/api`. `build:tester`, `serve:tester` and `build:prod` run it first, so it isn't committed. `test:lib` runs it first too: the library's documentation tests check its inputs, outputs, defaults and methods against the source and Angular's metadata. Its shape is in `src/app/api/api-model.ts`, which the scripts and the site share.
 
