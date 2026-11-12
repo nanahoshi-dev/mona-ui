@@ -7,6 +7,7 @@ import { take, takeUntil } from "rxjs";
 import { DROPDOWN_POPUP_INPUT_TOKEN } from "../models/DropdownPopupInput";
 import { DropdownService } from "../services/dropdown.service";
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 @Directive({
     selector: "[monaDropdownPopupHandler]"
 })

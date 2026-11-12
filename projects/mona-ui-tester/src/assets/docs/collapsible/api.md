@@ -9,10 +9,3 @@ Everything below is imported from `@nanahoshi/mona-ui/collapsible`. Each name li
 | [`CollapsibleDirective`](/api/collapsible/CollapsibleDirective) | Directive | Headless disclosure root. |
 | [`CollapsibleContentDirective`](/api/collapsible/CollapsibleContentDirective) | Directive | Animates the height of the collapsible content between `0` and its measured size. |
 | [`CollapsibleTriggerDirective`](/api/collapsible/CollapsibleTriggerDirective) | Directive | Toggles the closest `monaCollapsible`. |
-
-### Types
-
-| Type | Kind | Description |
-| --- | --- | --- |
-| [`COLLAPSIBLE_CONFIG`](/api/collapsible/COLLAPSIBLE_CONFIG) | Constant |  |
-| [`CollapsibleConfig`](/api/collapsible/CollapsibleConfig) | Interface | The contract a collapsible root exposes to its trigger and content parts. |

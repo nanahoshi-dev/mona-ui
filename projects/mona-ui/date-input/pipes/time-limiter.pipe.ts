@@ -3,6 +3,7 @@ import { ImmutableSet, toImmutableSet, where } from "@mirei/ts-collections";
 import { DateTime } from "luxon";
 import type { TimeUnit } from "../models/TimeUnit";
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 @Pipe({
     name: "timeLimiter"
 })

@@ -1,3 +1,4 @@
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export interface TimeUnit {
     value: number;
     viewValue: number;

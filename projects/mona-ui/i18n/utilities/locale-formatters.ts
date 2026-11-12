@@ -104,6 +104,7 @@ export function getNumberGroupingPattern(locale: string): NumberGroupingPattern 
     return pattern;
 }
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export function getNumberSymbols(locale: string): NumberSymbols {
     const localeId = canonicalizeLocaleId(locale);
     let symbols = numberSymbolsCache.get(localeId);
@@ -150,6 +151,7 @@ export function getNumberSymbols(locale: string): NumberSymbols {
     return symbols;
 }
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export function getNumberFormatter(locale: string, options?: Intl.NumberFormatOptions): Intl.NumberFormat {
     const cleanLocale = canonicalizeLocaleId(locale);
     const key = `${cleanLocale}:${serializeOptions(options)}`;
@@ -278,6 +280,7 @@ export interface ParseLocalizedNumberOptions {
  */
 export type LocalizedNumberInvalidReason = "decimals" | "precision" | "syntax";
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export interface LocalizedNumberValidationResult {
     fractionDigits: number;
     /** Set when `valid` is false. */
@@ -583,6 +586,7 @@ function parseLocalizedNumberParts(
     }
 }
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export function validateLocalizedNumber(
     text: string | null | undefined,
     localeId: string,
@@ -703,6 +707,7 @@ export function validateLocalizedDecimal(
     return { fractionDigits, valid: true, value };
 }
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export interface LocalizedNumberEditValidationResult {
     readonly complete: boolean;
     /** Set when `valid` is false. */
@@ -734,6 +739,7 @@ export interface ValidateLocalizedNumberEditOptions {
     readonly allowSign?: boolean;
 }
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export function validateLocalizedNumberEdit(
     text: string | null | undefined,
     localeId: string,

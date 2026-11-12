@@ -55,6 +55,7 @@ function findNearestValidDirState(element: Element | null | undefined): MonaText
     return null;
 }
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export function resolveComponentDirection(
     hostElement?: ElementRef<HTMLElement> | HTMLElement | null,
     directionality?: Directionality | null
@@ -259,12 +260,14 @@ function findAutoRoot(element: Element): Element | null {
     return null;
 }
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export interface DirectionObserverHandle {
     (): void;
     check: () => void;
     updateAutoObserver: () => void;
 }
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export function observeComponentDirection(
     hostElement: ElementRef<HTMLElement> | HTMLElement | null | undefined,
     directionality: Directionality | null | undefined,

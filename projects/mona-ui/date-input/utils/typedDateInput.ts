@@ -80,7 +80,10 @@ export function parseTypedDate(text: string, format: string, localeId: string): 
     return null;
 }
 
-/** Whether a date is one of `disabledDates`, compared by day. */
+/**
+ * Whether a date is one of `disabledDates`, compared by day.
+ * @hidden Exported for Mona UI's other entry points; applications don't need it.
+ */
 export function isDateDisabled(date: Date, disabledDates: DateDisabledType): boolean {
     if (!disabledDates) {
         return false;
@@ -138,6 +141,7 @@ export function typedDateParseError(): TypedDateParseError {
     return { kind: "parse" };
 }
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export interface TypedDateInputOptions {
     /** The limits the typed date is checked against. */
     readonly constraints: () => TypedDateConstraints;
@@ -149,6 +153,7 @@ export interface TypedDateInputOptions {
     readonly value: ModelSignal<Date | null>;
 }
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export interface TypedDateInput {
     /**
      * Writes the typed text to the value. Text that doesn't parse, or a date outside the limits, leaves the value as
@@ -169,6 +174,7 @@ export interface TypedDateInput {
 /**
  * The typed-input pipeline of the date, time and date-time pickers. Call it in an injection context: the errors are
  * reported to the form field (signal forms, `ngModel` or a reactive form control) bound to the picker.
+ * @hidden Exported for Mona UI's other entry points; applications don't need it.
  */
 export function createTypedDateInput(options: TypedDateInputOptions): TypedDateInput {
     const { constraints, format, localeId, resolve, value } = options;

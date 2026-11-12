@@ -27,6 +27,7 @@ export function mergeTwo<T extends object>(base: T, source?: DeepPartial<T>): T 
     return result as T;
 }
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export function mergeMessages<T extends object>(
     fallback: T,
     localeMessages?: DeepPartial<NoInfer<T>>,

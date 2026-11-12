@@ -10,23 +10,21 @@ Everything below is imported from `@nanahoshi/mona-ui/combo-box`, unless a table
 
 From `@nanahoshi/mona-ui/dropdowns`:
 
-| Name | Kind | Description |
-| --- | --- | --- |
-| [`DropdownFilterableDirective`](/api/dropdowns/DropdownFilterableDirective) | Directive |  |
-| [`DropdownGroupableDirective`](/api/dropdowns/DropdownGroupableDirective) | Directive |  |
-| [`DropdownVirtualScrollDirective`](/api/dropdowns/DropdownVirtualScrollDirective) | Directive |  |
-| [`DropdownDataHandlerDirective`](/api/dropdowns/DropdownDataHandlerDirective) | Directive |  |
-| [`DropdownFooterTemplateDirective`](/api/dropdowns/DropdownFooterTemplateDirective) | Directive |  |
-| [`DropdownGroupHeaderTemplateDirective`](/api/dropdowns/DropdownGroupHeaderTemplateDirective) | Directive |  |
-| [`DropdownHeaderTemplateDirective`](/api/dropdowns/DropdownHeaderTemplateDirective) | Directive |  |
-| [`DropdownItemTemplateDirective`](/api/dropdowns/DropdownItemTemplateDirective) | Directive |  |
-| [`DropdownListPopupHandlerDirective`](/api/dropdowns/DropdownListPopupHandlerDirective) | Directive |  |
-| [`DropdownLiveRegionDirective`](/api/dropdowns/DropdownLiveRegionDirective) | Directive | Announces how many results a dropdown shows after its list is filtered, or after its items change, while the popup is open ("3 results available", "No results found"). |
-| [`DropdownNoDataTemplateDirective`](/api/dropdowns/DropdownNoDataTemplateDirective) | Directive |  |
-| [`DropdownPopupHandlerDirective`](/api/dropdowns/DropdownPopupHandlerDirective) | Directive |  |
-| [`DropdownPrefixTemplateDirective`](/api/dropdowns/DropdownPrefixTemplateDirective) | Directive |  |
-| [`DropdownSuffixTemplateDirective`](/api/dropdowns/DropdownSuffixTemplateDirective) | Directive |  |
-| [`DropdownListService`](/api/dropdowns/DropdownListService) | Service |  |
+| Name | Kind |
+| --- | --- |
+| [`DropdownFilterableDirective`](/api/dropdowns/DropdownFilterableDirective) | Directive |
+| [`DropdownGroupableDirective`](/api/dropdowns/DropdownGroupableDirective) | Directive |
+| [`DropdownVirtualScrollDirective`](/api/dropdowns/DropdownVirtualScrollDirective) | Directive |
+| [`DropdownDataHandlerDirective`](/api/dropdowns/DropdownDataHandlerDirective) | Directive |
+| [`DropdownFooterTemplateDirective`](/api/dropdowns/DropdownFooterTemplateDirective) | Directive |
+| [`DropdownGroupHeaderTemplateDirective`](/api/dropdowns/DropdownGroupHeaderTemplateDirective) | Directive |
+| [`DropdownHeaderTemplateDirective`](/api/dropdowns/DropdownHeaderTemplateDirective) | Directive |
+| [`DropdownItemTemplateDirective`](/api/dropdowns/DropdownItemTemplateDirective) | Directive |
+| [`DropdownListPopupHandlerDirective`](/api/dropdowns/DropdownListPopupHandlerDirective) | Directive |
+| [`DropdownNoDataTemplateDirective`](/api/dropdowns/DropdownNoDataTemplateDirective) | Directive |
+| [`DropdownPrefixTemplateDirective`](/api/dropdowns/DropdownPrefixTemplateDirective) | Directive |
+| [`DropdownSuffixTemplateDirective`](/api/dropdowns/DropdownSuffixTemplateDirective) | Directive |
+| [`DropdownListService`](/api/dropdowns/DropdownListService) | Service |
 
 ### Types
 
@@ -38,13 +36,9 @@ From `@nanahoshi/mona-ui/dropdowns`:
 
 | Type | Kind | Description |
 | --- | --- | --- |
-| [`DROPDOWN_DATA_INPUT_TOKEN`](/api/dropdowns/DROPDOWN_DATA_INPUT_TOKEN) | Constant |  |
-| [`DROPDOWN_POPUP_INPUT_TOKEN`](/api/dropdowns/DROPDOWN_POPUP_INPUT_TOKEN) | Constant |  |
 | [`DropdownDataInputToken`](/api/dropdowns/DropdownDataInputToken) | Constant | **Deprecated.** Use `DROPDOWN_DATA_INPUT_TOKEN`. |
-| [`dropdownPopupThemeVariants`](/api/dropdowns/dropdownPopupThemeVariants) | Constant |  |
 | [`DROPDOWNS_DEFAULT_MESSAGES`](/api/dropdowns/DROPDOWNS_DEFAULT_MESSAGES) | Constant |  |
 | [`DropdownDataInput`](/api/dropdowns/DropdownDataInput) | Interface |  |
-| [`DropdownPopupInput`](/api/dropdowns/DropdownPopupInput) | Interface |  |
 | [`DropdownFieldPredicateType`](/api/dropdowns/DropdownFieldPredicateType) | Type alias |  |
 | [`DropdownFieldSelectorType`](/api/dropdowns/DropdownFieldSelectorType) | Type alias |  |
 

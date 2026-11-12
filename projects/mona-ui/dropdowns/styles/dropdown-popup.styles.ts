@@ -2,6 +2,7 @@ import { cva } from "class-variance-authority";
 import { themeOverlaySurfaceClasses, type VariantInputs } from "@nanahoshi/mona-ui/internal";
 import type { VariantProps } from "class-variance-authority";
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export const dropdownPopupThemeVariants = cva(
     `
         h-full max-h-64 overflow-auto
