@@ -317,6 +317,20 @@ markdown.block {
     background-color: var(--api-kind);
 }
 
+/* A kind filter that's on takes its kind's wash, and in forced colors the system's selected colors. */
+.api-kind-filter[aria-pressed="true"] {
+    background-color: color-mix(in oklab, var(--api-kind) 14%, var(--color-background));
+    border-color: color-mix(in oklab, var(--api-kind) 45%, var(--color-border));
+    color: color-mix(in oklab, var(--api-kind) 50%, var(--color-foreground));
+
+    @media (forced-colors: active) {
+        forced-color-adjust: none;
+        background-color: Highlight;
+        border-color: Highlight;
+        color: HighlightText;
+    }
+}
+
 .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
