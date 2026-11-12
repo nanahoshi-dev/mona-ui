@@ -103,11 +103,13 @@ describe("ApiSymbolPageComponent", () => {
         ]);
     });
 
-    it("says so when the entry point exports no such name", async () => {
+    it("says so when the entry point documents no such name", async () => {
         const page = await open("/api/chart/Missing");
 
         expect(page.querySelector("h1")?.textContent?.trim()).toBe("Export not found");
-        expect(page.textContent).toContain("@nanahoshi/mona-ui/chart exports nothing named Missing.");
+        expect(page.textContent?.replace(/\s+/g, " ")).toContain(
+            "@nanahoshi/mona-ui/chart has no documented export named Missing."
+        );
     });
 
     it("says so when there is no such entry point", async () => {
