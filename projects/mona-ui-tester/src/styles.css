@@ -260,8 +260,9 @@ markdown.block {
         padding-inline-start: 1.25rem;
     }
 
+    /* The primary color itself is too dark to read on a dark theme such as Anna's, so links take its text-safe shade. */
     & a {
-        color: var(--color-primary);
+        color: var(--color-primary-subtle-foreground);
         text-decoration: underline;
         text-underline-offset: 2px;
     }

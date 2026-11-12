@@ -39,7 +39,7 @@
                 <span class="font-semibold text-foreground">Related types:</span>{{ " " }}
                 @for (type of page.related; track type.entryPoint + "/" + type.name; let last = $last) {
                     <a
-                        class="rounded-sm text-primary underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator"
+                        class="rounded-sm text-primary-subtle-foreground underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator"
                         [routerLink]="['/api', type.entryPoint, type.name]"
                         ><code class="font-mono text-[0.8125rem]">{{ type.name }}</code></a
                     >{{ last ? "" : ", " }}
@@ -51,7 +51,7 @@
     <h2 class="mt-6 mb-2 border-b border-border pb-1.5 text-2xl font-bold">API</h2>
     <p class="text-sm text-muted-foreground">
         This page's exports couldn't be loaded. Find them in the
-        <a class="text-primary underline underline-offset-2" routerLink="/api">API reference</a>.
+        <a class="text-primary-subtle-foreground underline underline-offset-2" routerLink="/api">API reference</a>.
     </p>
 } @else {
     <p class="mt-6 text-sm text-muted-foreground" role="status">Loading the API…</p>

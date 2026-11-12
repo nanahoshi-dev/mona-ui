@@ -2,7 +2,7 @@
     @for (token of tokens(); track $index) {
         @if (token.entryPoint; as entryPoint) {
             <a
-                class="text-primary underline decoration-primary/40 underline-offset-2 hover:decoration-primary"
+                class="text-primary-subtle-foreground underline decoration-current/40 underline-offset-2 hover:decoration-current"
                 [routerLink]="['/api', entryPoint, token.text]"
                 >{{ token.text }}</a
             >
