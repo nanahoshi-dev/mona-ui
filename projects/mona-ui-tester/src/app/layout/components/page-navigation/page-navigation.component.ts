@@ -37,8 +37,23 @@ export class PageNavigationComponent {
         return fullPath;
     });
     protected readonly sections = this.#pageService.sections;
+    /**
+     * In the order the headings come on the page, which isn't the order their files load in. A heading not on the page
+     * yet keeps its place.
+     */
     protected readonly visibleSections = computed(() =>
-        Array.from(this.sections()).filter(section => section.parentId() != null && section.depth() === 1)
+        Array.from(this.sections())
+            .filter(section => section.parentId() != null && section.depth() === 1)
+            .sort((first, second) => {
+                const firstHeading = this.#document.getElementById(first.id());
+                const secondHeading = this.#document.getElementById(second.id());
+                if (!firstHeading || !secondHeading || firstHeading === secondHeading) {
+                    return 0;
+                }
+                return firstHeading.compareDocumentPosition(secondHeading) & firstHeading.DOCUMENT_POSITION_FOLLOWING
+                    ? -1
+                    : 1;
+            })
     );
 
     public constructor() {
