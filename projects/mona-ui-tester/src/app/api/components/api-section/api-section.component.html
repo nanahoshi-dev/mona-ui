@@ -1,0 +1,58 @@
+@if (ready(); as section) {
+    @let page = section.page;
+    <h2 class="mt-6 mb-2 border-b border-border pb-1.5 text-2xl font-bold" [id]="section.ids.api">API</h2>
+    @if (page.entryPoints.length > 0) {
+        <p class="mb-4 text-sm leading-relaxed font-medium text-muted-foreground">
+            Everything below is imported from
+            <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.8125rem] text-foreground"
+                >{{ packageName }}/{{ page.entryPoints[0] }}</code
+            >{{ page.entryPoints.length > 1 ? ", unless a list names another entry point" : "" }}. Each name links to
+            its reference page, with every input, output, property and method.
+        </p>
+    }
+    @for (group of classGroups(); track group.entryPoint) {
+        @if (group.entryPoint !== page.entryPoints[0]) {
+            <p class="mt-6 mb-3 text-sm font-medium text-muted-foreground">
+                From
+                <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.8125rem] text-foreground"
+                    >{{ packageName }}/{{ group.entryPoint }}</code
+                >:
+            </p>
+        }
+        <app-api-export-list class="block" [exports]="group.exports" [links]="page.links"></app-api-export-list>
+    }
+    @if (hasTypes()) {
+        <h3 class="mt-8 mb-3 text-xl font-semibold" [id]="section.ids.types">Types</h3>
+        @for (group of typeGroups(); track group.entryPoint) {
+            @if (group.entryPoint !== page.entryPoints[0]) {
+                <p class="mt-6 mb-3 text-sm font-medium text-muted-foreground">
+                    From
+                    <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.8125rem] text-foreground"
+                        >{{ packageName }}/{{ group.entryPoint }}</code
+                    >:
+                </p>
+            }
+            <app-api-export-list class="block" [exports]="group.exports" [links]="page.links"></app-api-export-list>
+        }
+        @if (page.related.length > 0) {
+            <p class="mt-5 text-sm leading-relaxed font-medium text-muted-foreground">
+                <span class="font-semibold text-foreground">Related types:</span>{{ " " }}
+                @for (type of page.related; track type.entryPoint + "/" + type.name; let last = $last) {
+                    <a
+                        class="rounded-sm text-primary underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator"
+                        [routerLink]="['/api', type.entryPoint, type.name]"
+                        ><code class="font-mono text-[0.8125rem]">{{ type.name }}</code></a
+                    >{{ last ? "" : ", " }}
+                }
+            </p>
+        }
+    }
+} @else if (state().status === "missing") {
+    <h2 class="mt-6 mb-2 border-b border-border pb-1.5 text-2xl font-bold">API</h2>
+    <p class="text-sm text-muted-foreground">
+        This page's exports couldn't be loaded. Find them in the
+        <a class="text-primary underline underline-offset-2" routerLink="/api">API reference</a>.
+    </p>
+} @else {
+    <p class="mt-6 text-sm text-muted-foreground" role="status">Loading the API…</p>
+}
