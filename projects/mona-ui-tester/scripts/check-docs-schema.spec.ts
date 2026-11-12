@@ -47,7 +47,13 @@ describe("check-docs-schema", () => {
         });
 
         it("asks for a combined heading to be divided, and counts it as both sections", () => {
-            const headings = ["Overview", "Import & Quick Start", "Examples", "Accessibility & Forms Integration", "API"];
+            const headings = [
+                "Overview",
+                "Import & Quick Start",
+                "Examples",
+                "Accessibility & Forms Integration",
+                "API"
+            ];
             expect(kinds(headings)).toEqual(["split"]);
         });
 
@@ -99,7 +105,9 @@ describe("check-docs-schema", () => {
         });
 
         it("accepts a manifest that matches the routes", () => {
-            expect(checkManifest([page("intro"), page("button", "button")], ["intro", "button"], () => true)).toEqual([]);
+            expect(checkManifest([page("intro"), page("button", "button")], ["intro", "button"], () => true)).toEqual(
+                []
+            );
         });
 
         it("reports drift in both directions", () => {
@@ -110,16 +118,22 @@ describe("check-docs-schema", () => {
         });
 
         it("reports duplicates, unknown entry points and component pages without one", () => {
-            const pages: DocsPage[] = [
-                page("a"),
-                page("a"),
-                page("b", "missing"),
-                { ...page("c"), kind: "component" }
-            ];
+            const pages: DocsPage[] = [page("a"), page("a"), page("b", "missing"), { ...page("c"), kind: "component" }];
             expect(checkManifest(pages, ["a", "b", "c"], entryPoint => entryPoint !== "missing")).toEqual([
                 '"a" is in the manifest more than once.',
                 'Page "b" names unknown entry point "missing".',
                 'Component page "c" has no entry point.'
+            ]);
+        });
+
+        it("wants a sub-page's path to be its parent's and one more segment", () => {
+            const parent: DocsPage = {
+                ...page("sidebar", "sidebar"),
+                children: [page("sidebar/menus", "sidebar"), page("sidebar-state", "sidebar")]
+            };
+            const pages = [parent, ...(parent.children ?? [])];
+            expect(checkManifest(pages, ["sidebar", "sidebar/menus", "sidebar-state"], () => true)).toEqual([
+                'Page "sidebar-state" is nested under "sidebar", so its path should be "sidebar/<name>".'
             ]);
         });
     });

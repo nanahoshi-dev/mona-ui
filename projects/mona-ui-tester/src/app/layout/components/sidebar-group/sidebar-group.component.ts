@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, inject, input } from "@angular/core";
 import { RouterLink } from "@angular/router";
 import {
@@ -28,7 +29,7 @@ let nextListId = 0;
 
 @Component({
     selector: "app-sidebar-group",
-    imports: [LucideChevronRight, LucideDynamicIcon, RouterLink],
+    imports: [LucideChevronRight, LucideDynamicIcon, NgTemplateOutlet, RouterLink],
     templateUrl: "./sidebar-group.component.html"
 })
 export class SidebarGroupComponent {

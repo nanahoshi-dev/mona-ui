@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { DOCS_MANIFEST } from "../src/app/layout/docs-manifest";
+import { DOCS_MANIFEST, docsPageSlug } from "../src/app/layout/docs-manifest";
 import type { DocsCategory, DocsPage } from "../src/app/layout/docs-manifest";
 import { PAGES_WITHOUT_MARKDOWN, readRouteSources } from "./generate-search-index";
 
@@ -57,7 +57,10 @@ export function cleanPageMarkdown(markdown: string): string {
         .replace(/\r\n/g, "\n")
         .replace(/<!--[\s\S]*?-->\n?/g, "")
         .replace(/^# .*\n+/gm, "")
-        .replace(/\]\((?:\/components\/|\.\.\/)([a-z0-9-]+)(#[^)]*)?\)/g, "]($1.md$2)")
+        .replace(
+            /\]\((?:\/components\/|\.\.\/)([a-z0-9-]+(?:\/[a-z0-9-]+)*)(#[^)]*)?\)/g,
+            (_link, path: string, hash: string | undefined) => `](${docsPageSlug({ path })}.md${hash ?? ""})`
+        )
         .replace(/\n{3,}/g, "\n\n")
         .trim();
 }
@@ -160,9 +163,9 @@ function main(): void {
     mkdirSync(join(outputRoot, pagesFolder), { recursive: true });
 
     for (const { markdown, page } of pages) {
-        writeFileSync(join(outputRoot, pagesFolder, `${page.path}.md`), markdown);
+        writeFileSync(join(outputRoot, pagesFolder, `${docsPageSlug(page)}.md`), markdown);
     }
-    const linkTo = (page: DocsPage): string => `${pagesFolder}/${page.path}.md`;
+    const linkTo = (page: DocsPage): string => `${pagesFolder}/${docsPageSlug(page)}.md`;
     writeFileSync(
         join(outputRoot, "llms.txt"),
         renderLlmsTxt(pages, essentials, linkTo, forPackage ? undefined : "llms-full.txt")

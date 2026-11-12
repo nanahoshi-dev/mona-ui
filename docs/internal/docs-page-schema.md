@@ -73,10 +73,16 @@ Get Started, Actions, Form Fields, Selection, Date Time & Color, Data, Charts, N
 
 ### Nesting
 
-Add `children` only when a topic has its own examples and is worth linking to directly. Everything else stays an in-page section. No page has children yet, because each child needs a route, and the sidebar will need to render them when the first one arrives.
+Add `children` only when a topic has its own examples and is worth linking to directly. Everything else stays an in-page section.
+
+- A child's `path` is its parent's plus one segment, `sidebar/state`, which is its URL under `/components` and its route in `routes.ts`. `check:docs-schema` checks this.
+- Its folders, for markdown, examples and generated files, are named by `docsPageSlug()`, which turns the slashes into dashes: `assets/docs/sidebar-state`, `examples/sidebar-state`, and `app-sidebar-state-<name>-example` for an example's selector.
+- The sidebar lists children under their parent by `navTitle`, the short name, and everything else (the page heading, search, the previous and next links) uses `title`.
+- Next and previous follow `flattenDocsPages()`, which puts children right after their parent.
 
 - **Charts** don't nest. The Charts category holds Chart Overview and one page per series family (Line & Area, Bar & Waterfall, Scatter & Bubble, Financial, Heatmap, Pie & Donut, Funnel, Treemap, Radar & Polar, Radial), each with its own playground. The playgrounds share `PartsDemoContainerComponent` and nothing else, so one family's demo never depends on another's.
 - **Grid** doesn't nest either. The Grid category holds Grid Overview and one page per feature (Sorting & Filtering, Grouping & Aggregates, Selection, Editing, Columns, Rows, Server Binding & Virtualization, State & Export), each with its own playground. A feature directive's panel is a part with `placement: "host"`, so the code sample writes its bindings on `<mona-grid>` rather than nesting it.
+- **Sidebar** nests: Sidebar Menus (`/components/sidebar/menus`) and Sidebar State & Behavior (`/components/sidebar/state`) are its `children`, listed under it in Navigation as Menus and State & Behavior, each with its own playground. The overview documents the exports the other two don't claim. A part names its `parent` and its `wrappers` (such as the `nav` and `ul` around a row), so the code sample nests it as deep as the markup does; rows that share a list share one wrapper. Markup the playground doesn't let you change, such as a fixed row or the inset, is a `staticPart()` with no panel.
 
 Keep nesting to two levels. Use links with disclosure buttons, not `role="tree"`.
 

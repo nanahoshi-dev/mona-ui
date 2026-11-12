@@ -1,0 +1,62 @@
+@let l = layout();
+@let n = nav();
+@let d = inspector();
+
+<app-parts-demo-container
+    eventsHint="Open or close a sidebar, with a trigger, the rail or toggle(), to see its expandedChange."
+    [eventLog]="eventLog"
+    [parts]="parts()"
+    [(values)]="values">
+    @if (ready()) {
+        <mona-sidebar-layout
+            class="h-112 border border-border"
+            [mobileBreakpoint]="l.mobileBreakpoint"
+            [modalScope]="l.modalScope">
+            <mona-sidebar
+                id="nav"
+                [collapsible]="n.collapsible"
+                [expanded]="n.expanded"
+                [persistKey]="n.persistKey"
+                (expandedChange)="onExpandedChange('nav', $event)">
+                <nav monaSidebarContent aria-label="Workspace">
+                    <ul monaSidebarMenu>
+                        @for (page of pages; track page.label) {
+                            <li monaSidebarMenuItem>
+                                <a
+                                    monaSidebarMenuButton
+                                    href="/{{ page.label.toLowerCase() }}"
+                                    [tooltip]="page.label"
+                                    (click)="$event.preventDefault()">
+                                    <svg aria-hidden="true" [lucideIcon]="page.icon" [size]="16"></svg>
+                                    <span>{{ page.label }}</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </mona-sidebar>
+
+            <main class="gap-4 overflow-auto p-4" monaSidebarInset>
+                <div class="flex flex-wrap gap-2">
+                    <button monaButton monaSidebarTrigger for="nav" type="button">Navigation</button>
+                    <button monaButton monaSidebarTrigger for="inspector" type="button">Details</button>
+                </div>
+                <app-sidebar-state-readout></app-sidebar-state-readout>
+            </main>
+
+            <mona-sidebar
+                id="inspector"
+                aria-label="Details"
+                side="end"
+                [collapsible]="d.collapsible"
+                [expanded]="d.expanded"
+                [persistKey]="d.persistKey"
+                (expandedChange)="onExpandedChange('inspector', $event)">
+                <div class="space-y-1 p-3 text-sm" monaSidebarContent>
+                    <p class="font-semibold">Website redesign</p>
+                    <p>Owner: Grace Hopper</p>
+                </div>
+            </mona-sidebar>
+        </mona-sidebar-layout>
+    }
+</app-parts-demo-container>

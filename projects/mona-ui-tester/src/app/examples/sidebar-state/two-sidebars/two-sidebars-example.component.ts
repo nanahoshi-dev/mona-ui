@@ -12,7 +12,7 @@ import {
 } from "@nanahoshi/mona-ui/sidebar";
 
 @Component({
-    selector: "app-sidebar-two-sidebars-example",
+    selector: "app-sidebar-state-two-sidebars-example",
     imports: [
         ButtonDirective,
         SidebarComponent,
@@ -26,7 +26,7 @@ import {
     ],
     templateUrl: "./two-sidebars-example.component.html"
 })
-export class SidebarTwoSidebarsExampleComponent {
+export class SidebarStateTwoSidebarsExampleComponent {
     protected readonly detailsOpen = signal(false);
     protected readonly navOpen = signal(true);
     protected readonly projects = ["Website redesign", "Mobile app", "Billing"];

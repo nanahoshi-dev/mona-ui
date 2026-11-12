@@ -39,7 +39,9 @@ export class PartsDemoContainerComponent {
     );
     protected readonly panels = computed(() => {
         const values = this.values();
-        return this.parts().map(part => ({ part, config: applyLiveValues(part.config, values[part.id]) }));
+        return this.parts()
+            .filter(part => part.panel !== false)
+            .map(part => ({ part, config: applyLiveValues(part.config, values[part.id]) }));
     });
     /** Markup the code sample adds inside the root after the parts, such as an active template. */
     public readonly codeContent = input<readonly string[]>([]);

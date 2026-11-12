@@ -16,14 +16,22 @@ export interface DocsPage {
      * other page of that entry point names, which is all of them when no other page does.
      */
     readonly apiExports?: readonly string[];
-    /** Sub-pages shown nested in the sidebar. Only for topics with their own examples and a reason to be linked to. */
+    /**
+     * Sub-pages shown nested under this one in the sidebar, at `/components/<path>/<child>`. Only for topics with their
+     * own examples and a reason to be linked to.
+     */
     readonly children?: readonly DocsPage[];
     /** One plain sentence for search results, page metadata and `llms.txt`. No markdown. */
     readonly description: string;
     /** The folder under `projects/mona-ui` whose `public-api.ts` this page documents. */
     readonly entryPoint?: string;
     readonly kind: DocsPageKind;
-    /** The route segment under `/components`. */
+    /** The shorter name the sidebar shows a nested page by, under its parent's. Without it, the title. */
+    readonly navTitle?: string;
+    /**
+     * The route under `/components`, such as `sidebar/state` for a page nested under `sidebar`. Its folders are named by
+     * {@link docsPageSlug}.
+     */
     readonly path: string;
     readonly title: string;
 }
@@ -43,9 +51,9 @@ function component(
     title: string,
     entryPoint: string,
     description: string,
-    api?: Pick<DocsPage, "apiAlsoFrom" | "apiExports">
+    options?: Pick<DocsPage, "apiAlsoFrom" | "apiExports" | "children" | "navTitle">
 ): DocsPage {
-    return { ...api, description, entryPoint, kind: "component", path, title };
+    return { ...options, description, entryPoint, kind: "component", path, title };
 }
 
 export const DOCS_MANIFEST: readonly DocsCategory[] = [
@@ -171,7 +179,13 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
             component("contextmenu", "Context Menu", "contextmenu", "A popup menu attached to an element, opened by right-click or keyboard."),
             component("menubar", "Menubar", "menubar", "A persistent horizontal bar of top-level menus."),
             component("popup-menu", "Popup Menu", "popup-menu", "Opens a menu from an element you already have, such as an icon button or a row action."),
-            component("sidebar", "Sidebar", "sidebar", "A composable application shell with collapsible side panels."),
+            // The overview documents every sidebar export that its two sub-pages don't claim.
+            component("sidebar", "Sidebar", "sidebar", "A composable application shell with collapsible side panels.", {
+                children: [
+                    component("sidebar/menus", "Sidebar Menus", "sidebar", "Groups, menus, rows, submenus, badges, actions and loading rows inside a sidebar.", { navTitle: "Menus", apiExports: ["SidebarGroupActionDirective", "SidebarGroupContentDirective", "SidebarGroupDirective", "SidebarGroupHeaderDirective", "SidebarGroupLabelDirective", "SidebarInputDirective", "SidebarMenuActionDirective", "SidebarMenuBadgeDirective", "SidebarMenuButtonDirective", "SidebarMenuButtonSize", "SidebarMenuDirective", "SidebarMenuItemDirective", "SidebarMenuSkeletonComponent", "SidebarMenuSubDirective"] }),
+                    component("sidebar/state", "Sidebar State & Behavior", "sidebar", "Collapsing, controlled and remembered state, the drawer on small screens, and reading a sidebar from code.", { navTitle: "State & Behavior", apiExports: ["InjectSidebarOptions", "LocalStorageSidebarStorage", "SIDEBAR_STORAGE", "SidebarCollapsibleMode", "SidebarController", "SidebarModalScope", "SidebarStorage", "injectSidebar", "provideSidebarStorage"] })
+                ]
+            }),
             component("stepper", "Stepper", "stepper", "Guides users through a sequential, multi-step process."),
             component("tabs", "Tabs", "tabs", "Switches between panels of related content.")
         ]
@@ -213,6 +227,14 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
         ]
     }
 ];
+
+/**
+ * The name of the folders that hold a page's markdown and examples, and of its generated files: its path, with a nested
+ * page's slashes as dashes, so `sidebar/state` lives in `sidebar-state`.
+ */
+export function docsPageSlug(page: Pick<DocsPage, "path">): string {
+    return page.path.split("/").join("-");
+}
 
 /** Every page in navigation order, with nested pages after their parent. */
 export function flattenDocsPages(categories: readonly DocsCategory[] = DOCS_MANIFEST): DocsPage[] {

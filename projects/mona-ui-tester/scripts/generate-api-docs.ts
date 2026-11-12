@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ClassDeclaration } from "ts-morph";
-import { flattenDocsPages } from "../src/app/layout/docs-manifest";
+import { docsPageSlug, flattenDocsPages } from "../src/app/layout/docs-manifest";
 import type { DocsPage } from "../src/app/layout/docs-manifest";
 import { createLibraryProject, readEntryPoint } from "./api-extractor";
 import type { ApiMember, ApiMethod, ApiSymbol, ApiSymbolKind } from "./api-extractor";
@@ -448,7 +448,7 @@ function main(): void {
             .filter(name => declaredInLibrary.has(name) && !/Variant/.test(name))
             .forEach(name => unexported.set(name, (unexported.get(name) ?? new Set()).add(page.path)));
 
-        const file = join(docsDirectory, page.path, "api.md");
+        const file = join(docsDirectory, docsPageSlug(page), "api.md");
         const current = existsSync(file) ? readFileSync(file, "utf8").replace(/\r\n/g, "\n") : null;
         if (current === rendered.markdown) {
             continue;

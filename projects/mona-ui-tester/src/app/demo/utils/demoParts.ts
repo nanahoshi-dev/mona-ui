@@ -23,17 +23,56 @@ import { coerceDefaultValue, normalizeOptionalValues } from "./deriveInputConfig
 export interface DemoPart {
     /** Bindings the code sample shows that the panel can't change, such as `[data]="data"`. */
     readonly codeAttributes?: readonly string[];
+    /** Markup the code sample writes inside this part's element, before the parts nested in it, such as a row's label. */
+    readonly codeContent?: readonly string[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Parts of different component types share a list.
     readonly config: ComponentConfig<any>;
+    /**
+     * The element the code sample writes for a directive, such as `button` for `[monaSidebarTrigger]`. Without it, the
+     * element its selector names, or a `div` for an attribute selector.
+     */
+    readonly element?: string;
     readonly id: string;
     readonly metadata: ComponentMetadata;
     /**
-     * `"host"` for a directive applied to the root's element, such as `monaGridSortable` on `mona-grid`: its bindings
-     * join the root's attributes instead of nesting as an element of their own. A directive whose options feature is
+     * `false` for markup the code sample shows that the playground doesn't let you change, such as a fixed row or the
+     * inset beside a sidebar. It gets no tab of its own.
+     */
+    readonly panel?: boolean;
+    /** The id of the part this one is written inside in the code sample. Without it, the root. */
+    readonly parent?: string;
+    /**
+     * `"host"` for a directive applied to its parent's element, such as `monaGridSortable` on `mona-grid`: its bindings
+     * join the parent's attributes instead of nesting as an element of their own. A directive whose options feature is
      * on is written as that binding, otherwise as its bare attribute.
      */
     readonly placement?: "child" | "host";
     readonly title: string;
+    /**
+     * Elements the code sample wraps this part in, outermost first, each written as its opening tag without the angle
+     * brackets, such as `nav monaSidebarContent aria-label="Main"`. Parts next to each other with the same wrapper
+     * share one, as rows share their list.
+     */
+    readonly wrappers?: readonly string[];
+}
+
+/**
+ * Markup the code sample shows that the playground doesn't let you change, such as a fixed row: a part with no panel,
+ * written as the element its selector names.
+ */
+export function staticPart(
+    id: string,
+    selector: string,
+    options: Pick<DemoPart, "codeAttributes" | "codeContent" | "element" | "parent" | "wrappers"> = {}
+): DemoPart {
+    return {
+        ...options,
+        config: { inputs: {} },
+        id,
+        metadata: { inputs: [], name: "", selector },
+        panel: false,
+        title: id
+    };
 }
 
 /** The current input values of each part, by part id. */
@@ -99,7 +138,7 @@ export function applyLiveValues<TComponent>(
     return { ...config, inputs: inputs as ComponentConfigInputType<TComponent> };
 }
 
-/** The markup of the whole playground: the first part's element, with the others inside it. */
+/** The markup of the whole playground: the first part's element, with the others inside it or inside their parent. */
 export function generatePartsCodeSample(
     parts: readonly DemoPart[],
     values: DemoPartValues,
@@ -110,26 +149,18 @@ export function generatePartsCodeSample(
         const inputNames = new Set((part.metadata.inputs ?? []).map(input => input.name));
         return features ? buildActiveFeatureAttributes(features, inputNames) : [];
     };
-    const featureContent = (part: DemoPart): string[] => {
+    const featureContent = (part: DemoPart, position: "end" | "start" = "end"): string[] => {
         const features = part.config.featureHandler?.data();
         const inputNames = new Set((part.metadata.inputs ?? []).map(input => input.name));
-        return features ? buildActiveFeatureContent(features, inputNames) : [];
+        return features ? buildActiveFeatureContent(features, inputNames, position) : [];
     };
     const inputAttributes = (part: DemoPart): string[] => {
         const partValues = values[part.id] ?? {};
-        const items = createComponentInputConfigArray(part.config.inputs).filter(
-            item => !isComponentDefault(part.metadata, item.name, partValues[item.name] ?? item.value)
-        );
+        const items = createComponentInputConfigArray(part.config.inputs)
+            .filter(item => !isComponentDefault(part.metadata, item.name, partValues[item.name] ?? item.value))
+            .map(item => withComponentBaseline(part.metadata, item));
         return buildInputAttributes(items, partValues);
     };
-    const render = (part: DemoPart, children: string[] = [], hostAttributes: string[] = []): string =>
-        generateComponentCodeSample(
-            part.metadata.selector ?? "",
-            [],
-            {},
-            [...(part.codeAttributes ?? []), ...inputAttributes(part), ...featureAttributes(part), ...hostAttributes],
-            [...children, ...featureContent(part)]
-        );
     const hostBindings = (part: DemoPart): string[] => {
         const attribute = selectorHostAttribute(part.metadata.selector ?? "");
         const bindings = [...(part.codeAttributes ?? []), ...inputAttributes(part), ...featureAttributes(part)];
@@ -140,13 +171,76 @@ export function generatePartsCodeSample(
     if (!root) {
         return "";
     }
-    const hosted = others.filter(part => part.placement === "host");
-    const children = others.filter(part => part.placement !== "host");
-    return render(
-        root,
-        [...children.map(child => render(child)), ...hosted.flatMap(featureContent), ...content],
-        hosted.flatMap(hostBindings)
-    );
+    const nestedIn = (part: DemoPart, placement: "child" | "host"): DemoPart[] =>
+        others.filter(other => (other.parent ?? root.id) === part.id && (other.placement ?? "child") === placement);
+    const render = (part: DemoPart): string => {
+        const hosted = nestedIn(part, "host");
+        return generateComponentCodeSample(
+            elementSelector(part),
+            [],
+            {},
+            [
+                ...(part.codeAttributes ?? []),
+                ...inputAttributes(part),
+                ...featureAttributes(part),
+                ...hosted.flatMap(hostBindings)
+            ],
+            [
+                ...featureContent(part, "start"),
+                ...(part.codeContent ?? []),
+                ...renderWrapped(
+                    nestedIn(part, "child").map(child => ({ part: child, wrappers: child.wrappers ?? [] }))
+                ),
+                ...hosted.flatMap(hostedPart => featureContent(hostedPart)),
+                ...(part === root ? content : []),
+                ...featureContent(part)
+            ]
+        );
+    };
+    const renderWrapped = (siblings: readonly WrappedPart[]): string[] => {
+        const rendered: string[] = [];
+        for (let index = 0; index < siblings.length;) {
+            const wrapper = siblings[index].wrappers[0];
+            if (wrapper === undefined) {
+                rendered.push(render(siblings[index].part));
+                index++;
+                continue;
+            }
+            let end = index;
+            while (end < siblings.length && siblings[end].wrappers[0] === wrapper) {
+                end++;
+            }
+            const inner = renderWrapped(
+                siblings.slice(index, end).map(sibling => ({ part: sibling.part, wrappers: sibling.wrappers.slice(1) }))
+            );
+            rendered.push(wrapElement(wrapper, inner));
+            index = end;
+        }
+        return rendered;
+    };
+    return render(root);
+}
+
+interface WrappedPart {
+    readonly part: DemoPart;
+    readonly wrappers: readonly string[];
+}
+
+/** The selector the code sample writes a part as, with its own element in place of the selector's when it names one. */
+function elementSelector(part: DemoPart): string {
+    const selector = part.metadata.selector ?? "";
+    if (!part.element) {
+        return selector;
+    }
+    const attribute = selectorHostAttribute(selector);
+    return attribute ? `${part.element}[${attribute}]` : part.element;
+}
+
+/** The content inside one wrapper, written as its opening tag without the angle brackets. */
+function wrapElement(wrapper: string, content: readonly string[]): string {
+    const [tag, ...attributes] = wrapper.split(" ");
+    const attributeText = attributes.join(" ");
+    return generateComponentCodeSample(tag, [], {}, attributeText ? [attributeText] : [], [...content]);
 }
 
 /**
@@ -154,15 +248,32 @@ export function generatePartsCodeSample(
  * sample can leave it out. Only a literal default can be compared: a number, a boolean or a quoted string.
  */
 function isComponentDefault(metadata: ComponentMetadata, name: string, value: unknown): boolean {
+    const defaultValue = literalDefault(metadata, name);
+    return defaultValue !== undefined && value === defaultValue;
+}
+
+/**
+ * The item with the component's own default as the value the sample leaves out. A dropdown otherwise treats the value
+ * the playground starts on as that, and would leave out a value the component wouldn't have chosen by itself.
+ */
+function withComponentBaseline<TItem extends { defaultValue?: unknown; name: string }>(
+    metadata: ComponentMetadata,
+    item: TItem
+): TItem {
+    const defaultValue = literalDefault(metadata, item.name);
+    return defaultValue === undefined ? item : { ...item, defaultValue };
+}
+
+/** The input's default from the metadata, when it is a literal the sample can compare a value with. */
+function literalDefault(metadata: ComponentMetadata, name: string): boolean | number | string | undefined {
     const input = metadata.inputs?.find(property => property.name === name);
     if (!input || input.defaultValue === undefined) {
-        return false;
+        return undefined;
     }
     const defaultValue = coerceDefaultValue(input.defaultValue);
-    return (
-        (typeof defaultValue === "number" || typeof defaultValue === "boolean" || typeof defaultValue === "string") &&
-        value === defaultValue
-    );
+    return typeof defaultValue === "number" || typeof defaultValue === "boolean" || typeof defaultValue === "string"
+        ? defaultValue
+        : undefined;
 }
 
 export interface DemoEventEntry {

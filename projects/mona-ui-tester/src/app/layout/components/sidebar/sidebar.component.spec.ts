@@ -2,7 +2,7 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Router, provideRouter } from "@angular/router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DOCS_MANIFEST } from "../../docs-manifest";
+import { DOCS_MANIFEST, flattenDocsPages } from "../../docs-manifest";
 import { SidebarComponent } from "./sidebar.component";
 
 @Component({ template: "" })
@@ -39,9 +39,7 @@ describe("SidebarComponent", () => {
         const hrefs = Array.from(fixture.nativeElement.querySelectorAll("nav a")).map(link =>
             (link as HTMLAnchorElement).getAttribute("href")
         );
-        expect(hrefs).toEqual(
-            DOCS_MANIFEST.flatMap(category => category.pages.map(page => `/components/${page.path}`))
-        );
+        expect(hrefs).toEqual(flattenDocsPages().map(page => `/components/${page.path}`));
     });
 
     it("brings the current page's link into view", async () => {
