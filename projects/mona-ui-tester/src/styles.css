@@ -317,6 +317,22 @@ markdown.block {
     background-color: var(--api-kind);
 }
 
+/* A kind's badge, or a member's type or signature: a stronger wash than a card's, with a border and the label's color. */
+.api-kind-chip {
+    background-color: color-mix(in oklab, var(--api-kind) 12%, var(--color-background));
+    border: 1px solid color-mix(in oklab, var(--api-kind) 35%, var(--color-border));
+    color: color-mix(in oklab, var(--api-kind) 50%, var(--color-foreground));
+}
+
+/* An import statement's keywords and path, mixed toward the text color like a kind's label. */
+.api-code-keyword {
+    color: color-mix(in oklab, oklch(60% 0.18 270) 55%, var(--color-foreground));
+}
+
+.api-code-string {
+    color: color-mix(in oklab, oklch(60% 0.15 160) 55%, var(--color-foreground));
+}
+
 /* A kind filter that's on takes its kind's wash, and in forced colors the system's selected colors. */
 .api-kind-filter[aria-pressed="true"] {
     background-color: color-mix(in oklab, var(--api-kind) 14%, var(--color-background));

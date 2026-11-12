@@ -57,10 +57,10 @@ describe("api-text", () => {
 
         const sections = apiSections(symbol);
 
-        expect(sections.map(section => [section.id, section.title])).toEqual([
-            ["inputs", "Inputs"],
-            ["outputs", "Outputs"],
-            ["inherited-from-baseoptions", "Inherited from BaseOptions"]
+        expect(sections.map(section => [section.id, section.kind, section.title])).toEqual([
+            ["inputs", "inputs", "Inputs"],
+            ["outputs", "outputs", "Outputs"],
+            ["inherited-from-baseoptions", "inherited", "Inherited from BaseOptions"]
         ]);
         expect(sections[0].items.map(item => [item.id, item.flags])).toEqual([
             ["value", ["two-way"]],

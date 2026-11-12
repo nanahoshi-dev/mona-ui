@@ -1,4 +1,5 @@
 import type { ApiSymbolKind } from "./api-model";
+import type { ApiSectionKind } from "./api-text";
 
 /**
  * The hue of each kind of export, which the reference's cards and filters set as `--api-kind`. The `api-kind-*` classes
@@ -16,4 +17,19 @@ export const KIND_HUES: Readonly<Record<ApiSymbolKind, string>> = {
     pipe: "oklch(62% 0.2 300)",
     service: "oklch(66% 0.15 160)",
     type: "oklch(66% 0.12 190)"
+};
+
+/**
+ * The hue of each section of a symbol's page, mostly borrowed from the kind it's most like: a template context takes a
+ * directive's, properties an interface's, methods a function's, an enum's members its own, and inherited members a
+ * class's quiet slate. Inputs and outputs, which a template binds, take blue and green.
+ */
+export const SECTION_HUES: Readonly<Record<ApiSectionKind, string>> = {
+    inherited: KIND_HUES.class,
+    inputs: "oklch(66% 0.14 235)",
+    members: KIND_HUES.enum,
+    methods: KIND_HUES.function,
+    outputs: "oklch(66% 0.15 160)",
+    properties: KIND_HUES.interface,
+    "template-context": KIND_HUES.directive
 };

@@ -78,11 +78,16 @@ export interface ApiSectionItem {
     readonly value?: string;
 }
 
+/** What a section of a symbol's page lists, which its tint follows. */
+export type ApiSectionKind =
+    "inherited" | "inputs" | "members" | "methods" | "outputs" | "properties" | "template-context";
+
 export interface ApiSection {
     /** The base type an inherited section comes from. */
     readonly from?: string;
     readonly id: string;
     readonly items: readonly ApiSectionItem[];
+    readonly kind: ApiSectionKind;
     readonly title: string;
 }
 
@@ -185,6 +190,7 @@ function memberFlags(member: ApiMember): ApiFlag[] {
 interface DraftSection {
     readonly from?: string;
     readonly items: readonly Omit<ApiSectionItem, "id">[];
+    readonly kind: ApiSectionKind;
     readonly title: string;
 }
 
@@ -201,10 +207,14 @@ function memberItems(members: readonly ApiMember[]): Omit<ApiSectionItem, "id">[
 function draftSections(symbol: ApiSymbolReference): DraftSection[] {
     const inputs = symbol.inputs ?? [];
     const sections: DraftSection[] = [
-        { items: memberItems(inputs), title: "Inputs" },
-        { items: memberItems(withModelEvents(symbol.outputs ?? [], inputs)), title: "Outputs" },
-        { items: memberItems(symbol.templateContext?.members ?? []), title: "Template context" },
-        { items: memberItems(symbol.properties ?? []), title: "Properties" },
+        { items: memberItems(inputs), kind: "inputs", title: "Inputs" },
+        { items: memberItems(withModelEvents(symbol.outputs ?? [], inputs)), kind: "outputs", title: "Outputs" },
+        {
+            items: memberItems(symbol.templateContext?.members ?? []),
+            kind: "template-context",
+            title: "Template context"
+        },
+        { items: memberItems(symbol.properties ?? []), kind: "properties", title: "Properties" },
         {
             items: (symbol.methods ?? []).map(method => ({
                 description: method.description,
@@ -212,6 +222,7 @@ function draftSections(symbol: ApiSymbolReference): DraftSection[] {
                 name: method.name,
                 signature: method.signature
             })),
+            kind: "methods",
             title: "Methods"
         },
         {
@@ -221,6 +232,7 @@ function draftSections(symbol: ApiSymbolReference): DraftSection[] {
                 name: member.name,
                 value: member.value
             })),
+            kind: "members",
             title: "Members"
         }
     ];
@@ -239,6 +251,7 @@ function draftSections(symbol: ApiSymbolReference): DraftSection[] {
                     signature: method.signature
                 }))
             ],
+            kind: "inherited",
             title: `Inherited from ${base.from}`
         });
     }
@@ -257,12 +270,17 @@ export function apiSections(symbol: ApiSymbolReference): ApiSection[] {
         from: section.from,
         id: sectionIds[index],
         items: section.items.map(item => ({ ...item, id: createUniqueHeadingId(item.name, ids) })),
+        kind: section.kind,
         title: section.title
     }));
 }
 
-/** The statement that imports a symbol. Types are imported as types. */
+/** The keyword that imports a symbol of a kind. Types are imported as types. */
+export function importKeyword(kind: ApiSymbolKind): "import type" | "import" {
+    return kind === "interface" || kind === "type" ? "import type" : "import";
+}
+
+/** The statement that imports a symbol. */
 export function importStatement(symbol: Pick<ApiSymbol, "kind" | "name">, entryPoint: string): string {
-    const keyword = symbol.kind === "interface" || symbol.kind === "type" ? "import type" : "import";
-    return `${keyword} { ${symbol.name} } from "${PACKAGE_NAME}/${entryPoint}";`;
+    return `${importKeyword(symbol.kind)} { ${symbol.name} } from "${PACKAGE_NAME}/${entryPoint}";`;
 }
