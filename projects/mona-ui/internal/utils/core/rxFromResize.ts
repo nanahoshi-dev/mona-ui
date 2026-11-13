@@ -1,6 +1,7 @@
-import { forEach } from "@mirei/ts-collections";
 import { Observable } from "rxjs";
 
+// A plain loop rather than ts-collections, which doesn't tree-shake: the internal entry point, which the button and
+// nearly every component import, would otherwise bring all of it.
 export const rxFromResize = (
     target: Element | Iterable<Element>,
     options?: ResizeObserverOptions
@@ -14,7 +15,9 @@ export const rxFromResize = (
             }
         }
         const resizeObserver = new ResizeObserver(entries => observer.next(entries));
-        forEach(elements, e => resizeObserver.observe(e, options));
+        for (const element of elements) {
+            resizeObserver.observe(element, options);
+        }
         return () => resizeObserver.disconnect();
     });
 };

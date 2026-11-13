@@ -1,5 +1,14 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+    existsSync,
+    mkdirSync,
+    mkdtempSync,
+    readdirSync,
+    readFileSync,
+    rmSync,
+    symlinkSync,
+    writeFileSync
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { discoverOfficialLocales } from "./audit-locales";
@@ -686,6 +695,57 @@ for (const expected of [".bg-primary", ".border-input-border", "--color-primary:
     }
 }
 
+/**
+ * The bundles a button, the theme and nearly every component load, and what each mustn't import. ts-collections
+ * doesn't tree-shake, so one import of it brings all of it. A value import of the overlay module puts it in the
+ * initial bundle, even unused, as soon as lazily loaded code opens an overlay.
+ */
+const leanBundles: Readonly<Record<string, readonly string[]>> = {
+    "nanahoshi-mona-ui-button.mjs": ["@mirei/ts-collections", "@angular/cdk/overlay"],
+    "nanahoshi-mona-ui-internal.mjs": ["@mirei/ts-collections", "@angular/cdk/overlay"],
+    "nanahoshi-mona-ui-internal-indicator-icon.mjs": ["@mirei/ts-collections", "@angular/cdk/overlay"],
+    "nanahoshi-mona-ui-theme.mjs": ["@mirei/ts-collections", "@angular/cdk/overlay"]
+};
+
+/** What a bundle imports statically. `import()` isn't matched. */
+function staticImports(source: string): string[] {
+    return Array.from(source.matchAll(/^import\s+(?:[^'";]*?\bfrom\s*)?['"]([^'"]+)['"]/gm), match => match[1]);
+}
+
+/**
+ * Checks that the bundles every application loads stay small: see {@link leanBundles}. No bundle may import
+ * "culori" itself either, which registers every color space it has; "culori/css" and "culori/fn" register the CSS ones.
+ * @returns how many bundles were checked
+ */
+export function verifyLeanBundles(distDir: string): number {
+    const fesmDir = resolve(distDir, "fesm2022");
+    if (!existsSync(fesmDir)) {
+        throw new Error(`Bundles not found at: ${fesmDir}`);
+    }
+    const problems: string[] = [];
+    for (const [file, forbidden] of Object.entries(leanBundles)) {
+        const path = resolve(fesmDir, file);
+        if (!existsSync(path)) {
+            throw new Error(`Bundle not found at: ${path}`);
+        }
+        for (const specifier of staticImports(readFileSync(path, "utf-8"))) {
+            if (forbidden.includes(specifier)) {
+                problems.push(`${file} imports ${specifier}`);
+            }
+        }
+    }
+    const bundles = readdirSync(fesmDir).filter(file => file.endsWith(".mjs"));
+    for (const file of bundles) {
+        if (staticImports(readFileSync(resolve(fesmDir, file), "utf-8")).includes("culori")) {
+            problems.push(`${file} imports "culori" rather than "culori/css" and "culori/fn"`);
+        }
+    }
+    if (problems.length > 0) {
+        throw new Error(`Bundles import more than they should:\n${problems.join("\n")}`);
+    }
+    return bundles.length;
+}
+
 export function verifyBuiltPackage(options: PackageVerificationOptions = {}): void {
     const distDir = resolve(options.distDir ?? resolve(process.cwd(), "dist/mona-ui"));
     const sourceLocalesDir = resolve(
@@ -819,6 +879,9 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
 
     const agentPages = verifyAgentDocs(distDir);
     console.log(`✓ Agent docs verified: llms.txt and the ${agentPages} pages it links to`);
+
+    const bundles = verifyLeanBundles(distDir);
+    console.log(`✓ ${bundles} bundles checked: none imports what would undo tree-shaking`);
 
     runConsumerSmokeTest({
         distDir,

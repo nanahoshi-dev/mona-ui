@@ -1,4 +1,6 @@
-import { formatRgb, interpolate, parse, type Color } from "culori";
+// The CSS color spaces only, the ones chart colors come in. "culori" would register every color space it has.
+import "culori/css";
+import { formatRgb, interpolate, parse, type Color } from "culori/fn";
 import type { ChartHeatmapSeriesScene, SceneHeatmapCell } from "../../../models/chart-heatmap.models";
 import { lerp, lerpOpacity } from "../animation-math";
 import type { ChartAnimationPlanningContext, ChartSeriesTransitionPlan } from "../chart-transition-types";
