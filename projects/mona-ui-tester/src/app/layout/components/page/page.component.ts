@@ -7,9 +7,9 @@ import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
     LucideBookOpen,
     LucideBraces,
+    LucideCompass,
     LucideDynamicIcon,
     LucidePlay,
-    LucideSparkles,
     LucideTerminal,
     LucideUser,
     LucideX
@@ -59,7 +59,7 @@ export class PageComponent {
     protected readonly pageIcon = computed(() => {
         const url = this.#navigation.url();
         if (this.#navigation.apiLocation()) return LucideBraces;
-        if (url.includes("introduction")) return LucideSparkles;
+        if (url.includes("introduction")) return LucideCompass;
         if (url.includes("installation")) return LucideBookOpen;
         if (url.includes("avatar")) return LucideUser;
         if (url.includes("button")) return LucidePlay;

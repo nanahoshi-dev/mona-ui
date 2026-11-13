@@ -36,18 +36,22 @@ describe("IntroductionDocComponent", () => {
         const element = fixture.nativeElement as HTMLElement;
         const cardLinks = Array.from(element.querySelectorAll("a[target='_blank']")) as HTMLAnchorElement[];
 
-        expect(cardLinks.length).toBe(4);
-
         const hrefs = cardLinks.map(link => link.getAttribute("href"));
-        expect(hrefs).toContain("https://angular.dev");
-        expect(hrefs).toContain("https://tailwindcss.com");
-        expect(hrefs).toContain("https://www.typescriptlang.org");
-        expect(hrefs).toContain("https://phrolovia.github.io/ts-collections/");
+        expect(hrefs).toEqual(["https://angular.dev", "https://tailwindcss.com", "https://www.typescriptlang.org"]);
 
         cardLinks.forEach(link => {
             expect(link.getAttribute("rel")).toBe("noopener noreferrer");
             expect(link.getAttribute("aria-label")).toBeTruthy();
         });
+        expect(cardLinks[0].getAttribute("aria-label")).toBe("Angular v22.0 documentation (opens in a new tab)");
+
+        const logos = cardLinks.map(link => link.querySelector("img"));
+        expect(logos.map(logo => logo?.getAttribute("src"))).toEqual([
+            "https://cdn.jsdelivr.net/npm/devicon@2.18.0/icons/angular/angular-original.svg",
+            "https://cdn.jsdelivr.net/npm/devicon@2.18.0/icons/tailwindcss/tailwindcss-original.svg",
+            "https://cdn.jsdelivr.net/npm/devicon@2.18.0/icons/typescript/typescript-original.svg"
+        ]);
+        logos.forEach(logo => expect(logo?.getAttribute("alt")).toBe(""));
 
         expect(element.textContent).toContain("Angular");
         expect(element.textContent).toContain("v22.0");
@@ -55,8 +59,6 @@ describe("IntroductionDocComponent", () => {
         expect(element.textContent).toContain("v4.3");
         expect(element.textContent).toContain("TypeScript");
         expect(element.textContent).toContain("v6.0");
-        expect(element.textContent).toContain("ts-collections");
-        expect(element.textContent).toContain("v17.5");
     });
 
     it("has no AXE accessibility violations", async () => {
