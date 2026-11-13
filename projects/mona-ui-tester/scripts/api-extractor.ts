@@ -23,66 +23,22 @@ import type {
     Type,
     TypeNode
 } from "ts-morph";
+import type { ApiMember, ApiMethod, ApiSymbol, ApiSymbolKind, ApiTemplateContext } from "../src/app/api/api-model";
 
 /**
  * Reads what an entry point exports from its `public-api.ts`, so the reference pages describe what consumers can import
- * and nothing else. `generate-api-docs.ts` turns the result into markdown.
+ * and nothing else. `generate-api-docs.ts` turns the result into markdown and the `/api` pages' data. The shapes it
+ * returns live in `api-model.ts`, which the site shares.
  */
 
-export type ApiSymbolKind =
-    "class" | "component" | "constant" | "directive" | "enum" | "function" | "interface" | "pipe" | "service" | "type";
-
-export interface ApiMember {
-    /** The name consumers bind, when an input or output is aliased. */
-    readonly alias?: string;
-    readonly defaultValue?: string;
-    readonly description: string;
-    readonly name: string;
-    readonly optional?: boolean;
-    readonly readonly?: boolean;
-    readonly required?: boolean;
-    readonly twoWay?: boolean;
-    readonly type: string;
-}
-
-export interface ApiMethod {
-    readonly description: string;
-    readonly name: string;
-    readonly signature: string;
-}
-
-export interface ApiEnumMember {
-    readonly description: string;
-    readonly name: string;
-    readonly value: string;
-}
-
-export interface ApiTemplateContext {
-    readonly members: readonly ApiMember[];
-    readonly type: string;
-}
-
-export interface ApiSymbol {
-    readonly description: string;
-    readonly enumMembers?: readonly ApiEnumMember[];
-    readonly exportAs?: string;
-    readonly extends?: readonly string[];
-    /** The form control contract it implements, when it has one. */
-    readonly implements?: readonly string[];
-    readonly inputs?: readonly ApiMember[];
-    readonly kind: ApiSymbolKind;
-    readonly methods?: readonly ApiMethod[];
-    readonly name: string;
-    readonly outputs?: readonly ApiMember[];
-    readonly pipeName?: string;
-    readonly properties?: readonly ApiMember[];
-    readonly selector?: string;
-    /** The declaration's own source, for type aliases, functions and constants. */
-    readonly signature?: string;
-    /** What a template directive's `let-` variables can read, from its `ngTemplateContextGuard`. */
-    readonly templateContext?: ApiTemplateContext;
-    readonly typeParameters?: readonly string[];
-}
+export type {
+    ApiEnumMember,
+    ApiMember,
+    ApiMethod,
+    ApiSymbol,
+    ApiSymbolKind,
+    ApiTemplateContext
+} from "../src/app/api/api-model";
 
 /** Whether a class is exported by some entry point, so its own section can describe the members it passes down. */
 export type IsPublicClass = (declaration: ClassDeclaration) => boolean;
@@ -595,8 +551,17 @@ function readConstant(name: string, declaration: VariableDeclaration): ApiSymbol
     };
 }
 
+/**
+ * Whether an export is marked to stay out of the docs. A constant's comment is on its statement, and an overloaded
+ * function's on its first signature, as their descriptions are.
+ */
 function isInternal(declaration: Node): boolean {
-    return Node.isJSDocable(declaration) && readDoc(declaration).internal;
+    const documented = Node.isVariableDeclaration(declaration)
+        ? declaration.getVariableStatement()
+        : Node.isFunctionDeclaration(declaration)
+          ? (declaration.getOverloads().at(0) ?? declaration)
+          : declaration;
+    return documented !== undefined && Node.isJSDocable(documented) && readDoc(documented).internal;
 }
 
 /** Reads everything a `public-api.ts` exports. A name exported as both a type and a value appears once. */
@@ -605,7 +570,7 @@ export function readEntryPoint(sourceFile: SourceFile, isPublicClass: IsPublicCl
     for (const [name, declarations] of sourceFile.getExportedDeclarations()) {
         const declaration = declarations.at(0);
         // Styling exports are derived from the inputs, which the reference already lists.
-        if (!declaration || isInternal(declaration) || /Variant(Input|Props)$/.test(name)) {
+        if (!declaration || isInternal(declaration) || /Variants?(Input|Props)$/.test(name)) {
             continue;
         }
         if (declaration instanceof ClassDeclaration) {

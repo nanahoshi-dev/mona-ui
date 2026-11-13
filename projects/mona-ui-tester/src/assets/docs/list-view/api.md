@@ -2,241 +2,34 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/list-view`.
+Everything below is imported from `@nanahoshi/mona-ui/list-view`. Each name links to its reference page, with every input, output, property and method.
 
-### `ListViewComponent`
-
-**Selector:** `mona-list-view`  
-**Type parameters:** `T = unknown`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | Accessible name for the list view's `listbox` element. Describe what the list represents. |
-| `aria-labelledby` | `string` | `""` | Id of the element that names the list view's list, as an alternative to `aria-label`. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabledBy` | `string \| Predicate<T> \| null \| undefined` | `""` | Property name or predicate that marks an item as disabled. Disabled items can't be selected, activated or reached by typeahead. |
-| `height` | `string \| number` | `"100%"` | Sets the height of the list view. With virtual scrolling, the viewport takes this height, so a percentage needs a parent with a height; `""` sizes the viewport to its items instead. |
-| `items` | `Iterable<T>` | `[]` | Collection of items to render. |
-| `listClass` | `string` | `""` | Sets the classes of the inner UL element. |
-| `listItemClass` | `string` | `""` | Sets the classes of the list items. |
-| `listItemStyle` | `Partial<CSSStyleDeclaration>` | `{}` | Sets the style of the list items. |
-| `listStyle` | `Partial<CSSStyleDeclaration>` | `{}` | Sets the style of the list. |
-| `loading` | `boolean` | `false` | Marks the list as loading: it gets `aria-busy` and a polite "Loading" status. |
-| `maxHeight` | `string \| number` | `""` | Sets the maximum height of the list. |
-| `maxWidth` | `string \| number` | `""` | Sets the maximum width of the list. |
-| `pagerAriaLabel` | `string` | `""` | Accessible name of the pager. Defaults to "{name} pagination" from the list view's `aria-label`, so two paged list views on a page have different landmarks. |
-| `rounded` | `"large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the component. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the component's dimensions. |
-| `textField` | `ListKeySelector<T, string> \| undefined` | `""` | Property name or accessor used to derive the display text from a data item. |
-| `width` | `string \| number` | `"100%"` | Sets the width of the list view. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `itemActivate` | `T` | Emitted with the data item when the user activates an enabled item by clicking it or pressing Enter on it. Fires whether or not the list view is selectable. |
-| `scrollBottom` | `Event` | Emitted once each time the list is scrolled to its end, when the list view isn't paged. Scrolling away and back emits again, as does reaching the new end after more items are added. |
-
-### `ListViewPageableDirective`
-
-**Selector:** `mona-list-view[monaListViewPageable]`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaListViewPageable` | `Partial<PagerSettings> \| ""` | `""` | Enables pagination. An empty string enables pagination with default settings (`type: "numeric"`, `previousNext: true`, `pageSize: 10`, `pageSizeValues: [5, 10, 20, 25, 50, 100]`, `visiblePages: 5`); pass an object to override any field. Has no visible effect while `monaListViewVirtualScroll` is enabled — see Pagination and virtualization don't combine. |
-| `page` (two-way) | `number` | `1` | The current page. Supports two-way binding via `[(page)]`; updates when the user navigates the pager and can be set to navigate programmatically. |
-| `pageSize` (two-way) | `number \| undefined` | `undefined` | Items per page. Supports two-way binding via `[(pageSize)]`: it updates when the user picks a size in the pager. While unset, the options' `pageSize` applies. A new size keeps the first item of the current page in view. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `pageChange` | `number` | Emitted when `page` changes. |
-| `pageSizeChange` | `number \| undefined` | Emitted when `pageSize` changes. |
-| `pageSizeSelect` | `PageSizeChangeEvent` | Emitted when the user picks a page size, before it is applied. Call `preventDefault()` on the event to keep the current size. |
-
-### `ListViewSelectableDirective`
-
-**Selector:** `mona-list-view[monaListViewSelectable]`  
-**Type parameters:** `T`, `K = unknown`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaListViewSelectable` | `Partial<SelectableOptions> \| ""` | `""` | Enables selection. An empty string enables single selection with default settings; pass an object to configure `mode` (`"single"` or `"multiple"`), `toggleable`, and `checkboxes`. |
-| `selectBy` | `ListKeySelector<T, K> \| undefined` | `""` | Property name or accessor used to derive the selection key from a data item. When omitted, the data item itself is used as the key. |
-| `selectedKeys` | `Iterable<K>` | `[]` | The selection, expressed as keys rather than items. Bind `[(selectedKeys)]` to keep it in sync. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `selectedKeysChange` | `K[]` | Emitted with the selected keys when the user selects or deselects an item. Not emitted for keys set through `selectedKeys`. |
-
-### `ListViewGroupableDirective`
-
-**Selector:** `mona-list-view[monaListViewGroupable]`  
-**Type parameters:** `T`, `K = T`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `groupBy` | `ListKeySelector<T, K> \| undefined` | `""` | Property name or accessor used to derive the group key from a data item. |
-| `monaListViewGroupable` | `GroupableOptions<T, K> \| ""` | `""` | Enables grouping. An empty string enables grouping with default settings; pass an object to configure `headerOrder`, `headerText`, `orderBy`, and `orderByDirection`. |
-
-### `ListViewItemTemplateDirective`
-
-Template for each item of a list view. The data item is the template's implicit value (`let-item`). Bind the list
-view's items to `monaListViewItemTemplateOf` to type it; without it, the item is `any` in templates.
-
-**Selector:** `ng-template[monaListViewItemTemplate]`  
-**Type parameters:** `T = any`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaListViewItemTemplateOf` | `Iterable<T> \| null \| undefined` | `null` | The list view's items, used only to type the template's item. Optional. |
-
-#### Template context
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `T` | The data item (`let-item`), or the group's value (`let-group`). |
-
-### `ListViewNavigableDirective`
-
-**Selector:** `mona-list-view[monaListViewNavigable]`  
-**Type parameters:** `T`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaListViewNavigable` | `Partial<NavigableOptions> \| ""` | `""` | Configures keyboard navigation, which is on without the directive. An empty string keeps the defaults (`enabled: true`, `mode: "select"`, `wrap: false`); pass an object to override any field. |
-
-### `ListViewVirtualScrollDirective`
-
-**Selector:** `mona-list-view[monaListViewVirtualScroll]`  
-**Type parameters:** `T`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaListViewVirtualScroll` (required) | `VirtualScrollOptions` | — | Enables virtual scrolling. `height` is the fixed row height, in pixels, used to measure the viewport; when omitted, a `28`px row height is assumed. |
-
-### `ListViewFooterTemplateDirective`
-
-**Selector:** `ng-template[monaListViewFooterTemplate]`
-
-### `ListViewGroupHeaderTemplateDirective`
-
-Template for the header of each group. The group's value is the template's implicit value (`let-group`); see
-`ListViewGroupHeaderTemplateContext`. The context isn't type-checked, so templates written against the value's own
-type keep compiling.
-
-**Selector:** `ng-template[monaListViewGroupHeaderTemplate]`
-
-### `ListViewHeaderTemplateDirective`
-
-**Selector:** `ng-template[monaListViewHeaderTemplate]`
-
-### `ListViewNoDataTemplateDirective`
-
-**Selector:** `ng-template[monaListViewNoDataTemplate]`
+| [`ListViewComponent`](/api/list-view/ListViewComponent) | Component |  |
+| [`ListViewPageableDirective`](/api/list-view/ListViewPageableDirective) | Directive |  |
+| [`ListViewSelectableDirective`](/api/list-view/ListViewSelectableDirective) | Directive |  |
+| [`ListViewGroupableDirective`](/api/list-view/ListViewGroupableDirective) | Directive |  |
+| [`ListViewItemTemplateDirective`](/api/list-view/ListViewItemTemplateDirective) | Directive | Template for each item of a list view. |
+| [`ListViewNavigableDirective`](/api/list-view/ListViewNavigableDirective) | Directive |  |
+| [`ListViewVirtualScrollDirective`](/api/list-view/ListViewVirtualScrollDirective) | Directive |  |
+| [`ListViewFooterTemplateDirective`](/api/list-view/ListViewFooterTemplateDirective) | Directive |  |
+| [`ListViewGroupHeaderTemplateDirective`](/api/list-view/ListViewGroupHeaderTemplateDirective) | Directive | Template for the header of each group. |
+| [`ListViewHeaderTemplateDirective`](/api/list-view/ListViewHeaderTemplateDirective) | Directive |  |
+| [`ListViewNoDataTemplateDirective`](/api/list-view/ListViewNoDataTemplateDirective) | Directive |  |
 
 ### Types
 
-#### `ListViewGroupHeaderTemplateContext`
-
-The context of a `monaListViewGroupHeaderTemplate`: the group's value (what `groupBy` returned for its items), as
-`let-group`.
-
-**Type parameters:** `G = unknown`
-
-| Name | Type |
-| --- | --- |
-| `$implicit` (read-only) | `G` |
-
-#### `ListViewItemTemplateContext`
-
-The context of a `monaListViewItemTemplate`: the data item, as `let-item`.
-
-**Type parameters:** `T = unknown`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `$implicit` (read-only) | `T` | The data item (`let-item`), or the group's value (`let-group`). |
+| [`ListViewGroupHeaderTemplateContext`](/api/list-view/ListViewGroupHeaderTemplateContext) | Interface | The context of a `monaListViewGroupHeaderTemplate`: the group's value (what `groupBy` returned for its items), as `let-group`. |
+| [`ListViewItemTemplateContext`](/api/list-view/ListViewItemTemplateContext) | Interface | The context of a `monaListViewItemTemplate`: the data item, as `let-item`. |
+| [`NavigableOptions`](/api/list-view/NavigableOptions) | Interface |  |
+| [`PagerSettings`](/api/list-view/PagerSettings) | Interface |  |
+| [`VirtualScrollOptions`](/api/list-view/VirtualScrollOptions) | Interface |  |
+| [`GroupableOptions`](/api/list-view/GroupableOptions) | Type alias |  |
+| [`NavigationMode`](/api/list-view/NavigationMode) | Type alias | Whether arrow keys only highlight an item, or select it as well. |
+| [`OrderByOptions`](/api/list-view/OrderByOptions) | Type alias | How the items within each group are ordered. |
+| [`SelectableOptions`](/api/list-view/SelectableOptions) | Type alias |  |
 
-#### `NavigableOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `enabled` | `boolean` | Whether keyboard navigation is active. |
-| `mode` | `NavigationMode` | Whether navigation only moves a visual highlight (`"highlight"`) or also changes selection (`"select"`). |
-| `wrap` | `boolean` | Whether navigating past the last (or before the first) item cycles to the other end. |
-
-#### `PagerSettings`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `enabled` | `boolean` | Whether the pager is active. |
-| `firstLast` | `boolean` | Whether first/last page buttons are shown. |
-| `pageSize` | `number` | Number of items shown per page. |
-| `pageSizeValues` | `number[] \| boolean` | Page size options shown in the pager, or `false`/`true` to hide/show a default set. |
-| `previousNext` | `boolean` | Whether previous/next page buttons are shown. |
-| `showInfo` | `boolean` | Whether a page summary (e.g. "1-10 of 50") is shown. |
-| `type` | `"numeric" \| "input"` | Whether pages are selected via numbered buttons or a page-number input. |
-| `visiblePages` | `number` | Number of numeric page buttons shown at once, when `type` is `"numeric"`. |
-
-#### `VirtualScrollOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `enabled` | `boolean` | Whether virtual scrolling is active. |
-| `height?` | `number` | Fixed row height, in pixels, used to measure the virtual scroll viewport. |
-
-#### `GroupableOptions`
-
-```typescript
-type GroupableOptions<T = unknown, R = unknown> = { enabled?: boolean; headerOrder?: "asc" | "desc"; headerText?: (value: unknown) => string; } & OrderByOptions<T, R>;
-```
-
-#### `NavigationMode`
-
-Whether arrow keys only highlight an item, or select it as well.
-
-```typescript
-type NavigationMode = "highlight" | "select";
-```
-
-#### `OrderByOptions`
-
-How the items within each group are ordered. Leave both out to keep their order.
-
-```typescript
-type OrderByOptions<T, R> = | { orderBy?: never; orderByDirection?: never } | { orderBy: string | Selector<T, R>; orderByDirection?: "asc" | "desc"; };
-```
-
-#### `SelectableOptions`
-
-```typescript
-type SelectableOptions = | { checkboxes?: boolean; enabled?: boolean; mode: "single"; toggleable?: boolean; } | { checkboxes?: boolean; enabled?: boolean; mode: "multiple"; };
-```
-
-#### `ListKeySelector`
-
-From `@nanahoshi/mona-ui/list`.
-
-```typescript
-type ListKeySelector<T, K = unknown> = string | Selector<T, K> | null;
-```
-
-**Documented elsewhere:** [`PageSizeChangeEvent`](/components/pager)
+**Related types:** [`ListKeySelector`](/api/list/ListKeySelector), [`PageSizeChangeEvent`](/api/pager/PageSizeChangeEvent)

@@ -1,0 +1,58 @@
+<ul class="space-y-3.5">
+    @for (card of cards(); track card.key) {
+        <li class="api-kind-card rounded-xl px-4 py-3.5 sm:px-5 sm:py-4" [style.--api-kind]="card.hue">
+            <div class="flex flex-wrap items-start justify-between gap-3 sm:items-center">
+                <div class="flex min-w-0 flex-col items-start gap-1">
+                    <span
+                        class="api-kind-label inline-flex items-center gap-1.5 text-[0.625rem] leading-none font-semibold tracking-widest uppercase">
+                        <span class="api-kind-dot size-1.5 rounded-full" aria-hidden="true"></span>
+                        {{ card.label }}
+                    </span>
+                    <a
+                        class="rounded-sm font-mono text-sm font-semibold text-foreground [overflow-wrap:anywhere] underline-offset-2 hover:text-primary-subtle-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator"
+                        [routerLink]="['/api', card.item.entryPoint, card.item.name]"
+                        >{{ card.item.name }}</a
+                    >
+                </div>
+                @if (card.uses.length > 0) {
+                    <div class="flex max-w-full min-w-0 flex-wrap gap-1.5 sm:justify-end">
+                        @for (use of card.uses; track use.value) {
+                            <button
+                                type="button"
+                                class="group inline-flex max-w-full cursor-pointer items-center gap-1.5 rounded-md border border-border bg-surface-muted px-2.5 py-1 text-start font-mono text-xs text-foreground transition-colors hover:bg-active focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus-indicator"
+                                [title]="card.item.pipeName ? 'Copy the pipe name' : 'Copy the selector'"
+                                (click)="copy(card.key, use.value)">
+                                <span class="sr-only">Copy </span>
+                                <span class="min-w-0 [overflow-wrap:anywhere]">
+                                    @for (part of use.parts; track $index) {
+                                        @if (!$first) {
+                                            <wbr />
+                                        }
+                                        <span>{{ part }}</span>
+                                    }
+                                </span>
+                                @if (isCopied(card.key, use.value)) {
+                                    <svg lucideCheck class="shrink-0 text-success" aria-hidden="true" [size]="14"></svg>
+                                } @else {
+                                    <svg
+                                        lucideCopy
+                                        class="shrink-0 text-muted-foreground group-hover:text-foreground"
+                                        aria-hidden="true"
+                                        [size]="14"></svg>
+                                }
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+            @if (card.item.summary) {
+                <app-api-prose
+                    class="api-prose mt-3 block text-sm leading-relaxed text-muted-foreground"
+                    [inline]="true"
+                    [links]="links()"
+                    [markdown]="card.item.summary"></app-api-prose>
+            }
+        </li>
+    }
+</ul>
+<span class="sr-only" aria-live="polite">{{ status() }}</span>

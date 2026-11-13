@@ -1,0 +1,100 @@
+@let current = section();
+<section [attr.aria-labelledby]="current.id">
+    <div class="mb-3 flex items-center gap-2.5">
+        <span class="api-kind-dot size-2 shrink-0 rounded-full" aria-hidden="true"></span>
+        <h2 class="min-w-0 text-base font-semibold text-foreground [overflow-wrap:anywhere]" [id]="current.id">
+            @if (current.from; as from) {
+                Inherited from
+                @if (links()[from]; as entryPoint) {
+                    <a
+                        class="rounded-sm font-mono text-primary-subtle-foreground underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator"
+                        [routerLink]="['/api', entryPoint, from]"
+                        >{{ from }}</a
+                    >
+                } @else {
+                    <code class="font-mono">{{ from }}</code>
+                }
+            } @else {
+                {{ current.title }}
+            }
+        </h2>
+        <span
+            class="rounded-full bg-muted px-2 py-0.5 text-[0.6875rem] font-medium text-muted-foreground"
+            aria-hidden="true"
+            >{{ current.items.length }}</span
+        >
+    </div>
+    <ul class="space-y-3">
+        @for (item of current.items; track item.id) {
+            <li class="api-kind-card scroll-mt-6 rounded-xl px-4 py-3.5 @2xl:px-5" [id]="item.id">
+                <div class="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+                    <div class="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1.5">
+                        <h3 class="min-w-0 font-mono text-sm font-bold text-foreground [overflow-wrap:anywhere]">
+                            <a
+                                class="rounded-sm underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator"
+                                [routerLink]="[]"
+                                [fragment]="item.id"
+                                >{{ item.name }}</a
+                            >
+                        </h3>
+                        @if (item.type) {
+                            <span class="sr-only">Type: </span>
+                            <app-api-type
+                                class="api-kind-chip min-w-0 rounded-md px-2 py-0.5 text-xs leading-5 [overflow-wrap:anywhere]"
+                                [links]="links()"
+                                [self]="self()"
+                                [text]="item.type"></app-api-type>
+                        }
+                    </div>
+                    @if (item.flags.length > 0 || item.defaultValue !== undefined || item.value) {
+                        <div class="flex max-w-full flex-wrap items-center gap-1.5">
+                            @for (flag of item.flags; track flag) {
+                                <span
+                                    class="rounded-full border border-border bg-background px-2 py-px text-[0.6875rem] leading-4 font-medium text-muted-foreground"
+                                    >{{ flag }}</span
+                                >
+                            }
+                            @if (item.defaultValue !== undefined) {
+                                <span
+                                    class="inline-flex max-w-full items-center gap-1.5 rounded-md border border-border bg-background px-2 py-0.5 text-xs">
+                                    <span
+                                        class="text-[0.625rem] font-semibold tracking-wider text-muted-foreground uppercase"
+                                        >Default</span
+                                    >&ngsp;<code
+                                        class="min-w-0 font-mono font-semibold text-foreground [overflow-wrap:anywhere]"
+                                        >{{ item.defaultValue }}</code
+                                    >
+                                </span>
+                            }
+                            @if (item.value) {
+                                <span
+                                    class="inline-flex max-w-full items-center gap-1.5 rounded-md border border-border bg-background px-2 py-0.5 text-xs">
+                                    <span
+                                        class="text-[0.625rem] font-semibold tracking-wider text-muted-foreground uppercase"
+                                        >Value</span
+                                    >&ngsp;<code
+                                        class="min-w-0 font-mono font-semibold text-foreground [overflow-wrap:anywhere]"
+                                        >{{ item.value }}</code
+                                    >
+                                </span>
+                            }
+                        </div>
+                    }
+                </div>
+                @if (item.signature) {
+                    <app-api-type
+                        class="api-kind-chip mt-2.5 block rounded-lg px-3 py-2 text-[0.8125rem] leading-6 whitespace-pre-wrap [overflow-wrap:anywhere]"
+                        [links]="links()"
+                        [self]="self()"
+                        [text]="item.signature"></app-api-type>
+                }
+                @if (item.description) {
+                    <app-api-prose
+                        class="api-prose mt-2.5 block text-sm leading-relaxed text-muted-foreground"
+                        [links]="links()"
+                        [markdown]="item.description"></app-api-prose>
+                }
+            </li>
+        }
+    </ul>
+</section>

@@ -39,7 +39,28 @@ describe("SidebarComponent", () => {
         const hrefs = Array.from(fixture.nativeElement.querySelectorAll("nav a")).map(link =>
             (link as HTMLAnchorElement).getAttribute("href")
         );
-        expect(hrefs).toEqual(flattenDocsPages().map(page => `/components/${page.path}`));
+        expect(hrefs).toEqual(["/api", ...flattenDocsPages().map(page => `/components/${page.path}`)]);
+    });
+
+    it("marks the API reference link as current anywhere under /api", async () => {
+        const router = TestBed.inject(Router);
+        router.resetConfig([{ path: "**", component: EmptyComponent }]);
+        const link = (): HTMLAnchorElement => fixture.nativeElement.querySelector("nav a[href='/api']");
+
+        await router.navigateByUrl("/api");
+        await fixture.whenStable();
+        fixture.detectChanges();
+        expect(link().getAttribute("aria-current")).toBe("page");
+
+        await router.navigateByUrl("/api/chart/ChartComponent");
+        await fixture.whenStable();
+        fixture.detectChanges();
+        expect(link().getAttribute("aria-current")).toBe("true");
+
+        await router.navigateByUrl("/components/button");
+        await fixture.whenStable();
+        fixture.detectChanges();
+        expect(link().getAttribute("aria-current")).toBeNull();
     });
 
     it("brings the current page's link into view", async () => {

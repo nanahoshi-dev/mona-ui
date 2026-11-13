@@ -2,47 +2,16 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/label`.
+Everything below is imported from `@nanahoshi/mona-ui/label`. Each name links to its reference page, with every input, output, property and method.
 
-### `LabelComponent`
-
-**Selector:** `mona-label`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes merged onto the rendered `<label>` element via `tailwind-merge`. |
-| `for` | `LabelTarget` | `undefined` | Associates the label with a native control ID or a target that exposes a public `focus()` method. String values are reflected as the native `for` attribute. Object targets receive focus when the label is clicked. |
-| `optional` | `boolean` | `false` | Whether to display optional-field text next to the caption. |
-| `optionalText` | `string` | `""` | Text displayed when `optional` is enabled. |
-| `text` | `string` | `""` | Visible label caption text. |
-
-### `LabelDirective`
-
-**Selector:** `label[monaLabel]`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes merged onto the native label element via `tailwind-merge`. |
-| `for` | `LabelTarget` | `undefined` | Associates the label with a native control ID or a target that exposes a public `focus()` method. String values are reflected as the native `for` attribute. Object targets receive focus when the label is clicked. |
+| Name | Kind |
+| --- | --- |
+| [`LabelComponent`](/api/label/LabelComponent) | Component |
+| [`LabelDirective`](/api/label/LabelDirective) | Directive |
 
 ### Types
 
-#### `LabelFocusable`
-
-**Methods**
-
-| Signature | Description |
+| Type | Kind |
 | --- | --- |
-| `activateFromLabel(): void` | Runs instead of `focus()` on a click, for a control a native label would activate. |
-| `focus(options?: FocusOptions): void` | Moves focus to the control. The label calls it on a click when the control has no `activateFromLabel`. |
-| `setLabelledBy(id: string \| null): void` | Receives the id of the label's text, so the control can use it for `aria-labelledby`. |
-
-#### `LabelTarget`
-
-```typescript
-type LabelTarget = string | LabelFocusable | null | undefined;
-```
+| [`LabelFocusable`](/api/label/LabelFocusable) | Interface |
+| [`LabelTarget`](/api/label/LabelTarget) | Type alias |

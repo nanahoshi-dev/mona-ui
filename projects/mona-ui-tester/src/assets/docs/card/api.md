@@ -2,86 +2,23 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/card`.
+Everything below is imported from `@nanahoshi/mona-ui/card`. Each name links to its reference page, with every input, output, property and method.
 
-### `CardComponent`
-
-**Selector:** `mona-card`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `role` | `"article" \| "group" \| "region"` | `"group"` | The role the card takes when it has a title, which then names it. Use `article` for self-contained content or `region` for a landmark. |
-| `rounded` | `"large" \| "medium" \| "none" \| "small" \| "xlarge" \| "xxlarge"` | `"medium"` | Controls the border radius applied to the card and its header/footer regions. |
-
-### `CardFooterComponent`
-
-**Selector:** `mona-card-footer`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the rendered footer element via `tailwind-merge`. |
-
-### `CardHeaderComponent`
-
-**Selector:** `mona-card-header`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the rendered header element via `tailwind-merge`. |
-
-### `CardActionDirective`
-
-**Selector:** `ng-template[monaCardAction]`
-
-### `CardContentDirective`
-
-**Selector:** `ng-template[monaCardContent]`
-
-### `CardDescriptionDirective`
-
-**Selector:** `ng-template[monaCardDescription]`
-
-#### Template context
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `string` | An id for the element in the template, if something needs to refer to it. The card doesn't need it for its name. |
-
-### `CardTitleDirective`
-
-**Selector:** `ng-template[monaCardTitle]`
-
-#### Template context
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `string` | An id for the element in the template, if something needs to refer to it. The card doesn't need it for its name. |
+| Name | Kind |
+| --- | --- |
+| [`CardComponent`](/api/card/CardComponent) | Component |
+| [`CardFooterComponent`](/api/card/CardFooterComponent) | Component |
+| [`CardHeaderComponent`](/api/card/CardHeaderComponent) | Component |
+| [`CardActionDirective`](/api/card/CardActionDirective) | Directive |
+| [`CardContentDirective`](/api/card/CardContentDirective) | Directive |
+| [`CardDescriptionDirective`](/api/card/CardDescriptionDirective) | Directive |
+| [`CardTitleDirective`](/api/card/CardTitleDirective) | Directive |
 
 ### Types
 
-#### `CARD_DEFAULT_MESSAGES`
+| Type | Kind |
+| --- | --- |
+| [`CARD_DEFAULT_MESSAGES`](/api/card/CARD_DEFAULT_MESSAGES) | Constant |
+| [`CardTemplateContext`](/api/card/CardTemplateContext) | Interface |
 
-```typescript
-const CARD_DEFAULT_MESSAGES: { actionsLabel: string; };
-```
-
-#### `CardTemplateContext`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` (read-only) | `string` | An id for the element in the template, if something needs to refer to it. The card doesn't need it for its name. |
-
-#### `ClassInputType`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type ClassInputType = string | string[] | Record<string, unknown> | null | undefined;
-```
+**Related types:** [`ClassInputType`](/api/common/ClassInputType)

@@ -2,65 +2,9 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/check-box`.
+Everything below is imported from `@nanahoshi/mona-ui/check-box`. Each name links to its reference page, with every input, output, property and method.
 
-### `CheckBoxComponent`
-
-**Selector:** `mona-check-box`  
-**Implements:** `FormCheckboxControl`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-describedby` | `string` | `""` | Id of an element that describes the check box, such as an error message. |
-| `aria-label` | `string` | `""` | Accessible name of the check box when it has no visible label. |
-| `aria-labelledby` | `string` | `""` | Id of the element that labels the check box. |
-| `checked` (two-way) | `boolean` | `false` | Whether the control is checked. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the label container via `tailwind-merge`. |
-| `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction. |
-| `indeterminate` | `boolean` | `false` | Activates indeterminate mode, showing a dash instead of a checkmark. A user change clears it, as it does on a native checkbox. Use `[(indeterminate)]` to follow that, because a one-way binding only writes again when the bound value changes. |
-| `inputId` | `string` | `generated` | Id of the native checkbox input. Point a `<label for>` at it to label the check box from outside. A unique id is generated when it isn't set. |
-| `invalid` | `boolean` | `false` | Marks the checkbox as invalid. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `label` | `string` | `""` | Text label displayed alongside the checkbox. When provided, takes precedence over projected content. |
-| `labelPosition` | `"before" \| "after"` | `"after"` | Position of the label relative to the checkbox. |
-| `labelSize` | `"large" \| "medium" \| "small"` | `"medium"` | Controls the font size of the label text. |
-| `name` | `string` | `""` | Name of the native checkbox input, used in native form submission. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `readonly` | `boolean` | `false` | Prevents value changes while the control stays focusable and readable. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `required` | `boolean` | `false` | Marks the control as required for form validation. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the checkmark box. |
-| `tabIndex` | `number` | `0` | Tab index of the native checkbox input. |
-| `touched` | `boolean` | `false` | Marks the checkbox as touched. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `checkedChange` | `boolean` | Emitted when `checked` changes. |
-| `indeterminateChange` | `boolean` | Emitted with `false` when a user change clears the indeterminate mode. |
-| `inputBlur` | `FocusEvent` | Emitted when the checkbox input loses focus. |
-| `inputChange` | `Event` | Emitted when the checkbox value changes. |
-| `inputFocus` | `FocusEvent` | Emitted when the checkbox input gains focus. |
-| `touch` | `void` | Emitted when the checkbox loses focus or its value changes. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `focus(options?: FocusOptions): void` | Moves focus to the native checkbox input. |
-
-### `CheckboxDirective`
-
-Applies Mona UI styling to a native `<input type="checkbox">`. All native checkbox behaviors — keyboard interaction,
-form submission, `indeterminate` state, and Angular forms directives — are preserved.
-
-**Selector:** `input[type='checkbox'][monaCheckbox]`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `invalid` | `boolean` | `false` | Marks the checkbox as invalid, triggering error border and ring styling. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the checkbox. |
-| `touched` | `boolean` | `false` | Marks the checkbox as touched. Error styling is only shown when both `invalid` and `touched` are `true`. |
+| [`CheckBoxComponent`](/api/check-box/CheckBoxComponent) | Component |  |
+| [`CheckboxDirective`](/api/check-box/CheckboxDirective) | Directive | Applies Mona UI styling to a native `<input type="checkbox">`. |

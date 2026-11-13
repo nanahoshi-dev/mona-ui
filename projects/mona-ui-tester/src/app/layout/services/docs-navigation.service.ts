@@ -7,6 +7,13 @@ import type { DocsCategory, DocsPage } from "../docs-manifest";
 
 const STORAGE_KEY = "mona-docs-navigation";
 const ALWAYS_OPEN_BY_DEFAULT = "get-started";
+const API_PATH = /^\/api(?:\/([^/]+)(?:\/([^/]+))?)?\/?$/;
+
+/** Where the reader is in the API reference: its index, an entry point, or one of that entry point's exports. */
+export interface ApiLocation {
+    readonly entryPoint?: string;
+    readonly symbol?: string;
+}
 
 /**
  * Where the reader is in the documentation, from the manifest and the current URL. The sidebar has two instances, one
@@ -20,6 +27,27 @@ export class DocsNavigationService {
     readonly #router = inject(Router);
     readonly #storage = this.#readStorage();
 
+    /** Where the URL is in the API reference, or `null` outside `/api`. A change of fragment alone doesn't change it. */
+    public readonly apiLocation = computed<ApiLocation | null>(
+        () => {
+            const match = API_PATH.exec(this.url().split(/[?#]/)[0]);
+            if (!match) {
+                return null;
+            }
+            const [, entryPoint, symbol] = match.map(part =>
+                part === undefined ? undefined : decodeURIComponent(part)
+            );
+            return { entryPoint, symbol };
+        },
+        {
+            equal: (first, second) =>
+                first === second ||
+                (first !== null &&
+                    second !== null &&
+                    first.entryPoint === second.entryPoint &&
+                    first.symbol === second.symbol)
+        }
+    );
     public readonly categories: readonly DocsCategory[] = DOCS_MANIFEST;
     public readonly currentCategory = computed<DocsCategory | null>(() => {
         const page = this.currentPage();

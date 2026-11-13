@@ -2,64 +2,17 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/splitter`.
+Everything below is imported from `@nanahoshi/mona-ui/splitter`. Each name links to its reference page, with every input, output, property and method.
 
-### `SplitterPaneComponent`
-
-**Selector:** `mona-splitter-pane`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `collapsed` (two-way) | `boolean` | `false` | Whether the pane is collapsed. |
-| `collapsible` | `boolean` | `false` | Whether the pane is collapsible. |
-| `label` | `string` | `""` | Names the separator after this pane, for assistive technology. Without it, the separator has a generic name, which can't tell one from another when a splitter has several. |
-| `max` | `string \| number \| null` | `null` | The maximum size of the pane, in pixels. A number or a string like `"200px"`. Percentages aren't supported, and are ignored with a warning in development. |
-| `min` | `string \| number \| null` | `null` | The minimum size of the pane, in pixels. A number or a string like `"200px"`. Percentages aren't supported, and are ignored with a warning in development. |
-| `resizable` | `boolean` | `true` | Whether the pane is resizable. A separator only moves, by pointer or key, when the panes on both of its sides are. |
-| `size` (two-way) | `string \| number` | `""` | The size of the pane. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `collapsedChange` | `boolean` | Emitted when `collapsed` changes. |
-| `sizeChange` | `string \| number` | Emitted when `size` changes. |
-
-### `SplitterComponent`
-
-**Selector:** `mona-splitter`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `keyboardStep` | `number` | `10` | How far an arrow key moves a separator, in pixels. |
-| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | The layout direction of the splitter panes. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `resizeEnd` | `readonly (string \| number)[]` | Emitted with every pane's `size`, in order, once a drag ends, after each key that resizes, and when the separator collapses or expands a pane. Use it to save a layout: `sizeChange` on a pane fires on every move, and these values can go straight back into `size`. |
+| Name | Kind |
+| --- | --- |
+| [`SplitterPaneComponent`](/api/splitter/SplitterPaneComponent) | Component |
+| [`SplitterComponent`](/api/splitter/SplitterComponent) | Component |
 
 ### Types
 
-#### `SPLITTER_DEFAULT_MESSAGES`
-
-```typescript
-const SPLITTER_DEFAULT_MESSAGES: MonaSplitterMessages;
-```
-
-#### `MonaSplitterMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `collapseDown` (read-only) | `string` |
-| `collapseNext` (read-only) | `string` |
-| `collapsePrevious` (read-only) | `string` |
-| `collapseUp` (read-only) | `string` |
-| `resizer` (read-only) | `string` |
+| [`SPLITTER_DEFAULT_MESSAGES`](/api/splitter/SPLITTER_DEFAULT_MESSAGES) | Constant |
+
+**Related types:** [`MonaSplitterMessages`](/api/i18n/MonaSplitterMessages)

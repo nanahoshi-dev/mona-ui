@@ -2,262 +2,30 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/list-box`.
+Everything below is imported from `@nanahoshi/mona-ui/list-box`. Each name links to its reference page, with every input, output, property and method.
 
-### `ListBoxComponent`
-
-**Selector:** `mona-list-box`  
-**Type parameters:** `T = unknown`, `K = unknown`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | Accessible name for the list box's `listbox` element. Describe what the list represents, which matters in particular when connecting two list boxes: the toolbar's name and the transfer buttons' labels are built from it. |
-| `aria-labelledby` | `string` | `""` | Id of the element that names the list box, as an alternative to `aria-label`. Without an `aria-label`, the toolbar's name and the transfer buttons' labels are built from that element's text. |
-| `connectedList` | `ListBoxComponent<T, K> \| null` | `null` | The other list box to transfer items to and from using the toolbar actions. |
-| `disabledBy` | `string \| Predicate<T> \| null \| undefined` | `""` | Property name or predicate that marks items as disabled. Disabled items can't be selected, and no action (including the "All" transfers) carries them. |
-| `height` | `string \| number` | `"100%"` | Sets the height of the component. |
-| `items` | `Iterable<T>` | `[]` | Collection of items to render. |
-| `rounded` | `"large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the component. |
-| `selectBy` | `ListKeySelector<T, K>` | `""` | Property name or accessor used to derive the key from a data item, used to identify selected items. |
-| `selectedKeys` | `Iterable<K>` | `[]` | Keys of the currently selected items. |
-| `selectionMode` | `SelectionMode` | `"single"` | Allows multiple items to be selected simultaneously when set to `"multiple"`. |
-| `singleSelectionToggleable` | `boolean` | `true` | Allows an already-selected item to be deselected by clicking it again while `selectionMode` is `"single"`. Has no effect when `selectionMode` is `"multiple"`. Accepts the bare attribute form. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the component's dimensions. |
-| `textField` | `ListKeySelector<T, string>` | `""` | Property name or accessor used to derive the display text from a data item. |
-| `toolbar` | `string \| boolean \| Partial<ToolbarOptions> \| null \| undefined` | `true` | Shows the action toolbar. Pass `false` to hide it entirely, or an options object to customize which actions are shown and where the toolbar is positioned. The transfer actions appear only with a `connectedList`; the move, clear and remove actions work on a list box of its own. Accepts the bare attribute form. |
-| `toolbarAriaLabel` | `string` | `""` | Accessible name for the toolbar. By default it is built from the list box's name ("Available foods actions"). |
-| `width` | `string \| number` | `"100%"` | Sets the width of the component. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `actionClick` | `ListBoxActionEvent<T>` | Emitted when a toolbar action button is clicked, carrying the action's details. |
-| `selectedKeysChange` | `K[]` | Emitted with the updated keys whenever the user changes the selection, including when an action (transfer, clear, remove) or a selection in the connected list box changes it. |
-| `selectionChange` | `ListBoxSelectionEvent<T>` | Emitted with the selected and deselected items whenever the user changes the selection, including when an action (transfer, clear, remove) or a selection in the connected list box changes it. |
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `listBoxItems` (read-only) | `Signal<ImmutableList<T>>` | The items, as rendered. Read-only: change `items` to change them. |
-| `selectedItems` (read-only) | `Signal<ImmutableSet<T>>` | The selected items, read-only. |
-| `selectedItems$` (read-only) | `Observable<ImmutableSet<T>>` | **Deprecated.** Use the `selectedItems` signal or the `selectionChange` output. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `clearSelections(): void` | Clears the selection and reports the change through `selectionChange` and `selectedKeysChange`. |
-| `notifySelectionChange(): void` | **Deprecated.** `clearSelections()` and the actions report selection changes themselves. |
-
-### `ListBoxItemTemplateDirective`
-
-Template for each item of a list box. The data item is the template's implicit value (`let-item`). Bind the list
-box's items to `monaListBoxItemTemplateOf` to type it; without it, the item is `any` in templates.
-
-**Selector:** `ng-template[monaListBoxItemTemplate]`  
-**Type parameters:** `T = any`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaListBoxItemTemplateOf` | `Iterable<T> \| null \| undefined` | `null` | The list box's items, used only to type the template's item. Optional. |
-
-#### Template context
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `T` | The raw data item being rendered. |
-
-### `ListBoxFooterTemplateDirective`
-
-**Selector:** `ng-template[monaListBoxFooterTemplate]`
-
-### `ListBoxHeaderTemplateDirective`
-
-**Selector:** `ng-template[monaListBoxHeaderTemplate]`
-
-### `ListBoxNoDataTemplateDirective`
-
-**Selector:** `ng-template[monaListBoxNoDataTemplate]`
-
-### `ListBoxClearEvent`
-
-**Type parameters:** `T = any`  
-**Extends:** `PreventableEvent`
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `action` (read-only) | `Extract<ToolbarAction, "clear">` | Discriminant matching the `ListBoxActionEvent` union. |
-| `selectedItems` (read-only) | `T[]` | The items that were selected when Clear Selection was clicked. |
-
-### `ListBoxMoveEvent`
-
-**Type parameters:** `T = any`  
-**Extends:** `PreventableEvent`
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `action` (read-only) | `Extract<ToolbarAction, "moveDown" \| "moveUp">` | Discriminant matching the `ListBoxActionEvent` union. |
-| `newIndex` (read-only) | `number` | For Move Up, the index above the first selected item; for Move Down, the index below the last one. |
-| `oldIndex` (read-only) | `number` | The index of the first selected item (in list order) before the move. |
-| `selectedIndices` (read-only) | `number[]` | Indices of all selected items before the move, ascending. |
-| `selectedItems` (read-only) | `T[]` | The items that were selected when the move was requested. |
-
-### `ListBoxRemoveEvent`
-
-**Type parameters:** `T = any`  
-**Extends:** `PreventableEvent`
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `action` (read-only) | `Extract<ToolbarAction, "remove">` | Discriminant matching the `ListBoxActionEvent` union. |
-| `selectedItems` (read-only) | `T[]` | The items that were selected when Remove was clicked. |
-
-### `ListBoxTransferEvent`
-
-**Type parameters:** `T = any`  
-**Extends:** `PreventableEvent`
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `action` (read-only) | `ListBoxTransferAction` | Discriminant matching the `ListBoxActionEvent` union. |
-| `selectedItems` (read-only) | `T[]` | The items to transfer, in list order: the source's selection, or all of the source's items for the "All" variants. See Which list box's `actionClick` fires. |
+| [`ListBoxComponent`](/api/list-box/ListBoxComponent) | Component |  |
+| [`ListBoxItemTemplateDirective`](/api/list-box/ListBoxItemTemplateDirective) | Directive | Template for each item of a list box. |
+| [`ListBoxFooterTemplateDirective`](/api/list-box/ListBoxFooterTemplateDirective) | Directive |  |
+| [`ListBoxHeaderTemplateDirective`](/api/list-box/ListBoxHeaderTemplateDirective) | Directive |  |
+| [`ListBoxNoDataTemplateDirective`](/api/list-box/ListBoxNoDataTemplateDirective) | Directive |  |
+| [`ListBoxClearEvent`](/api/list-box/ListBoxClearEvent) | Class |  |
+| [`ListBoxMoveEvent`](/api/list-box/ListBoxMoveEvent) | Class |  |
+| [`ListBoxRemoveEvent`](/api/list-box/ListBoxRemoveEvent) | Class |  |
+| [`ListBoxTransferEvent`](/api/list-box/ListBoxTransferEvent) | Class |  |
 
 ### Types
 
-#### `LIST_BOX_DEFAULT_MESSAGES`
-
-```typescript
-const LIST_BOX_DEFAULT_MESSAGES: MonaListBoxMessages;
-```
-
-#### `ListBoxItemTemplateContext`
-
-The context of a `monaListBoxItemTemplate`: the data item, as `let-item`.
-
-**Type parameters:** `T = unknown`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `$implicit` (read-only) | `T` | The raw data item being rendered. |
+| [`LIST_BOX_DEFAULT_MESSAGES`](/api/list-box/LIST_BOX_DEFAULT_MESSAGES) | Constant |  |
+| [`ListBoxItemTemplateContext`](/api/list-box/ListBoxItemTemplateContext) | Interface | The context of a `monaListBoxItemTemplate`: the data item, as `let-item`. |
+| [`ListBoxSelectionEvent`](/api/list-box/ListBoxSelectionEvent) | Interface |  |
+| [`ToolbarOptions`](/api/list-box/ToolbarOptions) | Interface |  |
+| [`ListBoxActionEvent`](/api/list-box/ListBoxActionEvent) | Type alias |  |
+| [`ListBoxTransferAction`](/api/list-box/ListBoxTransferAction) | Type alias | The toolbar actions that move items between list boxes. |
+| [`ToolbarAction`](/api/list-box/ToolbarAction) | Type alias |  |
 
-#### `ListBoxSelectionEvent`
-
-**Type parameters:** `T = any`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `deselectedItems` (read-only) | `T[]` | Items that were deselected (read-only). |
-| `selectedItems` (read-only) | `T[]` | Items that are now selected (read-only). |
-
-#### `ToolbarOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `actions` | `ToolbarAction[]` | Which toolbar buttons to show. They appear in a fixed order. |
-| `position` | `Position` | Which side of the list the toolbar renders on; `"right"` and `"left"` are the inline end and start, so they swap in RTL. |
-
-#### `ListBoxActionEvent`
-
-```typescript
-type ListBoxActionEvent<T = any> = ListBoxClearEvent<T> | ListBoxMoveEvent<T> | ListBoxRemoveEvent<T> | ListBoxTransferEvent<T>;
-```
-
-#### `ListBoxTransferAction`
-
-The toolbar actions that move items between list boxes.
-
-```typescript
-type ListBoxTransferAction = Extract<ToolbarAction, "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo">;
-```
-
-#### `ToolbarAction`
-
-```typescript
-type ToolbarAction = "clear" | "moveDown" | "moveUp" | "remove" | "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo";
-```
-
-#### `ListKeySelector`
-
-From `@nanahoshi/mona-ui/list`.
-
-```typescript
-type ListKeySelector<T, K = unknown> = string | Selector<T, K> | null;
-```
-
-#### `MonaListBoxMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `clearSelection` (read-only) | `string` | Label of the Clear Selection toolbar button. |
-| `moveDown` (read-only) | `string` | Label of the Move Down toolbar button. |
-| `moveUp` (read-only) | `string` | Label of the Move Up toolbar button. |
-| `remove` (read-only) | `string` | Label of the Remove toolbar button. |
-| `selectionCleared` (read-only) | `string` | Announced after Clear Selection. |
-| `transferAllFrom` (read-only) | `string` | Label of Transfer All From when the connected list box has no accessible name. |
-| `transferAllTo` (read-only) | `string` | Label of Transfer All To when the connected list box has no accessible name. |
-| `transferFrom` (read-only) | `string` | Label of Transfer From when the connected list box has no accessible name. |
-| `transferTo` (read-only) | `string` | Label of Transfer To when the connected list box has no accessible name. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `itemsMoved(position: number, total: number): string` | Announced after Move Up or Move Down, with the new position of the first moved item ("Moved to position 2 of 5"). |
-| `itemsRemoved(count: number): string` | Announced after Remove, with the number of items removed. |
-| `itemsTransferred(count: number, list: string): string` | Announced after a transfer, with the number of items moved and the name of the list they moved to. |
-| `itemsTransferredToOtherList(count: number): string` | Announced after a transfer to a list box that has no accessible name. |
-| `toolbarLabel(list: string): string` | Accessible name of the toolbar, from the list box's name ("Available foods actions"). |
-| `transferAllFromList(list: string): string` | Label of Transfer All From, naming the connected list box. |
-| `transferAllToList(list: string): string` | Label of Transfer All To, naming the connected list box. |
-| `transferFromList(list: string): string` | Label of Transfer From, naming the connected list box. |
-| `transferToList(list: string): string` | Label of Transfer To, naming the connected list box. |
-
-#### `Position`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type Position = "top" | "right" | "bottom" | "left";
-```
-
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
-
-#### `SelectionMode`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type SelectionMode = "single" | "multiple";
-```
+**Related types:** [`ListKeySelector`](/api/list/ListKeySelector), [`MonaListBoxMessages`](/api/i18n/MonaListBoxMessages), [`Position`](/api/common/Position), [`PreventableEvent`](/api/common/PreventableEvent), [`SelectionMode`](/api/common/SelectionMode)

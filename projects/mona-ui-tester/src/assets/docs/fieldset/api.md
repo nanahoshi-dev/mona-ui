@@ -2,28 +2,9 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/fieldset`.
+Everything below is imported from `@nanahoshi/mona-ui/fieldset`. Each name links to its reference page, with every input, output, property and method.
 
-### `FieldsetComponent`
-
-**Selector:** `mona-fieldset`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | Accessible name of the fieldset when it has no legend. |
-| `aria-labelledby` | `string` | `""` | Id of the element that labels the fieldset when it has no legend. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the rendered `<fieldset>` element via `tailwind-merge`. |
-| `disabled` | `boolean` | `false` | Whether the fieldset and the Mona UI form controls inside it are disabled, including nested fieldsets. Reflected as the native `disabled` attribute on the rendered `<fieldset>`, which also covers native controls. A signal form field inside stays enabled in the form model, so its validation keeps running. |
-| `legend` | `string` | `""` | The legend text of the fieldset. Shown in the top border as a labelled notch. Ignored when `monaFieldsetLegendTemplate` is provided. |
-| `name` | `string \| undefined` | `undefined` | The `name` attribute reflected onto the rendered `<fieldset>` element. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the fieldset and its legend. |
-
-### `FieldsetLegendTemplateDirective`
-
-Replaces the string `legend` with projected content inside the `<legend>` element. When this template is present, no
-default legend styling is applied — the consumer is responsible for all visual treatment. The template has no context
-variables.
-
-**Selector:** `ng-template[monaFieldsetLegendTemplate]`
+| Name | Kind | Description |
+| --- | --- | --- |
+| [`FieldsetComponent`](/api/fieldset/FieldsetComponent) | Component |  |
+| [`FieldsetLegendTemplateDirective`](/api/fieldset/FieldsetLegendTemplateDirective) | Directive | Replaces the string `legend` with projected content inside the `<legend>` element. |

@@ -2,103 +2,23 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/spinner`.
+Everything below is imported from `@nanahoshi/mona-ui/spinner`. Each name links to its reference page, with every input, output, property and method.
 
-### `SpinnerComponent`
-
-An indeterminate loading indicator primitive for communicating ongoing activity.
-Supports multiple appearances and standard sizes. It's a named image, so it's found when a screen reader reaches it,
-not announced. To announce loading, use `SpinnerService` or a live region that's already on the page.
-
-**Selector:** `mona-spinner`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `appearance` | `SpinnerAppearance` | `"default"` | Visual appearance of the spinner animation. |
-| `aria-label` | `string \| undefined` | `undefined` | Accessible name of the spinner when it is not decorative. When not set, falls back to the localized loading text. |
-| `class` | `ClassInputType` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `decorative` | `boolean` | `false` | When `true`, removes the `img` role and hides the spinner from assistive technology with `aria-hidden="true"`. Useful when visible text says the same thing, or a parent element already manages loading semantics (such as `aria-busy="true"` on a button). |
-| `size` | `SpinnerSize` | `"medium"` | Size preset controlling the dimensions of the indicator. |
-
-### `SpinnerService`
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `hide(refOrId: SpinnerRef \| string): void` | Hides and destroys the spinner associated with the given `SpinnerRef` or string `id`. |
-| `show(options?: SpinnerOptions): SpinnerRef` | Displays a spinner loading overlay according to the provided options. Returns a `SpinnerRef` handle for lifecycle management and updates. |
-| `track<T>(source: Observable<T>, options?: SpinnerOptions): Observable<T>` | Wraps an Observable operation with a Spinner lifecycle. Shows the spinner on subscription and closes it when the observable completes, errors, or is unsubscribed. Cancelling a `cancellable` spinner completes the returned observable and unsubscribes from the source, which also aborts an HTTP request. |
+| Name | Kind | Description |
+| --- | --- | --- |
+| [`SpinnerComponent`](/api/spinner/SpinnerComponent) | Component | An indeterminate loading indicator primitive for communicating ongoing activity. |
+| [`SpinnerService`](/api/spinner/SpinnerService) | Service |  |
 
 ### Types
 
-#### `SPINNER_DEFAULT_MESSAGES`
-
-```typescript
-const SPINNER_DEFAULT_MESSAGES: { cancel: string; loading: string; };
-```
-
-#### `SpinnerRef`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `cancelled$` (read-only) | `Observable<void>` | Emits when the user cancels the loading request. Completes when the request ends, without emitting if it wasn't cancelled. |
-| `id` (read-only) | `string` | Unique request identifier. |
-
-**Methods**
-
-| Signature | Description |
+| Type | Kind |
 | --- | --- |
-| `close(): void` | Idempotently closes the request and releases target leases. |
-| `update(update: SpinnerUpdate): void` | Dynamically updates `text`, `appearance`, or `size`. |
+| [`SPINNER_DEFAULT_MESSAGES`](/api/spinner/SPINNER_DEFAULT_MESSAGES) | Constant |
+| [`SpinnerRef`](/api/spinner/SpinnerRef) | Interface |
+| [`SpinnerCancelOptions`](/api/spinner/SpinnerCancelOptions) | Interface |
+| [`SpinnerOptions`](/api/spinner/SpinnerOptions) | Interface |
+| [`SpinnerUpdate`](/api/spinner/SpinnerUpdate) | Interface |
+| [`SpinnerAppearance`](/api/spinner/SpinnerAppearance) | Type alias |
+| [`SpinnerSize`](/api/spinner/SpinnerSize) | Type alias |
 
-#### `SpinnerCancelOptions`
-
-| Name | Type |
-| --- | --- |
-| `onCancel?` | `() => void` |
-| `text?` | `string` |
-
-#### `SpinnerOptions`
-
-| Name | Type |
-| --- | --- |
-| `appearance?` | `SpinnerAppearance` |
-| `cancellable?` | `boolean \| SpinnerCancelOptions` |
-| `delay?` | `number` |
-| `id?` | `string` |
-| `minimumVisibleDuration?` | `number` |
-| `size?` | `SpinnerSize` |
-| `target?` | `HTMLElement \| ElementRef<HTMLElement> \| readonly (HTMLElement \| ElementRef<HTMLElement>)[]` |
-| `text?` | `string` |
-| `zIndex?` | `number` |
-
-#### `SpinnerUpdate`
-
-| Name | Type |
-| --- | --- |
-| `appearance?` | `SpinnerAppearance` |
-| `size?` | `SpinnerSize` |
-| `text?` | `string` |
-
-#### `SpinnerAppearance`
-
-```typescript
-type SpinnerAppearance = "default" | "pulsing" | "pulsing-triad" | "pulsing-ring" | "converging-spinner";
-```
-
-#### `SpinnerSize`
-
-```typescript
-type SpinnerSize = "small" | "medium" | "large";
-```
-
-#### `ClassInputType`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type ClassInputType = string | string[] | Record<string, unknown> | null | undefined;
-```
+**Related types:** [`ClassInputType`](/api/common/ClassInputType)

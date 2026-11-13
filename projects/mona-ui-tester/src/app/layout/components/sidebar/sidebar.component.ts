@@ -1,5 +1,6 @@
 import { Component, ElementRef, afterRenderEffect, inject } from "@angular/core";
-import { LucideSearch, LucideSparkles } from "@lucide/angular";
+import { RouterLink } from "@angular/router";
+import { LucideBraces, LucideSearch, LucideSparkles } from "@lucide/angular";
 import { CommandShortcutComponent } from "@nanahoshi/mona-ui/command";
 import { DocsNavigationService } from "../../services/docs-navigation.service";
 import { DocsSearchService } from "../../services/docs-search.service";
@@ -7,7 +8,7 @@ import { SidebarGroupComponent } from "../sidebar-group/sidebar-group.component"
 
 @Component({
     selector: "app-sidebar",
-    imports: [CommandShortcutComponent, SidebarGroupComponent, LucideSearch, LucideSparkles],
+    imports: [CommandShortcutComponent, SidebarGroupComponent, LucideBraces, LucideSearch, LucideSparkles, RouterLink],
     templateUrl: "./sidebar.component.html",
     host: {
         class: "flex flex-col h-full"

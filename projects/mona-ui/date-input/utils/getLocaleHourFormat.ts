@@ -3,6 +3,7 @@ import type { HourFormat } from "../models/HourFormat";
 /**
  * The clock a locale uses by default: "12" for en-US, ja-JP and ko-KR, "24" for de-DE, fr-FR and tr-TR. Locales that
  * mark the hour cycle explicitly (`en-US-u-hc-h23`) are honoured.
+ * @hidden Exported for Mona UI's other entry points; applications don't need it.
  */
 export function getLocaleHourFormat(localeId: string): HourFormat {
     try {

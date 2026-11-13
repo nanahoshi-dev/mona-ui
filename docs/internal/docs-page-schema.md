@@ -41,17 +41,40 @@ A page needs at least one of **Examples** or **Appearance & Styling**, because a
 
 ## The API section
 
-`api.md` describes what the page's entry point exports from its `public-api.ts`, so anything a consumer can import is documented, and nothing else is. To change what a page says, change the library's JSDoc and run `npm run generate:api-docs`.
+`api.md` lists what the page's entry point exports from its `public-api.ts`, each export linking to its page in the [API reference](#the-api-reference), which describes it in full. So anything a consumer can import is documented, and nothing else is. To change what either says, change the library's JSDoc and run `npm run generate:api-docs`. These rules decide what the reference shows:
 
 - **Descriptions** come from the `@description` tag or the plain comment, and a default is read from the code. `@default` is only for what the code can't say, such as an expression.
 - **Components and directives:** a public property or method appears only if it has a JSDoc comment. Many are public only so a template or sibling can reach them, so a comment is how a member says it's for consumers. Mark one `@internal` to hide it even with a comment. Inputs and outputs always appear.
 - **Plain classes, services, interfaces, types, functions and constants:** everything exported and public appears.
-- **Styling types** (`*VariantProps`, `*VariantInput`) don't appear, because inputs spell out their values.
+- **Shared plumbing:** an export that only the library's other entry points use, such as a token one entry point's components provide for another's directives, is marked `@hidden`. It stays exported, because entry points import each other only through the package, but it doesn't appear. `@internal` won't do: `stripInternal` removes it from the published typings, and the entry points that import it stop building. A type that only hidden exports use is hidden too; if a public export uses a hidden type, `check:api-docs` fails.
+- **Styling types** (`*VariantProps`, `*VariantInput`, `*VariantsInput`) don't appear, because inputs spell out their values.
 - **Template context** comes from a directive's `ngTemplateContextGuard`.
-- **Types from another entry point** link to the page that documents them. When that entry point has no page, as with `common`, the type is shown on the page using it.
-- **Pages sharing an entry point** name their exports with `apiExports` in the manifest. A page of that entry point without `apiExports` documents the exports no other page names, so a new export always lands somewhere: the chart family and grid feature pages name theirs, and Chart Overview and Grid Overview take the rest. `apiAlsoFrom` adds another entry point's exports, as the dropdowns do with `dropdowns`.
+
+The page itself only lists the exports. `api.md` lists them as tables, for search, the AI docs and anyone reading the repository, but the site doesn't render it: `app-api-section` (`src/app/api/components/api-section`) draws the list as cards from `dist/docs-api/pages/<page>.json`, which `build:api-data` writes from the same data, so a long selector wraps instead of crowding a column. The `src` of `app-api-section` still names `api.md`, which is how the scripts find the page's section.
+
+- **Components, directives, pipes, services, classes and functions:** a card each, with a link to the reference page, the kind, the first sentence of the description, and each selector or the pipe name, copied with a click. Members are on the reference pages, and the examples show them in use, so the page doesn't repeat them.
+- **Types** (interfaces, type aliases, enums and constants): cards of their own under **Types**, the same way. The types the page uses from elsewhere follow as **Related types**, including those of an entry point with no page, such as `common`, and what those use in turn.
+- On a page with more than one entry point, the exports of each other one get a list of their own, named above it.
+- **Kind colors:** each kind has a hue, in `KIND_HUES` in `src/app/api/api-kind-hues.ts`, which the `api-kind-*` classes in `styles.css` use on the guide pages and the API reference alike. A card mixes it with the theme's background for its tint and with the text color for its label, so the label stays above 4.5:1 in every theme. Forced colors drop the tint, and the label still names the kind. Links in the API reference take `primary-subtle-foreground`, since the primary color itself is too dark to read on Anna Dark.
+
+**Pages sharing an entry point** name their exports with `apiExports` in the manifest. A page of that entry point without `apiExports` documents the exports no other page names, so a new export always lands somewhere: the chart family and grid feature pages name theirs, and Chart Overview and Grid Overview take the rest. `apiAlsoFrom` adds another entry point's exports, as the dropdowns do with `dropdowns`.
 
 `npm run check:api-docs` also fails when the public API uses a type no entry point exports, because a consumer couldn't name it and the page couldn't describe it. `npm run generate:api-docs -- --report` lists them.
+
+A description is markdown. A `<` in it is escaped, so naming an element such as `<title>` shows it as written, except for the inline formatting tags `b`, `br`, `code`, `em`, `i`, `kbd`, `strong`, `sub` and `sup`.
+
+## The API reference
+
+Every export has its own page at `/api/<entry point>/<name>`, and every entry point a page at `/api/<entry point>`. That page shows the import path, copied with a click, and the entry point's guides, then its exports as cards in a grid, grouped and tinted by kind like the guide pages' cards. Filters narrow them to one kind, and to the names and descriptions that contain some text; the page outline follows what's shown. `/api` lists the entry points and finds an export by name. The sidebar links to it above the categories.
+
+An export's page starts with its kind, tinted, its entry point, its selectors, pipe name or `exportAs`, each copied with a click, its guide and its import statement. Its members follow as cards, a section each, such as inputs, outputs and methods, tinted with the section's hue from `SECTION_HUES` in `api-kind-hues.ts`. Each card shows the member's type, flags and default beside its name, then what it does. Filters narrow them to one section, and to the names, types, signatures and descriptions that contain some text, the same way as on an entry point's page: both use `app-api-filter-bar`. An export with fewer than two members has no filters.
+
+`npm run build:api-data` (`generate-api-docs.ts --data`) writes what these pages show to `dist/docs-api`: an `index.json`, a file per entry point with its symbols, and under `pages/` what each page's API section lists, served at `/assets/api`. `build:tester`, `serve:tester` and `build:prod` run it first, so it isn't committed. `test:lib` runs it first too: the library's documentation tests check its inputs, outputs, defaults and methods against the source and Angular's metadata. Its shape is in `src/app/api/api-model.ts`, which the scripts and the site share.
+
+- **Type names link** to their pages, in signatures, member types, base types and code spans in descriptions. A few names are exported by more than one entry point, not always for the same declaration, so an entry point's own export wins.
+- **Inherited members** from an exported base type are listed under it, nearest base first.
+- **Used by** lists the exports whose API mentions the symbol.
+- **Anchors:** each section and member has one, from `apiSections()` in `src/app/api/api-text.ts`, which the search index uses too, so a member's search result lands on it. A guide links to a member the same way, as in `/api/menubar/MenuComponent#items`. The AI docs point such a link at the symbol, since their files have no heading per member.
 
 ## Guide pages
 
@@ -100,7 +123,7 @@ The page runs it, shows its source and can send it to StackBlitz as a generated 
 
 ## Search
 
-`npm run build:search-index` builds the search index from the manifest and the markdown each page's component shows, and `build:tester` and `serve:tester` run it first. The index goes to `dist/docs-search` and is served at `/pagefind`. It's rebuilt only when one of those starts, so a dev server keeps searching the text it started with.
+`npm run build:search-index` builds the search index from the manifest and the markdown each page's component shows, nested pages included, and from every export's reference page in `dist/docs-api`. `build:tester` and `serve:tester` run it first, after `build:api-data`. The index goes to `dist/docs-search` and is served at `/pagefind`. It's rebuilt only when one of those starts, so a dev server keeps searching the text it started with.
 
 A new page needs nothing extra, as long as its component names its markdown with `src="docs/…"`. The script fails if it finds no markdown for a page, except the ones listed in `PAGES_WITHOUT_MARKDOWN`. A heading's link in the results relies on `docs-heading-id.ts`, which the site and the script share.
 
@@ -109,10 +132,11 @@ A new page needs nothing extra, as long as its component names its markdown with
 `npm run generate:ai-docs` writes the docs as plain markdown for coding agents, and `build:tester` and `serve:tester` run it first. It reads the same manifest and markdown as search, and writes to `dist/docs-ai`, which the site serves from its root:
 
 - `/components/<page>.md`: one page, headed by its title, description and entry point. Each example's files replace its `example` block, so the code is there to read. HTML comments and H1s are left out, and links to other pages point at their markdown files.
-- `/llms.txt`: the essentials from `projects/mona-ui-tester/ai/llms-essentials.md`, then a link to every page, grouped as in the sidebar.
-- `/llms-full.txt`: every page in one file.
+- `/components/api/<entry point>.md`: everything the entry point exports, in full, from `dist/docs-api`. Links to `/api` pages point at these files.
+- `/llms.txt`: the essentials from `projects/mona-ui-tester/ai/llms-essentials.md`, then a link to every page, grouped as in the sidebar, then to every entry point's reference.
+- `/llms-full.txt`: every page and reference in one file.
 
-`npm run build:prod` also runs it with `--package`, which puts the pages in the package's `docs` folder and an `llms.txt` that links to them at its root, so an installed version carries the docs that match it. `verify:package` fails if a page that `llms.txt` links to is missing.
+`npm run build:prod` also runs it with `--package`, which puts the pages in the package's `docs` folder, the references in `docs/api`, and an `llms.txt` that links to them at its root, so an installed version carries the docs that match it. `verify:package` fails if a page that `llms.txt` links to is missing.
 
 Keep `llms-essentials.md` short. It's what an agent reads first: installing, importing, providers, and the mistakes worth warning about.
 

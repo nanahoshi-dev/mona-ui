@@ -2,139 +2,23 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/chart`.
+Everything below is imported from `@nanahoshi/mona-ui/chart`. Each name links to its reference page, with every input, output, property and method.
 
-### `HeatmapSeriesComponent`
-
-Renders a matrix of cells colored by value, with a color scale in the legend.
-
-**Selector:** `mona-heatmap-series`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `borderRadius` | `number \| undefined` | `undefined` | Corner radius in pixels for each individual heat cell. |
-| `cellGap` | `number` | `1` | Spacing gap in pixels between adjacent cells. |
-| `class` | `string` | `""` | Additional CSS classes applied to the series host element. |
-| `color` | `string` | `""` | Explicit primary base color used to derive the heat palette. |
-| `colorMode` | `ChartHeatmapColorMode` | `"sequential"` | Color scale mapping mode: 'sequential' for continuous single-hue intensity or 'diverging' for dual-pole deviations. |
-| `colors` | `readonly string[] \| undefined` | `undefined` | Explicit array of color stops defining the gradient palette. |
-| `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding root chart data. |
-| `field` (required) | `ChartField` | — | Property key or accessor extracting the numeric heat value for each cell. |
-| `fillOpacity` | `number \| undefined` | `undefined` | Fill opacity applied to the heat cells (0 to 1). |
-| `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
-| `max` | `number \| undefined` | `undefined` | Explicit upper bound for the numeric value color domain. |
-| `midpoint` | `number \| undefined` | `undefined` | Explicit central midpoint for diverging color scales. |
-| `min` | `number \| undefined` | `undefined` | Explicit lower bound for the numeric value color domain. |
-| `name` | `string` | `"Heatmap"` | Name of the series displayed in legends, tooltips, and live region announcements. |
-| `showValues` | `boolean` | `false` | Whether to render numeric value labels inside individual heat cells on Canvas. |
-| `strokeColor` | `string` | `""` | Explicit border stroke color for individual heat cells. |
-| `strokeWidth` | `number \| undefined` | `undefined` | Stroke width in pixels for cell borders. |
-| `valueFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Custom formatter for raw cell values in labels, tooltips, and live regions. |
-| `visible` (two-way) | `boolean` | `true` | Whether the series is currently visible on the chart and in calculations. |
-| `xCategories` | `readonly unknown[] \| undefined` | `undefined` | Explicit category ordering for the X axis columns. |
-| `xField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting the X column category for each cell. |
-| `yCategories` | `readonly unknown[] \| undefined` | `undefined` | Explicit category ordering for the Y axis rows. |
-| `yField` (required) | `ChartField` | — | Property key or accessor extracting the Y row category for each cell. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `visibleChange` | `boolean` | Emitted when `visible` changes. |
+| [`HeatmapSeriesComponent`](/api/chart/HeatmapSeriesComponent) | Component | Renders a matrix of cells colored by value, with a color scale in the legend. |
 
 ### Types
 
-#### `ChartColorLegendScale`
+| Type | Kind | Description |
+| --- | --- | --- |
+| [`ChartColorLegendScale`](/api/chart/ChartColorLegendScale) | Interface |  |
+| [`ChartColorLegendStop`](/api/chart/ChartColorLegendStop) | Interface |  |
+| [`ChartColorLegendTick`](/api/chart/ChartColorLegendTick) | Interface |  |
+| [`ChartHeatmapCategory`](/api/chart/ChartHeatmapCategory) | Interface |  |
+| [`ChartHeatmapCellData`](/api/chart/ChartHeatmapCellData) | Interface |  |
+| [`HeatmapCellClickEvent`](/api/chart/HeatmapCellClickEvent) | Interface | **Deprecated.** Nothing emits this. |
+| [`HeatmapColorStop`](/api/chart/HeatmapColorStop) | Interface | **Deprecated.** No chart input takes this. |
+| [`ChartHeatmapColorMode`](/api/chart/ChartHeatmapColorMode) | Type alias |  |
 
-| Name | Type |
-| --- | --- |
-| `formattedMax` (read-only) | `string` |
-| `formattedMidpoint?` (read-only) | `string` |
-| `formattedMin` (read-only) | `string` |
-| `kind` (read-only) | `"color"` |
-| `midpoint?` (read-only) | `number` |
-| `mode` (read-only) | `ChartHeatmapColorMode` |
-| `stops` (read-only) | `readonly ChartColorLegendStop[]` |
-| `ticks` (read-only) | `readonly ChartColorLegendTick[]` |
-| `title` (read-only) | `string` |
-
-#### `ChartColorLegendStop`
-
-| Name | Type |
-| --- | --- |
-| `color` (read-only) | `string` |
-| `offset` (read-only) | `number` |
-| `value` (read-only) | `number` |
-
-#### `ChartColorLegendTick`
-
-| Name | Type |
-| --- | --- |
-| `formattedValue` (read-only) | `string` |
-| `offset` (read-only) | `number` |
-| `value` (read-only) | `number` |
-
-#### `ChartHeatmapCategory`
-
-| Name | Type |
-| --- | --- |
-| `formattedValue` (read-only) | `string` |
-| `index` (read-only) | `number` |
-| `key` (read-only) | `string` |
-| `value` (read-only) | `unknown` |
-
-#### `ChartHeatmapCellData`
-
-**Type parameters:** `TDatum = unknown`
-
-| Name | Type |
-| --- | --- |
-| `categoryX` (read-only) | `string` |
-| `categoryY` (read-only) | `string` |
-| `datum` (read-only) | `TDatum` |
-| `formattedValue` (read-only) | `string` |
-| `formattedX` (read-only) | `string` |
-| `formattedY` (read-only) | `string` |
-| `numericValue` (read-only) | `number \| null` |
-| `rawValue` (read-only) | `unknown` |
-| `xIndex` (read-only) | `number` |
-| `yIndex` (read-only) | `number` |
-
-#### `HeatmapCellClickEvent`
-
-**Deprecated.** Nothing emits this. Use `pointClick` on the chart.
-
-**Type parameters:** `T = unknown`
-
-| Name | Type |
-| --- | --- |
-| `categoryX` (read-only) | `string` |
-| `categoryY` (read-only) | `string` |
-| `datum` (read-only) | `T` |
-| `formattedValue` (read-only) | `string` |
-| `rawValue` (read-only) | `unknown` |
-| `seriesId` (read-only) | `string` |
-| `seriesName` (read-only) | `string` |
-| `seriesType` (read-only) | `"heatmap"` |
-| `value` (read-only) | `number \| null` |
-| `xIndex` (read-only) | `number` |
-| `yIndex` (read-only) | `number` |
-
-#### `HeatmapColorStop`
-
-**Deprecated.** No chart input takes this.
-
-| Name | Type |
-| --- | --- |
-| `color` (read-only) | `string` |
-| `offset` (read-only) | `number` |
-
-#### `ChartHeatmapColorMode`
-
-```typescript
-type ChartHeatmapColorMode = "diverging" | "sequential";
-```
-
-**Documented elsewhere:** [`ChartField`](/components/chart), [`ChartValueFormatter`](/components/chart)
+**Related types:** [`ChartField`](/api/chart/ChartField), [`ChartValueFormatter`](/api/chart/ChartValueFormatter)

@@ -2,130 +2,19 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/chart`.
+Everything below is imported from `@nanahoshi/mona-ui/chart`. Each name links to its reference page, with every input, output, property and method.
 
-### `OhlcSeriesComponent`
-
-Renders traditional financial OHLC (Open-High-Low-Close) bar series with vertical high/low price spans, left-facing
-open ticks, right-facing close ticks, and directional color coding.
-
-**Selector:** `mona-ohlc-series`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `bodyWidth` | `number \| undefined` | `undefined` | Explicit total width in pixels for open/close tick arms. |
-| `bodyWidthRatio` | `number` | `0.7` | Ratio of available category slot or mark spacing allocated to open/close tick arms (0.0 to 1.0). |
-| `class` | `string` | `""` | Additional CSS classes applied to the series host element. |
-| `closeField` (required) | `ChartField` | — | Property key or accessor extracting the closing price for each data item. |
-| `color` | `string \| undefined` | `undefined` | Optional color override applied uniformly across all OHLC ticks and stems. |
-| `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding the root chart data. |
-| `dataLabels` | `ChartDataLabelsInput` | `false` | Data label display options or boolean flag enabling default labels. |
-| `fallingColor` | `string` | `""` | Color for falling / bearish bars (close < open). |
-| `fillOpacity` | `number \| undefined` | `undefined` | Fill and stroke opacity ratio (0 to 1). |
-| `highField` (required) | `ChartField` | — | Property key or accessor extracting the highest price for each data item. |
-| `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
-| `lowField` (required) | `ChartField` | — | Property key or accessor extracting the lowest price for each data item. |
-| `maxBodyWidth` | `number` | `32` | Maximum total tick width in pixels. |
-| `name` | `string` | `"OHLC"` | Name of the series displayed in legends, tooltips, and live region announcements. |
-| `neutralColor` | `string` | `""` | Color for neutral / flat bars (close === open). |
-| `opacity` | `number \| undefined` | `undefined` | **Deprecated.** Use `fillOpacity`, as on the other series. Overall opacity multiplier applied to OHLC stems and tick arms. |
-| `openField` (required) | `ChartField` | — | Property key or accessor extracting the opening price for each data item. |
-| `risingColor` | `string` | `""` | Color for rising / bullish bars (close > open). |
-| `seriesKey` | `string \| undefined` | `undefined` | Optional stable key identifying this series for mark identity and selection across updates. |
-| `tickLength` | `number \| undefined` | `undefined` | Length in pixels for horizontal open and close tick arms. |
-| `tickWidth` | `number \| undefined` | `undefined` | Backward-compatible alias for tickLength. |
-| `valueFormatter` | `ChartAxisFormatter \| undefined` | `undefined` | Formatter callback transforming financial numeric values into custom display strings. |
-| `visible` (two-way) | `boolean` | `true` | Whether the series is currently visible on the chart and in calculations. |
-| `wickColor` | `string` | `""` | Explicit stroke color for the central vertical stem. |
-| `wickWidth` | `number \| undefined` | `undefined` | Pixel stroke width for OHLC stems and tick arms. When unset, the series reads `--mona-chart-financial-wick-width`, or uses `1`. |
-| `xAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used. |
-| `xField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting the X coordinate, overriding the root chart X field. |
-| `yAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `visibleChange` | `boolean` | Emitted when `visible` changes. |
-
-### `CandlestickSeriesComponent`
-
-Renders financial Japanese candlestick series with central high/low wicks, rectangular open/close bodies,
-rising/falling/neutral color coding, and solid or hollow rising bodies.
-
-**Selector:** `mona-candlestick-series`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `bodyWidth` | `number \| undefined` | `undefined` | Explicit body width in pixels for candlestick candles. |
-| `bodyWidthRatio` | `number` | `0.7` | Ratio of available category slot or mark spacing allocated to candle bodies (0.0 to 1.0). |
-| `class` | `string` | `""` | Additional CSS classes applied to the series host element. |
-| `closeField` (required) | `ChartField` | — | Property key or accessor extracting the closing price for each data item. |
-| `color` | `string \| undefined` | `undefined` | Optional color override applied uniformly across all candle bodies. |
-| `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding the root chart data. |
-| `dataLabels` | `ChartDataLabelsInput` | `false` | Data label display options or boolean flag enabling default labels. |
-| `fallingColor` | `string` | `""` | Color for falling / bearish candles (close < open). |
-| `fillMode` | `ChartFinancialFillMode` | `"hollow"` | Visual fill mode for candle bodies: 'filled' (solid fill) or 'hollow' (rising hollow, falling filled). |
-| `fillOpacity` | `number \| undefined` | `undefined` | Fill and stroke opacity ratio (0 to 1). |
-| `highField` (required) | `ChartField` | — | Property key or accessor extracting the highest price for each data item. |
-| `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
-| `lowField` (required) | `ChartField` | — | Property key or accessor extracting the lowest price for each data item. |
-| `maxBodyWidth` | `number` | `32` | Maximum candle body width in pixels. |
-| `name` | `string` | `"Candlestick"` | Name of the series displayed in legends, tooltips, and live region announcements. |
-| `neutralColor` | `string` | `""` | Color for neutral / flat candles (close === open). |
-| `opacity` | `number \| undefined` | `undefined` | **Deprecated.** Use `fillOpacity`, as on the other series. Overall opacity multiplier applied to candle wicks and bodies. |
-| `openField` (required) | `ChartField` | — | Property key or accessor extracting the opening price for each data item. |
-| `risingColor` | `string` | `""` | Color for rising / bullish candles (close > open). |
-| `seriesKey` | `string \| undefined` | `undefined` | Optional stable key identifying this series for mark identity and selection across updates. |
-| `valueFormatter` | `ChartAxisFormatter \| undefined` | `undefined` | Formatter callback transforming financial numeric values into custom display strings. |
-| `visible` (two-way) | `boolean` | `true` | Whether the series is currently visible on the chart and in calculations. |
-| `wickColor` | `string` | `""` | Explicit stroke color for the upper and lower wicks. |
-| `wickWidth` | `number \| undefined` | `undefined` | Pixel stroke width for candle wicks. When unset, the series reads `--mona-chart-financial-wick-width`, or uses `1`. |
-| `xAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used. |
-| `xField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting the X coordinate, overriding the root chart X field. |
-| `yAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `visibleChange` | `boolean` | Emitted when `visible` changes. |
+| [`OhlcSeriesComponent`](/api/chart/OhlcSeriesComponent) | Component | Renders traditional financial OHLC (Open-High-Low-Close) bar series with vertical high/low price spans, left-facing open ticks, right-facing close ticks, and directional color coding. |
+| [`CandlestickSeriesComponent`](/api/chart/CandlestickSeriesComponent) | Component | Renders financial Japanese candlestick series with central high/low wicks, rectangular open/close bodies, rising/falling/neutral color coding, and solid or hollow rising bodies. |
 
 ### Types
 
-#### `ChartOhlcPointValue`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `change?` (read-only) | `number` |
-| `changePercentage?` (read-only) | `number` |
-| `close` (read-only) | `number` |
-| `direction` (read-only) | `ChartFinancialDirection` |
-| `formattedChange?` (read-only) | `string` |
-| `formattedChangePercentage?` (read-only) | `string` |
-| `formattedClose?` (read-only) | `string` |
-| `formattedHigh?` (read-only) | `string` |
-| `formattedLow?` (read-only) | `string` |
-| `formattedOpen?` (read-only) | `string` |
-| `high` (read-only) | `number` |
-| `low` (read-only) | `number` |
-| `open` (read-only) | `number` |
-| `valueKind` (read-only) | `"ohlc"` |
+| [`ChartOhlcPointValue`](/api/chart/ChartOhlcPointValue) | Interface |
+| [`ChartFinancialDirection`](/api/chart/ChartFinancialDirection) | Type alias |
+| [`ChartFinancialFillMode`](/api/chart/ChartFinancialFillMode) | Type alias |
 
-#### `ChartFinancialDirection`
-
-```typescript
-type ChartFinancialDirection = "falling" | "neutral" | "rising";
-```
-
-#### `ChartFinancialFillMode`
-
-```typescript
-type ChartFinancialFillMode = "filled" | "hollow";
-```
-
-**Documented elsewhere:** [`ChartAxisFormatter`](/components/chart), [`ChartDataLabelsInput`](/components/chart), [`ChartField`](/components/chart)
+**Related types:** [`ChartAxisFormatter`](/api/chart/ChartAxisFormatter), [`ChartDataLabelsInput`](/api/chart/ChartDataLabelsInput), [`ChartField`](/api/chart/ChartField)

@@ -58,7 +58,7 @@ mona-contextmenu
 └── mona-contextmenu-separator         — a horizontal divider
 ```
 
-Alternatively, pass an `items` collection directly (see the API section) instead of projecting components. When `items` is non-empty, it takes precedence over projected content.
+Alternatively, pass an [`items`](/api/contextmenu/ContextMenuComponent#items) collection directly instead of projecting components. When `items` is non-empty, it takes precedence over projected content.
 
 ### Template directives
 

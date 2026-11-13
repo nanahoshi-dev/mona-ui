@@ -2,105 +2,19 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/otp-input`.
+Everything below is imported from `@nanahoshi/mona-ui/otp-input`. Each name links to its reference page, with every input, output, property and method.
 
-### `OtpInputComponent`
-
-**Selector:** `mona-otp-input`  
-**Implements:** `FormValueControl<string>`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-describedby` | `string \| null` | `null` | Id of an element that describes the inner `<input>`, such as an error message. |
-| `aria-label` | `string \| null` | `null` | Accessible name for the inner `<input>` element. A `<label>` or `mona-label` names it too, and the generic "Verification code" name only applies when there is neither. |
-| `aria-labelledby` | `string \| null` | `null` | Id of the element that labels the inner `<input>`. |
-| `characterPattern` | `RegExp \| null` | `null` | Regular expression used to determine whether each individual OTP character is allowed. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `groupLength` | `number \| number[] \| null` | `null` | Configures slot grouping lengths. Accepts a uniform number or an array of group sizes. |
-| `inputAttributes` | `AttributeConfig` | `{}` | Additional HTML attributes applied directly to the inner `<input>` element. |
-| `inputId` | `string` | `generated` | Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the control. A unique id is generated when it isn't set. |
-| `invalid` | `boolean` | `false` | Marks the OTP input as invalid. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `length` | `number` | `4` | Sets the total number of characters accepted by the OTP input and the number of visual slots. |
-| `name` | `string` | `""` | Name of the native input, used in native form submission and by browsers for autofill. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `placeholder` | `string` | `""` | Hint character displayed in empty visual slots. |
-| `readonly` | `boolean` | `false` | Prevents value changes while preserving the component's focusability and visual state. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `required` | `boolean` | `false` | Marks the OTP input as required. Triggers invalid state when touched and incomplete. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the OTP slots. |
-| `separator` | `string` | `""` | Text character or string displayed between visual slot groups. |
-| `separatorClass` | `string \| string[]` | `""` | Additional CSS classes applied to separator elements. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the dimensions and font size of the OTP slots. |
-| `slotClass` | `string \| string[]` | `""` | Additional CSS classes applied to each visual slot element. |
-| `spacing` | `boolean` | `true` | Determines whether visual slots within a group have spacing between them or are joined together. |
-| `tabindex` | `string \| number` | `0` | Tab index of the inner `<input>`. |
-| `touched` | `boolean` | `false` | Sets the touched state of the OTP input. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `type` | `OtpInputType` | `"text"` | Sets the type of the OTP input ("text", "number", or "password"). |
-| `value` (two-way) | `string` | `""` | Two-way bindable current value of the OTP input. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `complete` | `string` | Emitted when a user interaction completes the verification code. Pasting a different full code over a complete one emits again, so auto-submit sees the new code. Correcting a complete code one character at a time doesn't. |
-| `inputBlur` | `FocusEvent` | Emitted when the inner input loses focus. |
-| `inputFocus` | `FocusEvent` | Emitted when the inner input gains focus. |
-| `touch` | `void` | Emitted when the inner input loses focus. The `FormField` directive listens to this to mark the field as touched. |
-| `valueChange` | `string` | Emitted when `value` changes. |
-
-#### Methods
-
-| Signature | Description |
+| Name | Kind |
 | --- | --- |
-| `blur(): void` | Removes focus from the input. |
-
-### `OtpInputSeparatorTemplateDirective`
-
-**Selector:** `ng-template[monaOtpInputSeparatorTemplate]`
-
-#### Template context
-
-| Name | Type |
-| --- | --- |
-| `$implicit` | `number` |
-| `groupIndex` | `number` |
+| [`OtpInputComponent`](/api/otp-input/OtpInputComponent) | Component |
+| [`OtpInputSeparatorTemplateDirective`](/api/otp-input/OtpInputSeparatorTemplateDirective) | Directive |
 
 ### Types
 
-#### `OTP_INPUT_DEFAULT_MESSAGES`
-
-```typescript
-const OTP_INPUT_DEFAULT_MESSAGES: MonaOtpInputMessages;
-```
-
-#### `OtpInputSeparatorContext`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `$implicit` | `number` |
-| `groupIndex` | `number` |
+| [`OTP_INPUT_DEFAULT_MESSAGES`](/api/otp-input/OTP_INPUT_DEFAULT_MESSAGES) | Constant |
+| [`OtpInputSeparatorContext`](/api/otp-input/OtpInputSeparatorContext) | Interface |
+| [`OtpInputType`](/api/otp-input/OtpInputType) | Type alias |
 
-#### `OtpInputType`
-
-```typescript
-type OtpInputType = "text" | "number" | "password";
-```
-
-#### `AttributeConfig`
-
-From `@nanahoshi/mona-ui/common`.
-
-HTML attributes by name, to apply to an element.
-
-```typescript
-type AttributeConfig = Record<string, unknown>;
-```
-
-#### `MonaOtpInputMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
-| --- | --- |
-| `verificationCode` (read-only) | `string` |
+**Related types:** [`AttributeConfig`](/api/common/AttributeConfig), [`MonaOtpInputMessages`](/api/i18n/MonaOtpInputMessages)

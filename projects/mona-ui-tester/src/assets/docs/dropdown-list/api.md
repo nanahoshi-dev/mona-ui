@@ -2,348 +2,45 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/dropdown-list`, `@nanahoshi/mona-ui/dropdowns`, as noted.
+Everything below is imported from `@nanahoshi/mona-ui/dropdown-list`, unless a table names another entry point. Each name links to its reference page, with every input, output, property and method.
 
-### `DropdownListComponent`
-
-**Selector:** `mona-dropdown-list`  
-**Type parameters:** `TData = unknown`, `TValue = TData`  
-**Implements:** `FormValueControl<TValue \| null>`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-describedby` | `string` | `""` | ID of an element that describes the dropdown list, such as help text or an error message. |
-| `aria-label` | `string` | `""` | Accessible name for the host element. Describe what the component represents. When empty, falls back to the placeholder text. |
-| `aria-labelledby` | `string` | `""` | ID of an external element that provides the accessible name for the host element. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `data` | `Iterable<TData>` | `[]` | Collection of items to render. |
-| `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction. |
-| `invalid` | `boolean` | `false` | Marks the field as invalid. Set automatically by the `FormField` directive when bound via `[formField]`. |
-| `itemDisabled` | `DropdownFieldPredicateType<TData>` | `undefined` | Predicate or field name used to determine whether an individual item is disabled. |
-| `loading` | `boolean` | `false` | Shows a loading indicator, in place of the clear button, and marks the field busy. It doesn't block interaction: the field stays usable while data loads. |
-| `placeholder` | `string` | `""` | Placeholder text shown when no value is selected or entered. |
-| `popupClass` | `string` | `""` | Additional CSS classes applied to the popup element. |
-| `popupHeight` | `ListSizeInputType` | `null` | Maximum height of the popup, in pixels or as a CSS length. Shorter lists shrink to fit. When unset, the popup is at most 200 pixels tall. |
-| `popupWidth` | `ListSizeInputType` | `null` | Width of the popup element. |
-| `readonly` | `boolean` | `false` | Prevents value changes while preserving the component's visual state. |
-| `required` | `boolean` | `false` | Marks the field as required for form validation. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the component. |
-| `showClearButton` | `boolean` | `false` | Shows a clear button that resets the selected value when clicked. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the component's dimensions. |
-| `textField` | `DropdownFieldSelectorType<TData, string>` | `undefined` | Property name or accessor used to derive the display text from a data item. If omitted, the item itself is used as the display text. |
-| `touched` | `boolean` | `false` | Marks the control as touched. Set automatically by the `FormField` directive when bound via `[formField]`. |
-| `value` (two-way) | `TValue \| null` | `null` | Currently selected value, two-way bindable and compatible with Signal Forms via `[formField]`. Object mode returns the selected data item; primitive mode (see `valuePrimitive`) returns the value resolved through `valueField`. `null` represents no selection. |
-| `valueField` | `DropdownFieldSelectorType<TData, unknown>` | `undefined` | Property name or accessor used to derive the value from a data item. It is used for stable item identity, matching externally supplied values, and primitive value projection when `valuePrimitive` is enabled. When omitted, the item itself is used as the value. Should resolve to a stable, unique scalar. |
-| `valuePrimitive` | `boolean` | `false` | Determines whether the bound value contains complete data items or values extracted through `valueField`. When `false`, selecting an item writes the complete data item. When `true`, selecting an item writes the value resolved through `valueField`. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `close` | `PopupCloseEvent<unknown>` | Emitted when the popup is about to close. This event is preventable. |
-| `closed` | `void` | Emitted after the popup closes. |
-| `open` | `PreventableEvent<Event>` | Emitted when the popup is about to open. This event is preventable. |
-| `opened` | `void` | Emitted after the popup opens. |
-| `touch` | `void` | Emitted when focus leaves the dropdown list. Moving between it, its clear button and its popup doesn't count. The `FormField` directive listens to this to mark the field as touched. |
-| `valueChange` | `TValue \| null` | Emitted when `value` changes. |
-
-#### Methods
-
-| Signature | Description |
+| Name | Kind |
 | --- | --- |
-| `focus(options?: FocusOptions): void` | Moves focus to the dropdown list. |
+| [`DropdownListComponent`](/api/dropdown-list/DropdownListComponent) | Component |
+| [`DropdownListValueTemplateDirective`](/api/dropdown-list/DropdownListValueTemplateDirective) | Directive |
 
-### `DropdownFilterableDirective`
+From `@nanahoshi/mona-ui/dropdowns`:
 
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `mona-auto-complete[monaDropDownFilterable], mona-dropdown-list[monaDropDownFilterable], mona-combo-box[monaDropDownFilterable], mona-multi-select[monaDropDownFilterable]`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `filter` | `string` | `""` | Current filter text used to narrow the visible options. |
-| `filterPlaceholder` | `string` | `""` | Placeholder text in the popup's filter row. Auto Complete has no filter row, since its own input is the filter, so it ignores this. |
-| `monaDropDownFilterable` | `Partial<FilterableOptions> \| ""` | `""` | Filter operator, case sensitivity, and debounce delay. An empty string enables filtering with default settings (`operator: "contains"`, `caseSensitive: false`, `debounce: 0`); pass an object to override any field. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `filterChange` | `FilterChangeEvent` | Emitted when the filter value changes. Cancelable. |
-
-### `DropdownGroupableDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `mona-auto-complete[monaDropDownGroupable], mona-combo-box[monaDropDownGroupable], mona-dropdown-list[monaDropDownGroupable], mona-multi-select[monaDropDownGroupable]`  
-**Type parameters:** `TData`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `groupBy` | `string \| Selector<TData, unknown> \| null \| undefined` | `""` | Property name, or accessor, used to derive an option's group. |
-| `monaDropDownGroupable` | `GroupableOptions<TData, unknown> \| ""` | `""` | Group header order, and optional per-group item ordering. An empty string enables grouping with default settings (`headerOrder: "asc"`); pass an object to override any field. |
-
-### `DropdownVirtualScrollDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `mona-auto-complete[monaDropDownVirtualScroll], mona-dropdown-list[monaDropDownVirtualScroll], mona-combo-box[monaDropDownVirtualScroll], mona-multi-select[monaDropDownVirtualScroll]`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaDropDownVirtualScroll` | `Partial<VirtualScrollOptions> \| ""` | `""` | Whether virtual scrolling is enabled and the pixel height of a single option row. An empty string enables virtual scrolling with default settings (`height: 28`); pass an object to override either field. |
-
-### `DropdownDataHandlerDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `[monaDropdownDataHandler]`
-
-### `DropdownFooterTemplateDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `ng-template[monaDropDownFooterTemplate], ng-template[monaAutoCompleteFooterTemplate], ng-template[monaDropDownListFooterTemplate], ng-template[monaDropDownTreeFooterTemplate], ng-template[monaComboBoxFooterTemplate], ng-template[monaMultiSelectFooterTemplate]`
-
-### `DropdownGroupHeaderTemplateDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `ng-template[monaDropDownGroupHeaderTemplate], ng-template[monaAutoCompleteGroupHeaderTemplate], ng-template[monaDropDownListGroupHeaderTemplate], ng-template[monaComboBoxGroupHeaderTemplate], ng-template[monaMultiSelectGroupHeaderTemplate]`
-
-### `DropdownHeaderTemplateDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `ng-template[monaDropDownHeaderTemplate], ng-template[monaAutoCompleteHeaderTemplate], ng-template[monaDropDownListHeaderTemplate], ng-template[monaDropDownTreeHeaderTemplate], ng-template[monaComboBoxHeaderTemplate], ng-template[monaMultiSelectHeaderTemplate]`
-
-### `DropdownItemTemplateDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `ng-template[monaDropDownItemTemplate], ng-template[monaAutoCompleteItemTemplate], ng-template[monaDropDownListItemTemplate], ng-template[monaComboBoxItemTemplate], ng-template[monaMultiSelectItemTemplate]`
-
-### `DropdownListPopupHandlerDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `[monaDropdownListPopupHandler]`
-
-### `DropdownListValueTemplateDirective`
-
-**Selector:** `ng-template[monaDropDownListValueTemplate]`
-
-### `DropdownLiveRegionDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-Announces how many results a dropdown shows after its list is filtered, or after its items change, while the
-popup is open ("3 results available", "No results found").
-
-The announcement goes through the CDK `LiveAnnouncer`, whose live region lives at the end of the document, so it
-never becomes part of the combobox's content. The highlighted option isn't announced here:
-`aria-activedescendant` already does that.
-
-**Selector:** `[monaDropdownLiveRegion]`
-
-### `DropdownNoDataTemplateDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `ng-template[monaDropDownNoDataTemplate], ng-template[monaAutoCompleteNoDataTemplate], ng-template[monaDropDownListNoDataTemplate], ng-template[monaDropDownTreeNoDataTemplate], ng-template[monaComboBoxNoDataTemplate], ng-template[monaMultiSelectNoDataTemplate]`
-
-### `DropdownPopupHandlerDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `[monaDropdownPopupHandler]`
-
-### `DropdownPrefixTemplateDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `ng-template[monaDropdownPrefixTemplate]`
-
-### `DropdownSuffixTemplateDirective`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Selector:** `ng-template[monaDropdownSuffixTemplate]`
-
-### `DropdownListService`
-
-From `@nanahoshi/mona-ui/dropdowns`.
-
-**Type parameters:** `TData = unknown`
-
-#### Properties
-
-| Name | Type |
+| Name | Kind |
 | --- | --- |
-| `navigate$` (read-only) | `Subject<{ item: ListItem<TData>; }>` |
+| [`DropdownFilterableDirective`](/api/dropdowns/DropdownFilterableDirective) | Directive |
+| [`DropdownGroupableDirective`](/api/dropdowns/DropdownGroupableDirective) | Directive |
+| [`DropdownVirtualScrollDirective`](/api/dropdowns/DropdownVirtualScrollDirective) | Directive |
+| [`DropdownDataHandlerDirective`](/api/dropdowns/DropdownDataHandlerDirective) | Directive |
+| [`DropdownFooterTemplateDirective`](/api/dropdowns/DropdownFooterTemplateDirective) | Directive |
+| [`DropdownGroupHeaderTemplateDirective`](/api/dropdowns/DropdownGroupHeaderTemplateDirective) | Directive |
+| [`DropdownHeaderTemplateDirective`](/api/dropdowns/DropdownHeaderTemplateDirective) | Directive |
+| [`DropdownItemTemplateDirective`](/api/dropdowns/DropdownItemTemplateDirective) | Directive |
+| [`DropdownListPopupHandlerDirective`](/api/dropdowns/DropdownListPopupHandlerDirective) | Directive |
+| [`DropdownNoDataTemplateDirective`](/api/dropdowns/DropdownNoDataTemplateDirective) | Directive |
+| [`DropdownPrefixTemplateDirective`](/api/dropdowns/DropdownPrefixTemplateDirective) | Directive |
+| [`DropdownSuffixTemplateDirective`](/api/dropdowns/DropdownSuffixTemplateDirective) | Directive |
+| [`DropdownListService`](/api/dropdowns/DropdownListService) | Service |
 
 ### Types
 
-#### `DROPDOWN_DATA_INPUT_TOKEN`
-
-```typescript
-const DROPDOWN_DATA_INPUT_TOKEN: InjectionToken<DropdownDataInput<unknown>>;
-```
-
-#### `DROPDOWN_LIST_DEFAULT_MESSAGES`
-
-```typescript
-const DROPDOWN_LIST_DEFAULT_MESSAGES: MonaDropdownListMessages;
-```
-
-#### `DROPDOWN_POPUP_INPUT_TOKEN`
-
-```typescript
-const DROPDOWN_POPUP_INPUT_TOKEN: InjectionToken<DropdownPopupInput>;
-```
-
-#### `DropdownDataInputToken`
-
-**Deprecated.** Use `DROPDOWN_DATA_INPUT_TOKEN`.
-
-```typescript
-const DropdownDataInputToken: InjectionToken<DropdownDataInput<unknown>>;
-```
-
-#### `dropdownPopupThemeVariants`
-
-```typescript
-const dropdownPopupThemeVariants: (props?: ({ rounded?: "none" | "small" | "medium" | "large" | "full" | null | undefined; size?: "small" | "medium" | "large" | null | undefined; } & ClassProp) | undefined) => string;
-```
-
-#### `DROPDOWNS_DEFAULT_MESSAGES`
-
-```typescript
-const DROPDOWNS_DEFAULT_MESSAGES: MonaDropdownsMessages;
-```
-
-#### `DropdownDataInput`
-
-**Type parameters:** `TData`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `data` (read-only) | `InputSignal<Iterable<TData>>` |
-| `itemDisabled` (read-only) | `InputSignal<DropdownFieldPredicateType<TData>>` |
-| `textField` (read-only) | `InputSignal<DropdownFieldSelectorType<TData, string>>` |
-| `valueField` (read-only) | `InputSignal<DropdownFieldSelectorType<TData, unknown>>` |
+| [`DROPDOWN_LIST_DEFAULT_MESSAGES`](/api/dropdown-list/DROPDOWN_LIST_DEFAULT_MESSAGES) | Constant |
 
-#### `DropdownPopupInput`
+From `@nanahoshi/mona-ui/dropdowns`:
 
-| Name | Type |
-| --- | --- |
-| `close` (read-only) | `OutputEmitterRef<PopupCloseEvent>` |
-| `closed` (read-only) | `OutputEmitterRef<void>` |
-| `disabled` (read-only) | `Signal<boolean>` |
-| `open` (read-only) | `OutputEmitterRef<PreventableEvent>` |
-| `opened` (read-only) | `OutputEmitterRef<void>` |
-| `popupHeight` (read-only) | `InputSignal<ListSizeInputType>` |
-| `popupWidth` (read-only) | `InputSignal<ListSizeInputType>` |
-| `readonly` (read-only) | `Signal<boolean>` |
-| `touch` (read-only) | `OutputEmitterRef<void>` |
-
-#### `DropdownFieldPredicateType`
-
-```typescript
-type DropdownFieldPredicateType<TData> = string | Predicate<TData> | null | undefined;
-```
-
-#### `DropdownFieldSelectorType`
-
-```typescript
-type DropdownFieldSelectorType<TData, TResult = unknown> = string | Selector<TData, TResult> | null | undefined;
-```
-
-#### `FilterChangeEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Extends:** `PreventableEvent`
-
-| Name | Type |
-| --- | --- |
-| `filter` (read-only) | `string` |
-
-#### `ListItem`
-
-From `@nanahoshi/mona-ui/list`.
-
-An item of a list, wrapping its data item.
-
-**Type parameters:** `TData`
-
-| Name | Type |
-| --- | --- |
-| `data` (read-only) | `TData` |
-| `header` (read-only) | `string` |
-| `isHeader` (read-only) | `boolean` |
-| `uid` (read-only) | `string` |
-
-#### `ListSizeInputType`
-
-From `@nanahoshi/mona-ui/list`.
-
-```typescript
-type ListSizeInputType = ListSizeType | number;
-```
-
-#### `ListSizeType`
-
-From `@nanahoshi/mona-ui/list`.
-
-A CSS length, or nothing to leave it to the stylesheet.
-
-```typescript
-type ListSizeType = string | null | undefined;
-```
-
-#### `MonaDropdownListMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
-| --- | --- |
-| `clear` (read-only) | `string` |
-
-#### `MonaDropdownsMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
-| --- | --- |
-| `itemPosition` (read-only) | `(text: string, position: number, total: number) => string` |
-| `noResultsFound` (read-only) | `string` |
-| `resultsAvailable` (read-only) | `(count: number) => string` |
-
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
+| [`DropdownDataInputToken`](/api/dropdowns/DropdownDataInputToken) | Constant | **Deprecated.** Use `DROPDOWN_DATA_INPUT_TOKEN`. |
+| [`DROPDOWNS_DEFAULT_MESSAGES`](/api/dropdowns/DROPDOWNS_DEFAULT_MESSAGES) | Constant |  |
+| [`DropdownDataInput`](/api/dropdowns/DropdownDataInput) | Interface |  |
+| [`DropdownFieldPredicateType`](/api/dropdowns/DropdownFieldPredicateType) | Type alias |  |
+| [`DropdownFieldSelectorType`](/api/dropdowns/DropdownFieldSelectorType) | Type alias |  |
 
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
-
-**Documented elsewhere:** [`FilterableOptions`](/components/grid-sorting-filtering), [`GroupableOptions`](/components/list-view), [`PopupCloseEvent`](/components/popup), [`VirtualScrollOptions`](/components/list-view)
+**Related types:** [`FilterableOptions`](/api/common/FilterableOptions), [`FilterChangeEvent`](/api/common/FilterChangeEvent), [`GroupableOptions`](/api/grid/GroupableOptions), [`ListItem`](/api/list/ListItem), [`ListSizeInputType`](/api/list/ListSizeInputType), [`ListSizeType`](/api/list/ListSizeType), [`MonaDropdownListMessages`](/api/i18n/MonaDropdownListMessages), [`MonaDropdownsMessages`](/api/i18n/MonaDropdownsMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`PreventableEvent`](/api/common/PreventableEvent), [`VirtualScrollOptions`](/api/common/VirtualScrollOptions)

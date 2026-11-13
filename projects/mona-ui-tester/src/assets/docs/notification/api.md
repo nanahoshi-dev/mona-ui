@@ -2,123 +2,24 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/notification`.
+Everything below is imported from `@nanahoshi/mona-ui/notification`. Each name links to its reference page, with every input, output, property and method.
 
-### `NotificationService`
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `hide(id: string): void` | Closes the notification with the given `id`, wherever its container is positioned. No-op if no notification with that `id` is currently shown. |
-| `hideAll(): void` | Closes every currently visible notification, across all positions. |
-| `show(options: NotificationOptions): NotificationRef` | Creates a notification and returns a `NotificationRef`. If a notification with the same `id` already exists at the resolved `position`, returns a ref to that existing notification instead of creating a duplicate. |
-
-### `provideNotificationDefaults`
-
-Sets application-wide notification behavior: whether timed notifications close on their own, how much longer they
-stay, how many show at once, and whether the countdown pauses while the window is in the background.
-
-```typescript
-function provideNotificationDefaults(defaults: Partial<NotificationDefaults>): EnvironmentProviders;
-```
+| Name | Kind | Description |
+| --- | --- | --- |
+| [`NotificationService`](/api/notification/NotificationService) | Service |  |
+| [`provideNotificationDefaults`](/api/notification/provideNotificationDefaults) | Function | Sets application-wide notification behavior: whether timed notifications close on their own, how much longer they stay, how many show at once, and whether the countdown pauses while the window is in the background. |
 
 ### Types
 
-#### `NOTIFICATION_DATA`
-
-The `data` given in the notification's options, for a content component or template to inject.
-
-```typescript
-const NOTIFICATION_DATA: InjectionToken<unknown>;
-```
-
-#### `NOTIFICATION_DEFAULT_MESSAGES`
-
-```typescript
-const NOTIFICATION_DEFAULT_MESSAGES: { close: string; error: string; info: string; region: string; success: string; warning: string; };
-```
-
-#### `NOTIFICATION_DEFAULTS`
-
-Application-wide notification settings. Provide them with `provideNotificationDefaults()`.
-
-```typescript
-const NOTIFICATION_DEFAULTS: InjectionToken<NotificationDefaults>;
-```
-
-#### `NOTIFICATION_REF`
-
-The reference of the notification a content component or template is shown in.
-
-```typescript
-const NOTIFICATION_REF: InjectionToken<NotificationRef>;
-```
-
-#### `NotificationRef`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `afterHide` (read-only) | `Observable<void>` | Emits once the notification has finished closing, after its leave animation, and been removed. |
-| `content` (read-only) | `ComponentRef<unknown> \| null` | The dynamically created content component's reference, or `null` when the notification's content is a string or `TemplateRef`, or before the component has been created. |
-| `id` (read-only) | `string` | The notification's id: the one given in its options, or a generated one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `hide(): void` | Closes the notification. |
-| `update(changes: NotificationUpdate): void` | Changes the content, title, type or close button of the notification. The new message is announced to assistive technology. |
-
-#### `NotificationDefaults`
-
-Application-wide settings for notifications, given with `provideNotificationDefaults()`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `autoHide` (read-only) | `boolean` | Whether notifications with a `duration` close on their own. Turn it off to leave every notification open until the user closes it (WCAG 2.2.1). |
-| `durationScale` (read-only) | `number` | A factor applied to every `duration`, for example `2` to keep notifications twice as long. |
-| `maxVisible?` (read-only) | `number` | The most notifications shown at once at each position. The oldest closes to make room for a new one. Without it, there is no limit. |
-| `pauseOnWindowBlur` (read-only) | `boolean` | Whether the countdown pauses while the browser window doesn't have focus. |
-
-#### `NotificationOptions`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `appendTo?` | `ViewContainerRef` | The container to append the notification's container to. Defaults to `document.body` when omitted. |
-| `closable?` | `boolean` | Whether a close button is rendered on the notification. Timed notifications have one too, so they can be dismissed before their time is up. |
-| `closeTitle?` | `string` | The accessible title/tooltip for the close button. Defaults to localized "Close". |
-| `content` | `string \| TemplateRef<unknown> \| Type<unknown>` | The notification's content. Accepts plain text, a `TemplateRef`, or a component `Type` to render. A template gets the `NotificationRef` as `$implicit` and `data` as `data`; a component can inject `NOTIFICATION_REF` and `NOTIFICATION_DATA`. |
-| `data?` | `unknown` | Data for a content component or template, available through `NOTIFICATION_DATA` or the template's `data` context property. |
-| `duration?` | `number` | The time, in milliseconds, before the notification automatically closes. Omit to keep the notification open until manually closed. The countdown pauses while the notification is hovered or has focus, and while the window is in the background. |
-| `height?` | `number \| string` | The notification's height. A number is treated as pixels. |
-| `id?` | `string` | A unique identifier for the notification. Reusing an `id` for the same `position` returns the existing notification instead of creating a new one. |
-| `position?` | `NotificationPosition` | The screen position the notification is anchored to. |
-| `progressBar?` | `boolean` | Whether a countdown progress bar is displayed for a timed (`duration`) notification. |
-| `title?` | `string` | The notification's title. Defaults to localized title derived from `type` (e.g. "Info", "Success", "Warning", "Error"). |
-| `type?` | `NotificationType` | The notification's semantic type, controlling its icon, color, and accessibility announcement urgency. |
-| `width?` | `number \| string` | The notification's width. A number is treated as pixels. |
-
-#### `NotificationPosition`
-
-The screen position a notification container is anchored to.
-
-```typescript
-type NotificationPosition = "bottom" | "bottomleft" | "bottomright" | "top" | "topleft" | "topright";
-```
-
-#### `NotificationType`
-
-The semantic type of a notification, controlling its icon, color, and accessibility announcement urgency.
-
-```typescript
-type NotificationType = "error" | "info" | "success" | "warning";
-```
-
-#### `NotificationUpdate`
-
-The options `NotificationRef.update()` can change on a notification that is already shown.
-
-```typescript
-type NotificationUpdate = Partial<Pick<NotificationOptions, "closable" | "content" | "title" | "type">>;
-```
+| [`NOTIFICATION_DATA`](/api/notification/NOTIFICATION_DATA) | Constant | The `data` given in the notification's options, for a content component or template to inject. |
+| [`NOTIFICATION_DEFAULT_MESSAGES`](/api/notification/NOTIFICATION_DEFAULT_MESSAGES) | Constant |  |
+| [`NOTIFICATION_DEFAULTS`](/api/notification/NOTIFICATION_DEFAULTS) | Constant | Application-wide notification settings. |
+| [`NOTIFICATION_REF`](/api/notification/NOTIFICATION_REF) | Constant | The reference of the notification a content component or template is shown in. |
+| [`NotificationRef`](/api/notification/NotificationRef) | Interface |  |
+| [`NotificationDefaults`](/api/notification/NotificationDefaults) | Interface | Application-wide settings for notifications, given with `provideNotificationDefaults()`. |
+| [`NotificationOptions`](/api/notification/NotificationOptions) | Interface |  |
+| [`NotificationPosition`](/api/notification/NotificationPosition) | Type alias | The screen position a notification container is anchored to. |
+| [`NotificationType`](/api/notification/NotificationType) | Type alias | The semantic type of a notification, controlling its icon, color, and accessibility announcement urgency. |
+| [`NotificationUpdate`](/api/notification/NotificationUpdate) | Type alias | The options `NotificationRef.update()` can change on a notification that is already shown. |

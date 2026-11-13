@@ -2,137 +2,23 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/stepper`.
+Everything below is imported from `@nanahoshi/mona-ui/stepper`. Each name links to its reference page, with every input, output, property and method.
 
-### `StepperComponent`
-
-**Selector:** `mona-stepper`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | Sets the accessible label for the stepper group. |
-| `linear` | `boolean` | `true` | Sets the flow of the stepper. If set to true, the user will only be able to navigate to the previous or the next step. |
-| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | Sets the orientation of the stepper. |
-| `progressAriaLabel` | `string` | `""` | Sets the accessible label for the progress bar element. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"full"` | Sets the roundness of the stepper steps. |
-| `step` (two-way) | `number` | `0` | Sets the active step of the stepper. |
-| `steps` | `Iterable<StepOptions>` | `[]` | Sets the steps of the stepper. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `stepChange` | `number` | Emitted when `step` changes. |
-| `stepSelect` | `StepSelectEvent<unknown>` | Emitted before a click or key changes the step. Call `preventDefault()` to stay on the current step, for example while its form is invalid. It doesn't fire when `step` is written from outside. |
-
-### `StepperIndicatorTemplateDirective`
-
-Marks an ng-template as the custom indicator template for mona-stepper.
-The template context provides the step options, index, active state, and current step index.
-
-**Selector:** `ng-template[monaStepperIndicatorTemplate]`
-
-### `StepperLabelTemplateDirective`
-
-Marks an ng-template as the custom label template for mona-stepper.
-The template context provides the step options, index, active state, and current step index.
-
-**Selector:** `ng-template[monaStepperLabelTemplate]`
-
-### `StepperStepTemplateDirective`
-
-Marks an ng-template as the custom step template for mona-stepper.
-When provided, this template replaces the entire default step indicator and label for each step.
-The template context provides the step options, index, active state, and current step index.
-
-**Selector:** `ng-template[monaStepperStepTemplate]`
-
-### `StepSelectEvent`
-
-What `mona-stepper` reports before a click or key changes the step. Call `preventDefault()` to stay on the current step.
-
-**Type parameters:** `T = unknown`  
-**Extends:** `PreventableEvent`
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` (read-only) | `number` | Zero-based index of the step being selected. |
-| `previousIndex` (read-only) | `number` | Zero-based index of the step that is current now. |
-| `step` (read-only) | `StepOptions<T>` | The options of the step being selected. |
+| [`StepperComponent`](/api/stepper/StepperComponent) | Component |  |
+| [`StepperIndicatorTemplateDirective`](/api/stepper/StepperIndicatorTemplateDirective) | Directive | Marks an ng-template as the custom indicator template for mona-stepper. |
+| [`StepperLabelTemplateDirective`](/api/stepper/StepperLabelTemplateDirective) | Directive | Marks an ng-template as the custom label template for mona-stepper. |
+| [`StepperStepTemplateDirective`](/api/stepper/StepperStepTemplateDirective) | Directive | Marks an ng-template as the custom step template for mona-stepper. |
+| [`StepSelectEvent`](/api/stepper/StepSelectEvent) | Class | What `mona-stepper` reports before a click or key changes the step. |
 
 ### Types
 
-#### `STEPPER_DEFAULT_MESSAGES`
-
-```typescript
-const STEPPER_DEFAULT_MESSAGES: MonaStepperMessages;
-```
-
-#### `StepOptions`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `completed?` | `boolean` | Whether the step is finished. When left unset, the steps before the current one count as completed. Set it when a step can be passed without being finished, or finished ahead of the current one. |
-| `data?` | `T` | Optional arbitrary data attached to this step. |
-| `disabled?` | `boolean` | When true, the step cannot be activated by click or keyboard regardless of linear mode. |
-| `invalid?` | `boolean` | When true, the step shows and announces that it has errors. |
-| `label` | `string` | Display label shown beneath the step indicator. |
+| [`STEPPER_DEFAULT_MESSAGES`](/api/stepper/STEPPER_DEFAULT_MESSAGES) | Constant |  |
+| [`StepOptions`](/api/stepper/StepOptions) | Interface |  |
+| [`StepperTemplateContext`](/api/stepper/StepperTemplateContext) | Interface |  |
+| [`StepState`](/api/stepper/StepState) | Type alias | Where a step stands. |
 
-#### `StepperTemplateContext`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `StepOptions<T>` | The step's options object (also available as the implicit binding). |
-| `active` | `boolean` | True when this step's index is less than or equal to the current active step index. |
-| `currentIndex` | `number` | Zero-based index of the currently active step. |
-| `disabled` | `boolean` | Whether this step is disabled and cannot be activated. |
-| `index` | `number` | Zero-based index of this step. |
-| `invalid` | `boolean` | Whether this step has errors. |
-| `state` | `StepState` | Where this step stands: `current`, `completed`, `upcoming` or `disabled`. |
-
-#### `StepState`
-
-Where a step stands. `current` outranks the others, and `disabled` outranks `completed` and `upcoming`. Invalid is
-separate, because a step of any state can have errors.
-
-```typescript
-type StepState = "completed" | "current" | "disabled" | "upcoming";
-```
-
-#### `MonaStepperMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
-| --- | --- |
-| `stepCompleted` (read-only) | `string` |
-| `stepInvalid` (read-only) | `string` |
-| `stepper` (read-only) | `string` |
-| `stepPosition` (read-only) | `(current: number, total: number) => string` |
-| `stepProgress` (read-only) | `string` |
-
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
+**Related types:** [`MonaStepperMessages`](/api/i18n/MonaStepperMessages), [`PreventableEvent`](/api/common/PreventableEvent)

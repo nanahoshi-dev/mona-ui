@@ -2,239 +2,28 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/window`.
+Everything below is imported from `@nanahoshi/mona-ui/window`. Each name links to its reference page, with every input, output, property and method.
 
-### `WindowComponent`
-
-**Selector:** `mona-window`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string \| undefined` | `undefined` | Accessible name for the window when it has no `title` or title template. |
-| `closable` | `boolean` | `true` | Sets the visibility of the close button in the window header. |
-| `closeOnEscape` | `boolean` | `true` | Sets whether the window should close when the escape key is pressed. |
-| `draggable` | `boolean` | `true` | Sets whether the window can be dragged by the user. |
-| `focusedElement` | `HTMLElement \| ElementRef<HTMLElement> \| string \| null` | — | Sets the element that should receive focus when the window is opened. Accepts an element reference or a query selector string. |
-| `height` (two-way) | `number` | — | Sets the height of the window. |
-| `left` (two-way) | `number` | — | Sets the left position of the window. |
-| `look` | `"default" \| "primary"` | `"default"` | Sets the look of the window. |
-| `maxHeight` | `number` | — | Sets the maximum height of the window. |
-| `maximizable` | `boolean` | `true` | Sets whether the user can maximize the window. |
-| `maxWidth` | `number` | — | Sets the maximum width of the window. |
-| `messages` | `Partial<WindowMessages>` | — | Internationalization message overrides for accessible labels. |
-| `minHeight` | `number` | — | Sets the minimum height of the window. |
-| `minimizable` | `boolean` | `true` | Sets whether the user can minimize the window. |
-| `minWidth` | `number` | — | Sets the minimum width of the window. |
-| `modal` | `boolean` | `false` | Sets whether the window should have an overlay behind it. |
-| `resizable` | `boolean` | `false` | Sets whether the user can resize the window. |
-| `rounded` | `"large" \| "medium" \| "none" \| "small"` | `"medium"` | Sets the border radius of the window. |
-| `title` | `string` | — | Sets the title of the window. |
-| `top` (two-way) | `number` | — | Sets the top position of the window. |
-| `width` (two-way) | `number` | — | Sets the width of the window. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `close` | `PopupCloseEvent<unknown>` | Emits before the window closes, whatever closes it: the close button, Escape, a programmatic close, or the component being destroyed. Call `preventDefault()` to keep it open (a close caused by destruction can't be kept). |
-| `closed` | `void` | Emitted after the window has fully closed (post-animation). Preventing this event has no effect. |
-| `dragEnd` | `void` | Emits when the window dragging ends. |
-| `dragStart` | `void` | Emits when the window dragging starts. |
-| `heightChange` | `number` | Emitted when `height` changes. |
-| `leftChange` | `number` | Emitted when `left` changes. |
-| `topChange` | `number` | Emitted when `top` changes. |
-| `widthChange` | `number` | Emitted when `width` changes. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `closeWindow(): void` | Closes the window. |
-| `move(position: { top?: number; left?: number }): void` | Moves the window, in pixels. An axis that isn't given keeps its place. |
-| `openWindow(): void` | Opens the window. Called once after the first render; call it again to reopen a window that was closed. Does nothing while the window is open. |
-| `resize(dimensions: { width?: number; height?: number }): void` | Resizes the window, in pixels. A dimension that isn't given keeps its size. |
-
-### `WindowActionTemplateDirective`
-
-**Selector:** `ng-template[monaWindowActionTemplate]`
-
-### `WindowContentTemplateDirective`
-
-**Selector:** `ng-template[monaWindowContentTemplate]`
-
-### `WindowFooterTemplateDirective`
-
-**Selector:** `ng-template[monaWindowFooterTemplate]`
-
-### `WindowTitleTemplateDirective`
-
-**Selector:** `ng-template[monaWindowTitleTemplate]`
-
-### `WindowService`
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `open<R = unknown, D = unknown>(settings: WindowSettings<D>): WindowRef<R>` | Opens a window. |
-
-### `WindowRef`
-
-A handle on an open window.
-
-**Type parameters:** `R = unknown`
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `close$` (read-only) | `Observable<PopupCloseEvent<R>>` | Emits before the window closes, whatever closes it. Call `preventDefault()` to keep it open. Completes once the window has closed. |
-| `closed$` (read-only) | `Observable<WindowResult<R>>` | Emits how the window closed, once it has closed, then completes. Replays to late subscribers. |
-| `component` (read-only) | `ComponentRef<unknown> \| null` | The hosted component, when `content` is a component rather than a `TemplateRef`. |
-| `drag$` (read-only) | `Observable<MoveEvent>` | Emits while the window is dragged. Completes when it closes. |
-| `dragEnd$` (read-only) | `Observable<void>` | Emits when a drag ends. Completes when the window closes. |
-| `dragStart$` (read-only) | `Observable<void>` | Emits when a drag starts. Completes when the window closes. |
-| `element` (read-only) | `HTMLElement` | The window's overlay element. |
-| `height` (read-only) | `number` | The window's current rendered height, in pixels. |
-| `popupRef` (read-only) | `PopupRef` | The underlying `PopupRef`, for advanced overlay access. |
-| `resize$` (read-only) | `Observable<ResizeEvent>` | Emits while the window is resized by the user. Completes when it closes. |
-| `width` (read-only) | `number` | The window's current rendered width, in pixels. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `center(): void` | Centers the window in the viewport. It stays centered as its size changes, until it is moved. |
-| `close(result?: R): void` | Closes the window. `close$` can still prevent it. |
-| `closeWithDelay(delay: number, result?: R): void` | Closes the window after the given delay, in milliseconds. |
-| `move(params: { top?: number; left?: number }): void` | Moves the window, in pixels from the viewport's top-left corner. An axis that isn't given keeps its place. |
-| `resize(params: { width?: number; height?: number; center?: boolean }): void` | Resizes the window, in pixels. A dimension that isn't given keeps its size; `center` centers the window afterward. |
+| [`WindowComponent`](/api/window/WindowComponent) | Component |  |
+| [`WindowActionTemplateDirective`](/api/window/WindowActionTemplateDirective) | Directive |  |
+| [`WindowContentTemplateDirective`](/api/window/WindowContentTemplateDirective) | Directive |  |
+| [`WindowFooterTemplateDirective`](/api/window/WindowFooterTemplateDirective) | Directive |  |
+| [`WindowTitleTemplateDirective`](/api/window/WindowTitleTemplateDirective) | Directive |  |
+| [`WindowService`](/api/window/WindowService) | Service |  |
+| [`WindowRef`](/api/window/WindowRef) | Class | A handle on an open window. |
 
 ### Types
 
-#### `WINDOW_DATA`
-
-The `data` a window was opened with, for a component given as its `content`.
-
-```typescript
-const WINDOW_DATA: InjectionToken<unknown>;
-```
-
-#### `WINDOW_DEFAULT_MESSAGES`
-
-```typescript
-const WINDOW_DEFAULT_MESSAGES: MonaWindowMessages;
-```
-
-#### `MoveEvent`
-
-| Name | Type |
-| --- | --- |
-| `left` | `number` |
-| `top` | `number` |
-
-#### `ResizeEvent`
-
-| Name | Type |
-| --- | --- |
-| `height` | `number` |
-| `left` | `number` |
-| `top` | `number` |
-| `width` | `number` |
-
-#### `WindowActionTemplateContext`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `$implicit` | `WindowRef` | The window's own `WindowRef`, exposed to a `monaWindowActionTemplate` via `let-windowRef`. |
+| [`WINDOW_DATA`](/api/window/WINDOW_DATA) | Constant | The `data` a window was opened with, for a component given as its `content`. |
+| [`WINDOW_DEFAULT_MESSAGES`](/api/window/WINDOW_DEFAULT_MESSAGES) | Constant |  |
+| [`MoveEvent`](/api/window/MoveEvent) | Interface |  |
+| [`ResizeEvent`](/api/window/ResizeEvent) | Interface |  |
+| [`WindowActionTemplateContext`](/api/window/WindowActionTemplateContext) | Interface |  |
+| [`WindowResult`](/api/window/WindowResult) | Interface | How a window closed, emitted once by `WindowRef.closed$`. |
+| [`WindowSettings`](/api/window/WindowSettings) | Interface |  |
 
-#### `WindowResult`
-
-How a window closed, emitted once by `WindowRef.closed$`.
-
-**Type parameters:** `R = unknown`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `value` (read-only) | `R \| undefined` | The value passed to `close(value)`; `undefined` for the close button, Escape and the host being destroyed. |
-| `via` (read-only) | `PopupCloseSource` | What closed the window: the close button, Escape, or a programmatic close. |
-
-#### `WindowSettings`
-
-**Type parameters:** `D = unknown`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `actionTemplate?` | `TemplateRef<WindowActionTemplateContext>` | Template rendered next to the minimize/maximize/close buttons. |
-| `ariaLabel?` | `string` | Accessible name for a window without a `title`. |
-| `closable?` | `boolean` | Whether the title bar shows a close button. |
-| `closeOnEscape?` | `boolean` | Whether pressing Escape closes the window. |
-| `content?` | `TemplateRef<unknown> \| Type<unknown>` | The window's content — a template reference or a component class. |
-| `data?` | `D` | Data for the content: a component injects it with `WINDOW_DATA`, a template gets it as its implicit context (`let-data`). |
-| `draggable?` | `boolean` | Whether the user can move the window by its title bar. Unlike the `WindowComponent` input, this defaults to `false`. |
-| `focusedElement?` | `HTMLElement \| ElementRef<HTMLElement> \| string \| null` | The element that receives focus when the window opens: an element, an element reference, or a CSS selector matched inside the window. |
-| `footerTemplate?` | `TemplateRef<unknown>` | Template rendered in the window's footer area. |
-| `height?` | `number` | Height in pixels. When omitted, the window fits its content. |
-| `injector?` | `Injector` | Parent injector for the window's content. Pass the opener's injector so a component given as `content` can inject what the opener provides. Default: the root injector. |
-| `left?` | `number` | Distance from the viewport's left edge in pixels. When omitted, the window is centered horizontally. |
-| `look?` | `"default" \| "primary"` | The title bar's color scheme. |
-| `maxHeight?` | `number` | Maximum height in pixels, also the limit for resizing. When omitted, the viewport's height is the limit. |
-| `maximizable?` | `boolean` | Whether the title bar shows a maximize button. |
-| `maxWidth?` | `number` | Maximum width in pixels, also the limit for resizing. When omitted, the viewport's width is the limit. |
-| `messages?` | `Partial<WindowMessages>` | Overrides for the window's messages, such as the title bar button labels. |
-| `minHeight?` | `number` | Minimum height in pixels. Resizing stops at it, or at 50 pixels when omitted. |
-| `minimizable?` | `boolean` | Whether the title bar shows a minimize button. |
-| `minWidth?` | `number` | Minimum width in pixels. Resizing stops at it, or at 50 pixels when omitted. |
-| `modal?` | `boolean` | Whether the window is modal: a backdrop, `aria-modal="true"`, focus kept inside, page scroll locked, and the rest of the page inert. |
-| `preventClose?` | `Action<PopupCloseEvent, boolean>` | Return `true` to cancel a close. See `preventClose` is service-only. |
-| `resizable?` | `boolean` | Whether the user can resize the window by its edges and corners, or from the title bar with the keyboard. |
-| `rounded?` | `"large" \| "medium" \| "none" \| "small"` | Border-radius preset for the window. |
-| `title?` | `string \| TemplateRef<unknown>` | The window's title — a plain string or a template reference. |
-| `top?` | `number` | Distance from the viewport's top edge in pixels. When omitted, the window is centered vertically. |
-| `width?` | `number` | Width in pixels. When omitted, the window fits its content. |
-| `windowClass?` | `string \| string[]` | Class(es) applied to the window's overlay element. |
-
-#### `Action`
-
-From `@nanahoshi/mona-ui/common`.
-
-A function taking a `P` and returning an `R`.
-
-```typescript
-type Action<P = void, R = void> = (arg: P) => R;
-```
-
-#### `MonaWindowMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `close` (read-only) | `string` | The close button's tooltip. |
-| `closeWindow` (read-only) | `string` | The close button's accessible name. |
-| `maximize` (read-only) | `string` | The maximize button's tooltip and accessible name while the window isn't maximized. |
-| `minimize` (read-only) | `string` | The minimize button's tooltip and accessible name while the window isn't minimized. |
-| `moveOrResizeWindow` (read-only) | `string` | The title bar's name when the window can be both dragged and resized; it says which keys do each. |
-| `moveWindow` (read-only) | `string` | The title bar's name when the window can be dragged but not resized. |
-| `resizeBottom` (read-only) | `string` | **Deprecated.** No longer rendered; resize handles are for the pointer, and the title bar resizes with the keyboard. |
-| `resizeBottomLeft` (read-only) | `string` | **Deprecated.** No longer rendered; resize handles are for the pointer, and the title bar resizes with the keyboard. |
-| `resizeBottomRight` (read-only) | `string` | **Deprecated.** No longer rendered; resize handles are for the pointer, and the title bar resizes with the keyboard. |
-| `resizeLeft` (read-only) | `string` | **Deprecated.** No longer rendered; resize handles are for the pointer, and the title bar resizes with the keyboard. |
-| `resizeRight` (read-only) | `string` | **Deprecated.** No longer rendered; resize handles are for the pointer, and the title bar resizes with the keyboard. |
-| `resizeTop` (read-only) | `string` | **Deprecated.** No longer rendered; resize handles are for the pointer, and the title bar resizes with the keyboard. |
-| `resizeTopLeft` (read-only) | `string` | **Deprecated.** No longer rendered; resize handles are for the pointer, and the title bar resizes with the keyboard. |
-| `resizeTopRight` (read-only) | `string` | **Deprecated.** No longer rendered; resize handles are for the pointer, and the title bar resizes with the keyboard. |
-| `resizeWindow` (read-only) | `string` | The title bar's name when the window can be resized but not dragged. |
-| `restore` (read-only) | `string` | The tooltip and accessible name of the minimize or maximize button while it would restore the window. |
-
-#### `WindowMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-```typescript
-type WindowMessages = MonaWindowMessages;
-```
-
-**Documented elsewhere:** [`PopupCloseEvent`](/components/popup), [`PopupCloseSource`](/components/popup), [`PopupRef`](/components/popup)
+**Related types:** [`Action`](/api/common/Action), [`MonaWindowMessages`](/api/i18n/MonaWindowMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`PopupCloseSource`](/api/popup/PopupCloseSource), [`PopupRef`](/api/popup/PopupRef), [`WindowMessages`](/api/i18n/WindowMessages)

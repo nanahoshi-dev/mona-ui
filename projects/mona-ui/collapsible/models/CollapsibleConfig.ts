@@ -1,9 +1,11 @@
 import { InjectionToken, type Signal } from "@angular/core";
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export const COLLAPSIBLE_CONFIG = new InjectionToken<CollapsibleConfig>("COLLAPSIBLE_CONFIG");
 
 /**
  * The contract a collapsible root exposes to its trigger and content parts.
+ * @hidden Exported for Mona UI's other entry points; applications don't need it.
  */
 export interface CollapsibleConfig {
     readonly animate: Signal<boolean>;

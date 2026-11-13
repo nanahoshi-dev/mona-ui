@@ -2,92 +2,10 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/collapsible`.
+Everything below is imported from `@nanahoshi/mona-ui/collapsible`. Each name links to its reference page, with every input, output, property and method.
 
-### `CollapsibleDirective`
-
-Headless disclosure root. Adds no markup of its own, so it can be applied to any element
-(`li`, `div`, `section`) and paired with `monaCollapsibleTrigger` and `monaCollapsibleContent`.
-
-**Selector:** `[monaCollapsible]`  
-**Exported as:** `monaCollapsible`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `animate` | `boolean` | `true` | Enables the height transition applied to the collapsible content. |
-| `disabled` | `boolean` | `false` | Suppresses toggling through the trigger. `expand()` and `collapse()` still apply. |
-| `expanded` (two-way) | `boolean` | `false` | Sets whether the content is expanded. Supports two-way binding. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `expandedChange` | `boolean` | Emitted when `expanded` changes. |
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `contentId` (read-only) | `string` | Id of the content element, which the trigger references through `aria-controls`. Generated, unless the content element has its own `id`. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `collapse(): void` | Sets `expanded` to `false`. |
-| `expand(): void` | Sets `expanded` to `true`. |
-| `setContentId(id: string \| null): void` | Takes the ID the content element was given, so the trigger points at it. `CollapsibleContentDirective` calls it, so there's no need to. |
-| `toggle(): void` | Toggles `expanded` unless the root is disabled. |
-
-### `CollapsibleContentDirective`
-
-Animates the height of the collapsible content between `0` and its measured size. Adds no wrapper
-element, so it can be applied directly to a `ul`, `div` or any other container with any number of children.
-
-The measured size is also published on the host as the `--mona-collapsible-content-height` custom
-property, so consumers can drive their own animation instead (pair it with `[animate]="false"` on the root).
-
-**Selector:** `[monaCollapsibleContent]`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `id` | `string \| null` | `null` | The content's id, for when it has to be something in particular. Generated if not given. |
-
-### `CollapsibleTriggerDirective`
-
-Toggles the closest `monaCollapsible`. Wires `aria-expanded` / `aria-controls` automatically and
-only adds `role`, `tabindex` and keyboard handling when the host element is not already interactive.
-
-**Selector:** `[monaCollapsibleTrigger]`
-
-### Types
-
-#### `COLLAPSIBLE_CONFIG`
-
-```typescript
-const COLLAPSIBLE_CONFIG: InjectionToken<CollapsibleConfig>;
-```
-
-#### `CollapsibleConfig`
-
-The contract a collapsible root exposes to its trigger and content parts.
-
-| Name | Type |
-| --- | --- |
-| `animate` (read-only) | `Signal<boolean>` |
-| `contentId` (read-only) | `string` |
-| `disabled` (read-only) | `Signal<boolean>` |
-| `expanded` (read-only) | `Signal<boolean>` |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `collapse(): void` | Collapses the content. |
-| `expand(): void` | Expands the content. |
-| `setContentId(id: string \| null): void` | Takes the id the content was given, so the trigger points at it. A root without it always uses `contentId`. |
-| `toggle(): void` | Switches between expanded and collapsed. The trigger calls it on activation. |
+| [`CollapsibleDirective`](/api/collapsible/CollapsibleDirective) | Directive | Headless disclosure root. |
+| [`CollapsibleContentDirective`](/api/collapsible/CollapsibleContentDirective) | Directive | Animates the height of the collapsible content between `0` and its measured size. |
+| [`CollapsibleTriggerDirective`](/api/collapsible/CollapsibleTriggerDirective) | Directive | Toggles the closest `monaCollapsible`. |

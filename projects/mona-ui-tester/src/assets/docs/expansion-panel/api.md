@@ -2,74 +2,12 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/expansion-panel`.
+Everything below is imported from `@nanahoshi/mona-ui/expansion-panel`. Each name links to its reference page, with every input, output, property and method.
 
-### `ExpansionPanelComponent`
-
-**Selector:** `mona-expansion-panel`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled` | `boolean` | `false` | Disables the header: toggling by click or key, and the actions in it. |
-| `expanded` (two-way) | `boolean` | `false` | Sets whether the expansion panel is expanded or collapsed. |
-| `headingLevel` | `number \| null` | `3` | The level of the heading around the header's button, from 1 to 6. Set it to fit the page's outline, or to `null` for no heading. |
-| `rounded` | `"large" \| "medium" \| "none" \| "small"` | `"medium"` | Sets the border radius of the expansion panel. |
-| `title` | `string` | `""` | Sets the title of the expansion panel, which also names its button and region. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `expandedChange` | `boolean` | Emitted when `expanded` changes. |
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `animate` (read-only) | `Signal<boolean>` | Always enabled. Satisfies the `CollapsibleConfig` contract for `monaCollapsibleTrigger`; this component doesn't use `monaCollapsibleContent`, so no animation ever consults it. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `collapse(): void` | Collapses the panel, even when `disabled`. |
-| `expand(): void` | Expands the panel, even when `disabled`. |
-| `focus(): void` | Moves focus to the panel's header button. |
-| `toggle(): void` | Toggles the panel, unless it's `disabled`. |
-
-### `AccordionComponent`
-
-Groups `mona-expansion-panel` elements: only one is open at a time unless `multiple` is set, and Up, Down, Home and End
-move between their headers. Adds no role of its own, as the pattern asks: each panel brings its heading and region.
-
-**Selector:** `mona-accordion`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `multiple` | `boolean` | `false` | Lets several panels stay open. Without it, opening a panel closes the others, however it was opened. |
-
-### `ExpansionPanelActionsTemplateDirective`
-
-Injects content beside the header's button, between the title and the toggle icon. Its controls are the application's
-own: their clicks and keys don't reach the button, and they need their own accessible names. The template has no
-context variables.
-
-**Selector:** `ng-template[monaExpansionPanelActionsTemplate]`
-
-### `ExpansionPanelIconTemplateDirective`
-
-Replaces the default plus/minus toggle icon.
-
-**Selector:** `ng-template[monaExpansionPanelIconTemplate]`
-
-### `ExpansionPanelTitleTemplateDirective`
-
-Replaces the string `title` in the header's button with projected content. It can't hold controls, since it's inside
-a button. The template has no context variables.
-
-**Selector:** `ng-template[monaExpansionPanelTitleTemplate]`
+| [`ExpansionPanelComponent`](/api/expansion-panel/ExpansionPanelComponent) | Component |  |
+| [`AccordionComponent`](/api/expansion-panel/AccordionComponent) | Component | Groups `mona-expansion-panel` elements: only one is open at a time unless `multiple` is set, and Up, Down, Home and End move between their headers. |
+| [`ExpansionPanelActionsTemplateDirective`](/api/expansion-panel/ExpansionPanelActionsTemplateDirective) | Directive | Injects content beside the header's button, between the title and the toggle icon. |
+| [`ExpansionPanelIconTemplateDirective`](/api/expansion-panel/ExpansionPanelIconTemplateDirective) | Directive | Replaces the default plus/minus toggle icon. |
+| [`ExpansionPanelTitleTemplateDirective`](/api/expansion-panel/ExpansionPanelTitleTemplateDirective) | Directive | Replaces the string `title` in the header's button with projected content. |

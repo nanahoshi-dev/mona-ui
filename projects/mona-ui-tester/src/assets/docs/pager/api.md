@@ -2,248 +2,28 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/pager`.
+Everything below is imported from `@nanahoshi/mona-ui/pager`. Each name links to its reference page, with every input, output, property and method.
 
-### `PagerComponent`
-
-**Selector:** `mona-pager`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string \| null` | `null` | Accessible name of the pager's navigation landmark. Defaults to the localized "Pagination"; name each pager when a page has several. |
-| `aria-labelledby` | `string` | `""` | Id of the element that names the pager. Takes precedence over `aria-label`. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `firstLast` | `boolean` | `true` | Shows the first and last page navigation buttons. |
-| `navigable` | `boolean` | `true` | Enables page shortcuts while a pager button has focus: Page Up and Page Down go to the previous and next page, Home and End to the first and last, and the left and right arrows to the previous and next page (mirrored right to left). The buttons themselves are always ordinary tab stops. |
-| `pageInput` | `boolean` | `false` | Shows a numeric input for jumping directly to a page. |
-| `pageSize` (two-way) | `number` | `5` | Number of items displayed per page; values below 1 count as 1. Supports two-way binding (`[(pageSize)]`): `pageSizeChange` emits the new size after the user changes it, and `pageChange` reports it as `take`. |
-| `pageSizeValues` | `readonly number[] \| boolean` | `[5, 10, 20, 50, 100]` | Page-size options shown in the page-size dropdown. `true` shows the default options; `false` or an empty array hides the dropdown. |
-| `previousNext` | `boolean` | `true` | Shows the previous and next page navigation buttons. |
-| `responsive` | `boolean` | `true` | Replaces the page buttons with a page dropdown when the pager is narrower than 480px. Other sections wrap onto a new line instead of being hidden. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the component. |
-| `showInfo` | `boolean` | `true` | Displays the summary of the current page range and total item count. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the component's dimensions. |
-| `skip` (two-way) | `number` | `0` | Number of items before the current page. Supports two-way binding. A value past the last page, or between page boundaries, is corrected to the start of the page that holds it, and `pageChange` reports it. |
-| `total` | `number` | `0` | Total number of items in the paged collection. |
-| `type` | `PagerType` | `"numeric"` | Visual mode of the pager: numeric page buttons, or a page-jump input. |
-| `visiblePages` | `number` | `5` | Number of page buttons shown between the first and last page before the rest collapse into jump buttons. At least 1. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `pageChange` | `PageChangeEvent` | Emitted when the user changes the page or the page size, or when the pager corrects a `skip` that is past the last page or not on a page boundary. Setting `skip` or `pageSize` from code to a valid value doesn't emit it. |
-| `pageSizeChange` | `number` | Emitted when `pageSize` changes. |
-| `pageSizeSelect` | `PageSizeChangeEvent` | Emitted when the user picks a page size, before it is applied. Call `preventDefault()` on the event to keep the current size. |
-| `skipChange` | `number` | Emitted when `skip` changes. |
-
-### `PagerNavigationButtonsTemplateDirective`
-
-**Selector:** `ng-template[monaPagerNavigationButtonsTemplate]`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `type` (required) | `"first" \| "last" \| "next" \| "previous"` | — | Which navigation button the template replaces. |
-
-#### Template context
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `PagerContext` | The pager state, the same values the context spreads at its top level. |
-| `currentPage` | `number` | The current page, starting at 1. |
-| `disabled` | `boolean` | True when the button has nowhere to go (the first or last page is current, or there are no pages). |
-| `end` | `number` | The position of the last item on the current page, or 0 when there are no items. |
-| `goToPage` | `(page: number) => void` | Goes to a page (clamped to the page range) and emits `pageChange`, as a click on a page button does. |
-| `navigate` | `() => void` | Goes to `targetPage`. |
-| `pageSize` | `number` | The number of items per page. |
-| `pageSizes` | `readonly number[]` | The page sizes offered by the page-size dropdown. |
-| `setPageSize` | `(pageSize: number \| null) => void` | Changes the page size through the cancelable `pageSizeSelect` event, as the page-size dropdown does. `null` and values below 1 are ignored. |
-| `skip` | `number` | The number of items before the current page. |
-| `start` | `number` | The position of the first item on the current page, or 0 when there are no items. |
-| `targetPage` | `number` | The page the button goes to. |
-| `total` | `number` | The total number of items. |
-| `totalPages` | `number` | The total number of pages. |
-
-### `PagerInfoTemplateDirective`
-
-**Selector:** `ng-template[monaPagerInfoTemplate]`
-
-#### Template context
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `PagerContext` | The pager state, the same values the context spreads at its top level. |
-| `currentPage` | `number` | The current page, starting at 1. |
-| `end` | `number` | The position of the last item on the current page, or 0 when there are no items. |
-| `goToPage` | `(page: number) => void` | Goes to a page (clamped to the page range) and emits `pageChange`, as a click on a page button does. |
-| `pageSize` | `number` | The number of items per page. |
-| `pageSizes` | `readonly number[]` | The page sizes offered by the page-size dropdown. |
-| `setPageSize` | `(pageSize: number \| null) => void` | Changes the page size through the cancelable `pageSizeSelect` event, as the page-size dropdown does. `null` and values below 1 are ignored. |
-| `skip` | `number` | The number of items before the current page. |
-| `start` | `number` | The position of the first item on the current page, or 0 when there are no items. |
-| `total` | `number` | The total number of items. |
-| `totalPages` | `number` | The total number of pages. |
-
-### `PagerNumericButtonsTemplateDirective`
-
-**Selector:** `ng-template[monaPagerNumericButtonsTemplate]`
-
-#### Template context
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `PagerContext` | The pager state, the same values the context spreads at its top level. |
-| `currentPage` | `number` | The current page, starting at 1. |
-| `end` | `number` | The position of the last item on the current page, or 0 when there are no items. |
-| `goToPage` | `(page: number) => void` | Goes to a page (clamped to the page range) and emits `pageChange`, as a click on a page button does. |
-| `pages` | `readonly number[]` | The page numbers the default buttons would show, in order (the first and last page included). |
-| `pageSize` | `number` | The number of items per page. |
-| `pageSizes` | `readonly number[]` | The page sizes offered by the page-size dropdown. |
-| `setPageSize` | `(pageSize: number \| null) => void` | Changes the page size through the cancelable `pageSizeSelect` event, as the page-size dropdown does. `null` and values below 1 are ignored. |
-| `skip` | `number` | The number of items before the current page. |
-| `start` | `number` | The position of the first item on the current page, or 0 when there are no items. |
-| `total` | `number` | The total number of items. |
-| `totalPages` | `number` | The total number of pages. |
-
-### `PagerPageSizeTemplateDirective`
-
-**Selector:** `ng-template[monaPagerPageSizeTemplate]`
-
-#### Template context
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `readonly number[]` | The page sizes offered, as for the default dropdown. |
-| `currentPage` | `number` | The current page, starting at 1. |
-| `end` | `number` | The position of the last item on the current page, or 0 when there are no items. |
-| `goToPage` | `(page: number) => void` | Goes to a page (clamped to the page range) and emits `pageChange`, as a click on a page button does. |
-| `pageSize` | `number` | The number of items per page. |
-| `pageSizes` | `readonly number[]` | The page sizes offered by the page-size dropdown. |
-| `setPageSize` | `(pageSize: number \| null) => void` | Changes the page size through the cancelable `pageSizeSelect` event, as the page-size dropdown does. `null` and values below 1 are ignored. |
-| `skip` | `number` | The number of items before the current page. |
-| `start` | `number` | The position of the first item on the current page, or 0 when there are no items. |
-| `total` | `number` | The total number of items. |
-| `totalPages` | `number` | The total number of pages. |
-
-### `PageSizeChangeEvent`
-
-The cancelable payload of the pager's `pageSizeSelect` event.
-
-**Extends:** `PreventableEvent`
-
-#### Properties
-
-| Name | Type |
-| --- | --- |
-| `newPageSize` (read-only) | `number` |
-| `oldPageSize` (read-only) | `number` |
+| [`PagerComponent`](/api/pager/PagerComponent) | Component |  |
+| [`PagerNavigationButtonsTemplateDirective`](/api/pager/PagerNavigationButtonsTemplateDirective) | Directive |  |
+| [`PagerInfoTemplateDirective`](/api/pager/PagerInfoTemplateDirective) | Directive |  |
+| [`PagerNumericButtonsTemplateDirective`](/api/pager/PagerNumericButtonsTemplateDirective) | Directive |  |
+| [`PagerPageSizeTemplateDirective`](/api/pager/PagerPageSizeTemplateDirective) | Directive |  |
+| [`PageSizeChangeEvent`](/api/pager/PageSizeChangeEvent) | Class | The cancelable payload of the pager's `pageSizeSelect` event. |
 
 ### Types
 
-#### `PAGER_DEFAULT_MESSAGES`
-
-```typescript
-const PAGER_DEFAULT_MESSAGES: { firstPageLabel: string; itemsPerPageLabel: string; jumpBackwardLabel: (pages: number) => string; jumpForwardLabel: (pages: number) => string; lastPageLabel: string; nextPageLabel: string; ofText: string; pageInputPrefix: (_totalPages: number) => string; pageInputSuffix: (totalPages: number) => string; pageLabel: (page: number) => string; pageSelectLabel: string; pageSizeLabel: (pageSize: number) => string; pageStatus: (page: number, totalPages: number) => string; pageText: string; pagerLabel: string; previousPageLabel: string; rangeStatus: (start: number, end: number, total: number) => string; };
-```
-
-#### `PagerContext`
-
-The pager's state and actions, passed to every custom template.
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `currentPage` (read-only) | `number` | The current page, starting at 1. |
-| `end` (read-only) | `number` | The position of the last item on the current page, or 0 when there are no items. |
-| `pageSize` (read-only) | `number` | The number of items per page. |
-| `pageSizes` (read-only) | `readonly number[]` | The page sizes offered by the page-size dropdown. |
-| `skip` (read-only) | `number` | The number of items before the current page. |
-| `start` (read-only) | `number` | The position of the first item on the current page, or 0 when there are no items. |
-| `total` (read-only) | `number` | The total number of items. |
-| `totalPages` (read-only) | `number` | The total number of pages. |
+| [`PAGER_DEFAULT_MESSAGES`](/api/pager/PAGER_DEFAULT_MESSAGES) | Constant |  |
+| [`PagerContext`](/api/pager/PagerContext) | Interface | The pager's state and actions, passed to every custom template. |
+| [`NavigationButtonsTemplateContext`](/api/pager/NavigationButtonsTemplateContext) | Interface |  |
+| [`InfoTemplateContext`](/api/pager/InfoTemplateContext) | Interface |  |
+| [`NumericButtonsTemplateContext`](/api/pager/NumericButtonsTemplateContext) | Interface | Context of `monaPagerNumericButtonsTemplate`. |
+| [`PageChangeEvent`](/api/pager/PageChangeEvent) | Interface |  |
+| [`PageSizeTemplateContext`](/api/pager/PageSizeTemplateContext) | Interface |  |
+| [`PagerType`](/api/pager/PagerType) | Type alias |  |
 
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `goToPage(page: number): void` | Goes to a page (clamped to the page range) and emits `pageChange`, as a click on a page button does. |
-| `setPageSize(pageSize: number \| null): void` | Changes the page size through the cancelable `pageSizeSelect` event, as the page-size dropdown does. `null` and values below 1 are ignored. |
-
-#### `NavigationButtonsTemplateContext`
-
-**Extends:** `PagerContext`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` (read-only) | `PagerContext` | The pager state, the same values the context spreads at its top level. |
-| `disabled` (read-only) | `boolean` | True when the button has nowhere to go (the first or last page is current, or there are no pages). |
-| `targetPage` (read-only) | `number` | The page the button goes to. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `navigate(): void` | Goes to `targetPage`. |
-
-#### `InfoTemplateContext`
-
-**Extends:** `PagerContext`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` (read-only) | `PagerContext` | The pager state, the same values the context spreads at its top level. |
-
-#### `NumericButtonsTemplateContext`
-
-Context of `monaPagerNumericButtonsTemplate`. The template renders inside the pager's `<ol>`, so put each
-control in an `<li>`.
-
-**Extends:** `PagerContext`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` (read-only) | `PagerContext` | The pager state, the same values the context spreads at its top level. |
-| `pages` (read-only) | `readonly number[]` | The page numbers the default buttons would show, in order (the first and last page included). |
-
-#### `PageChangeEvent`
-
-| Name | Type |
-| --- | --- |
-| `page` | `number` |
-| `skip` | `number` |
-| `take` | `number` |
-
-#### `PageSizeTemplateContext`
-
-**Extends:** `PagerContext`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` (read-only) | `readonly number[]` | The page sizes offered, as for the default dropdown. |
-
-#### `PagerType`
-
-```typescript
-type PagerType = "input" | "numeric";
-```
-
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
+**Related types:** [`PreventableEvent`](/api/common/PreventableEvent)

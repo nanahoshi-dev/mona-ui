@@ -232,6 +232,120 @@ markdown.block {
         border-bottom: 1px solid var(--color-border);
         color: var(--color-muted-foreground);
     }
+
+    /*
+     * A long selector or type has nowhere to break, and would push the table past the page's column. The first
+     * column, which names each row, stays whole.
+     */
+    & td:not(:first-child) code:not(app-example *) {
+        overflow-wrap: anywhere;
+    }
+}
+
+/* Descriptions on the API reference pages, rendered from the library's JSDoc */
+.api-prose {
+    & p + p,
+    & ul,
+    & ol {
+        margin-top: 0.5rem;
+    }
+
+    & ul {
+        list-style-type: disc;
+        padding-inline-start: 1.25rem;
+    }
+
+    & ol {
+        list-style-type: decimal;
+        padding-inline-start: 1.25rem;
+    }
+
+    /* The primary color itself is too dark to read on a dark theme such as Anna's, so links take its text-safe shade. */
+    & a {
+        color: var(--color-primary-subtle-foreground);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    & code {
+        background-color: var(--color-muted);
+        color: var(--color-foreground);
+        font-family: ui-monospace, monospace;
+        font-size: 0.875em;
+        padding: 0.0625rem 0.3125rem;
+        border-radius: 0.25rem;
+        overflow-wrap: anywhere;
+    }
+
+    & a code {
+        color: inherit;
+    }
+}
+
+/*
+ * The API reference tints each kind of export with its hue, which `api-kind-hues.ts` sets as --api-kind, mixed with the
+ * theme's own colors: a faint wash and border, the hue itself on the leading edge, and a label mixed toward the text
+ * color, so it stays readable on a dark theme too. Forced colors drop the tint and draw the borders in the system's text
+ * color, and the label or heading says the kind.
+ */
+.api-kind-card {
+    --api-kind-border: color-mix(in oklab, var(--api-kind) 30%, var(--color-border));
+    background-color: color-mix(in oklab, var(--api-kind) 6%, var(--color-background));
+    border: 1px solid var(--api-kind-border);
+    border-inline-start: 4px solid var(--api-kind);
+    transition: border-color 150ms ease;
+
+    &:hover {
+        --api-kind-border: color-mix(in oklab, var(--api-kind) 55%, var(--color-border));
+    }
+
+    /* A card whose name link covers it keeps the links in its description above that link. */
+    & .api-prose a {
+        position: relative;
+        z-index: 1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+}
+
+.api-kind-label {
+    color: color-mix(in oklab, var(--api-kind) 50%, var(--color-foreground));
+}
+
+.api-kind-dot {
+    background-color: var(--api-kind);
+}
+
+/* A kind's badge, or a member's type or signature: a stronger wash than a card's, with a border and the label's color. */
+.api-kind-chip {
+    background-color: color-mix(in oklab, var(--api-kind) 12%, var(--color-background));
+    border: 1px solid color-mix(in oklab, var(--api-kind) 35%, var(--color-border));
+    color: color-mix(in oklab, var(--api-kind) 50%, var(--color-foreground));
+}
+
+/* An import statement's keywords and path, mixed toward the text color like a kind's label. */
+.api-code-keyword {
+    color: color-mix(in oklab, oklch(60% 0.18 270) 55%, var(--color-foreground));
+}
+
+.api-code-string {
+    color: color-mix(in oklab, oklch(60% 0.15 160) 55%, var(--color-foreground));
+}
+
+/* A kind filter that's on takes its kind's wash, and in forced colors the system's selected colors. */
+.api-kind-filter[aria-pressed="true"] {
+    background-color: color-mix(in oklab, var(--api-kind) 14%, var(--color-background));
+    border-color: color-mix(in oklab, var(--api-kind) 45%, var(--color-border));
+    color: color-mix(in oklab, var(--api-kind) 50%, var(--color-foreground));
+
+    @media (forced-colors: active) {
+        forced-color-adjust: none;
+        background-color: Highlight;
+        border-color: Highlight;
+        color: HighlightText;
+    }
 }
 
 .no-scrollbar {

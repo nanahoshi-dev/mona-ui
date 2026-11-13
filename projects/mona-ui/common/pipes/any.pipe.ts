@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from "@angular/core";
 import { any, Predicate } from "@mirei/ts-collections";
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 @Pipe({
     name: "monaAny"
 })

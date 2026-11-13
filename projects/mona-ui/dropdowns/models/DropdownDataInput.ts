@@ -8,6 +8,7 @@ export interface DropdownDataInput<TData> {
     readonly valueField: InputSignal<DropdownFieldSelectorType<TData, unknown>>;
 }
 
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export const DROPDOWN_DATA_INPUT_TOKEN = new InjectionToken<DropdownDataInput<unknown>>("DROPDOWN_DATA_INPUT");
 
 /**

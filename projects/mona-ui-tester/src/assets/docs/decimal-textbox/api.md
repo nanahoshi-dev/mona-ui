@@ -2,76 +2,13 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/numeric-text-box`.
+Everything below is imported from `@nanahoshi/mona-ui/numeric-text-box`. Each name links to its reference page, with every input, output, property and method.
 
-### `DecimalTextBoxComponent`
-
-A numeric input whose value is a decimal string, for amounts a JavaScript `number` cannot hold exactly (money,
-quantities with many digits, identifiers). Typing, paste, spin buttons and bounds use exact decimal arithmetic,
-so there is no precision limit. The value is canonical: `"-1234.5"`, with `.` as the separator and no grouping,
-exponent, leading zeros or trailing fraction zeros.
-
-**Selector:** `mona-decimal-text-box`  
-**Implements:** `FormValueControl<string \| null>`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-describedby` | `string` | `""` | ID of an element that provides an extended description for the input, such as a hint or an error message. |
-| `aria-label` | `string \| null` | `null` | Accessible name for the input. Prefer a visible label, linked through `inputId` or `aria-labelledby`. |
-| `aria-labelledby` | `string` | `""` | ID of an external element that provides the accessible name for the input. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `decimals` | `number` | `0` | Number of fractional decimal places to display and accept. Values are truncated to an integer and clamped to the range 0–20. Non-finite and negative values normalize to 0. |
-| `disabled` | `boolean` | `false` | Sets whether the input is disabled. |
-| `formatter` | `Action<string \| null, string> \| null` | `null` | Formats the value to be displayed in the input when the input is not focused. |
-| `inputId` | `string` | `a generated ID` | ID of the inner input, so a `<label for>` or `<mona-label for>` can point at it. |
-| `invalid` | `boolean` | `false` | Marks the text box as invalid. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `maxValue` | `string \| number \| null` | `null` | Maximum value that can be entered, as a decimal string or a number. |
-| `minValue` | `string \| number \| null` | `null` | Minimum value that can be entered, as a decimal string or a number. |
-| `nullable` | `boolean` | `true` | Sets whether the input can be empty. When `false`, leaving an empty field sets it to the minimum, or to zero when there is no minimum (clamped to the maximum). |
-| `placeholder` | `string` | `""` | Text shown in the input while it is empty. It isn't a label: it disappears once there is a value. |
-| `readonly` | `boolean` | `false` | Sets whether the input is readonly. The spin buttons are hidden while it is. |
-| `required` | `boolean` | `false` | Sets whether the input is required. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | ```medium``` | Sets the border radius of the input. |
-| `size` | `"large" \| "medium" \| "small"` | ```medium``` | Sets the size of the input. |
-| `spinners` | `boolean` | `true` | Sets whether the spin buttons are visible. |
-| `step` | `string \| number` | `"1"` | Step value to increment or decrement the value, as a decimal string or a number. |
-| `tabindex` | `number` | `0` | Tab index of the input. |
-| `touched` | `boolean` | `false` | Sets the touched state of the text box. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `value` (two-way) | `string \| null` | `null` | Two-way bindable current value, as a canonical decimal string such as `"-1234.5"`. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `inputBlur` | `FocusEvent` | Emits when focus leaves the component, after the value has been clamped to the bounds. Moving focus between the input and elements inside the component (such as a prefix template) doesn't count. |
-| `inputFocus` | `FocusEvent` | Emits when the inner input element is focused. |
-| `inputFocusOut` | `FocusEvent` | Emits when the inner input element loses focus. |
-| `touch` | `void` | Emitted when focus leaves the component, as a native input is touched on blur. Typing and spinning don't count. The `FormField` directive listens to this to mark the field as touched. |
-| `valueChange` | `string \| null` | Emitted when `value` changes. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `decrease(): void` | Steps the value down by `step` and moves focus to the input. |
-| `focus(options?: FocusOptions): void` | Moves focus to the input, with the caret at the end. |
-| `increase(): void` | Steps the value up by `step` and moves focus to the input. |
-| `onBlur(event: FocusEvent): void` | Runs when focus leaves an element inside the component: clamps the value and marks the field touched. |
-
-### `NumericTextBoxPrefixTemplateDirective`
-
-**Selector:** `ng-template[monaNumericTextBoxPrefixTemplate]`
+| [`DecimalTextBoxComponent`](/api/numeric-text-box/DecimalTextBoxComponent) | Component | A numeric input whose value is a decimal string, for amounts a JavaScript `number` cannot hold exactly (money, quantities with many digits, identifiers). |
+| [`NumericTextBoxPrefixTemplateDirective`](/api/numeric-text-box/NumericTextBoxPrefixTemplateDirective) | Directive |  |
 
 ### Types
 
-#### `Action`
-
-From `@nanahoshi/mona-ui/common`.
-
-A function taking a `P` and returning an `R`.
-
-```typescript
-type Action<P = void, R = void> = (arg: P) => R;
-```
+**Related types:** [`Action`](/api/common/Action)

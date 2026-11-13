@@ -2,145 +2,20 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/chart`.
+Everything below is imported from `@nanahoshi/mona-ui/chart`. Each name links to its reference page, with every input, output, property and method.
 
-### `AreaSeriesComponent`
-
-Renders a continuous Cartesian area series supporting gradient fades, solid fills, cumulative stacking, and 100%
-normalized bands.
-
-**Selector:** `mona-area-series`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes applied to the series host element. |
-| `color` | `string` | `""` | Explicit stroke and fill color override for the area series. |
-| `connectNulls` | `boolean` | `false` | Whether to connect points across null or invalid values without gaps. |
-| `curve` | `ChartCurve` | `"linear"` | Curve interpolation style (`"linear"`, `"monotone-x"`, `"natural"`, `"step"`, or `"step-after"`). |
-| `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding the root chart data. |
-| `dataLabels` | `ChartDataLabelsInput` | `false` | Data label display options or boolean flag enabling default labels. |
-| `downsampling` | `ChartDownsamplingInput \| undefined` | `undefined` | Per-series high-density downsampling override. Undefined inherits the chart policy. |
-| `field` | `ChartField` | `""` | Property key or accessor extracting the Y value for each data item. |
-| `fillMode` | `ChartAreaFillMode` | `"gradient"` | Area fill style (`"gradient"` fading to zero baseline, or uniform `"solid"`). |
-| `fillOpacity` | `number \| undefined` | `undefined` | Maximum opacity applied to the area fill. |
-| `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
-| `lineStyle` | `ChartLineStyle` | `"solid"` | Stroke pattern used for the area's boundary line (`"solid"`, `"dashed"`, or `"dotted"`). |
-| `name` | `string` | `""` | Name of the series displayed in legends and tooltips. |
-| `pointRadius` | `number \| undefined` | `undefined` | Radius in pixels for point markers. |
-| `seriesKey` | `string \| undefined` | `undefined` | Optional stable key identifying this series for mark identity and selection across updates. |
-| `showPoints` | `boolean` | `false` | Whether to draw point markers at each data coordinate along the top boundary line. |
-| `stack` | `string \| undefined` | `undefined` | Named stack group to participate in. Series with matching trimmed stack names stack together. |
-| `stackMode` | `ChartStackMode` | `"normal"` | Stacking mode used when stack is specified: 'normal' for raw cumulative values, or 'percent' for 100% normalized segments. |
-| `strokeWidth` | `number \| undefined` | `undefined` | Stroke width in pixels for the area boundary line. |
-| `valueFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Custom formatter for raw Y/data values in tooltips and live region announcements. |
-| `visible` (two-way) | `boolean` | `true` | Whether the series is currently visible on the chart and in calculations. |
-| `xAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used. |
-| `xField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting the X value, overriding the root chart X field. |
-| `yAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `visibleChange` | `boolean` | Emitted when `visible` changes. |
-
-### `RangeAreaSeriesComponent`
-
-Renders continuous Cartesian vertical range bands/areas bounded between lower and upper values (e.g. confidence
-intervals, forecast envelopes, or high/low bands).
-
-**Selector:** `mona-range-area-series`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes applied to the series host element. |
-| `color` | `string` | `""` | Explicit stroke and fill color override for the range area series. |
-| `connectNulls` | `boolean` | `false` | Whether to connect points across null or invalid values without gaps. |
-| `curve` | `ChartCurve` | `"linear"` | Curve interpolation style (`"linear"`, `"monotone-x"`, `"natural"`, `"step"`, or `"step-after"`). |
-| `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding the root chart data. |
-| `dataLabels` | `ChartDataLabelsInput` | `false` | Data label display options or boolean flag enabling default labels. |
-| `downsampling` | `ChartDownsamplingInput \| undefined` | `undefined` | Per-series high-density downsampling override. Undefined inherits the chart policy. |
-| `fillOpacity` | `number \| undefined` | `undefined` | Maximum opacity applied to the range area fill. |
-| `fromField` (required) | `ChartField` | — | Property key or accessor extracting the starting range value for each data item. |
-| `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
-| `name` | `string` | `"Range Area"` | Name of the series displayed in legends, tooltips, and live region announcements. |
-| `pointRadius` | `number \| undefined` | `undefined` | Radius in pixels for point markers drawn along the boundary curves. |
-| `seriesKey` | `string \| undefined` | `undefined` | Optional stable key identifying this series for mark identity and selection across updates. |
-| `showPoints` | `boolean` | `false` | Whether to draw point markers at each data coordinate along both boundary curves. |
-| `strokeWidth` | `number \| undefined` | `undefined` | Stroke width in pixels for the boundary lines. |
-| `toField` (required) | `ChartField` | — | Property key or accessor extracting the ending range value for each data item. |
-| `valueFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Custom formatter for raw range values in tooltips and live region announcements. |
-| `visible` (two-way) | `boolean` | `true` | Whether the series is currently visible on the chart and in calculations. |
-| `xAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used. |
-| `xField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting the X coordinate, overriding the root chart X field. |
-| `yAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `visibleChange` | `boolean` | Emitted when `visible` changes. |
-
-### `LineSeriesComponent`
-
-Renders a continuous Cartesian line series with configurable interpolation, optional null-gap joining, point markers,
-data labels, and multi-axis binding.
-
-**Selector:** `mona-line-series`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes applied to the series host element. |
-| `color` | `string` | `""` | Explicit stroke color override for the series line. |
-| `connectNulls` | `boolean` | `false` | Whether to connect points across null or invalid values without gaps. |
-| `curve` | `ChartCurve` | `"linear"` | Curve interpolation style (`"linear"`, `"monotone-x"`, `"natural"`, `"step"`, or `"step-after"`). |
-| `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding the root chart data. |
-| `dataLabels` | `ChartDataLabelsInput` | `false` | Data label display options or boolean flag enabling default labels. |
-| `downsampling` | `ChartDownsamplingInput \| undefined` | `undefined` | Per-series high-density downsampling override. Undefined inherits the chart policy. |
-| `field` | `ChartField` | `""` | Property key or accessor extracting the Y value for each data item. |
-| `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
-| `lineStyle` | `ChartLineStyle` | `"solid"` | Stroke pattern used to render the series line (`"solid"`, `"dashed"`, or `"dotted"`). |
-| `name` | `string` | `""` | Name of the series displayed in legends and tooltips. |
-| `pointRadius` | `number \| undefined` | `undefined` | Radius in pixels for point markers. |
-| `seriesKey` | `string \| undefined` | `undefined` | Optional stable key identifying this series for mark identity and selection across updates. |
-| `showPoints` | `boolean` | `false` | Whether to draw point markers at each data coordinate along the line. |
-| `strokeWidth` | `number \| undefined` | `undefined` | Stroke width in pixels for the series line. |
-| `valueFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Formats this series' values in tooltips, data labels and announcements, without changing the axis ticks. Takes precedence over the axis formatter. |
-| `visible` (two-way) | `boolean` | `true` | Whether the series is currently visible on the chart and in calculations. |
-| `xAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian X axis this series binds to. When omitted, the primary X axis is used. |
-| `xField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting the X value, overriding the root chart X field. |
-| `yAxisId` | `string \| undefined` | `undefined` | Optional ID of the Cartesian Y axis this series binds to. When omitted, the primary Y axis is used. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `visibleChange` | `boolean` | Emitted when `visible` changes. |
+| [`AreaSeriesComponent`](/api/chart/AreaSeriesComponent) | Component | Renders a continuous Cartesian area series supporting gradient fades, solid fills, cumulative stacking, and 100% normalized bands. |
+| [`RangeAreaSeriesComponent`](/api/chart/RangeAreaSeriesComponent) | Component | Renders continuous Cartesian vertical range bands/areas bounded between lower and upper values (e.g. confidence intervals, forecast envelopes, or high/low bands). |
+| [`LineSeriesComponent`](/api/chart/LineSeriesComponent) | Component | Renders a continuous Cartesian line series with configurable interpolation, optional null-gap joining, point markers, data labels, and multi-axis binding. |
 
 ### Types
 
-#### `ChartAreaFillMode`
+| Type | Kind |
+| --- | --- |
+| [`ChartAreaFillMode`](/api/chart/ChartAreaFillMode) | Type alias |
+| [`ChartCurve`](/api/chart/ChartCurve) | Type alias |
+| [`ChartLineStyle`](/api/chart/ChartLineStyle) | Type alias |
 
-```typescript
-type ChartAreaFillMode = "gradient" | "solid";
-```
-
-#### `ChartCurve`
-
-```typescript
-type ChartCurve = "linear" | "monotone-x" | "natural" | "step" | "step-after";
-```
-
-#### `ChartLineStyle`
-
-```typescript
-type ChartLineStyle = "solid" | "dashed" | "dotted";
-```
-
-**Documented elsewhere:** [`ChartDataLabelsInput`](/components/chart), [`ChartDownsamplingInput`](/components/chart), [`ChartField`](/components/chart), [`ChartStackMode`](/components/chart), [`ChartValueFormatter`](/components/chart)
+**Related types:** [`ChartDataLabelsInput`](/api/chart/ChartDataLabelsInput), [`ChartDownsamplingInput`](/api/chart/ChartDownsamplingInput), [`ChartField`](/api/chart/ChartField), [`ChartStackMode`](/api/chart/ChartStackMode), [`ChartValueFormatter`](/api/chart/ChartValueFormatter)

@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import type * as Ts from "typescript";
+import type { ApiEntryPointReference, ApiMember, ApiSymbol } from "../../mona-ui-tester/src/app/api/api-model";
 
 interface DirectoryEntry {
     isDirectory(): boolean;
@@ -46,14 +47,15 @@ interface EntryPoint {
 interface DocumentedRow {
     readonly defaultCell: string;
     readonly description: string;
-    readonly isOutputTable: boolean;
     readonly name: string;
-    /** The name column, where the generated tables say a member is required or two-way. */
+    /** The member's name, with whether it's required or two-way, as the API reference marks it. */
     readonly nameCell: string;
     readonly typeCell: string;
 }
 
 const docsRoot = "projects/mona-ui-tester/src/assets/docs";
+/** Where `npm run build:api-data` writes what the API reference shows, which `npm run test:lib` runs first. */
+const referenceRoot = "dist/docs-api";
 
 /** Each entry point this module covers, and the tester folders that document it. */
 const coveredEntryPoints: readonly (readonly [entry: string, docs: readonly string[]])[] = [
@@ -96,7 +98,7 @@ const elementBindings =
     /^(?:aria-.*|attr\..*|class|class\..*|data-.*|dir|formField|hidden|id|lang|ngModel|ngModelChange|role|routerLink|style|style\..*|tabindex|title|(?:blur|change|click|focus|focusin|focusout|input|keydown|keyup|pointerdown)|(?:keydown|keyup)\..*)$/;
 
 /**
- * Comparing `'after'` with `"after"`: the tables use both, and neither is wrong.
+ * Comparing `'after'` with `"after"`: the reference uses both, and neither is wrong.
  */
 function normalizeLiteral(text: string): string {
     return text
@@ -109,86 +111,23 @@ function isLiteralDefault(text: string): boolean {
     return /^(?:"[^"]*"|'[^']*'|`[^`]*`|-?\d+(?:\.\d+)?|true|false|null|undefined|\[\])$/.test(text);
 }
 
-/** The text under each heading that names a class or a selector, up to the next heading of that level or above. */
-function readClassSection(markdown: string, source: SourceClass): string | undefined {
-    const lines = markdown.replace(/\r\n/g, "\n").split("\n");
-    const selectors = source.selector.split(",").map(selector => selector.trim());
-    let fence = false;
-    let startLevel = 0;
-    const collected: string[] = [];
-    for (const line of lines) {
-        if (line.startsWith("```")) {
-            fence = !fence;
-        }
-        const heading = fence ? undefined : /^(#{1,6}) (.*)$/.exec(line);
-        if (heading) {
-            const level = heading[1].length;
-            if (startLevel > 0 && level <= startLevel) {
-                break;
-            }
-            const named = [...heading[2].matchAll(/`([^`]+)`/g)].map(match => match[1].replace(/^<|>$/g, ""));
-            if (startLevel === 0 && (named.includes(source.className) || named.some(n => selectors.includes(n)))) {
-                startLevel = level;
-                continue;
-            }
-        }
-        if (startLevel > 0) {
-            collected.push(line);
-        }
-    }
-    return startLevel > 0 ? collected.join("\n") : undefined;
-}
-
-/** The rows of every inputs or outputs table in a section. Methods and ARIA tables are about something else. */
-function readRows(section: string): DocumentedRow[] {
-    const rows: DocumentedRow[] = [];
-    let columns: string[] | undefined;
-    let subheading = "";
-    for (const line of section.split("\n")) {
-        const heading = /^#{1,6} (.*)$/.exec(line);
-        if (heading) {
-            subheading = heading[1];
-        }
-        if (!line.trim().startsWith("|")) {
-            columns = undefined;
-            continue;
-        }
-        const cells = line
-            .trim()
-            .replace(/^\||\|$/g, "")
-            .split(/(?<!\\)\|/)
-            .map(cell => cell.trim());
-        if (!columns) {
-            columns = cells.map(cell => cell.toLowerCase());
-            continue;
-        }
-        if (cells.every(cell => /^:?-+:?$/.test(cell))) {
-            continue;
-        }
-        const nameColumn = columns[0];
-        const isMemberTable = /^(?:name|input|inputs|output|outputs)$/.test(nameColumn);
-        if (!isMemberTable || !/inputs|outputs|^$/i.test(subheading.replace(/`[^`]*`/g, ""))) {
-            continue;
-        }
-        const name = /^`\[{0,2}\(?([\w-]+)\)?\]{0,2}`/.exec(cells[0])?.[1];
-        if (name) {
-            const at = (column: string): string => cells[columns?.indexOf(column) ?? -1] ?? "";
-            rows.push({
-                defaultCell: at("default"),
-                description: at("description"),
-                isOutputTable: /output/i.test(nameColumn) || /outputs/i.test(subheading),
-                name,
-                nameCell: cells[0],
-                typeCell: at("type")
-            });
-        }
-    }
-    return rows;
+/** What the API reference lists for a symbol's inputs and outputs, by the name a template binds. */
+function referenceRows(symbol: ApiSymbol): DocumentedRow[] {
+    return [...(symbol.inputs ?? []), ...(symbol.outputs ?? [])].map((member: ApiMember) => ({
+        defaultCell: member.defaultValue ?? "",
+        description: member.description,
+        name: member.alias ?? member.name,
+        nameCell: [member.alias ?? member.name, member.required ? "required" : "", member.twoWay ? "two-way" : ""]
+            .filter(Boolean)
+            .join(" "),
+        typeCell: member.type
+    }));
 }
 
 describe("Leaf component documentation", () => {
     const entryPoints = new Map<string, EntryPoint>();
     const documents = new Map<string, string>();
+    const references = new Map<string, readonly ApiSymbol[]>();
     const selectorMembers = new Map<string, SourceClass>();
     let themeGuide = "";
 
@@ -267,7 +206,7 @@ describe("Leaf component documentation", () => {
             return { baseClass, className, members };
         };
 
-        /** Every class in the library by name, so a component's table can be checked against what it inherits. */
+        /** Every class in the library by name, so a component's reference can be checked against what it inherits. */
         const allClasses = new Map<string, Omit<SourceClass, "selector">>();
         const walk = (directory: string): void => {
             for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -409,6 +348,17 @@ describe("Leaf component documentation", () => {
             }
         }
         themeGuide = documents.get("guides/theming.md") ?? "";
+        if (!fs.existsSync(path.resolve(root, referenceRoot, "index.json"))) {
+            throw new Error(
+                `${referenceRoot} is missing. Run npm run build:api-data, which npm run test:lib runs first.`
+            );
+        }
+        for (const [entry] of coveredEntryPoints) {
+            const file = path.resolve(root, referenceRoot, `${entry}.json`);
+            if (fs.existsSync(file)) {
+                references.set(entry, (JSON.parse(fs.readFileSync(file, "utf-8")) as ApiEntryPointReference).symbols);
+            }
+        }
         // Loading TypeScript and parsing the source took 7s on CI against the default 10s, and the time follows the runner.
     }, 60_000);
 
@@ -431,21 +381,27 @@ describe("Leaf component documentation", () => {
         });
     });
 
-    describe("tables", () => {
-        it("gives every exported component and directive with members a section listing all of them", () => {
+    describe("reference", () => {
+        it("gives every exported component and directive with members a reference listing all of them", () => {
             const problems: string[] = [];
             for (const [entryName] of coveredEntryPoints) {
                 const entry = entryPoints.get(entryName) as EntryPoint;
                 const pages = documentsOf(entry);
+                const symbols = references.get(entryName) ?? [];
                 for (const source of entry.classes.filter(candidate => candidate.selector)) {
-                    const sections = pages.flatMap(([, markdown]) => readClassSection(markdown, source) ?? []);
-                    if (sections.length === 0) {
+                    const symbol = symbols.find(candidate => candidate.name === source.className);
+                    if (!symbol) {
                         if (source.members.length > 0 || !pages.some(([, text]) => mentions(text, source))) {
-                            problems.push(`${entryName}: no section for ${source.className}`);
+                            problems.push(`${entryName}: no reference for ${source.className}`);
                         }
                         continue;
                     }
-                    const rows = sections.flatMap(readRows);
+                    if (
+                        !pages.some(([name, text]) => name.endsWith("/api.md") && text.includes(`[\`${symbol.name}\`]`))
+                    ) {
+                        problems.push(`${entryName}: no API table links ${source.className}`);
+                    }
+                    const rows = referenceRows(symbol);
                     for (const member of source.members) {
                         const row = rows.find(candidate => candidate.name === member.name);
                         if (!row) {
@@ -582,16 +538,16 @@ function checkRow(
     }
     if (member.required) {
         if (!/required/i.test(`${row.nameCell} ${row.defaultCell} ${row.description}`)) {
-            problems.push(`${label} is required, and the table doesn't say so`);
+            problems.push(`${label} is required, and the reference doesn't say so`);
         }
     } else if (
         member.defaultText !== undefined &&
         isLiteralDefault(member.defaultText) &&
         normalizeLiteral(row.defaultCell) !== normalizeLiteral(member.defaultText)
     ) {
-        problems.push(`${label} defaults to ${member.defaultText}, and the table says ${row.defaultCell}`);
+        problems.push(`${label} defaults to ${member.defaultText}, and the reference says ${row.defaultCell}`);
     }
     if (member.isModel && !/model|two-way/i.test(`${row.nameCell} ${row.typeCell} ${row.description}`)) {
-        problems.push(`${label} is a model, and the table doesn't say it's two-way`);
+        problems.push(`${label} is a model, and the reference doesn't say it's two-way`);
     }
 }

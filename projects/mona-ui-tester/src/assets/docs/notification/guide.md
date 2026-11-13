@@ -46,7 +46,7 @@ export class MyComponent {
 | `hideAll(): void`                                     | Closes every currently visible notification, across all positions.                                                                                                                                                   |
 | `show(options: NotificationOptions): NotificationRef` | Creates a notification and returns a `NotificationRef`. If a notification with the same `id` already exists at the resolved `position`, returns a ref to that existing notification instead of creating a duplicate. |
 
-See [Anatomy & Options Resolution](#anatomy) for how `show()` fills in defaults, and [API](#api) for the full `NotificationOptions` / `NotificationRef` shapes.
+See [Anatomy & Options Resolution](#anatomy) for how `show()` fills in defaults, and the API reference for the full [`NotificationOptions`](/api/notification/NotificationOptions) and [`NotificationRef`](/api/notification/NotificationRef) shapes.
 
 ## Anatomy
 

@@ -2,99 +2,17 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/segmented`.
+Everything below is imported from `@nanahoshi/mona-ui/segmented`. Each name links to its reference page, with every input, output, property and method.
 
-### `SegmentedComponent`
-
-**Selector:** `mona-segmented`  
-**Type parameters:** `T extends SegmentedValue = SegmentedValue`  
-**Implements:** `FormValueControl<T \| null>`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `alignment` | `"center" \| "end" \| "start" \| "stretch"` | `"stretch"` | Controls the alignment of the items inside the segmented component. |
-| `animate` | `boolean` | `true` | Controls whether the selection indicator animates between selected options. When false, selection changes are applied immediately without transition. |
-| `aria-label` | `string \| null` | `null` | Accessible name for the radio group. Provide either `aria-label` or `aria-labelledby`. |
-| `aria-labelledby` | `string \| null` | `null` | ID of an external element that provides the accessible name for the radio group. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled` | `boolean` | `false` | Disables every option in the group and prevents value changes. |
-| `invalid` | `boolean` | `false` | Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`. When bound to a signal form field via `[formField]`, this is written by the signal forms `FormField` directive. |
-| `name` | `string` | `""` | The name of the radios, for a native `<form>`. Generated when empty, so two groups don't interfere. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `options` (required) | `readonly SegmentedOption<T>[]` | — | The list of selectable options. Exactly one option is selected at a time. |
-| `readonly` | `boolean` | `false` | Prevents value changes while the control stays focusable and readable. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `required` | `boolean` | `false` | Marks the group as required, as `aria-required`. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the segmented container and its options. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the height, horizontal padding, text size, and spacing of each option. |
-| `touched` | `boolean` | `false` | Marks the component as touched. When bound to a signal form field via `[formField]`, this is written by the signal forms `FormField` directive. |
-| `value` (two-way) | `T \| null` | `null` | The currently selected value. When it matches no current option, no option is checked. A `null` value is allowed initially but cannot be restored through segmented interaction. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `touch` | `void` | Emitted when the selected value changes or focus leaves the group. |
-| `valueChange` | `T \| null` | Emitted when `value` changes. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `focus(options?: FocusOptions): void` | Moves focus to the selected option, or the first enabled one. |
-
-### `SegmentedItemTemplateDirective`
-
-Renders the visual content of every segmented option. Overrides the default label
-text of each option. Bind the options, as `[monaSegmentedItemTemplate]="options"`, to type `let-option` from them.
-
-**Selector:** `ng-template[monaSegmentedItemTemplate]`  
-**Type parameters:** `T extends SegmentedValue = SegmentedValue`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `monaSegmentedItemTemplate` | `readonly SegmentedOption<T>[] \| "" \| undefined` | `undefined` | The options, to type `let-option` from them. It changes nothing else. |
-
-#### Template context
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `$implicit` | `SegmentedOption<T>` | The option rendered by this item. |
-| `disabled` | `boolean` | Whether this option is disabled, either individually or via the group. |
-| `index` | `number` | Zero-based option index. |
-| `option` | `SegmentedOption<T>` | The option rendered by this item. |
-| `selected` | `boolean` | Whether this option is currently selected. |
+| [`SegmentedComponent`](/api/segmented/SegmentedComponent) | Component |  |
+| [`SegmentedItemTemplateDirective`](/api/segmented/SegmentedItemTemplateDirective) | Directive | Renders the visual content of every segmented option. |
 
 ### Types
 
-#### `SegmentedItemTemplateContext`
-
-Rendering context passed to the segmented item template.
-
-**Type parameters:** `T extends SegmentedValue = SegmentedValue`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `$implicit` (read-only) | `SegmentedOption<T>` | The option rendered by this item. |
-| `disabled` (read-only) | `boolean` | Whether this option is disabled, either individually or via the group. |
-| `index` (read-only) | `number` | Zero-based option index. |
-| `option` (read-only) | `SegmentedOption<T>` | The option rendered by this item. |
-| `selected` (read-only) | `boolean` | Whether this option is currently selected. |
-
-#### `SegmentedOption`
-
-**Type parameters:** `T extends SegmentedValue = SegmentedValue`
-
-| Name | Type |
-| --- | --- |
-| `disabled?` (read-only) | `boolean` |
-| `label` (read-only) | `string` |
-| `value` (read-only) | `T` |
-
-#### `SegmentedValue`
-
-```typescript
-type SegmentedValue = string | number;
-```
+| [`SegmentedItemTemplateContext`](/api/segmented/SegmentedItemTemplateContext) | Interface | Rendering context passed to the segmented item template. |
+| [`SegmentedOption`](/api/segmented/SegmentedOption) | Interface |  |
+| [`SegmentedValue`](/api/segmented/SegmentedValue) | Type alias |  |

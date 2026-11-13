@@ -1,3 +1,4 @@
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
 export interface ProgressRange {
     readonly max: number;
     readonly min: number;
@@ -12,6 +13,7 @@ export interface ProgressRange {
  * @param max The maximum value.
  * @returns The range and the value within it, or `null` when the range itself is invalid, because `min` or `max` isn't
  * finite or `max` isn't above `min`.
+ * @hidden Exported for Mona UI's other entry points; applications don't need it.
  */
 export const normalizeProgressRange = (value: number, min: number, max: number): ProgressRange | null => {
     if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) {

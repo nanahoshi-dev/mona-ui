@@ -6,6 +6,7 @@ import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
     LucideBookOpen,
+    LucideBraces,
     LucideDynamicIcon,
     LucidePlay,
     LucideSparkles,
@@ -15,6 +16,7 @@ import {
 } from "@lucide/angular";
 
 import { BreadcrumbComponent, BreadcrumbItemComponent } from "@nanahoshi/mona-ui/breadcrumb";
+import { PACKAGE_NAME } from "../../../api/api-text";
 import { THEME_OPTIONS, type ThemeOption } from "../../../theme-options";
 import { DocsNavigationService } from "../../services/docs-navigation.service";
 import { PageService } from "../../services/page.service";
@@ -46,12 +48,17 @@ export class PageComponent {
     readonly #navigation = inject(DocsNavigationService);
     readonly #themeService = inject(ThemeService);
     protected readonly activeBreadcrumbs = computed(() => {
+        const api = this.#navigation.apiLocation();
+        if (api) {
+            return ["Documentation", "API Reference", api.entryPoint, api.symbol].filter(crumb => crumb !== undefined);
+        }
         const page = this.#navigation.currentPage();
         const category = this.#navigation.currentCategory();
         return page && category ? ["Documentation", category.title, page.title] : ["Documentation"];
     });
     protected readonly pageIcon = computed(() => {
         const url = this.#navigation.url();
+        if (this.#navigation.apiLocation()) return LucideBraces;
         if (url.includes("introduction")) return LucideSparkles;
         if (url.includes("installation")) return LucideBookOpen;
         if (url.includes("avatar")) return LucideUser;
@@ -73,6 +80,21 @@ export class PageComponent {
         const meta = inject(Meta);
         effect(() => {
             const page = this.#navigation.currentPage();
+            const api = this.#navigation.apiLocation();
+            if (api) {
+                const importPath = `${PACKAGE_NAME}/${api.entryPoint}`;
+                const subject = api.symbol ?? (api.entryPoint ? importPath : null);
+                title.setTitle(subject ? `${subject} · API Reference · Mona UI` : "API Reference · Mona UI");
+                meta.updateTag({
+                    content: api.symbol
+                        ? `The API reference of ${api.symbol}, from ${importPath}.`
+                        : api.entryPoint
+                          ? `Everything ${importPath} exports.`
+                          : "Every export of Mona UI, by entry point.",
+                    name: "description"
+                });
+                return;
+            }
             title.setTitle(page ? `${page.title} · Mona UI` : "Mona UI");
             if (page) {
                 meta.updateTag({ content: page.description, name: "description" });
@@ -81,6 +103,7 @@ export class PageComponent {
         // The page scrolls inside this element, which the router doesn't reset. A link to a section scrolls on its own.
         effect(() => {
             this.#navigation.currentPage();
+            this.#navigation.apiLocation();
             const container = this.scrollContainer()?.nativeElement;
             if (container && !untracked(this.#navigation.url).includes("#")) {
                 container.scrollTop = 0;

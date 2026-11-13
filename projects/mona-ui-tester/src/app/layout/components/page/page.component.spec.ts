@@ -56,6 +56,44 @@ describe("PageComponent", () => {
         expect(scrollTop).not.toHaveBeenCalled();
     });
 
+    it("names an API reference page by its entry point and export", async () => {
+        const router = TestBed.inject(Router);
+        router.resetConfig([{ path: "**", component: EmptyComponent }]);
+
+        await router.navigateByUrl("/api/chart/ChartComponent");
+        await fixture.whenStable();
+        fixture.detectChanges();
+        expect(component["activeBreadcrumbs"]()).toEqual(["Documentation", "API Reference", "chart", "ChartComponent"]);
+        expect(TestBed.inject(Title).getTitle()).toBe("ChartComponent · API Reference · Mona UI");
+
+        await router.navigateByUrl("/api/chart");
+        await fixture.whenStable();
+        fixture.detectChanges();
+        expect(TestBed.inject(Title).getTitle()).toBe("@nanahoshi/mona-ui/chart · API Reference · Mona UI");
+    });
+
+    it("returns to the top between API reference pages, but not for a link to a member", async () => {
+        const router = TestBed.inject(Router);
+        router.resetConfig([{ path: "**", component: EmptyComponent }]);
+        const container = fixture.nativeElement.querySelector("[data-page-scroll-container]") as HTMLElement;
+        const scrollTop = vi.spyOn(container, "scrollTop", "set");
+        await router.navigateByUrl("/api/chart/ChartComponent");
+        await fixture.whenStable();
+        fixture.detectChanges();
+        scrollTop.mockClear();
+
+        await router.navigateByUrl("/api/chart/ChartPoint");
+        await fixture.whenStable();
+        fixture.detectChanges();
+        expect(scrollTop).toHaveBeenCalledWith(0);
+
+        scrollTop.mockClear();
+        await router.navigateByUrl("/api/chart/ChartPoint#x");
+        await fixture.whenStable();
+        fixture.detectChanges();
+        expect(scrollTop).not.toHaveBeenCalled();
+    });
+
     it("keeps the drawer open for a section's button, and closes it for a link", () => {
         const sidebar = component["sidebarService"];
         sidebar.open();

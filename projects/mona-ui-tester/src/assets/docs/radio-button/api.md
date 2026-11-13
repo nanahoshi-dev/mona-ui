@@ -2,104 +2,16 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/radio-button`.
+Everything below is imported from `@nanahoshi/mona-ui/radio-button`. Each name links to its reference page, with every input, output, property and method.
 
-### `RadioButtonComponent`
-
-**Selector:** `mona-radio-button`  
-**Type parameters:** `T = unknown`  
-**Implements:** `FormValueControl<T>`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-describedby` | `string` | `""` | Id of an element that describes the radio button, such as an error message. |
-| `aria-label` | `string` | `""` | Accessible name of the radio button when it has no visible label. |
-| `aria-labelledby` | `string` | `""` | Id of the element that labels the radio button. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the label container element via `tailwind-merge`. |
-| `disabled` | `boolean` | `false` | Sets the disabled state of the radio button. |
-| `inputId` | `string` | `generated` | Id of the native radio input. Point a `<label for>` at it to label the radio button from outside. A unique id is generated when it isn't set. |
-| `invalid` | `boolean` | `false` | Marks the radio button as invalid. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `label` | `string` | `""` | Text label displayed alongside the radio button. When provided, takes precedence over projected content. When empty, projected content inside `<mona-radio-button>` is used. When both are absent, name the radio button with `aria-label` or `aria-labelledby`. |
-| `labelPosition` | `"before" \| "after"` | `"after"` | Position of the label relative to the radio button circle. |
-| `labelSize` | `"large" \| "medium" \| "small"` | `"medium"` | Font size applied to the label text. |
-| `name` | `string` | `""` | HTML `name` attribute forwarded to the native input. Radio buttons that share the same `name` form a mutually exclusive group in the browser. |
-| `radioValue` | `T` | `undefined` | The identity value of this radio button within a group. Compared against `value()` to determine whether this button is selected. When this button is chosen, its `radioValue` is written to the form as the new group value. A radio button without one can't be selected. |
-| `readonly` | `boolean` | `false` | Prevents value changes while the control stays focusable and readable. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `required` | `boolean` | `false` | Marks the radio button as required, as the native `required` attribute. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"full"` | Sets the border radius of the radio button circle and indicator. |
-| `touched` | `boolean` | `false` | Marks the radio button as touched. Error styling requires both `invalid` and `touched` to be `true`. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `value` (two-way) | `T` | `undefined` | The currently selected value of a group of radio buttons that aren't in a `mona-radio-group`. When bound to a signal form field via `[formField]`, the `FormField` directive keeps it in sync. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `inputBlur` | `FocusEvent` | Emits when the input loses focus. |
-| `inputClick` | `MouseEvent` | Emits when the input is clicked. |
-| `inputFocus` | `FocusEvent` | Emits when the input receives focus. |
-| `touch` | `void` | Emits when the radio button loses focus or is selected. |
-| `valueChange` | `T` | Emitted when `value` changes. |
-
-#### Methods
-
-| Signature | Description |
+| Name | Kind |
 | --- | --- |
-| `focus(options?: FocusOptions): void` | Moves focus to the native radio input. |
-
-### `RadioGroupComponent`
-
-**Selector:** `mona-radio-group`  
-**Type parameters:** `T = unknown`  
-**Implements:** `FormValueControl<T>`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-describedby` | `string` | `""` | Id of an element that describes the group, such as an error message. |
-| `aria-label` | `string` | `""` | Accessible name of the group. A group needs a name from this, `aria-labelledby` or a `mona-label`. |
-| `aria-labelledby` | `string` | `""` | Id of the element that labels the group. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the group via `tailwind-merge`. |
-| `disabled` | `boolean` | `false` | Disables every radio button in the group. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `invalid` | `boolean` | `false` | Marks the group as invalid. It shows once `touched` is also true. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `name` | `string` | `""` | The native `name` shared by the radio buttons in the group. A unique name is generated when it isn't set. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `orientation` | `"horizontal" \| "vertical"` | `"vertical"` | The direction the radio buttons are laid out and announced in. |
-| `readonly` | `boolean` | `false` | Prevents value changes while the radio buttons stay focusable and readable. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `required` | `boolean` | `false` | Marks the group as required. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `touched` | `boolean` | `false` | Marks the group as touched. Error styling needs both `invalid` and `touched`. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `value` (two-way) | `T` | `undefined` | The `radioValue` of the selected radio button. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `touch` | `void` | Emits when a radio button is selected and when focus leaves the group. |
-| `valueChange` | `T` | Emitted when `value` changes. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `focus(options?: FocusOptions): void` | Moves focus to the selected radio button, or the first enabled one. |
-
-### `RadioButtonDirective`
-
-**Selector:** `input[type='radio'][monaRadioButton]`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `invalid` | `boolean` | `false` | Marks the radio button as invalid, triggering error border and ring styling. |
-| `rounded` | `RadioButtonDirectiveProps["rounded"]` | `"full"` | Sets the border radius of the radio button. |
-| `touched` | `boolean` | `false` | Marks the radio button as touched. Error styling is only shown when both `invalid` and `touched` are `true`. |
+| [`RadioButtonComponent`](/api/radio-button/RadioButtonComponent) | Component |
+| [`RadioGroupComponent`](/api/radio-button/RadioGroupComponent) | Component |
+| [`RadioButtonDirective`](/api/radio-button/RadioButtonDirective) | Directive |
 
 ### Types
 
-#### `RadioButtonDirectiveProps`
-
-```typescript
-type RadioButtonDirectiveProps = VariantProps<typeof radioButtonDirectiveThemeVariants>;
-```
+| Type | Kind |
+| --- | --- |
+| [`RadioButtonDirectiveProps`](/api/radio-button/RadioButtonDirectiveProps) | Type alias |

@@ -2,245 +2,34 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/command`.
+Everything below is imported from `@nanahoshi/mona-ui/command`. Each name links to its reference page, with every input, output, property and method.
 
-### `CommandComponent`
-
-A searchable list of actions or options, operated from one input. It works inline, in a popover, or in a
-`mona-command-dialog`. It only runs what the consumer asks for: choosing an item emits an event, and nothing closes
-or navigates by itself.
-
-**Selector:** `mona-command`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `filter` | `CommandFilter` | `defaultCommandFilter` | What counts as a match while `filterMode` is `"auto"`. |
-| `filterMode` | `CommandFilterMode` | `"auto"` | Whether the component filters the items, or the consumer supplies only the matching ones. |
-| `loading` | `boolean` | `false` | Whether results are on their way. Shows `mona-command-loading` and holds back the empty state. |
-| `loop` | `boolean` | `true` | Whether the arrow keys wrap around at the ends of the list. |
-| `query` (two-way) | `string` | `""` | The text in the input. |
-| `rounded` | `"large" \| "medium" \| "none" \| "small"` | `"medium"` | The corner radius. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `itemSelect` | `CommandSelectEvent` | Emits when any item is chosen, with the pointer or with Enter. |
-| `queryChange` | `string` | Emitted when `query` changes. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `focus(): void` | Moves focus to the input. |
-
-### `CommandDialogComponent`
-
-A modal for a `mona-command`. It stays near the top of the page instead of centering, so the input doesn't jump as
-results come and go, and the `mona-command` inside is created each time it opens, so it starts with an empty query.
-
-**Selector:** `mona-command-dialog`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string \| undefined` | `undefined` | The accessible name of the dialog. |
-| `open` (two-way) | `boolean` | `false` | Whether the dialog is open. |
-| `shortcut` | `string \| null` | `null` | A key combination that opens and closes the dialog from anywhere on the page, such as `mod+k`. `mod` is Command on Apple devices and Ctrl elsewhere. Nothing is bound unless this is set. |
-| `width` | `number \| string` | `"36rem"` | The dialog's width. It never gets wider than the viewport. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `openChange` | `boolean` | Emitted when `open` changes. |
-
-### `CommandItemComponent`
-
-One action or option in a `mona-command`. What it shows is its content; what it's found by is its value.
-
-**Selector:** `mona-command-item`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `disabled` | `boolean` | `false` | Whether the item shows but can't be chosen. |
-| `keywords` | `readonly string[]` | `[]` | Other words the item should be found by, such as synonyms. |
-| `value` (required) | `string` | — | What the item is found by, and what the select event carries. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `itemSelect` | `CommandSelectEvent` | Emits when this item is chosen, with the pointer or with Enter. |
-
-### `CommandInputComponent`
-
-The search field of a `mona-command`. Focus stays here while the arrow keys move through the list, so typing always
-continues the search.
-
-**Selector:** `mona-command-input`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string \| undefined` | `undefined` | The accessible name of the field. |
-| `placeholder` | `string` | — | The text shown while the field is empty. |
-
-### `CommandGroupComponent`
-
-A titled set of items. It hides itself while none of its items show.
-
-**Selector:** `mona-command-group`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `heading` | `string` | — | The title above the group's items. |
-
-### `CommandHighlightComponent`
-
-Shows a text with the parts the query matches marked. Marks the query's words, however the item was matched.
-
-**Selector:** `mona-command-highlight`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `text` (required) | `string` | — | The text to show. |
-
-### `CommandListComponent`
-
-Holds the items of a `mona-command`, and scrolls them. The empty and loading states sit outside the listbox, which
-may only contain options and groups.
-
-**Selector:** `mona-command-list`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string \| undefined` | `undefined` | The accessible name of the list. |
-
-### `CommandShortcutComponent`
-
-Shows an item's shortcut the way the platform writes it. It's only a hint: binding the keys stays with the consumer,
-who knows what they do.
-
-**Selector:** `mona-command-shortcut`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `keys` (required) | `string` | — | The keys, joined with `+`, such as `mod+k`. `mod` is Command on Apple devices and Ctrl elsewhere. |
-
-### `CommandEmptyComponent`
-
-Shows while a query has no results. Its content replaces the default message.
-
-**Selector:** `mona-command-empty`
-
-### `CommandFooterComponent`
-
-A strip below the list, for key hints or links.
-
-**Selector:** `mona-command-footer`
-
-### `CommandHeaderComponent`
-
-A strip above or below the input, for filters or a title.
-
-**Selector:** `mona-command-header`
-
-### `CommandLoadingComponent`
-
-Shows while the `mona-command` is `loading`. Its content replaces the default message.
-
-**Selector:** `mona-command-loading`
-
-### `CommandSeparatorComponent`
-
-A line between items. It's only visual, because a listbox can't contain a separator role. It hides while the
-component filters, when it would divide nothing.
-
-**Selector:** `mona-command-separator`
-
-### `CommandDialogContentDirective`
-
-Marks the template a `mona-command-dialog` renders while it's open.
-
-**Selector:** `ng-template[monaCommandDialogContent]`
+| [`CommandComponent`](/api/command/CommandComponent) | Component | A searchable list of actions or options, operated from one input. |
+| [`CommandDialogComponent`](/api/command/CommandDialogComponent) | Component | A modal for a `mona-command`. |
+| [`CommandItemComponent`](/api/command/CommandItemComponent) | Component | One action or option in a `mona-command`. |
+| [`CommandInputComponent`](/api/command/CommandInputComponent) | Component | The search field of a `mona-command`. |
+| [`CommandGroupComponent`](/api/command/CommandGroupComponent) | Component | A titled set of items. |
+| [`CommandHighlightComponent`](/api/command/CommandHighlightComponent) | Component | Shows a text with the parts the query matches marked. |
+| [`CommandListComponent`](/api/command/CommandListComponent) | Component | Holds the items of a `mona-command`, and scrolls them. |
+| [`CommandShortcutComponent`](/api/command/CommandShortcutComponent) | Component | Shows an item's shortcut the way the platform writes it. |
+| [`CommandEmptyComponent`](/api/command/CommandEmptyComponent) | Component | Shows while a query has no results. |
+| [`CommandFooterComponent`](/api/command/CommandFooterComponent) | Component | A strip below the list, for key hints or links. |
+| [`CommandHeaderComponent`](/api/command/CommandHeaderComponent) | Component | A strip above or below the input, for filters or a title. |
+| [`CommandLoadingComponent`](/api/command/CommandLoadingComponent) | Component | Shows while the `mona-command` is `loading`. |
+| [`CommandSeparatorComponent`](/api/command/CommandSeparatorComponent) | Component | A line between items. |
+| [`CommandDialogContentDirective`](/api/command/CommandDialogContentDirective) | Directive | Marks the template a `mona-command-dialog` renders while it's open. |
 
 ### Types
 
-#### `COMMAND_DEFAULT_MESSAGES`
-
-```typescript
-const COMMAND_DEFAULT_MESSAGES: MonaCommandMessages;
-```
-
-#### `defaultCommandFilter`
-
-The default filter: an item stays when every word of the query appears in its value or keywords, ignoring case and
-accents.
-
-```typescript
-const defaultCommandFilter: CommandFilter;
-```
-
-#### `CommandFilterItem`
-
-What a filter sees of an item.
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `keywords` (read-only) | `readonly string[]` | Other words the item should be found by. |
-| `value` (read-only) | `string` | The item's value. |
+| [`COMMAND_DEFAULT_MESSAGES`](/api/command/COMMAND_DEFAULT_MESSAGES) | Constant |  |
+| [`defaultCommandFilter`](/api/command/defaultCommandFilter) | Constant | The default filter: an item stays when every word of the query appears in its value or keywords, ignoring case and accents. |
+| [`CommandFilterItem`](/api/command/CommandFilterItem) | Interface | What a filter sees of an item. |
+| [`CommandSelectEvent`](/api/command/CommandSelectEvent) | Interface | Emitted when an item is chosen, with the pointer or with Enter. |
+| [`CommandFilter`](/api/command/CommandFilter) | Type alias | Decides whether an item stays in the list for a query. |
+| [`CommandFilterMode`](/api/command/CommandFilterMode) | Type alias | Who decides which items show. |
 
-#### `CommandSelectEvent`
-
-Emitted when an item is chosen, with the pointer or with Enter.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `KeyboardEvent \| MouseEvent` | The click or key press that chose the item, to tell apart a modified one, such as Ctrl+Enter. |
-| `value` (read-only) | `string` | The value of the chosen item. |
-
-#### `CommandFilter`
-
-Decides whether an item stays in the list for a query. It's only called while the query isn't empty.
-
-```typescript
-type CommandFilter = (query: string, item: CommandFilterItem) => boolean;
-```
-
-#### `CommandFilterMode`
-
-Who decides which items show. `"auto"` filters them on the client. `"manual"` shows every item, for results the
-consumer already narrowed down, such as a server's.
-
-```typescript
-type CommandFilterMode = "auto" | "manual";
-```
-
-#### `MonaCommandMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
-| --- | --- |
-| `dialogLabel` (read-only) | `string` |
-| `inputLabel` (read-only) | `string` |
-| `listLabel` (read-only) | `string` |
-| `loading` (read-only) | `string` |
-| `noResults` (read-only) | `string` |
-| `placeholder` (read-only) | `string` |
-| `resultsAvailable` (read-only) | `(count: number) => string` |
+**Related types:** [`MonaCommandMessages`](/api/i18n/MonaCommandMessages)

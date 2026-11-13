@@ -2,137 +2,21 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/chart`.
+Everything below is imported from `@nanahoshi/mona-ui/chart`. Each name links to its reference page, with every input, output, property and method.
 
-### `PolarSeriesComponent`
-
-Renders continuous polar series mapping magnitude over continuous degree angles (0° to 360°).
-
-**Selector:** `mona-polar-series`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `angleField` | `ChartField` | `"angle"` | **Deprecated.** Use `categoryField`, as on the other series. Property key or accessor function extracting the degree angle (0° to 360°) for each data item. |
-| `categoryField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting the angle for each point. Takes precedence over `angleField`. |
-| `class` | `string` | `""` | Additional CSS classes applied to the series host element. |
-| `color` | `string` | `""` | Explicit stroke and marker color override for the series. |
-| `connectNulls` | `boolean` | `false` | Whether to connect points across null or invalid values without gaps. |
-| `curve` | `ChartRadialCurve` | `"linear"` | Radial curve interpolation style (`"linear"` or `"smooth"`). |
-| `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding the root chart data. |
-| `field` | `ChartField` | `"value"` | Property key or accessor function extracting the numeric radial distance/value for each data item. |
-| `fillMode` | `ChartRadialFillMode` | `"none"` | Fill mode applied to the area between the data curve and the chart center pole (`"none"`, `"solid"`, or `"gradient"`). |
-| `fillOpacity` | `number \| undefined` | `undefined` | Opacity ratio for polar area fills (0 to 1). |
-| `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
-| `name` | `string` | `"Polar"` | Series name displayed in legends, tooltips, and accessibility regions. |
-| `pointRadius` | `number \| undefined` | `undefined` | Radius in pixels for point markers. |
-| `showPoints` | `boolean` | `false` | Whether to draw point markers at each valid angular coordinate. |
-| `strokeWidth` | `number \| undefined` | `undefined` | Stroke width in pixels for the outer data line. |
-| `valueFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Custom formatter function for numeric values in tooltips and live region announcements. |
-| `visible` (two-way) | `boolean` | `true` | Whether the polar series is visible on the chart. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `visibleChange` | `boolean` | Emitted when `visible` changes. |
-
-### `RadarSeriesComponent`
-
-Renders closed polygonal radar series comparing categorical metrics across angular spokes.
-
-**Selector:** `mona-radar-series`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `categoryField` | `ChartField` | `"category"` | Property key or accessor function extracting the angular spoke category for each data item. |
-| `class` | `string` | `""` | Additional CSS classes applied to the series host element. |
-| `color` | `string` | `""` | Explicit stroke and marker color override for the series. |
-| `connectNulls` | `boolean` | `false` | Whether to connect adjacent valid category points across missing or null categories. |
-| `curve` | `ChartRadialCurve` | `"linear"` | Radial interpolation curve (`"linear"` or `"smooth"`). |
-| `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding the root chart data. |
-| `field` | `ChartField` | `"value"` | Property key or accessor function extracting the numeric radial value for each data item. |
-| `fillMode` | `ChartRadialFillMode` | `"none"` | Fill mode applied to the radar polygon (`"none"`, `"solid"`, or `"gradient"`). |
-| `fillOpacity` | `number \| undefined` | `undefined` | Opacity ratio for polygon interior fills (0 to 1). |
-| `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
-| `name` | `string` | `"Radar"` | Series name displayed in legends, tooltips, and accessibility regions. |
-| `pointRadius` | `number \| undefined` | `undefined` | Radius in pixels for point markers rendered at category vertices. |
-| `showPoints` | `boolean` | `true` | Whether to draw point markers at each category vertex along the radar polygon. |
-| `strokeWidth` | `number \| undefined` | `undefined` | Stroke width in pixels for the outer polygon boundary. |
-| `valueFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Custom formatter function for numeric values in tooltips and live region announcements. |
-| `visible` (two-way) | `boolean` | `true` | Whether the radar series is visible on the chart. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `visibleChange` | `boolean` | Emitted when `visible` changes. |
-
-### `ChartRadialAxisComponent`
-
-Configures the radial numeric dimension (distance from pole) in Polar Axis charts.
-
-**Selector:** `mona-chart-radial-axis`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `axisLine` | `boolean` | `true` | Whether the pole-to-boundary axis line along the label angle is rendered. |
-| `class` | `string` | `""` | Additional CSS classes applied to the axis host element. |
-| `formatter` | `ChartAxisFormatter \| undefined` | `undefined` | Custom formatter function for radial tick labels. |
-| `gridLines` | `boolean` | `true` | Whether concentric radial grid rings or polygons are visible. |
-| `gridShape` | `ChartRadialGridShape` | `"auto"` | Geometry of radial grid lines (`"auto"`, `"circle"`, or `"polygon"`). |
-| `labelAngle` | `number` | `0` | Angle in degrees at which radial tick labels are positioned (0 = 12 o'clock). |
-| `labelOffset` | `number` | `6` | Pixel offset between radial tick markers and their labels. |
-| `labels` | `boolean` | `true` | Whether radial tick numeric labels are rendered. |
-| `max` | `number \| undefined` | `undefined` | Explicit upper bound for the radial scale range. |
-| `min` | `number \| undefined` | `undefined` | Explicit lower bound for the radial scale range. |
-| `nice` | `boolean` | `true` | Automatically extends the radial domain to round, pleasant intervals. |
-| `tickCount` | `number \| undefined` | `5` | Suggested number of concentric radial intervals. |
-| `visible` | `boolean` | `true` | Whether the radial axis, grid rings, and tick labels are visible. |
-
-### `ChartAngularAxisComponent`
-
-Configures the angular dimension (spokes and continuous degrees) in Polar Axis charts.
-
-**Selector:** `mona-chart-angular-axis`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `axisLine` | `boolean` | `true` | Whether the outer circular or polygonal baseline axis boundary line is rendered. |
-| `class` | `string` | `""` | Additional CSS classes applied to the axis host element. |
-| `formatter` | `ChartAxisFormatter \| undefined` | `undefined` | Custom formatter function for angular tick and spoke labels. |
-| `gridLines` | `boolean` | `true` | Whether radial angular spokes connecting the pole to outer categories/ticks are visible. |
-| `labelOffset` | `number` | `10` | Radial offset in pixels between the outer chart boundary and the angular labels. |
-| `labels` | `boolean` | `true` | Whether angular category or degree labels are rendered. |
-| `rotation` | `number` | `0` | Angular rotation offset in degrees applied clockwise to all spoke positions. |
-| `tickCount` | `number \| undefined` | `undefined` | Suggested number of degree ticks for polar charts (defaults to 12). Radar tick count is derived from categories. |
-| `visible` | `boolean` | `true` | Whether the angular axis, spokes, and labels are visible. |
+| [`PolarSeriesComponent`](/api/chart/PolarSeriesComponent) | Component | Renders continuous polar series mapping magnitude over continuous degree angles (0° to 360°). |
+| [`RadarSeriesComponent`](/api/chart/RadarSeriesComponent) | Component | Renders closed polygonal radar series comparing categorical metrics across angular spokes. |
+| [`ChartRadialAxisComponent`](/api/chart/ChartRadialAxisComponent) | Component | Configures the radial numeric dimension (distance from pole) in Polar Axis charts. |
+| [`ChartAngularAxisComponent`](/api/chart/ChartAngularAxisComponent) | Component | Configures the angular dimension (spokes and continuous degrees) in Polar Axis charts. |
 
 ### Types
 
-#### `ChartRadialCurve`
+| Type | Kind |
+| --- | --- |
+| [`ChartRadialCurve`](/api/chart/ChartRadialCurve) | Type alias |
+| [`ChartRadialFillMode`](/api/chart/ChartRadialFillMode) | Type alias |
+| [`ChartRadialGridShape`](/api/chart/ChartRadialGridShape) | Type alias |
 
-```typescript
-type ChartRadialCurve = "linear" | "smooth";
-```
-
-#### `ChartRadialFillMode`
-
-```typescript
-type ChartRadialFillMode = "gradient" | "none" | "solid";
-```
-
-#### `ChartRadialGridShape`
-
-```typescript
-type ChartRadialGridShape = "auto" | "circle" | "polygon";
-```
-
-**Documented elsewhere:** [`ChartAxisFormatter`](/components/chart), [`ChartField`](/components/chart), [`ChartValueFormatter`](/components/chart)
+**Related types:** [`ChartAxisFormatter`](/api/chart/ChartAxisFormatter), [`ChartField`](/api/chart/ChartField), [`ChartValueFormatter`](/api/chart/ChartValueFormatter)

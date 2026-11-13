@@ -2,70 +2,17 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/button-group`.
+Everything below is imported from `@nanahoshi/mona-ui/button-group`. Each name links to its reference page, with every input, output, property and method.
 
-### `ButtonGroupComponent`
-
-**Selector:** `mona-button-group`  
-**Type parameters:** `T = unknown`  
-**Implements:** `FormValueControl<T \| readonly T[] \| null \| undefined>`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `allowEmpty` | `boolean` | `true` | When `false` and `selection` is `"single"`, a selected button stays selected until another one takes over: the active button can't be deselected, and clearing every `selected` brings it back. It doesn't choose a first button, and a `value` of `null` still clears the group, so a form can reset it. Has no effect in `"multiple"` mode. |
-| `aria-label` | `string \| undefined` | `undefined` | Accessible name for the host element. Override when multiple button groups appear on the same page so screen reader users can distinguish them. |
-| `aria-labelledby` | `string` | `""` | Id of the element that names the group. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled` | `boolean` | `false` | Renders all child buttons with reduced visual emphasis and removes pointer interaction. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `invalid` | `boolean` | `false` | Marks the group as invalid. Error styling requires both `invalid` and `touched` to be `true`. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `look` | `"default" \| "error" \| "ghost" \| "info" \| "outline" \| "primary" \| "secondary" \| "success" \| "warning"` | `"outline"` | Visual style variant propagated to all child buttons. Also controls container-level divider and border behavior. |
-| `readonly` | `boolean` | `false` | Prevents selection changes while the buttons stay focusable. Buttons that aren't toggleable keep working. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the container and the outer corners of the first and last child button. |
-| `selection` | `SelectionMode` | `"multiple"` | Whether one button can be selected at a time (`"single"`) or each toggles on its own (`"multiple"`). The buttons stay toggle buttons with `aria-pressed` in both. For a choice that must always hold one value, use `mona-segmented`, which is a radio group. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset propagated to all child buttons, overriding their individual `size` inputs. |
-| `touched` | `boolean` | `false` | Marks the group as touched. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `value` (two-way) | `T \| readonly T[] \| null \| undefined` | `undefined` | The value of the selected button in `"single"` mode, or `null`, and an array of the selected buttons' values in `"multiple"` mode. Buttons take part by having a `value`. While `undefined`, it leaves each button's `selected` alone. A value with no button yet stays, so one that loads before its button isn't lost. Use either this or `[(selected)]` on the buttons, not both. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `buttonClick` | `ButtonGroupClickEvent<T>` | Emitted when a button placed directly in the group is clicked, toggleable or not, after the group has applied its selection. Not emitted for a dropdown or split button's own buttons, for a disabled button, or for a toggle button while the group is read-only, since nothing was selected. |
-| `touch` | `void` | Emitted when a user changes the selection or focus leaves the group. The `FormField` directive listens to this to mark the field as touched. |
-| `valueChange` | `T \| readonly T[] \| null \| undefined` | Emitted when `value` changes. |
-
-#### Methods
-
-| Signature | Description |
+| Name | Kind |
 | --- | --- |
-| `focus(options?: FocusOptions): void` | Moves focus to the selected button, or the first enabled one. |
+| [`ButtonGroupComponent`](/api/button-group/ButtonGroupComponent) | Component |
 
 ### Types
 
-#### `BUTTON_GROUP_DEFAULT_MESSAGES`
-
-```typescript
-const BUTTON_GROUP_DEFAULT_MESSAGES: { buttonGroup: string; };
-```
-
-#### `ButtonGroupClickEvent`
-
-What `mona-button-group` reports about a clicked button.
-
-**Type parameters:** `T = unknown`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `button` (read-only) | `HTMLButtonElement` | The button's element. |
-| `selected` (read-only) | `boolean` | Whether the button is selected now that the group has applied its selection. |
-| `value` (read-only) | `T \| undefined` | The button's `value`, if it has one. |
+| [`BUTTON_GROUP_DEFAULT_MESSAGES`](/api/button-group/BUTTON_GROUP_DEFAULT_MESSAGES) | Constant |  |
+| [`ButtonGroupClickEvent`](/api/button-group/ButtonGroupClickEvent) | Interface | What `mona-button-group` reports about a clicked button. |
 
-#### `SelectionMode`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type SelectionMode = "single" | "multiple";
-```
+**Related types:** [`SelectionMode`](/api/common/SelectionMode)

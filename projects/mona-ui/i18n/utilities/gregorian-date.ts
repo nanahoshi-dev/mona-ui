@@ -23,6 +23,7 @@ export function normalizeGregorianLocale(localeId: string): string {
 /**
  * Creates a Luxon DateTime from a Date instance, reconfigured to the specified locale
  * with an explicit Gregorian output calendar.
+ * @hidden Exported for Mona UI's other entry points; applications don't need it.
  */
 export function gregorianDateTime(date: Date, localeId: string): DateTime {
     const locale = normalizeGregorianLocale(localeId);
@@ -35,6 +36,7 @@ export function gregorianDateTime(date: Date, localeId: string): DateTime {
 /**
  * Creates a Luxon DateTime from object components (year, month, etc.), reconfigured to the
  * specified locale with an explicit Gregorian output calendar.
+ * @hidden Exported for Mona UI's other entry points; applications don't need it.
  */
 export function gregorianDateTimeFromObject(
     obj: { year: number; month?: number; day?: number; hour?: number; minute?: number; second?: number },

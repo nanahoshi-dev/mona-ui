@@ -2,14 +2,17 @@ import { existsSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Marked } from "marked";
+import type { ApiEntryPointReference, ApiReferenceIndex, ApiSymbolReference } from "../src/app/api/api-model";
+import { KIND_LABELS, PACKAGE_NAME, apiSections, apiSymbolPath, prose } from "../src/app/api/api-text";
 import { createUniqueHeadingId } from "../src/app/layout/docs-heading-id";
-import { DOCS_MANIFEST } from "../src/app/layout/docs-manifest";
+import { DOCS_MANIFEST, flattenDocsPages } from "../src/app/layout/docs-manifest";
 import type { DocsPage } from "../src/app/layout/docs-manifest";
 
 /**
  * Builds the documentation's search index. The site renders its pages in the browser, so there's no HTML for Pagefind
- * to crawl: this renders each page's markdown to the same headings the site shows, and hands that over. The index goes
- * to `dist/docs-search`, which the tester's build serves at `/pagefind`.
+ * to crawl: this renders each page's markdown to the same headings the site shows, and hands that over, along with
+ * each symbol's API reference page from `dist/docs-api`. The index goes to `dist/docs-search`, which the tester's build
+ * serves at `/pagefind`.
  */
 
 export const PAGES_WITHOUT_MARKDOWN: readonly string[] = ["theme-colors", "theme-luna"];
@@ -46,7 +49,7 @@ export function readRouteSources(routes: string, readComponent: (importPath: str
 /**
  * One page as HTML for the index. The manifest gives the title, so an H1 in the markdown is left out. Headings keep the
  * ids the site gives them, and code blocks stay out of the index: their excerpts read badly, and what's worth finding
- * in them, such as selectors and inputs, is also in the prose and the API tables.
+ * in them, such as selectors and inputs, is also in the prose and the API reference.
  */
 export function renderSearchDocument(page: DocsPage, category: string, markdown: readonly string[]): string {
     const ids = new Set<string>();
@@ -65,6 +68,32 @@ export function renderSearchDocument(page: DocsPage, category: string, markdown:
         `<html lang="en"><head><meta data-pagefind-meta="category[content]" content="${escapeHtml(category)}"></head>`,
         `<body><h1>${escapeHtml(page.title)}</h1><p>${escapeHtml(page.description)}</p>`,
         body,
+        "</body></html>"
+    ].join("\n");
+}
+
+/**
+ * A symbol's reference page as HTML for the index. Each member is a heading with the anchor the page gives it, so a
+ * result for a member lands on that member.
+ */
+export function renderApiSearchDocument(entryPoint: string, symbol: ApiSymbolReference): string {
+    const marked = new Marked();
+    const markdown = (text: string): string => marked.parse(prose(text), { async: false });
+    const sections = apiSections(symbol).flatMap(section => [
+        `<h2 id="${section.id}">${escapeHtml(section.title)}</h2>`,
+        ...section.items.map(item =>
+            [
+                `<h3 id="${item.id}">${escapeHtml(item.name)}</h3>`,
+                item.description ? markdown(item.description) : ""
+            ].join("")
+        )
+    ]);
+    return [
+        `<html lang="en"><head><meta data-pagefind-meta="category[content]" content="API Reference"></head>`,
+        `<body><h1>${escapeHtml(symbol.name)}</h1>`,
+        `<p>${escapeHtml(`${KIND_LABELS[symbol.kind]} from ${PACKAGE_NAME}/${entryPoint}.`)}</p>`,
+        symbol.description ? markdown(symbol.description) : "",
+        ...sections,
         "</body></html>"
     ].join("\n");
 }
@@ -99,7 +128,7 @@ async function main(): Promise<void> {
 
     let pageCount = 0;
     for (const category of DOCS_MANIFEST) {
-        for (const page of category.pages) {
+        for (const page of flattenDocsPages([category])) {
             const sources = routes.get(page.path);
             if (!sources) {
                 throw new Error(`No route for the manifest's page "${page.path}".`);
@@ -118,13 +147,35 @@ async function main(): Promise<void> {
         }
     }
 
+    const apiDirectory = join(repositoryRoot, "dist/docs-api");
+    if (!existsSync(join(apiDirectory, "index.json"))) {
+        throw new Error("Write the API reference data first, with npm run build:api-data.");
+    }
+    const readJson = <T>(file: string): T => JSON.parse(readFileSync(join(apiDirectory, file), "utf8")) as T;
+    let symbolCount = 0;
+    for (const { name } of readJson<ApiReferenceIndex>("index.json").entryPoints) {
+        for (const symbol of readJson<ApiEntryPointReference>(`${name}.json`).symbols) {
+            const { errors } = await index.addHTMLFile({
+                content: renderApiSearchDocument(name, symbol),
+                url: apiSymbolPath(name, symbol.name)
+            });
+            if (errors.length > 0) {
+                throw new Error(`Couldn't index the reference of "${symbol.name}": ${errors.join(", ")}`);
+            }
+            symbolCount++;
+        }
+    }
+
     rmSync(outputPath, { force: true, recursive: true });
     const { errors } = await index.writeFiles({ outputPath });
     if (errors.length > 0) {
         throw new Error(`Couldn't write the index: ${errors.join(", ")}`);
     }
     await pagefind.close();
-    console.log(`Indexed ${pageCount} pages into ${readdirSync(outputPath).length} files at dist/docs-search.`);
+    const files = readdirSync(outputPath).length;
+    console.log(
+        `Indexed ${pageCount} pages and ${symbolCount} API references into ${files} files at dist/docs-search.`
+    );
 }
 
 if (process.env["VITEST"] !== "true" && process.argv[1]?.endsWith("generate-search-index.ts")) {

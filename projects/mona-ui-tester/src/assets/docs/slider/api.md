@@ -2,107 +2,19 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/slider`.
+Everything below is imported from `@nanahoshi/mona-ui/slider`. Each name links to its reference page, with every input, output, property and method.
 
-### `SliderComponent`
-
-**Selector:** `mona-slider`  
-**Implements:** `FormValueControl<number>`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-describedby` | `string \| null` | `null` | Id of an element that describes the control, such as an error message. On a range slider it describes each handle. |
-| `aria-label` | `string \| null` | `null` | Accessible name of the control. On a range slider it names the group holding both handles. |
-| `aria-labelledby` | `string \| null` | `null` | Id of the element that labels the control. On a range slider each handle reads it before its own name. |
-| `ariaValueText` | `((value: number) => string) \| null` | `null` | Human-readable override for the `aria-valuenow` announcement. Pass a function that receives the current value and returns the string to announce. |
-| `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction. |
-| `handleClasses` | `string \| string[]` | `[]` | Additional CSS classes to apply to the slider handle. |
-| `handleStyles` | `Partial<CSSStyleDeclaration>` | `{}` | Additional inline styles to apply to the slider handle. |
-| `invalid` | `boolean` | `false` | Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on the handle element once the control is touched. |
-| `labelPosition` | `SliderLabelPosition` | `"after"` | Position of the label relative to the component. |
-| `labelStep` | `number` | `1` | Controls which tick labels are shown — only every n<sup>th</sup> label is rendered. |
-| `largeTickStep` | `number \| null` | `null` | Controls which ticks render at large size — only every n<sup>th</sup> tick is enlarged. Pass `null` to disable large ticks. |
-| `max` | `number \| undefined` | `undefined` | Upper bound that wins over `maxValue`. When bound to a signal form field via `[formField]`, this is written from the field's `max` rule. |
-| `maxValue` | `number` | `10` | Upper bound of the value range. Must be greater than `minValue`. |
-| `min` | `number \| undefined` | `undefined` | Lower bound that wins over `minValue`. When bound to a signal form field via `[formField]`, this is written from the field's `min` rule. |
-| `minValue` | `number` | `0` | Lower bound of the value range. |
-| `orientation` | `Orientation` | `"horizontal"` | Layout orientation of the component. |
-| `readonly` | `boolean` | `false` | Prevents value changes while the control stays focusable and readable. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"full"` | Border-radius preset applied to the slider handle. |
-| `selectionBackground` | `string \| Partial<CSSStyleDeclaration> \| null` | `null` | Background color of the filled selection area between the minimum and the current value. Accepts a CSS color string or a `CSSStyleDeclaration` partial. |
-| `shiftMultiplier` | `number` | `10` | Multiplier applied to the step when the user holds Shift while pressing an arrow key. |
-| `showLabels` | `boolean` | `false` | Displays value labels alongside tick marks. Only takes effect when `showTicks` is `true`. |
-| `showTicks` | `boolean` | `false` | Displays tick marks at each step position along the track. |
-| `smallTickStep` | `number` | `1` | Controls how many ticks are visible — only every n<sup>th</sup> tick is rendered. |
-| `step` | `number` | `1` | Distance between the values the control can take. `maxValue` can always be reached, even when it isn't a whole number of steps from `minValue`. |
-| `touched` | `boolean` | `false` | Marks the slider as touched. Error styling requires both `invalid` and `touched` to be `true`. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `trackBackground` | `string \| Partial<CSSStyleDeclaration> \| null` | `null` | Background color of the unfilled track portion. Accepts a CSS color string or a `CSSStyleDeclaration` partial. |
-| `trackSize` | `string \| number` | `undefined` | Width (vertical orientation) or height (horizontal orientation) of the track. Accepts a pixel number or any CSS length string. |
-| `value` (two-way) | `number` | `0` | Current value. A value out of range or off the step grid is shown at the nearest valid value, and the model keeps its own until the user changes it, so a `maxValue` that loads late can't overwrite saved data. A development warning reports it. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `touch` | `void` | Emitted when a handle loses focus. A click on the track moves focus to the handle first. |
-| `valueChange` | `number` | Emitted when `value` changes. |
-
-#### Methods
-
-| Signature | Description |
+| Name | Kind |
 | --- | --- |
-| `focus(options?: FocusOptions): void` | Moves focus to the handle. Does nothing while disabled. |
-
-### `SliderHandleTemplateDirective`
-
-**Selector:** `ng-template[monaSliderHandleTemplate]`
-
-#### Template context
-
-| Name | Type |
-| --- | --- |
-| `$implicit` | `number` |
-
-### `SliderTickValueTemplateDirective`
-
-**Selector:** `ng-template[monaSliderTickValueTemplate]`
-
-#### Template context
-
-| Name | Type |
-| --- | --- |
-| `$implicit` | `number` |
+| [`SliderComponent`](/api/slider/SliderComponent) | Component |
+| [`SliderHandleTemplateDirective`](/api/slider/SliderHandleTemplateDirective) | Directive |
+| [`SliderTickValueTemplateDirective`](/api/slider/SliderTickValueTemplateDirective) | Directive |
 
 ### Types
 
-#### `SLIDER_DEFAULT_MESSAGES`
-
-```typescript
-const SLIDER_DEFAULT_MESSAGES: MonaSliderMessages;
-```
-
-#### `SliderLabelPosition`
-
-```typescript
-type SliderLabelPosition = "before" | "after";
-```
-
-#### `MonaSliderMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `maximumValue` (read-only) | `string` |
-| `minimumValue` (read-only) | `string` |
-| `sliderValue` (read-only) | `string` |
+| [`SLIDER_DEFAULT_MESSAGES`](/api/slider/SLIDER_DEFAULT_MESSAGES) | Constant |
+| [`SliderLabelPosition`](/api/slider/SliderLabelPosition) | Type alias |
 
-#### `Orientation`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type Orientation = "horizontal" | "vertical";
-```
+**Related types:** [`MonaSliderMessages`](/api/i18n/MonaSliderMessages), [`Orientation`](/api/common/Orientation)

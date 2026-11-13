@@ -12,6 +12,7 @@ import { DropdownService } from "../services/dropdown.service";
  * The announcement goes through the CDK `LiveAnnouncer`, whose live region lives at the end of the document, so it
  * never becomes part of the combobox's content. The highlighted option isn't announced here:
  * `aria-activedescendant` already does that.
+ * @hidden Exported for Mona UI's other entry points; applications don't need it.
  */
 @Directive({
     selector: "[monaDropdownLiveRegion]"

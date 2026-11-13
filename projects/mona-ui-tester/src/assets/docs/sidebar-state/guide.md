@@ -134,7 +134,7 @@ export class WorkspaceSwitcherComponent {
 }
 ```
 
-The controller exposes `expanded`, `state`, `iconOnly`, `compact`, `mobileOpen`, `side`, `variant`, `collapsible` and `sidebarId` as signals, plus `expand()`, `collapse()` and `toggle()`. The [API](#api) section describes each one.
+The controller exposes `expanded`, `state`, `iconOnly`, `compact`, `mobileOpen`, `side`, `variant`, `collapsible` and `sidebarId` as signals, plus `expand()`, `collapse()` and `toggle()`. The reference page of [`SidebarController`](/api/sidebar/SidebarController) describes each one.
 
 Structural facts are readable but not settable. `side`, `variant` and `collapsible` are authored as inputs on `mona-sidebar`; writing them from a descendant would leave the component and the shared state disagreeing until the next change detection pass. Bind the inputs instead.
 

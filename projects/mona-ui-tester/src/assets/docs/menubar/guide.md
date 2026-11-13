@@ -62,7 +62,7 @@ mona-menubar
     └── mona-menu-separator            — a horizontal divider
 ```
 
-Alternatively, a `mona-menu` can be given an `items` collection directly (see the API section) instead of projecting item components. When `items` is non-empty, it takes precedence over projected content.
+Alternatively, a `mona-menu` can be given an [`items`](/api/menubar/MenuComponent#items) collection directly instead of projecting item components. When `items` is non-empty, it takes precedence over projected content.
 
 ### Template directives
 

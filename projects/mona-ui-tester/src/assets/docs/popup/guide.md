@@ -47,7 +47,7 @@ Popup has a single content-projection slot. Everything placed inside `<mona-popu
 
 ### Custom positioning
 
-`anchorConnectionPoint` is the point on the anchor the popup attaches to; `popupConnectionPoint` is the point on the popup that touches the anchor. Both accept the same nine-position keyword set (see the [API](#api) table below). Popup adds no ARIA, so the example sets the role, the name and `aria-expanded` itself.
+`anchorConnectionPoint` is the point on the anchor the popup attaches to; `popupConnectionPoint` is the point on the popup that touches the anchor. Both accept the same nine-position keyword set, [`ConnectionPoint`](/api/popup/ConnectionPoint). Popup adds no ARIA, so the example sets the role, the name and `aria-expanded` itself.
 
 ```example
 popup/positioning

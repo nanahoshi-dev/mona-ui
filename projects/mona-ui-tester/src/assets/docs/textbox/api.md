@@ -2,85 +2,18 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/text-box`.
+Everything below is imported from `@nanahoshi/mona-ui/text-box`. Each name links to its reference page, with every input, output, property and method.
 
-### `TextBoxComponent`
-
-**Selector:** `mona-text-box`  
-**Implements:** `FormValueControl<string>`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-describedby` | `string` | `""` | Id of an element that describes the inner input, such as a hint or an error message. |
-| `aria-label` | `string` | `""` | Accessible name of the inner input. Prefer a visible label, linked through `inputId` or `aria-labelledby`; the placeholder is not a label. |
-| `aria-labelledby` | `string` | `""` | Id of the element that labels the inner input. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `clearButton` | `boolean` | `false` | Displays a clear button that resets the value to empty. The button is hidden while the value is empty or the text box is disabled or read-only. |
-| `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction. |
-| `inputAttributes` | `AttributeConfig` | `{}` | Additional HTML attributes applied directly to the inner `<input>` element. |
-| `inputClass` | `string \| string[]` | `""` | Additional CSS classes applied to the inner `<input>` element. |
-| `inputId` | `string` | `generated` | Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the text box. A unique id is generated when it isn't set. |
-| `inputStyle` | `string \| Partial<CSSStyleDeclaration> \| null` | `null` | Inline styles applied to the inner `<input>` element. Accepts a style string or a `CSSStyleDeclaration` partial. |
-| `invalid` | `boolean` | `false` | Marks the text box as invalid. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `maxLength` | `number \| undefined` | `undefined` | Maximum number of characters, set as `maxlength` on the inner input. When bound to a signal form field via `[formField]`, this is written from the field's `maxLength` rule. |
-| `minLength` | `number \| undefined` | `undefined` | Minimum number of characters, set as `minlength` on the inner input. When bound to a signal form field via `[formField]`, this is written from the field's `minLength` rule. |
-| `name` | `string` | `""` | Name of the inner input, used by browsers and password managers for autofill. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `placeholder` | `string` | `""` | Placeholder text shown when no value has been entered. |
-| `readonly` | `boolean` | `false` | Prevents value changes while preserving the component's visual state. |
-| `required` | `boolean` | `false` | Marks the text box as required. Triggers the invalid state when the value is empty and the field has been touched. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the component. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the component's dimensions. |
-| `touched` | `boolean` | `false` | Sets the touched state of the text box. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `type` | `InputType` | `"text"` | Sets the `type` attribute of the inner `<input>` element. |
-| `value` (two-way) | `string` | `""` | Two-way bindable current value of the text box. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `inputBlur` | `FocusEvent` | Emitted when the inner input loses focus, including when focus moves to the clear button or to content in the prefix or suffix templates. |
-| `inputFocus` | `FocusEvent` | Emitted when the inner input gains focus. |
-| `touch` | `void` | Emitted when focus leaves the text box, including its clear button and prefix and suffix content. Form directives (`[formField]`, `ngModel`, `formControl`) listen to this to mark the field as touched. |
-| `valueChange` | `string` | Emitted when `value` changes. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `focus(options?: FocusOptions): void` | Focuses the inner input and places the caret after the value, so the end of a long value is in view. |
-
-### `TextBoxPrefixTemplateDirective`
-
-Marks an `<ng-template>` as a prefix slot. The template is rendered inside the container's left side. Multiple prefix
-templates are supported and render in source order.
-
-**Selector:** `ng-template[monaTextBoxPrefixTemplate]`
-
-### `TextBoxSuffixTemplateDirective`
-
-Marks an `<ng-template>` as a suffix slot. The template is rendered inside the container's right side, after the
-optional clear button. Multiple suffix templates are supported and render in source order.
-
-**Selector:** `ng-template[monaTextBoxSuffixTemplate]`
+| [`TextBoxComponent`](/api/text-box/TextBoxComponent) | Component |  |
+| [`TextBoxPrefixTemplateDirective`](/api/text-box/TextBoxPrefixTemplateDirective) | Directive | Marks an `<ng-template>` as a prefix slot. |
+| [`TextBoxSuffixTemplateDirective`](/api/text-box/TextBoxSuffixTemplateDirective) | Directive | Marks an `<ng-template>` as a suffix slot. |
 
 ### Types
 
-#### `TEXT_BOX_DEFAULT_MESSAGES`
+| Type | Kind |
+| --- | --- |
+| [`TEXT_BOX_DEFAULT_MESSAGES`](/api/text-box/TEXT_BOX_DEFAULT_MESSAGES) | Constant |
 
-```typescript
-const TEXT_BOX_DEFAULT_MESSAGES: { clear: string; };
-```
-
-#### `AttributeConfig`
-
-From `@nanahoshi/mona-ui/common`.
-
-HTML attributes by name, to apply to an element.
-
-```typescript
-type AttributeConfig = Record<string, unknown>;
-```
-
-**Documented elsewhere:** [`InputType`](/components/input)
+**Related types:** [`AttributeConfig`](/api/common/AttributeConfig), [`InputType`](/api/text-box/InputType)

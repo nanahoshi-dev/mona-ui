@@ -2,17 +2,8 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/text-area`.
+Everything below is imported from `@nanahoshi/mona-ui/text-area`. Each name links to its reference page, with every input, output, property and method.
 
-### `TextAreaDirective`
-
-**Selector:** `textarea[monaTextArea]`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `invalid` | `boolean` | `false` | Marks the textarea as invalid, triggering error border and ring styling. |
-| `rounded` | `"large" \| "medium" \| "none" \| "small"` | `"medium"` | Sets the border radius of the textarea. |
-| `touched` | `boolean` | `false` | Marks the textarea as touched. Error styling is only shown when both `invalid` and `touched` are `true`. |
+| Name | Kind |
+| --- | --- |
+| [`TextAreaDirective`](/api/text-area/TextAreaDirective) | Directive |

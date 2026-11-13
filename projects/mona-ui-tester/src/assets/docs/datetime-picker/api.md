@@ -2,138 +2,16 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/datetime-picker`.
+Everything below is imported from `@nanahoshi/mona-ui/datetime-picker`. Each name links to its reference page, with every input, output, property and method.
 
-### `DateTimePickerComponent`
-
-**Selector:** `mona-datetime-picker`  
-**Implements:** `FormValueControl<Date \| null>`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-describedby` | `string` | `""` | Id of an element that describes the input, such as a hint or an error message. |
-| `aria-label` | `string` | `""` | Accessible name of the input. Prefer a visible label, linked through `inputId` or `aria-labelledby`; the placeholder is not a label. |
-| `aria-labelledby` | `string` | `""` | Id of the element that labels the input. |
-| `class` | `string` | `""` | Extra classes for the input's container. |
-| `disabled` | `boolean` | `false` | Sets the disabled state of the date time picker. |
-| `disabledDates` | `DateDisabledType` | — | Sets the disabled dates of the date time picker. Accepts either an iterable of Date objects or a predicate function. Typing a disabled date is reported as a `disabledDate` error instead of setting the value. |
-| `firstDay` | `FirstDayOfWeek \| null` | `null` | Sets the first day of the week. If not specified, derives from the active locale. |
-| `format` | `string \| null` | `null` | Sets the date format of the date time picker. If not specified, derives from the active locale, hourFormat, and showSeconds. Typed text is also accepted with one-digit parts and a two-digit year. |
-| `hourFormat` | `HourFormat \| null` | `null` | Sets the hour format of the date time picker. When null, the active locale's clock is used: 12-hour for en-US, 24-hour for de-DE. |
-| `hourStep` | `number` | `1` | Sets the hour step of the time picker. |
-| `inputId` | `string` | `generated` | Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the date time picker. A unique id is generated when it isn't set. |
-| `invalid` | `boolean` | `false` | Marks the date time picker as invalid. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `max` | `Date \| undefined` | `undefined` | Sets the maximum date of the date time picker. A later typed date is reported as a `maxDate` error. |
-| `min` | `Date \| undefined` | `undefined` | Sets the minimum date of the date time picker. An earlier typed date is reported as a `minDate` error. |
-| `minuteStep` | `number` | `1` | Sets the minute step of the time picker. |
-| `placeholder` | `string` | `""` | Sets the placeholder of the date time picker. |
-| `popupClass` | `string` | `""` | Sets the class of the popup element. |
-| `popupHeight` | `ListSizeInputType` | `undefined` | Sets the height of the popup element. When not set, the popup fits its content. |
-| `popupWidth` | `ListSizeInputType` | `undefined` | Sets the width of the popup element. When not set, the popup is at least as wide as the input. |
-| `readonly` | `boolean` | `false` | Sets the readonly state of the date time picker. |
-| `readonlyInput` | `boolean` | `false` | When true, the input is readonly but the popup button remains enabled. |
-| `required` | `boolean` | `false` | Sets the required state of the date time picker. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Sets the border radius of the date time picker. |
-| `secondStep` | `number` | `1` | Sets the second step of the time picker. |
-| `showClearButton` | `boolean` | `false` | Sets the visibility of the clear button. Clearing empties the value at once. |
-| `showSeconds` | `boolean` | `false` | Sets the visibility of the second selector. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Sets the size of the date time picker. |
-| `touched` | `boolean` | `false` | Sets the touched state of the date time picker. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `value` (two-way) | `Date \| null` | `null` | Two-way bindable current date time value. Typed text is written on Enter and when the input loses focus; text that isn't a valid date and time keeps the previous value and marks the field invalid. |
-| `weekNumber` | `boolean` | `false` | Enables the display of week numbers in the calendar. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `close` | `PopupCloseEvent<unknown>` | Emits when the popup is about to close. This event is preventable. |
-| `closed` | `void` | Emits after the popup is closed. |
-| `open` | `PreventableEvent<Event>` | Emits when the popup is about to open. This event is preventable. |
-| `opened` | `void` | Emits after the popup is opened. |
-| `touch` | `void` | Emitted when focus leaves the date time picker and its popup. The `FormField` directive listens to this to mark the field as touched. |
-| `valueChange` | `Date \| null` | Emitted when `value` changes. |
-
-#### Methods
-
-| Signature | Description |
+| Name | Kind |
 | --- | --- |
-| `focus(options?: FocusOptions): void` | Focuses the input and places the caret after the text. Read-only pickers take focus too. |
+| [`DateTimePickerComponent`](/api/datetime-picker/DateTimePickerComponent) | Component |
 
 ### Types
 
-#### `DATETIME_PICKER_DEFAULT_MESSAGES`
-
-```typescript
-const DATETIME_PICKER_DEFAULT_MESSAGES: MonaDateTimePickerMessages;
-```
-
-#### `DateDisabledType`
-
-From `@nanahoshi/mona-ui/date-input`.
-
-```typescript
-type DateDisabledType = Iterable<Date> | Predicate<Date> | null | undefined;
-```
-
-#### `HourFormat`
-
-From `@nanahoshi/mona-ui/date-input`.
-
-```typescript
-type HourFormat = "12" | "24";
-```
-
-#### `ListSizeInputType`
-
-From `@nanahoshi/mona-ui/list`.
-
-```typescript
-type ListSizeInputType = ListSizeType | number;
-```
-
-#### `ListSizeType`
-
-From `@nanahoshi/mona-ui/list`.
-
-A CSS length, or nothing to leave it to the stylesheet.
-
-```typescript
-type ListSizeType = string | null | undefined;
-```
-
-#### `MonaDateTimePickerMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `calendar` (read-only) | `string` |
-| `cancel` (read-only) | `string` |
-| `date` (read-only) | `string` |
-| `dateTimePicker` (read-only) | `string` |
-| `openDateTimePicker` (read-only) | `string` |
-| `set` (read-only) | `string` |
-| `time` (read-only) | `string` |
-| `timePicker` (read-only) | `string` |
+| [`DATETIME_PICKER_DEFAULT_MESSAGES`](/api/datetime-picker/DATETIME_PICKER_DEFAULT_MESSAGES) | Constant |
 
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
-
-**Documented elsewhere:** [`FirstDayOfWeek`](/components/calendar), [`PopupCloseEvent`](/components/popup)
+**Related types:** [`DateDisabledType`](/api/date-input/DateDisabledType), [`FirstDayOfWeek`](/api/calendar/FirstDayOfWeek), [`HourFormat`](/api/date-input/HourFormat), [`ListSizeInputType`](/api/list/ListSizeInputType), [`ListSizeType`](/api/list/ListSizeType), [`MonaDateTimePickerMessages`](/api/i18n/MonaDateTimePickerMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`PreventableEvent`](/api/common/PreventableEvent)

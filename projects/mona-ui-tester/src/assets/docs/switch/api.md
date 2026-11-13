@@ -2,67 +2,17 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/switch`.
+Everything below is imported from `@nanahoshi/mona-ui/switch`. Each name links to its reference page, with every input, output, property and method.
 
-### `SwitchComponent`
-
-**Selector:** `mona-switch`  
-**Implements:** `FormCheckboxControl`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string \| null` | `null` | Accessible name for the host element. Describe what the component represents. When empty, assistive technology announces the role without a label. |
-| `aria-labelledby` | `string \| null` | `null` | ID of an external element that provides the accessible name for the host element. |
-| `checked` (two-way) | `boolean` | `false` | Whether the control is checked. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction. |
-| `invalid` | `boolean` | `false` | Marks the switch as invalid. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `offLabel` | `string` | `""` | Label displayed inside the switch track when it is in the off state. |
-| `onLabel` | `string` | `""` | Label displayed inside the switch track when it is in the on state. |
-| `readonly` | `boolean` | `false` | Prevents value changes while the control stays focusable and readable. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-| `required` | `boolean` | `false` | Marks the switch as required for form validation. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"full"` | Border-radius preset applied to the component. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the component's dimensions. |
-| `tabindex` | `string \| number` | `0` | Tab index of the switch while it's enabled. |
-| `touched` | `boolean` | `false` | Marks the switch as touched. When bound to a signal form field via `[formField]`, this is written by the `FormField` directive. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `checkedChange` | `boolean` | Emitted when `checked` changes. |
-| `touch` | `void` | Emitted when the switch loses focus or its value changes. |
-
-#### Methods
-
-| Signature | Description |
+| Name | Kind |
 | --- | --- |
-| `focus(options?: FocusOptions): void` | Moves focus to the switch. |
-
-### `SwitchHandleContentTemplateDirective`
-
-**Selector:** `ng-template[monaSwitchHandleContentTemplate]`
-
-#### Template context
-
-| Name | Type |
-| --- | --- |
-| `$implicit` | `boolean` |
-
-### `SwitchOffLabelTemplateDirective`
-
-**Selector:** `ng-template[monaSwitchOffLabelTemplate]`
-
-### `SwitchOnLabelTemplateDirective`
-
-**Selector:** `ng-template[monaSwitchOnLabelTemplate]`
+| [`SwitchComponent`](/api/switch/SwitchComponent) | Component |
+| [`SwitchHandleContentTemplateDirective`](/api/switch/SwitchHandleContentTemplateDirective) | Directive |
+| [`SwitchOffLabelTemplateDirective`](/api/switch/SwitchOffLabelTemplateDirective) | Directive |
+| [`SwitchOnLabelTemplateDirective`](/api/switch/SwitchOnLabelTemplateDirective) | Directive |
 
 ### Types
 
-#### `SwitchHandleContentTemplateContext`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `$implicit` (read-only) | `boolean` |
+| [`SwitchHandleContentTemplateContext`](/api/switch/SwitchHandleContentTemplateContext) | Interface |

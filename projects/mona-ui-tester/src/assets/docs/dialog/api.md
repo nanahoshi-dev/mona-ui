@@ -2,272 +2,32 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/dialog`.
+Everything below is imported from `@nanahoshi/mona-ui/dialog`. Each name links to its reference page, with every input, output, property and method.
 
-### `DialogComponent`
-
-**Selector:** `mona-dialog`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `actions` | `Iterable<DialogAction>` | `[]` | Sets the actions of the dialog. |
-| `actionsLayout` | `ActionsLayout` | `"end"` | Sets the layout of the actions in the dialog footer. |
-| `aria-label` | `string \| undefined` | `undefined` | Accessible name for the dialog when it has no `title` or title template. |
-| `closable` | `boolean` | `true` | Sets the visibility of the close button in the dialog header. |
-| `closeOnEscape` | `boolean` | `true` | Sets whether the dialog should close when the escape key is pressed. |
-| `description` | `string` | — | Sets the description of the dialog. |
-| `focusedElement` | `HTMLElement \| ElementRef<HTMLElement> \| string \| null` | — | Sets the element that should receive focus when the dialog is opened. When omitted, focus moves to the first focusable element automatically. |
-| `height` | `number` | — | Sets the height of the dialog. |
-| `left` | `number` | — | Sets the left position of the dialog. |
-| `maxHeight` | `number` | — | Sets the maximum height of the dialog. |
-| `maxWidth` | `number` | — | Sets the maximum width of the dialog. |
-| `messages` | `Partial<DialogMessages>` | — | Sets the custom messages for the dialog. |
-| `minHeight` | `number` | — | Sets the minimum height of the dialog. |
-| `minWidth` | `number` | — | Sets the minimum width of the dialog. |
-| `modal` | `boolean` | `true` | Whether the dialog is modal: a backdrop, `aria-modal="true"`, focus kept inside, page scroll locked, and the rest of the page inert. |
-| `rounded` | `"large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the component. |
-| `text` | `string` | — | Primary text content displayed by the component. |
-| `title` | `string` | — | Title text displayed in the component header or trigger. |
-| `top` | `number` | — | Sets the top position of the dialog. |
-| `type` | `"confirm" \| "error" \| "info" \| "success" \| "warning"` | `"info"` | Visual severity type of the dialog, controlling its icon and semantic role. Set to `null` to render the dialog without an icon. |
-| `width` | `number` | — | Sets the width of the dialog. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `action` | `DialogActionEvent<unknown>` | Emitted when the user clicks an action button. Call `event.preventDefault()` on the emitted `DialogActionEvent` to keep the dialog open. |
-| `close` | `PopupCloseEvent<unknown>` | Emits before the dialog closes, whatever closes it: an action, the close button, Escape, or the component being destroyed. Call `preventDefault()` to keep it open (a close caused by destruction can't be kept). |
-| `closed` | `void` | Emits when the dialog has closed and its leave animation has finished. |
-
-### `DialogContentTemplateDirective`
-
-**Selector:** `ng-template[monaDialogContentTemplate]`
-
-### `DialogDescriptionTemplateDirective`
-
-**Selector:** `ng-template[monaDialogDescriptionTemplate]`
-
-### `DialogFooterTemplateDirective`
-
-**Selector:** `ng-template[monaDialogFooterTemplate]`
-
-### `DialogIconTemplateDirective`
-
-**Selector:** `ng-template[monaDialogIconTemplate]`
-
-### `DialogTitleTemplateDirective`
-
-**Selector:** `ng-template[monaDialogTitleTemplate]`
-
-### `DialogService`
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `alert(settings: DialogPromptSettings): Observable<void>` | Opens a dialog with an OK button. Emits once it closes, however it closes, then completes. The dialog opens when `alert()` is called, whether or not the result is subscribed to. |
-| `confirm(settings: DialogPromptSettings): Observable<boolean>` | Opens a confirmation dialog with OK and Cancel buttons. Emits `true` for OK and `false` for anything else (Cancel, the close button, Escape), then completes. The dialog opens when `confirm()` is called, whether or not the result is subscribed to. |
-| `show<R = unknown, D = unknown>(settings: DialogSettings<D>): DialogRef<R>` | Opens a dialog. |
-
-### `DialogRef`
-
-A handle on an open dialog. The close contract:
-- `action$` emits when an action button is clicked, before the dialog closes; `preventDefault()` keeps it open.
-- `close$` emits before any close, and `preventDefault()` keeps the dialog open.
-- `result` emits how the dialog closed as soon as the close goes ahead, and `closed$` emits the same result once
-  the dialog is gone. All of them complete when it closes.
-
-**Type parameters:** `R = unknown`
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `action$` (read-only) | `Observable<DialogActionEvent>` | Emits when an action button is clicked, before the dialog closes. Call `preventDefault()` on the event to keep the dialog open. Completes when the dialog closes. |
-| `close$` (read-only) | `Observable<PopupCloseEvent<R>>` | Emits before the dialog closes, whatever closes it. Call `preventDefault()` to keep it open. Completes when the dialog closes. |
-| `closed$` (read-only) | `Observable<DialogResult<R>>` | Emits the dialog's result once it has closed and its leave animation has finished, then completes. |
-| `component` (read-only) | `ComponentRef<unknown> \| null` | The component given as `content`, or `null` for template and text content. |
-| `element` (read-only) | `HTMLElement` | The dialog's overlay element. |
-| `height` (read-only) | `number` | The dialog's current rendered height, in pixels. |
-| `popupRef` (read-only) | `PopupRef` | The underlying `PopupRef`, for advanced overlay access. |
-| `result` (read-only) | `Observable<DialogResult<R>>` | Emits how the dialog closed (an action, the close button, Escape, a backdrop click or `close()`) as soon as the close goes ahead, then completes when the dialog is gone. Late subscribers get the result too. |
-| `width` (read-only) | `number` | The dialog's current rendered width, in pixels. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `close(result?: R): void` | Closes the dialog. The value is the `value` of the result, which reports the close as programmatic. |
-| `update(data: Partial<DialogSettings>): void` | Updates the dialog's content and appearance in place without closing and reopening it. Only the fields provided are changed; anything omitted keeps its current value. |
-
-### `DialogActionEvent`
-
-Emitted when the user clicks a dialog action button. Call `preventDefault()` to keep the dialog open.
-
-**Type parameters:** `T = unknown`  
-**Extends:** `PreventableEvent`
-
-#### Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `action` (read-only) | `DialogAction<T>` | The action that was clicked. |
+| [`DialogComponent`](/api/dialog/DialogComponent) | Component |  |
+| [`DialogContentTemplateDirective`](/api/dialog/DialogContentTemplateDirective) | Directive |  |
+| [`DialogDescriptionTemplateDirective`](/api/dialog/DialogDescriptionTemplateDirective) | Directive |  |
+| [`DialogFooterTemplateDirective`](/api/dialog/DialogFooterTemplateDirective) | Directive |  |
+| [`DialogIconTemplateDirective`](/api/dialog/DialogIconTemplateDirective) | Directive |  |
+| [`DialogTitleTemplateDirective`](/api/dialog/DialogTitleTemplateDirective) | Directive |  |
+| [`DialogService`](/api/dialog/DialogService) | Service |  |
+| [`DialogRef`](/api/dialog/DialogRef) | Class | A handle on an open dialog. |
+| [`DialogActionEvent`](/api/dialog/DialogActionEvent) | Class | Emitted when the user clicks a dialog action button. |
 
 ### Types
 
-#### `DIALOG_CANCEL`
-
-```typescript
-const DIALOG_CANCEL: "cancel";
-```
-
-#### `DIALOG_DATA`
-
-The `data` a dialog was opened with, for a component given as its `content`.
-
-```typescript
-const DIALOG_DATA: InjectionToken<unknown>;
-```
-
-#### `DIALOG_DEFAULT_MESSAGES`
-
-```typescript
-const DIALOG_DEFAULT_MESSAGES: MonaDialogMessages;
-```
-
-#### `DIALOG_OK`
-
-Marks the buttons `confirm()` and `alert()` add, so their result can be read without comparing text.
-
-```typescript
-const DIALOG_OK: "ok";
-```
-
-#### `DialogAction`
-
-**Type parameters:** `T = unknown`
-
-| Name | Type | Description |
+| Type | Kind | Description |
 | --- | --- | --- |
-| `cssClass?` | `string` | Additional class applied to the action button. |
-| `data?` | `T` | Arbitrary data associated with the action, readable from `DialogActionEvent.action.data`. |
-| `default?` | `boolean` | The action Enter triggers when focus is in the dialog but not on a button, link, text area or other control that handles Enter itself. Mark at most one action. |
-| `iconOnly?` | `boolean` | Renders the button as icon-only. |
-| `look?` | `"clear" \| "default" \| "error" \| "ghost" \| "info" \| "link" \| "outline" \| "primary" \| "secondary" \| "success" \| "warning"` | The action button's visual style. |
-| `rounded?` | `"full" \| "large" \| "medium" \| "none" \| "small"` | The action button's border-radius preset. Falls back to the dialog's own `rounded` when omitted. |
-| `text` | `string` | Required. The button's label. |
+| [`DIALOG_CANCEL`](/api/dialog/DIALOG_CANCEL) | Constant |  |
+| [`DIALOG_DATA`](/api/dialog/DIALOG_DATA) | Constant | The `data` a dialog was opened with, for a component given as its `content`. |
+| [`DIALOG_DEFAULT_MESSAGES`](/api/dialog/DIALOG_DEFAULT_MESSAGES) | Constant |  |
+| [`DIALOG_OK`](/api/dialog/DIALOG_OK) | Constant | Marks the buttons `confirm()` and `alert()` add, so their result can be read without comparing text. |
+| [`DialogAction`](/api/dialog/DialogAction) | Interface |  |
+| [`DialogSettings`](/api/dialog/DialogSettings) | Interface | The settings object accepted by `DialogService.show()`. |
+| [`ActionsLayout`](/api/dialog/ActionsLayout) | Type alias |  |
+| [`DialogPromptSettings`](/api/dialog/DialogPromptSettings) | Type alias | Settings for the `alert()` and `confirm()` helpers, which bring their own buttons. |
+| [`DialogResult`](/api/dialog/DialogResult) | Type alias | How a dialog closed. |
 
-#### `DialogSettings`
-
-The settings object accepted by `DialogService.show()`. Fields mirror the `DialogComponent` inputs of the same name
-(`actions`, `actionsLayout`, `ariaLabel`, `closable`, `closeOnEscape`, `description`, `focusedElement`, `height`,
-`left`, `maxHeight`, `maxWidth`, `minHeight`, `minWidth`, `modal`, `rounded`, `text`, `title`, `top`, `type`,
-`width`), plus these service-only fields:
-
-**Type parameters:** `D = unknown`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `actions?` | `Iterable<DialogAction>` | The buttons in the dialog footer. When omitted, the dialog shows an OK button, plus a Cancel button when `type` is `"confirm"`. Pass an empty list for no buttons. |
-| `actionsLayout?` | `ActionsLayout` | How the action buttons are aligned in the footer. |
-| `ariaLabel?` | `string` | Accessible name for the dialog when it has no `title` or `titleTemplate`. |
-| `closable?` | `boolean` | Whether the header shows a close button. |
-| `closeOnEscape?` | `boolean` | Whether pressing Escape closes the dialog. |
-| `content?` | `TemplateRef<unknown> \| Type<unknown>` | The dialog's body: a template, or a component. A template gets the dialog's `data` as `$implicit` and the `DialogRef` as `dialogRef`; a component can inject `DIALOG_DATA` and `DialogRef`. |
-| `data?` | `D` | Data for the content: `DIALOG_DATA` in a component, `$implicit` in a template. |
-| `description?` | `string` | Text shown under the title, and used as the dialog's accessible description. |
-| `descriptionTemplate?` | `TemplateRef<unknown>` | Template rendered in place of `description`. |
-| `focusedElement?` | `HTMLElement \| ElementRef<HTMLElement> \| string \| null` | The element that receives focus when the dialog opens: an element, an element reference, or a CSS selector matched inside the dialog. When omitted, focus moves to the first focusable element. |
-| `footerTemplate?` | `TemplateRef<unknown>` | Template rendered in place of the generated action-button row. |
-| `height?` | `number` | Height in pixels. When omitted, the dialog fits its content. |
-| `iconTemplate?` | `TemplateRef<unknown>` | Template rendered in place of the built-in `type` icon. |
-| `injector?` | `Injector` | Parent injector for the dialog's content, so a component given as `content` can inject what the opener provides. Defaults to the application injector. |
-| `left?` | `number` | Distance from the viewport's left edge in pixels. When omitted, the dialog is centered horizontally. |
-| `maxHeight?` | `number` | Maximum height in pixels. When omitted, the dialog stays 1rem inside the viewport and its body scrolls. |
-| `maxWidth?` | `number` | Maximum width in pixels. When omitted, the dialog stays 1rem inside the viewport. |
-| `messages?` | `Partial<DialogMessages>` | Overrides for the dialog's messages (close button label, OK, Cancel). |
-| `minHeight?` | `number` | Minimum height in pixels. |
-| `minWidth?` | `number` | Minimum width in pixels. |
-| `modal?` | `boolean` | Whether the dialog is modal: a backdrop, `aria-modal="true"`, focus kept inside, page scroll locked, and the rest of the page inert. A non-modal dialog does none of these. |
-| `restoreFocus?` | `boolean` | Whether focus goes back to where it was when the dialog opened, once it closes. |
-| `rounded?` | `"large" \| "medium" \| "none" \| "small"` | Border-radius preset for the dialog and its action buttons. |
-| `text?` | `string` | Text shown in the dialog's body when no `content` is given. |
-| `title?` | `string` | Text shown in the dialog header, and used as the dialog's accessible name. |
-| `titleTemplate?` | `TemplateRef<unknown>` | Template rendered in place of `title`. |
-| `top?` | `number` | Distance from the viewport's top edge in pixels. When omitted, the dialog is centered vertically. |
-| `type?` | `"confirm" \| "error" \| "info" \| "success" \| "warning"` | The dialog's severity, which picks its icon. `"confirm"`, `"error"` and `"warning"` give the dialog the `alertdialog` role. When omitted, `show()` renders no icon; `alert()` uses `"info"` and `confirm()` uses `"confirm"`. |
-| `width?` | `number` | Width in pixels. When omitted, the dialog fits its content. |
-
-#### `ActionsLayout`
-
-```typescript
-type ActionsLayout = "end" | "center" | "start" | "stretched";
-```
-
-#### `DialogPromptSettings`
-
-Settings for the `alert()` and `confirm()` helpers, which bring their own buttons.
-
-```typescript
-type DialogPromptSettings = Omit<DialogSettings, "actions" | "content" | "data" | "footerTemplate">;
-```
-
-#### `DialogResult`
-
-How a dialog closed. Every close produces one: an action button (`viaClose: false`), or anything else
-(`viaClose: true`): the close button, Escape, a backdrop click, or `close()`.
-
-```typescript
-type DialogResult<R = unknown> = | { readonly action: DialogAction; readonly via: PopupCloseSource.Action; readonly viaClose: false; } | { readonly via: Exclude<PopupCloseSource, PopupCloseSource.Action>; readonly value?: R; readonly viaClose: true; };
-```
-
-#### `Action`
-
-From `@nanahoshi/mona-ui/common`.
-
-A function taking a `P` and returning an `R`.
-
-```typescript
-type Action<P = void, R = void> = (arg: P) => R;
-```
-
-#### `DialogMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-```typescript
-type DialogMessages = MonaDialogMessages;
-```
-
-#### `MonaDialogMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `cancel` (read-only) | `string` | The label of the Cancel button that `confirm()` and a `"confirm"` dialog without `actions` add. |
-| `closeDialog` (read-only) | `string` | The accessible name of the close button in the dialog header. |
-| `ok` (read-only) | `string` | The label of the OK button that `alert()`, `confirm()` and a dialog without `actions` add. |
-
-#### `PreventableEvent`
-
-From `@nanahoshi/mona-ui/common`.
-
-**Type parameters:** `E extends Event = Event`
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `originalEvent` (read-only) | `E \| undefined` | The DOM event that caused this one, when there is one. |
-| `type` (read-only) | `string \| undefined` | A name for the kind of event, when the component that emits it sets one. |
-
-**Methods**
-
-| Signature | Description |
-| --- | --- |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
-| `preventDefault(): void` | Cancels what the event announces, such as opening or closing a popup, or closing a dialog. |
-
-**Documented elsewhere:** [`PopupCloseEvent`](/components/popup), [`PopupCloseSource`](/components/popup), [`PopupRef`](/components/popup)
+**Related types:** [`Action`](/api/common/Action), [`DialogMessages`](/api/i18n/DialogMessages), [`MonaDialogMessages`](/api/i18n/MonaDialogMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`PopupCloseSource`](/api/popup/PopupCloseSource), [`PopupRef`](/api/popup/PopupRef), [`PreventableEvent`](/api/common/PreventableEvent)

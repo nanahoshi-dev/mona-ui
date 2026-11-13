@@ -2,221 +2,23 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/chart`.
+Everything below is imported from `@nanahoshi/mona-ui/chart`. Each name links to its reference page, with every input, output, property and method.
 
-### `RadialBarSeriesComponent`
-
-Renders concentric circular progress rings with customizable bar gap, thickness, rounded corners, and background
-tracks.
-
-**Selector:** `mona-radial-bar-series`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `barGap` | `number` | `4` | Spacing in pixels between concentric radial rings. |
-| `barThickness` | `number \| undefined` | `undefined` | Explicit radial thickness in pixels for each bar ring. |
-| `categoryField` | `ChartField` | `"category"` | Property key or accessor extracting the category label for each radial ring. |
-| `categoryFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Formatter callback for ring category labels. |
-| `class` | `string` | `""` | Additional CSS classes applied to the series. |
-| `colorField` | `ChartField \| undefined` | `undefined` | Accessor function or property key extracting an explicit color for each radial ring. |
-| `colors` | `readonly string[] \| undefined` | `undefined` | Explicit array of colors used to fill successive radial rings. |
-| `cornerRadius` | `number \| undefined` | `undefined` | Corner radius in pixels applied to arc endpoints. |
-| `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding root chart data. |
-| `endAngle` | `number` | `360` | Ending angle in degrees (clockwise from 12 o'clock). |
-| `field` | `ChartField` | `"value"` | Property key or accessor extracting the numeric value for each radial ring. |
-| `fillMode` | `ChartRadialArcFillMode` | `"solid"` | Fill style applied to radial rings ("solid" or radial "gradient"). |
-| `fillOpacity` | `number \| undefined` | `undefined` | Opacity of bar fills (between 0 and 1). |
-| `hiddenItemIds` (two-way) | `readonly string[]` | `[]` | The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it. Build an ID with `chartItemKeyId(key)` when `keyField` is set, or else with `chartItemCategoryId(category)`. |
-| `innerRadiusRatio` | `number` | `0.2` | Inner radius ratio relative to available plot bounds (0 to 1). |
-| `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
-| `max` | `number \| undefined` | `undefined` | Explicit maximum value for the radial bar progress scale. |
-| `min` | `number \| undefined` | `undefined` | Explicit minimum value for the radial bar progress scale. |
-| `name` | `string` | `"Radial Bar"` | Series name used in tooltips and accessibility announcements. |
-| `outerRadiusRatio` | `number` | `0.9` | Outer radius ratio relative to available plot bounds (0.1 to 1). |
-| `showTrack` | `boolean` | `true` | Whether to display background circular track rings. |
-| `startAngle` | `number` | `0` | Starting angle in degrees (0 is 12 o'clock, clockwise). |
-| `strokeColor` | `string` | `""` | Color of bar stroke boundary. |
-| `strokeWidth` | `number \| undefined` | `undefined` | Stroke width in pixels for bar boundaries. |
-| `trackColor` | `string` | `""` | Color of background track rings. |
-| `trackOpacity` | `number \| undefined` | `undefined` | Opacity of background track rings. |
-| `valueFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Formatter callback for bar numeric values. |
-| `visible` (two-way) | `boolean` | `true` | Two-way bindable visibility of the series. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `datumVisibilityChange` | `ChartRadialDatumVisibilityEvent` | Emits when an individual ring's visibility is toggled via the legend. |
-| `hiddenItemIdsChange` | `readonly string[]` | Emitted when `hiddenItemIds` changes. |
-| `visibleChange` | `boolean` | Emitted when `visible` changes. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `toggleDatum(itemId: string): boolean` | Shows or hides the bar with this id, and returns whether it's now visible. |
-
-### `GaugeSeriesComponent`
-
-Renders circular or semi-circular gauge meters with value progress arcs, tapered needles, central hubs, and centered
-value projection.
-
-**Selector:** `mona-gauge-series`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `class` | `string` | `""` | Additional CSS classes applied to the series. |
-| `color` | `string` | `""` | Primary color of the gauge value arc. |
-| `cornerRadius` | `number \| undefined` | `undefined` | Corner radius in pixels applied to gauge arc endpoints. |
-| `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding root chart data. |
-| `endAngle` | `number` | `120` | Ending angle in degrees (clockwise from 12 o'clock). |
-| `field` | `ChartField` | `"value"` | Property key or accessor extracting the numeric gauge value when direct value is not set. |
-| `fillMode` | `ChartRadialArcFillMode` | `"solid"` | Fill style applied to gauge value arc ("solid" or radial "gradient"). |
-| `fillOpacity` | `number \| undefined` | `undefined` | Opacity of gauge value arc fill (between 0 and 1). |
-| `hubRadius` | `number` | `5` | Radius in pixels of the needle center hub circle. |
-| `indicator` | `ChartGaugeIndicator` | `"arc"` | Indicator mode: "arc" (progress arc), "needle" (pointer needle), or "both". |
-| `innerRadiusRatio` | `number` | `0.72` | Inner radius ratio relative to outer radius (0 to 1). |
-| `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
-| `max` | `number` | `100` | Maximum domain value. |
-| `min` | `number` | `0` | Minimum domain value. |
-| `name` | `string` | `"Gauge"` | Series name used in tooltips and accessibility announcements. |
-| `needleColor` | `string` | `""` | Color of the needle and center hub. |
-| `needleLengthRatio` | `number` | `0.78` | Length of the needle pointer as a fraction of outer radius (0.1 to 1). |
-| `needleWidth` | `number` | `2` | Stroke width in pixels for the needle pointer. |
-| `outerRadiusRatio` | `number` | `0.9` | Outer radius ratio relative to available plot bounds (0.1 to 1). |
-| `showValue` | `boolean` | `true` | Whether to display the formatted value in the center of the gauge. |
-| `startAngle` | `number` | `-120` | Starting angle in degrees (0 is 12 o'clock, clockwise). |
-| `trackColor` | `string` | `""` | Color of background track arc. |
-| `trackOpacity` | `number \| undefined` | `undefined` | Opacity of background track arc. |
-| `value` | `number \| undefined` | `undefined` | Direct scalar value for the gauge. When defined, takes precedence over data/field. |
-| `valueFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Formatter callback for gauge numeric values. |
-| `visible` (two-way) | `boolean` | `true` | Two-way bindable visibility of the series. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `visibleChange` | `boolean` | Emitted when `visible` changes. |
-
-### `RoseSeriesComponent`
-
-Renders Nightingale rose (coxcomb) charts with angular category petals whose radial extent scales by area or radius.
-
-**Selector:** `mona-rose-series`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `categoryField` | `ChartField` | `"category"` | Property key or accessor extracting the category label for each rose petal. |
-| `categoryFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Formatter callback for category labels. |
-| `class` | `string` | `""` | Additional CSS classes applied to the series. |
-| `colorField` | `ChartField \| undefined` | `undefined` | Accessor function or property key extracting an explicit color for each petal. |
-| `colors` | `readonly string[] \| undefined` | `undefined` | Explicit array of colors used to fill successive rose petals. |
-| `cornerRadius` | `number \| undefined` | `undefined` | Corner radius in pixels applied to outer petal corners. |
-| `data` | `readonly unknown[] \| undefined` | `undefined` | Series-specific dataset overriding root chart data. |
-| `endAngle` | `number` | `360` | Ending angle in degrees (clockwise from 12 o'clock). |
-| `field` | `ChartField` | `"value"` | Property key or accessor extracting the numeric petal value. |
-| `fillMode` | `ChartRadialArcFillMode` | `"solid"` | Fill style applied to rose petals ("solid" or radial "gradient"). |
-| `fillOpacity` | `number \| undefined` | `undefined` | Opacity of petal fills (between 0 and 1). |
-| `hiddenItemIds` (two-way) | `readonly string[]` | `[]` | The hidden item IDs. Bind `[(hiddenItemIds)]` for two-way binding; legend toggles write to it. Build an ID with `chartItemKeyId(key)` when `keyField` is set, or else with `chartItemCategoryId(category)`. |
-| `innerRadiusRatio` | `number` | `0` | Inner radius ratio relative to available plot bounds (0 to 1). |
-| `keyField` | `ChartField \| undefined` | `undefined` | Property key or accessor extracting a stable datum identity across updates. |
-| `name` | `string` | `"Rose"` | Series name used in tooltips and accessibility announcements. |
-| `outerRadiusRatio` | `number` | `0.9` | Outer radius ratio relative to available plot bounds (0.1 to 1). |
-| `padAngle` | `number` | `2` | Angular padding in degrees between adjacent rose petals. |
-| `scaleMode` | `ChartRoseScaleMode` | `"area"` | Scale mode for petal radius: "area" (annular area proportional to value) or "radius" (linear radial distance). |
-| `startAngle` | `number` | `0` | Starting angle in degrees (0 is 12 o'clock, clockwise). |
-| `strokeColor` | `string` | `""` | Color of petal separator strokes. |
-| `strokeWidth` | `number \| undefined` | `undefined` | Stroke width in pixels for petal boundaries. |
-| `valueFormatter` | `ChartValueFormatter \| undefined` | `undefined` | Formatter callback for petal numeric values. |
-| `visible` (two-way) | `boolean` | `true` | Two-way bindable visibility of the series. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `datumVisibilityChange` | `ChartRadialDatumVisibilityEvent` | Emits when an individual petal's visibility is toggled via the legend. |
-| `hiddenItemIdsChange` | `readonly string[]` | Emitted when `hiddenItemIds` changes. |
-| `visibleChange` | `boolean` | Emitted when `visible` changes. |
-
-#### Methods
-
-| Signature | Description |
-| --- | --- |
-| `toggleDatum(itemId: string): boolean` | Shows or hides the petal with this id, and returns whether it's now visible. |
-
-### `ChartGaugeCenterTemplateDirective`
-
-**Selector:** `ng-template[monaChartGaugeCenterTemplate]`
-
-#### Template context
-
-| Name | Type |
-| --- | --- |
-| `$implicit` | `number` |
-| `formattedMax` | `string` |
-| `formattedMin` | `string` |
-| `formattedValue` | `string` |
-| `isClamped` | `boolean` |
-| `max` | `number` |
-| `min` | `number` |
-| `ratio` | `number` |
-| `seriesId` | `string` |
-| `seriesName` | `string` |
-| `value` | `number` |
+| [`RadialBarSeriesComponent`](/api/chart/RadialBarSeriesComponent) | Component | Renders concentric circular progress rings with customizable bar gap, thickness, rounded corners, and background tracks. |
+| [`GaugeSeriesComponent`](/api/chart/GaugeSeriesComponent) | Component | Renders circular or semi-circular gauge meters with value progress arcs, tapered needles, central hubs, and centered value projection. |
+| [`RoseSeriesComponent`](/api/chart/RoseSeriesComponent) | Component | Renders Nightingale rose (coxcomb) charts with angular category petals whose radial extent scales by area or radius. |
+| [`ChartGaugeCenterTemplateDirective`](/api/chart/ChartGaugeCenterTemplateDirective) | Directive |  |
 
 ### Types
 
-#### `ChartGaugeCenterTemplateContext`
-
-| Name | Type |
+| Type | Kind |
 | --- | --- |
-| `$implicit` (read-only) | `number` |
-| `formattedMax` (read-only) | `string` |
-| `formattedMin` (read-only) | `string` |
-| `formattedValue` (read-only) | `string` |
-| `isClamped` (read-only) | `boolean` |
-| `max` (read-only) | `number` |
-| `min` (read-only) | `number` |
-| `ratio` (read-only) | `number` |
-| `seriesId` (read-only) | `string` |
-| `seriesName` (read-only) | `string` |
-| `value` (read-only) | `number` |
+| [`ChartGaugeCenterTemplateContext`](/api/chart/ChartGaugeCenterTemplateContext) | Interface |
+| [`ChartRadialDatumVisibilityEvent`](/api/chart/ChartRadialDatumVisibilityEvent) | Interface |
+| [`ChartGaugeIndicator`](/api/chart/ChartGaugeIndicator) | Type alias |
+| [`ChartRadialArcFillMode`](/api/chart/ChartRadialArcFillMode) | Type alias |
+| [`ChartRoseScaleMode`](/api/chart/ChartRoseScaleMode) | Type alias |
 
-#### `ChartRadialDatumVisibilityEvent`
-
-| Name | Type |
-| --- | --- |
-| `category` (read-only) | `unknown` |
-| `dataIndex` (read-only) | `number` |
-| `datum` (read-only) | `unknown` |
-| `itemId` (read-only) | `string` |
-| `seriesId` (read-only) | `string` |
-| `seriesName` (read-only) | `string` |
-| `seriesType` (read-only) | `"radialBar" \| "rose"` |
-| `visible` (read-only) | `boolean` |
-
-#### `ChartGaugeIndicator`
-
-```typescript
-type ChartGaugeIndicator = "arc" | "both" | "needle";
-```
-
-#### `ChartRadialArcFillMode`
-
-```typescript
-type ChartRadialArcFillMode = "gradient" | "solid";
-```
-
-#### `ChartRoseScaleMode`
-
-```typescript
-type ChartRoseScaleMode = "area" | "radius";
-```
-
-**Documented elsewhere:** [`ChartField`](/components/chart), [`ChartValueFormatter`](/components/chart)
+**Related types:** [`ChartField`](/api/chart/ChartField), [`ChartValueFormatter`](/api/chart/ChartValueFormatter)

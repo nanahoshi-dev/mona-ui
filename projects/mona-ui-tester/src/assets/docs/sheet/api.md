@@ -2,82 +2,18 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/sheet`.
+Everything below is imported from `@nanahoshi/mona-ui/sheet`. Each name links to its reference page, with every input, output, property and method.
 
-### `SheetComponent`
-
-**Selector:** `mona-sheet`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string \| undefined` | `undefined` | Accessible name used when no visible title is provided. |
-| `class` | `ClassInputType` | `undefined` | Additional CSS classes merged onto the sheet panel via `tailwind-merge`. |
-| `closable` | `boolean` | `true` | Whether the close button is displayed. |
-| `closeOnBackdropClick` | `boolean` | `true` | Whether clicking the backdrop requests that the sheet close. |
-| `closeOnEscape` | `boolean` | `true` | Whether pressing Escape requests that the sheet close. |
-| `description` | `string` | — | Supporting text displayed below the title. |
-| `height` | `number \| string` | — | Explicit sheet height. Numbers are interpreted as pixels. |
-| `messages` | `Partial<SheetMessages>` | — | Internationalization message overrides for accessible labels. |
-| `side` | `SheetSide` | `"right"` | Edge of the viewport from which the sheet opens. `left` and `right` are physical; `start` and `end` follow the direction (`start` is the left edge in LTR and the right edge in RTL). The edge is fixed once the sheet opens. |
-| `title` | `string` | — | Title displayed in the sheet header and used as its accessible name. |
-| `width` | `number \| string` | — | Explicit sheet width. Numbers are interpreted as pixels. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `close` | `PopupCloseEvent<unknown>` | Emitted before the sheet closes. Call preventDefault() to keep it open. |
-| `closed` | `void` | Emitted after the leave animation completes and the popup is disposed. |
+| Name | Kind |
+| --- | --- |
+| [`SheetComponent`](/api/sheet/SheetComponent) | Component |
 
 ### Types
 
-#### `SHEET_DEFAULT_MESSAGES`
+| Type | Kind | Description |
+| --- | --- | --- |
+| [`SHEET_DEFAULT_MESSAGES`](/api/sheet/SHEET_DEFAULT_MESSAGES) | Constant |  |
+| [`SheetPhysicalSide`](/api/sheet/SheetPhysicalSide) | Type alias | A side resolved to a physical edge. |
+| [`SheetSide`](/api/sheet/SheetSide) | Type alias | Edge the sheet opens from. |
 
-```typescript
-const SHEET_DEFAULT_MESSAGES: MonaSheetMessages;
-```
-
-#### `SheetPhysicalSide`
-
-A side resolved to a physical edge.
-
-```typescript
-type SheetPhysicalSide = "bottom" | "left" | "right" | "top";
-```
-
-#### `SheetSide`
-
-Edge the sheet opens from. `left` and `right` are physical, whatever the direction; `start` and `end` follow it
-(`start` is the left edge in LTR and the right edge in RTL).
-
-```typescript
-type SheetSide = "bottom" | "end" | "left" | "right" | "start" | "top";
-```
-
-#### `ClassInputType`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type ClassInputType = string | string[] | Record<string, unknown> | null | undefined;
-```
-
-#### `MonaSheetMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-| Name | Type |
-| --- | --- |
-| `closeSheet` (read-only) | `string` |
-
-#### `SheetMessages`
-
-From `@nanahoshi/mona-ui/i18n`.
-
-```typescript
-type SheetMessages = MonaSheetMessages;
-```
-
-**Documented elsewhere:** [`PopupCloseEvent`](/components/popup)
+**Related types:** [`ClassInputType`](/api/common/ClassInputType), [`MonaSheetMessages`](/api/i18n/MonaSheetMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`SheetMessages`](/api/i18n/SheetMessages)

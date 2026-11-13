@@ -2,105 +2,21 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/tooltip`.
+Everything below is imported from `@nanahoshi/mona-ui/tooltip`. Each name links to its reference page, with every input, output, property and method.
 
-### `TooltipComponent`
-
-**Selector:** `mona-tooltip`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `disabled` | `boolean` | `false` | Whether the tooltip is disabled. When disabled, the tooltip will not be shown, and an open one closes. |
-| `hideDelay` | `number` | `0` | The delay in milliseconds before hiding the tooltip after the pointer or focus leaves. A pointer that leaves always gets a short grace, so it can move onto the tooltip. |
-| `position` | `TooltipPosition` | `"top"` | The side of the target the tooltip opens on. `left` and `right` are physical; `start` and `end` follow the text direction. It flips to the opposite side when there isn't room. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | The border radius of the tooltip. |
-| `showDelay` | `number` | `0` | The delay in milliseconds before showing the tooltip after the trigger event. |
-| `target` (required) | `PopupAnchor` | — | The target element(s) to which the tooltip is attached. Can be an Element, ElementRef, or CSS selector string. A selector matches elements anywhere in the document, including ones added later. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `hidden` | `void` | Emitted when the tooltip popup is hidden. |
-| `shown` | `void` | Emitted when the tooltip popup is shown. |
-
-### `TooltipDirective`
-
-**Selector:** `[monaTooltip]`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `contentOf` | `((element: HTMLElement) => string) \| null` | `null` | Reads the tooltip's text from the matched element, in place of its `title`, which then stays where it is. An empty result shows nothing. |
-| `disabled` | `boolean` | `false` | Whether the tooltip is disabled. When disabled, the tooltip will not be shown, and an open one closes. On a button or another control, `[disabled]` also reaches the control, so use `tooltipDisabled` there. |
-| `filter` | `string` | `"[title]"` | The filter to select elements that will have tooltips. It can be a CSS selector that matches elements within the host element, including ones added later. Only applies when `mode` is set to `content`. |
-| `hideDelay` | `number` | `0` | The delay in milliseconds before hiding the tooltip after the pointer or focus leaves. A pointer that leaves always gets a short grace, so it can move onto the tooltip. |
-| `mode` | `"host" \| "content"` | `"host"` | The mode of the tooltip. "host" mode shows the host's tooltip content, or its title attribute. "content" mode uses the title attribute of elements matching the filter. |
-| `monaTooltip` | `string \| TemplateRef<unknown> \| null \| undefined` | `""` | The tooltip's content in host mode: text, or a template. Without it, the host's `title` is shown. |
-| `position` | `TooltipPosition` | `"top"` | The side of the target the tooltip opens on. `left` and `right` are physical; `start` and `end` follow the text direction. It flips to the opposite side when there isn't room. |
-| `showDelay` | `number` | `0` | The delay in milliseconds before showing the tooltip after the trigger event. |
-| `tooltipDisabled` | `boolean` | `false` | Disables only the tooltip, like `disabled`, on an element whose own `disabled` would take the same binding, such as a `monaButton` or a native control. |
-| `tooltipRounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | The border radius of the tooltip. |
-
-#### Outputs
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `hidden` | `void` | Emitted when the tooltip popup is hidden. |
-| `shown` | `void` | Emitted when the tooltip popup is shown. |
-
-### `getOffsetForPosition`
-
-**Deprecated.** No longer used by the tooltip or popover, which keep the gap on the side they flip to and place
-`left` and `right` physically in RTL. Kept for existing callers. Gets the appropriate offset for a tooltip based on its position.
-The offset ensures proper spacing between the tooltip and its anchor element.
-
-```typescript
-function getOffsetForPosition(position: Position, arrowVisible: boolean): PopupOffset;
-```
-
-### `getPositionConnectionPoints`
-
-**Deprecated.** No longer used by the tooltip or popover. Kept for existing callers.
-
-```typescript
-function getPositionConnectionPoints(position: Position): { anchor: ConnectionPoint; popup: ConnectionPoint };
-```
+| [`TooltipComponent`](/api/tooltip/TooltipComponent) | Component |  |
+| [`TooltipDirective`](/api/tooltip/TooltipDirective) | Directive |  |
+| [`getOffsetForPosition`](/api/tooltip/getOffsetForPosition) | Function | **Deprecated.** No longer used by the tooltip or popover, which keep the gap on the side they flip to and place `left` and `right` physically in RTL. |
+| [`getPositionConnectionPoints`](/api/tooltip/getPositionConnectionPoints) | Function | **Deprecated.** No longer used by the tooltip or popover. |
 
 ### Types
 
-#### `tooltipArrowThemeVariants`
+| Type | Kind | Description |
+| --- | --- | --- |
+| [`tooltipArrowThemeVariants`](/api/tooltip/tooltipArrowThemeVariants) | Constant |  |
+| [`OverlaySide`](/api/tooltip/OverlaySide) | Type alias | A side of the anchor. |
+| [`TooltipPosition`](/api/tooltip/TooltipPosition) | Type alias | The side of its anchor a tooltip opens on. |
 
-```typescript
-const tooltipArrowThemeVariants: (props?: ClassProp | undefined) => string;
-```
-
-#### `OverlaySide`
-
-A side of the anchor. `start` and `end` follow the direction.
-
-```typescript
-type OverlaySide = "bottom" | "end" | "left" | "right" | "start" | "top";
-```
-
-#### `TooltipPosition`
-
-The side of its anchor a tooltip opens on. `left` and `right` are physical in every direction; `start` and `end`
-follow the text direction.
-
-```typescript
-type TooltipPosition = OverlaySide;
-```
-
-#### `Position`
-
-From `@nanahoshi/mona-ui/common`.
-
-```typescript
-type Position = "top" | "right" | "bottom" | "left";
-```
-
-**Documented elsewhere:** [`ConnectionPoint`](/components/popup), [`PopupAnchor`](/components/popup), [`PopupOffset`](/components/popup)
+**Related types:** [`ConnectionPoint`](/api/popup/ConnectionPoint), [`PopupAnchor`](/api/popup/PopupAnchor), [`PopupOffset`](/api/popup/PopupOffset), [`Position`](/api/common/Position)

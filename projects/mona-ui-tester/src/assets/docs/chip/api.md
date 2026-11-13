@@ -2,50 +2,15 @@
 
 ## API
 
-Everything below is imported from `@nanahoshi/mona-ui/chip`.
+Everything below is imported from `@nanahoshi/mona-ui/chip`. Each name links to its reference page, with every input, output, property and method.
 
-### `ChipComponent`
-
-**Selector:** `mona-chip`
-
-#### Inputs
-
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| `aria-label` | `string` | `""` | Accessible name of the chip, for one whose text doesn't describe it, such as an icon. On a chip with no other role, it makes the chip a named group. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled` | `boolean` | `false` | Renders the chip with reduced visual emphasis and removes pointer interaction. |
-| `label` | `string` | `""` | Text label displayed inside the chip. When non-empty, takes precedence over projected content. |
-| `look` | `"default" \| "error" \| "ghost" \| "info" \| "outline" \| "primary" \| "secondary" \| "success" \| "warning"` | `"default"` | Visual style variant controlling the chip's background color, border, and interaction states. |
-| `removable` | `boolean` | `false` | Renders a remove button inside the chip. When activated, emits the `remove` output. |
-| `removeLabel` | `string` | `undefined` | Accessible label for the remove button, overriding the auto-computed `"Remove, <label>"` fallback. A chip with only projected content needs this or `aria-label`, or it warns in development. |
-| `removeTabIndex` | `number \| string` | `0` | Tab index for the remove button, independent of the chip host's own tabindex. Set to `-1` to exclude the remove button from tab order, since Delete and Backspace on the chip also remove it. |
-| `rounded` | `"full" \| "large" \| "medium" \| "none" \| "small"` | `"medium"` | Border-radius preset applied to the chip. |
-| `selected` (two-way) | `boolean` | `false` | Whether the chip is selected. When `toggleable` is `true`, each activation flips this value. Supports two-way binding via `[(selected)]`. Without `toggleable`, it's only a look, with no state for assistive technology. |
-| `size` | `"large" \| "medium" \| "small"` | `"medium"` | Size preset controlling the chip's padding and remove button dimensions. |
-| `tabindex` | `number \| string` | `undefined` | Tab index override for the chip host element. When not set, computed automatically: `0` when `toggleable` is `true` or functioning as a link, not focusable otherwise. Overridden to `-1` when `disabled` is `true`. |
-| `toggleable` | `boolean` | `false` | Enables toggle behavior. When `true`, each activation flips `selected` and the host receives `role="checkbox"` with `aria-checked`. With `removable`, the host is a `group` instead, and an inner element is the checkbox, beside the remove button. |
-| `value` | `unknown` | `undefined` | Arbitrary value associated with this chip. The chip doesn't use it or emit it, so to tell which chip was removed, pass the item in your `(remove)` handler. |
-
-#### Outputs
-
-| Name | Type | Description |
+| Name | Kind | Description |
 | --- | --- | --- |
-| `contentClick` | `void` | Emitted when a toggleable chip body is activated via click, Enter, or Space. Not emitted when the remove button is activated or for non-toggleable chips. |
-| `remove` | `Event` | Emitted when the remove button is clicked, or Delete or Backspace is pressed on the chip. Only fires when `removable` is `true`. Emits the originating `Event`. The chip can't keep focus once its parent destroys it, so move focus to the next chip or the list here. |
-| `selectedChange` | `boolean` | Emitted when `selected` changes. |
-
-### `ChipPrefixTemplateDirective`
-
-Apply to an `<ng-template>` directly inside `<mona-chip>` to render prefix content
-(e.g., an avatar or icon) before the chip label or projected content. The template receives no context.
-
-**Selector:** `ng-template[monaChipPrefixTemplate]`
+| [`ChipComponent`](/api/chip/ChipComponent) | Component |  |
+| [`ChipPrefixTemplateDirective`](/api/chip/ChipPrefixTemplateDirective) | Directive | Apply to an `<ng-template>` directly inside `<mona-chip>` to render prefix content (e.g., an avatar or icon) before the chip label or projected content. |
 
 ### Types
 
-#### `CHIP_DEFAULT_MESSAGES`
-
-```typescript
-const CHIP_DEFAULT_MESSAGES: { removeLabel: (label?: string) => string; };
-```
+| Type | Kind |
+| --- | --- |
+| [`CHIP_DEFAULT_MESSAGES`](/api/chip/CHIP_DEFAULT_MESSAGES) | Constant |
