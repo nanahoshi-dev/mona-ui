@@ -1,7 +1,7 @@
 import { Observable } from "rxjs";
 
-// A plain loop rather than ts-collections, which doesn't tree-shake: the internal entry point, which the button and
-// nearly every component import, would otherwise bring all of it.
+// A plain loop rather than ts-collections, where any one function brings some 100 kB: the internal entry point, which
+// the button and nearly every component import, would otherwise bring all of that.
 export const rxFromResize = (
     target: Element | Iterable<Element>,
     options?: ResizeObserverOptions

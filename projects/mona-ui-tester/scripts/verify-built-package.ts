@@ -695,17 +695,20 @@ for (const expected of [".bg-primary", ".border-input-border", "--color-primary:
     }
 }
 
+/** The bundles a button, the theme and nearly every component load, which mustn't import {@link heavyImports}. */
+const leanBundles: readonly string[] = [
+    "nanahoshi-mona-ui-button.mjs",
+    "nanahoshi-mona-ui-internal.mjs",
+    "nanahoshi-mona-ui-internal-indicator-icon.mjs",
+    "nanahoshi-mona-ui-theme.mjs"
+];
+
 /**
- * The bundles a button, the theme and nearly every component load, and what each mustn't import. ts-collections
- * doesn't tree-shake, so one import of it brings all of it. A value import of the overlay module puts it in the
- * initial bundle, even unused, as soon as lazily loaded code opens an overlay.
+ * What the {@link leanBundles} mustn't import. Any one function of ts-collections brings some 100 kB of it. A value
+ * import of the overlay module puts it in the initial bundle, even unused, as soon as lazily loaded code opens an
+ * overlay.
  */
-const leanBundles: Readonly<Record<string, readonly string[]>> = {
-    "nanahoshi-mona-ui-button.mjs": ["@mirei/ts-collections", "@angular/cdk/overlay"],
-    "nanahoshi-mona-ui-internal.mjs": ["@mirei/ts-collections", "@angular/cdk/overlay"],
-    "nanahoshi-mona-ui-internal-indicator-icon.mjs": ["@mirei/ts-collections", "@angular/cdk/overlay"],
-    "nanahoshi-mona-ui-theme.mjs": ["@mirei/ts-collections", "@angular/cdk/overlay"]
-};
+const heavyImports: readonly string[] = ["@mirei/ts-collections", "@angular/cdk/overlay"];
 
 /** What a bundle imports statically. `import()` isn't matched. */
 function staticImports(source: string): string[] {
@@ -723,13 +726,13 @@ export function verifyLeanBundles(distDir: string): number {
         throw new Error(`Bundles not found at: ${fesmDir}`);
     }
     const problems: string[] = [];
-    for (const [file, forbidden] of Object.entries(leanBundles)) {
+    for (const file of leanBundles) {
         const path = resolve(fesmDir, file);
         if (!existsSync(path)) {
             throw new Error(`Bundle not found at: ${path}`);
         }
         for (const specifier of staticImports(readFileSync(path, "utf-8"))) {
-            if (forbidden.includes(specifier)) {
+            if (heavyImports.includes(specifier)) {
                 problems.push(`${file} imports ${specifier}`);
             }
         }
