@@ -704,9 +704,9 @@ const leanBundles: readonly string[] = [
 ];
 
 /**
- * What the {@link leanBundles} mustn't import. Any one function of ts-collections brings some 100 kB of it. A value
- * import of the overlay module puts it in the initial bundle, even unused, as soon as lazily loaded code opens an
- * overlay.
+ * What the {@link leanBundles} mustn't import. A class of ts-collections, or any of its functions that returns a
+ * sequence, brings some 100 kB of it. A value import of the overlay module puts it in the initial bundle, even unused,
+ * as soon as lazily loaded code opens an overlay.
  */
 const heavyImports: readonly string[] = ["@mirei/ts-collections", "@angular/cdk/overlay"];
 
