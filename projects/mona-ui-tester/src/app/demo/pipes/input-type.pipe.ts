@@ -1,5 +1,5 @@
-import { Pipe, PipeTransform } from "@angular/core";
-import { ComponentPropertyMetadata } from "../models/ComponentMetadata";
+import { Pipe, type PipeTransform } from "@angular/core";
+import type { ComponentPropertyMetadata } from "../models/ComponentMetadata";
 
 @Pipe({
     name: "inputProperty"
@@ -19,7 +19,8 @@ export class InputPropertyPipe implements PipeTransform {
         }
         const rawValue = input[propertyType];
         if (typeof rawValue === "string") {
-            return rawValue.replaceAll("\r", "\n") || "";
+            // A Windows line ending is one break, not two, which would start a new paragraph in a description.
+            return rawValue.replace(/\r\n?/g, "\n");
         }
         return rawValue === undefined ? "" : String(rawValue);
     }
