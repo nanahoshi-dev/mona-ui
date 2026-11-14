@@ -32,7 +32,7 @@ provideThemeOptions({ initialTheme: { name: "anna", variant: "system" } });
 
 Anna Dark has charcoal surfaces, near-black borders and a solid violet for selection. On its own, the deep violet would be hard to see against the dark surface. So where a color alone shows a value, as in slider ranges, progress bars, switches, radio buttons, tabs and steps, Anna Dark uses a lighter violet instead. [Custom Themes](/components/theming/custom-themes#indicator-colors) shows how a theme of your own can do the same.
 
-Anna Light has soft gray surfaces and white controls. Selection is a violet tint rather than a solid fill, so secondary text in a selected row stays readable. The deep violet stands out well on the light surface, so it draws slider ranges, switches and the rest as it is.
+Anna Light has soft gray surfaces and off-white controls that darken gently on hover. Selection is a violet tint rather than a solid fill, so secondary text in a selected row stays readable. The deep violet stands out well on the light surface, so it draws slider ranges, switches and the rest as it is.
 
 ## Compare the Themes
 

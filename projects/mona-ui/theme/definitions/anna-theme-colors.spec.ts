@@ -28,13 +28,14 @@ describe("annaThemeColors", () => {
         expect(annaThemeColors.dark).not.toBe(monaThemeColors.dark);
     });
 
-    it("gives the light variant gray surfaces, white controls, and the same violet", () => {
+    it("gives the light variant gray surfaces, off-white controls, and the same violet", () => {
         expect(annaThemeColors.light).toEqual(
             expect.objectContaining({
                 "--color-canvas": "#E9E9EC",
                 "--color-surface": "#EFEFF1",
                 "--color-surface-muted": "#E4E4E7",
-                "--color-input-background": "#FFFFFF",
+                "--color-input-background": "#F7F7F9",
+                "--color-hover": "#EAEAED",
                 "--color-primary": "#583573",
                 "--color-selected": "#E9DDF2",
                 "--color-selected-border": "var(--color-primary)",

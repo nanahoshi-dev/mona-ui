@@ -38,8 +38,8 @@ const sharedRoles: ThemeColors = Object.freeze({
 });
 
 // Anna Light keeps the dark variant's structure: graphite surfaces, with every control a step brighter than any of them.
-// Here the controls are white, so the surfaces are soft grays. Selection becomes a violet tint, since secondary text
-// must stay readable on it.
+// The controls stop short of white, as far above the canvas as the dark variant's are, so they don't glare on the soft
+// gray surfaces. Selection becomes a violet tint, since secondary text must stay readable on it.
 const light: ThemeColors = Object.freeze({
     "--color-canvas": "#E9E9EC",
     "--color-surface": "#EFEFF1",
@@ -50,7 +50,7 @@ const light: ThemeColors = Object.freeze({
     "--color-foreground": "#1E1F22",
     "--color-muted-foreground": "#53545A",
 
-    "--color-input-background": "#FFFFFF",
+    "--color-input-background": "#F7F7F9",
     "--color-border-subtle": "#DFDFE3",
     "--color-border": "#D5D5DA",
     "--color-border-control": "#C4C5CA",
@@ -58,8 +58,9 @@ const light: ThemeColors = Object.freeze({
     "--color-border-control-contrast": "#7A7B82",
     "--color-border-control-contrast-hover": "#68696F",
 
-    "--color-hover": "#E2E2E6",
-    "--color-active": "#D8D8DD",
+    // A hovered control comes down to about the canvas's tone, a small step, while rows on a surface still darken.
+    "--color-hover": "#EAEAED",
+    "--color-active": "#E2E2E6",
 
     "--color-disabled-foreground": "#5A5B61",
     "--color-disabled-background": "#E6E6E9",
