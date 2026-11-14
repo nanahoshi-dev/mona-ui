@@ -1,4 +1,6 @@
-import { parse, wcagContrast } from "culori";
+// The CSS color spaces only: see generate-theme-color-palette.ts.
+import "culori/css";
+import { parse, wcagContrast } from "culori/fn";
 import type { ThemeVariant } from "../models/Theme";
 import type { ThemeProfile } from "../models/ThemeDefinition";
 

@@ -1,6 +1,7 @@
-import { forEach } from "@mirei/ts-collections";
 import { Observable } from "rxjs";
 
+// A plain loop rather than ts-collections, where any one function brings some 100 kB: the internal entry point, which
+// the button and nearly every component import, would otherwise bring all of that.
 export const rxFromResize = (
     target: Element | Iterable<Element>,
     options?: ResizeObserverOptions
@@ -14,7 +15,9 @@ export const rxFromResize = (
             }
         }
         const resizeObserver = new ResizeObserver(entries => observer.next(entries));
-        forEach(elements, e => resizeObserver.observe(e, options));
+        for (const element of elements) {
+            resizeObserver.observe(element, options);
+        }
         return () => resizeObserver.disconnect();
     });
 };

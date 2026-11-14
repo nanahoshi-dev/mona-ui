@@ -1,4 +1,6 @@
-import { formatRgb, parse } from "culori";
+// The CSS color spaces only, the ones chart colors come in. "culori" would register every color space it has.
+import "culori/css";
+import { formatRgb, parse } from "culori/fn";
 import type { SceneAreaPoint, ScenePoint } from "../../scene/scene-geometry";
 import { clamp } from "../../utils/number-utils";
 

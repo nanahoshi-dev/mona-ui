@@ -1,4 +1,7 @@
-import { clampChroma, converter, parse, wcagContrast, type Oklch } from "culori";
+// Only the CSS color spaces, which is everything a seed can be written in. Importing "culori" would register
+// every color space it has, for some 15 kB more in every application that provides a theme.
+import "culori/css";
+import { clampChroma, converter, parse, wcagContrast, type Oklch } from "culori/fn";
 import type {
     GeneratedThemeColorPalette,
     ThemeColorPaletteSeeds,

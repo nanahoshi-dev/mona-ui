@@ -9,6 +9,7 @@ import {
     runConsumerSmokeTest,
     verifyAgentDocs,
     verifyBuiltPackage,
+    verifyLeanBundles,
     verifyPackageStyles,
     verifyThirdPartyNotices
 } from "./verify-built-package";
@@ -1241,6 +1242,71 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
                 expect(() => verifyAgentDocs(tempDir)).toThrow("Agent docs index not found");
                 writeFileSync(join(tempDir, "llms.txt"), "- [Grid](docs/grid.md): A grid.\n");
                 expect(() => verifyAgentDocs(tempDir)).toThrow("docs/grid.md");
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+    });
+
+    describe("verifyLeanBundles", () => {
+        const leanFiles = [
+            "nanahoshi-mona-ui-button.mjs",
+            "nanahoshi-mona-ui-internal.mjs",
+            "nanahoshi-mona-ui-internal-indicator-icon.mjs",
+            "nanahoshi-mona-ui-theme.mjs"
+        ];
+
+        function createBundles(extra: Record<string, string> = {}): string {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            mkdirSync(join(tempDir, "fesm2022"));
+            for (const file of leanFiles) {
+                writeFileSync(join(tempDir, "fesm2022", file), "import * as i0 from '@angular/core';\nexport {};\n");
+            }
+            for (const [file, source] of Object.entries(extra)) {
+                writeFileSync(join(tempDir, "fesm2022", file), source);
+            }
+            return tempDir;
+        }
+
+        it("accepts culori's CSS spaces, an overlay module loaded on demand, and ts-collections elsewhere", () => {
+            const tempDir = createBundles({
+                "nanahoshi-mona-ui-theme.mjs": [
+                    "import 'culori/css';",
+                    "import { parse } from 'culori/fn';",
+                    "const load = () => import('@angular/cdk/overlay');"
+                ].join("\n"),
+                "nanahoshi-mona-ui-grid.mjs": "import { ImmutableSet } from '@mirei/ts-collections';\n"
+            });
+            try {
+                expect(verifyLeanBundles(tempDir)).toBe(5);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when a lean bundle imports ts-collections or the overlay module", () => {
+            const tempDir = createBundles({
+                "nanahoshi-mona-ui-button.mjs": "import { ConnectionPositionPair } from '@angular/cdk/overlay';\n",
+                "nanahoshi-mona-ui-internal.mjs": "import {\n    forEach\n} from '@mirei/ts-collections';\n"
+            });
+            try {
+                expect(() => verifyLeanBundles(tempDir)).toThrow(
+                    [
+                        "nanahoshi-mona-ui-button.mjs imports @angular/cdk/overlay",
+                        "nanahoshi-mona-ui-internal.mjs imports @mirei/ts-collections"
+                    ].join("\n")
+                );
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when any bundle imports the whole of culori, or a lean bundle is missing", () => {
+            const tempDir = createBundles({ "nanahoshi-mona-ui-chart.mjs": "import { parse } from 'culori';\n" });
+            try {
+                expect(() => verifyLeanBundles(tempDir)).toThrow('nanahoshi-mona-ui-chart.mjs imports "culori"');
+                rmSync(join(tempDir, "fesm2022", "nanahoshi-mona-ui-theme.mjs"));
+                expect(() => verifyLeanBundles(tempDir)).toThrow("nanahoshi-mona-ui-theme.mjs");
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
             }
