@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention -- The keys are file paths and package names. */
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { createExampleProject } from "../src/app/layout/example-project";
 import { checkExampleSource, findExampleReferences, renderRegistry } from "./generate-examples";
@@ -71,6 +72,7 @@ describe("generate-examples", () => {
         expect(project["src/index.html"]).toContain("<app-button-looks-example></app-button-looks-example>");
         expect(JSON.parse(project["package.json"]).dependencies["@nanahoshi/mona-ui"]).toBe("latest");
         expect(project["src/styles.css"]).not.toContain("typography");
+        expect(JSON.parse(project["package.json"]).dependencies["@tiptap/core"]).toBeUndefined();
     });
 
     it("adds what the editor needs only to a project that uses it", () => {
@@ -81,8 +83,17 @@ describe("generate-examples", () => {
             title: "Editor"
         });
         const manifest = JSON.parse(project["package.json"]);
+        const library = JSON.parse(readFileSync(new URL("../../mona-ui/package.json", import.meta.url), "utf-8"));
+        const editorPeers = Object.keys(library.peerDependenciesMeta).filter(
+            name => name.startsWith("@tiptap/") || name === "remixicon"
+        );
 
-        expect(manifest.dependencies.remixicon).toBeDefined();
+        expect(editorPeers).toContain("@tiptap/core");
+        expect(editorPeers).toContain("remixicon");
+        for (const name of editorPeers) {
+            expect(manifest.dependencies[name], name).toBe(library.peerDependencies[name]);
+        }
+        expect(manifest.dependencies.jspdf).toBeUndefined();
         expect(manifest.devDependencies["@tailwindcss/typography"]).toBeDefined();
         expect(project["src/styles.css"]).toContain('@plugin "@tailwindcss/typography";');
     });

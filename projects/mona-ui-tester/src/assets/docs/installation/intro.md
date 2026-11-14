@@ -1,6 +1,6 @@
 # Installation
 
-This guide adds Mona UI to an Angular application in four steps: install the package, set up Tailwind CSS, import the styles, and render a first component. Optional setup for themes, languages and the rich text editor follows.
+This guide adds Mona UI to an Angular application in four steps: install the package, set up Tailwind CSS, import the styles, and render a first component. Optional setup for themes, languages, the rich text editor and chart export follows.
 
 ## Before You Begin
 
@@ -129,10 +129,10 @@ For a right-to-left language, also set `dir="rtl"` on the `<html>` element in `s
 
 ### Set Up the Rich Text Editor
 
-The [Editor](/components/editor) also needs Tailwind's typography plugin and the Remix Icon font. Remix Icon is installed with Mona UI, so only the plugin needs installing:
+The [Editor](/components/editor) is built on [Tiptap](https://tiptap.dev), and also uses the Remix Icon font and Tailwind's typography plugin. No other component needs them, so they aren't installed with Mona UI. Install them with:
 
 ```bash
-npm install @tailwindcss/typography
+npm install @tiptap/core @tiptap/pm @tiptap/starter-kit @tiptap/extension-highlight @tiptap/extension-image @tiptap/extension-list @tiptap/extension-subscript @tiptap/extension-superscript @tiptap/extension-table @tiptap/extension-text-align @tiptap/extension-text-style remixicon @tailwindcss/typography
 ```
 
 Then add two lines to your global stylesheet, after the imports from step 3. Its top then reads:
@@ -154,11 +154,23 @@ The editor's code is large, about 900 kB before compression. To keep it out of t
 }
 ```
 
+### Export Charts
+
+Charts can be saved as PNG, SVG or PDF files. Exporting uses three packages that charts don't need otherwise, so they aren't installed with Mona UI. If your application exports charts, install them:
+
+```bash
+npm install jspdf svg2pdf.js html2canvas-pro
+```
+
+See [Export](/components/chart#export) for how to export a chart.
+
 ## Troubleshooting
 
 - **Components look unstyled.** Check that your global stylesheet imports `@nanahoshi/mona-ui/styles.css`, and that it comes after `@import "tailwindcss"`.
 - **An import can't be found.** Import from the component's entry point, such as `@nanahoshi/mona-ui/grid`. The package root, `@nanahoshi/mona-ui`, exports nothing. Each component's page names its entry point.
+- **The build can't resolve `@tiptap/core` or another `@tiptap` package.** Your application uses the editor, which needs packages that aren't installed with Mona UI. Install them as shown in [Set Up the Rich Text Editor](#set-up-the-rich-text-editor).
 - **The editor's toolbar has no icons, or its text has no formatting.** Add the Remix Icon import and the typography plugin, as shown in [Set Up the Rich Text Editor](#set-up-the-rich-text-editor).
+- **Exporting a chart fails with "Failed to load jsPDF" or a similar error.** Install the export packages, as shown in [Export Charts](#export-charts).
 
 ## Using an AI Coding Assistant
 

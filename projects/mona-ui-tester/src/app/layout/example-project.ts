@@ -42,9 +42,25 @@ const DEV_DEPENDENCIES = {
     typescript: ">=5.9.0 <6.1.0"
 };
 
-/** What the rich text editor needs on top, as its installation notes say. */
+/**
+ * What the rich text editor needs on top, as its installation notes say. The packages are the library's optional peer
+ * dependencies, which npm doesn't install on its own.
+ */
 const EDITOR_ENTRY = "@nanahoshi/mona-ui/editor";
-const EDITOR_DEPENDENCIES = { remixicon: "^4.9.1" };
+const EDITOR_DEPENDENCIES = {
+    "@tiptap/core": "^3.26.1",
+    "@tiptap/extension-highlight": "^3.26.1",
+    "@tiptap/extension-image": "^3.26.1",
+    "@tiptap/extension-list": "^3.26.1",
+    "@tiptap/extension-subscript": "^3.26.1",
+    "@tiptap/extension-superscript": "^3.26.1",
+    "@tiptap/extension-table": "^3.26.1",
+    "@tiptap/extension-text-align": "^3.26.1",
+    "@tiptap/extension-text-style": "^3.26.1",
+    "@tiptap/pm": "^3.26.1",
+    "@tiptap/starter-kit": "^3.26.1",
+    remixicon: "^4.9.1"
+};
 const EDITOR_DEV_DEPENDENCIES = { "@tailwindcss/typography": "^0.5.20" };
 const EDITOR_STYLES = `@import "remixicon/fonts/remixicon.css";
 @plugin "@tailwindcss/typography";

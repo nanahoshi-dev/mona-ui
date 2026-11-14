@@ -340,6 +340,20 @@ Resolution precedence is chart disable, series disable, series preference, then 
 
 Hidden items the data no longer has are dropped from the binding when the data changes. A chart with no data keeps them, so a value set before the data loads still applies.
 
+### Export
+
+`exportChart(options)` returns the chart as a PNG, SVG or PDF `Blob`, and `downloadChart(options)` also saves it as a file. Export needs the `jspdf`, `svg2pdf.js` and `html2canvas-pro` packages, which aren't installed with Mona UI. See [Export Charts](/components/installation#export-charts).
+
+```typescript
+private readonly chart = viewChild.required(ChartComponent);
+
+protected async downloadReport(): Promise<void> {
+    await this.chart().downloadChart({ fileName: "visitors.pdf", format: "pdf" });
+}
+```
+
+A PDF keeps the chart as vector graphics when it can, and falls back to an image otherwise. Set `mode` to `"vector"` or `"raster"` to choose. `width`, `height` and `background` set the output size and fill, and `page` sets a PDF's page size and margins.
+
 ### Locale
 
 Axis ticks, data labels, tooltips and announcements format numbers, percentages and dates for the library locale (`MonaI18nService.localeId()`), and a locale change reformats the chart in place. A series `valueFormatter` or axis `formatter` takes precedence. Built-in text comes from the `chart` messages.
