@@ -38,7 +38,7 @@ providers: [
 
 ## Register a Theme
 
-`provideThemeFamily()` takes a theme's `name` and its `variants`. A theme needs at least one variant. With a single one, as Anna has, `variant: "system"` always gives that one:
+`provideThemeFamily()` takes a theme's `name` and its `variants`. A theme needs at least one variant. With a single one, `variant: "system"` always gives that one:
 
 ```typescript
 import { provideThemeFamily, type ThemeFamilyRegistration } from "@nanahoshi/mona-ui/theme";
@@ -89,7 +89,7 @@ When the browser has no `backdrop-filter`, or the user asks for less transparenc
 
 Where a fill alone shows a value, as in slider ranges, progress bars, switches, radio buttons, tab bars and steps, components draw it with `--mona-indicator-color`, and what sits on the fill with `--mona-indicator-foreground`. Both fall back to the primary color and its foreground.
 
-If your primary color doesn't reach 3:1 against the surface on its own, set them in `custom`, as Anna does with a lighter violet:
+If your primary color doesn't reach 3:1 against the surface on its own, set them in `custom`, as Anna Dark does with a lighter violet:
 
 ```typescript
 custom: {

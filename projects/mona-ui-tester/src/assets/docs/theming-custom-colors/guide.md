@@ -68,7 +68,7 @@ provideThemeColorPalette({
 });
 ```
 
-The seed's hue and chroma give the palette its identity. Mona UI then chooses each tone's lightness, and lowers the chroma where it must, so that text meets WCAG AA contrast and every color fits in the sRGB gamut, in light and in dark. A palette applies to the variants its theme has: both for Mona and Luna, and dark only for Anna. An invalid or translucent seed throws an error while the application starts, naming its role.
+The seed's hue and chroma give the palette its identity. Mona UI then chooses each tone's lightness, and lowers the chroma where it must, so that text meets WCAG AA contrast and every color fits in the sRGB gamut, in light and in dark. A palette applies to every variant its theme has, so to light and dark for each built-in theme. An invalid or translucent seed throws an error while the application starts, naming its role.
 
 To see the colors before you use them, call `generateThemeColorPalette()`. It returns the tokens as two maps, `light` and `dark`:
 

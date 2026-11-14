@@ -29,19 +29,24 @@ describe("ThemingBuiltInThemesDocComponent", () => {
             "Mona Dark preview",
             "Luna Light preview",
             "Luna Dark preview",
+            "Anna Light preview",
             "Anna Dark preview"
         ]);
     });
 
     it("gives each preview its own theme's tokens, whatever the site's theme is", () => {
         TestBed.inject(ThemeService).setTheme({ name: "mona", variant: "light" });
-        const [, monaDark, , lunaDark, annaDark] = renderPreviews();
+        const [, monaDark, , lunaDark, annaLight, annaDark] = renderPreviews();
 
         expect(monaDark.style.getPropertyValue("--color-primary").trim()).toBe(
             builtInThemes.mona.variants.dark.colors["--color-primary"]
         );
         expect(lunaDark.style.getPropertyValue("--color-canvas").trim()).toBe(
             builtInThemes.luna.variants.dark.colors["--color-canvas"]
+        );
+        expect(lunaDark.style.getPropertyValue("--mona-indicator-color").trim()).toBe("var(--color-primary)");
+        expect(annaLight.style.getPropertyValue("--color-surface").trim()).toBe(
+            builtInThemes.anna.variants.light.colors["--color-surface"]
         );
         expect(annaDark.style.getPropertyValue("--mona-indicator-color").trim()).toBe(
             builtInThemes.anna.variants.dark.custom["--mona-indicator-color"]

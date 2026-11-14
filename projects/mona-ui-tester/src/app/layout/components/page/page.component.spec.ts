@@ -112,6 +112,7 @@ describe("PageComponent", () => {
         expect(component["themeOptions"].map(theme => `${theme.name}-${theme.variant}`)).toEqual([
             "mona-light",
             "mona-dark",
+            "anna-light",
             "anna-dark",
             "luna-light",
             "luna-dark",

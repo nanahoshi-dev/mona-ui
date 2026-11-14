@@ -25,7 +25,7 @@ Most themes have a light and a dark variant. The theme and the variant together,
 | ----- | ----------- | ----------------------------------------------------------------------------------- |
 | Mona  | Light, dark | Neutral grays, with color kept for status. The default.                             |
 | Luna  | Light, dark | Clean surfaces with a blue primary, and translucent glass on controls and overlays. |
-| Anna  | Dark        | Charcoal surfaces with a deep violet primary.                                       |
+| Anna  | Light, dark | Graphite grays with a deep violet primary, and flat controls a shade lighter.       |
 
 [Built-in Themes](/components/theming/built-in-themes) shows each one side by side, with real components.
 
@@ -92,7 +92,7 @@ Set the variant to `"system"`:
 provideThemeOptions({ initialTheme: { name: "mona", variant: "system" } });
 ```
 
-The theme then follows the operating system's light or dark setting, and keeps following it when the setting changes. `setTheme({ name: "luna", variant: "system" })` does the same at runtime. A theme with a single variant, such as Anna, uses that variant whatever the system says.
+The theme then follows the operating system's light or dark setting, and keeps following it when the setting changes. `setTheme({ name: "luna", variant: "system" })` does the same at runtime. A theme with a single variant, such as a dark-only theme of your own, uses that variant whatever the system says.
 
 The service also sets `color-scheme` on the root element, so native controls and scrollbars match the variant.
 
@@ -221,7 +221,7 @@ Tailwind's `dark:` variant follows the operating system, not the theme. To make 
 @custom-variant dark (&:where([data-mona-variant="dark"], [data-mona-variant="dark"] *));
 ```
 
-Classes such as `dark:invert` then apply whenever a dark variant is in effect, including Anna and a dark variant chosen by the system setting.
+Classes such as `dark:invert` then apply whenever a dark variant is in effect, including one chosen by the system setting.
 
 ## Theme Part of a Page
 

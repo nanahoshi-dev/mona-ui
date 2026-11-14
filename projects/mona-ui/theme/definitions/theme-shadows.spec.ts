@@ -5,7 +5,12 @@ describe("built-in theme shadows", () => {
     const requiredTokens = ["--shadow-control", "--shadow-overlay", "--shadow-raised"];
 
     it("keeps every supported theme variant on the same elevation contract", () => {
-        for (const shadows of [monaThemeShadows.light, monaThemeShadows.dark, annaThemeShadows.dark]) {
+        for (const shadows of [
+            monaThemeShadows.light,
+            monaThemeShadows.dark,
+            annaThemeShadows.light,
+            annaThemeShadows.dark
+        ]) {
             expect(Object.keys(shadows).sort()).toEqual(requiredTokens);
             expect(Object.keys(shadows).every(name => name.startsWith("--shadow-"))).toBe(true);
         }
@@ -20,9 +25,10 @@ describe("built-in theme shadows", () => {
     });
 
     it("owns elevation independently for every supported theme variant", () => {
-        expect(annaThemeShadows).not.toHaveProperty("light");
         expect(monaThemeShadows.dark).not.toEqual(monaThemeShadows.light);
+        expect(annaThemeShadows.light).not.toEqual(monaThemeShadows.light);
         expect(annaThemeShadows.dark).not.toEqual(monaThemeShadows.dark);
+        expect(annaThemeShadows.light["--shadow-control"]).toBe("none");
         expect(annaThemeShadows.dark["--shadow-control"]).toBe("none");
         expect(annaThemeShadows.dark["--shadow-raised"]).toContain("rgb(0 0 0 / 0.6)");
         expect(annaThemeShadows.dark["--shadow-overlay"]).toContain("rgb(0 0 0 / 0.65)");

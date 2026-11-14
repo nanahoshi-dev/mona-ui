@@ -63,8 +63,9 @@ describe("theme providers", () => {
     it("still refuses an explicit override of a variant a theme doesn't have", () => {
         TestBed.configureTestingModule({
             providers: [
-                provideThemeOptions({ initialTheme: { name: "anna", variant: "dark" } }),
-                provideThemeOverrides({ theme: "anna", light: { colors: { "--color-primary": "#000000" } } })
+                provideThemeFamily({ name: "night", variants: { dark: monaTheme.variants.dark } }),
+                provideThemeOptions({ initialTheme: { name: "night", variant: "dark" } }),
+                provideThemeOverrides({ theme: "night", light: { colors: { "--color-primary": "#000000" } } })
             ]
         });
 

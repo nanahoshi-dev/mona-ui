@@ -50,6 +50,7 @@ export class ThemingBuiltInThemesDocComponent {
             createPreview("Mona Dark", builtInThemes.mona.variants.dark, "dark", options),
             createPreview("Luna Light", builtInThemes.luna.variants.light, "light", options),
             createPreview("Luna Dark", builtInThemes.luna.variants.dark, "dark", options),
+            createPreview("Anna Light", builtInThemes.anna.variants.light, "light", options),
             createPreview("Anna Dark", builtInThemes.anna.variants.dark, "dark", options)
         ];
     }
@@ -61,7 +62,13 @@ function createPreview(
     variant: ThemeVariant,
     options: { readonly moreContrast: boolean; readonly reducedTransparency: boolean }
 ): ThemePreview {
-    const style: Record<string, string> = { ...flattenThemeProfile(profile), "color-scheme": variant };
+    // A theme without indicator colors would otherwise inherit the site theme's, where it sets them.
+    const style: Record<string, string> = {
+        "--mona-indicator-color": "var(--color-primary)",
+        "--mona-indicator-foreground": "var(--color-primary-foreground)",
+        ...flattenThemeProfile(profile),
+        "color-scheme": variant
+    };
     if (options.moreContrast) {
         for (const [name, replacement] of CONTRAST_BORDERS) {
             const value: string | undefined = profile.colors[replacement];

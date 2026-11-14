@@ -17,6 +17,9 @@ import type { ThemeStrategy } from "../strategies/theme.strategy";
 import { THEME_STRATEGY } from "../tokens/theme.tokens";
 import { ThemeService } from "./theme.service";
 
+/** A theme with a dark variant only, now that every built-in theme has both. */
+const darkOnlyTheme = { name: "night", variants: { dark: monaTheme.variants.dark } };
+
 interface FakeMedia {
     readonly listeners: Set<() => void>;
     matches: boolean;
@@ -211,11 +214,24 @@ describe("ThemeService behavior", () => {
         });
 
         it("takes the variant a theme has when it only has one", () => {
-            const { media, service } = configure({ initialTheme: { name: "anna", variant: "system" } });
-            expect(service.selection()).toEqual({ name: "anna", variant: "dark" });
+            const { media, service } = configure(
+                { initialTheme: { name: "night", variant: "system" } },
+                false,
+                provideThemeFamily(darkOnlyTheme)
+            );
+            expect(service.selection()).toEqual({ name: "night", variant: "dark" });
 
             flip(media, true);
             flip(media, false);
+
+            expect(service.selection()).toEqual({ name: "night", variant: "dark" });
+        });
+
+        it("follows the system with Anna, which has both variants", () => {
+            const { media, service } = configure({ initialTheme: { name: "anna", variant: "system" } });
+            expect(service.selection()).toEqual({ name: "anna", variant: "light" });
+
+            flip(media, true);
 
             expect(service.selection()).toEqual({ name: "anna", variant: "dark" });
         });
@@ -258,7 +274,7 @@ describe("ThemeService behavior", () => {
 
             expect(service.availableThemes()).toEqual(
                 expect.arrayContaining([
-                    { name: "anna", variants: ["dark"] },
+                    { name: "anna", variants: ["light", "dark"] },
                     { name: "custom", variants: ["dark"] },
                     { name: "mona", variants: ["light", "dark"] }
                 ])
@@ -266,10 +282,15 @@ describe("ThemeService behavior", () => {
         });
 
         it("says whether a theme has a variant", () => {
-            const { service } = configure({ initialTheme: { name: "mona", variant: "light" } });
+            const { service } = configure(
+                { initialTheme: { name: "mona", variant: "light" } },
+                false,
+                provideThemeFamily(darkOnlyTheme)
+            );
 
-            expect(service.supportsVariant("anna", "dark")).toBe(true);
-            expect(service.supportsVariant("anna", "light")).toBe(false);
+            expect(service.supportsVariant("anna", "light")).toBe(true);
+            expect(service.supportsVariant("night", "dark")).toBe(true);
+            expect(service.supportsVariant("night", "light")).toBe(false);
             expect(service.supportsVariant("nope", "dark")).toBe(false);
         });
 
@@ -363,7 +384,7 @@ describe("ThemeService behavior", () => {
 
         it.each([
             ["a theme that's gone", { name: "gone", variant: "dark" }],
-            ["a variant the theme doesn't have", { name: "anna", variant: "light" }],
+            ["a variant the theme doesn't have", { name: "night", variant: "light" }],
             ["a system preference for a theme that's gone", { name: "gone", variant: "system" }],
             ["a variant that isn't one", { name: "mona", variant: "dim" }],
             ["no name", { variant: "dark" }],
@@ -372,7 +393,12 @@ describe("ThemeService behavior", () => {
             ["null as a stored value", null]
         ])("counts %s as nothing stored, and leaves it", (_label, stored) => {
             const storage = createStorage(stored);
-            const { service } = configure(options, false, provideThemeStorage(storage));
+            const { service } = configure(
+                options,
+                false,
+                provideThemeStorage(storage),
+                provideThemeFamily(darkOnlyTheme)
+            );
 
             expect(service.selection()).toEqual({ name: "mona", variant: "light" });
             expect(storage.writes).toEqual([]);

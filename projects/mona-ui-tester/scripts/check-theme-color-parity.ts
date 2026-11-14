@@ -41,6 +41,7 @@ if (JSON.stringify(tailwindKeys) !== JSON.stringify(runtimeKeys)) {
 for (const [name, colors] of Object.entries({
     "Mona Light": monaThemeColors.light,
     "Mona Dark": monaThemeColors.dark,
+    "Anna Light": annaThemeColors.light,
     "Anna Dark": annaThemeColors.dark,
     "Luna Light": lunaThemeColors.light,
     "Luna Dark": lunaThemeColors.dark
@@ -70,6 +71,7 @@ const tailwindShadowKeys = Object.keys(tailwindShadows).sort();
 
 for (const [name, shadows] of Object.entries({
     "Mona Dark": monaThemeShadows.dark,
+    "Anna Light": annaThemeShadows.light,
     "Anna Dark": annaThemeShadows.dark,
     "Luna Light": lunaThemeShadows.light,
     "Luna Dark": lunaThemeShadows.dark
@@ -94,6 +96,7 @@ for (const [name, value] of Object.entries(runtimeShadows)) {
 
 const librarySources = globSync("projects/mona-ui/**/*.ts").filter(path => !path.endsWith(".spec.ts"));
 for (const [name, profile] of Object.entries({
+    "Anna Light": annaTheme.variants.light,
     "Anna Dark": annaTheme.variants.dark,
     "Luna Light": lunaTheme.variants.light,
     "Luna Dark": lunaTheme.variants.dark

@@ -24,27 +24,27 @@ The [Luna Showcase](/components/theming/luna) shows the materials on a full page
 
 ## Anna
 
-Anna is dark only: charcoal surfaces, a deep violet for main actions and selection, and a lighter violet for focus rings. Controls sit flat, without shadows, and animations are quick, at 150 ms.
+Anna pairs graphite grays with a deep violet for main actions. Controls sit flat, without shadows, and a shade lighter than any surface around them, so text boxes, buttons and check boxes stand out by their fill. Animations are quick, at 150 ms.
 
 ```typescript
-provideThemeOptions({ initialTheme: { name: "anna", variant: "dark" } });
+provideThemeOptions({ initialTheme: { name: "anna", variant: "system" } });
 ```
 
-Anna has no light variant, so `variant: "system"` still gives Anna Dark, and `supportsVariant("anna", "light")` returns `false`. If users can switch themes, offer Anna alongside a theme that has a light variant.
+Anna Dark has charcoal surfaces, near-black borders and a solid violet for selection. On its own, the deep violet would be hard to see against the dark surface. So where a color alone shows a value, as in slider ranges, progress bars, switches, radio buttons, tabs and steps, Anna Dark uses a lighter violet instead. [Custom Themes](/components/theming/custom-themes#indicator-colors) shows how a theme of your own can do the same.
 
-On its own, Anna's deep violet would be hard to see against the dark surface. So where a color alone shows a value, as in slider ranges, progress bars, switches, radio buttons, tabs and steps, Anna uses the lighter violet instead. [Custom Themes](/components/theming/custom-themes#indicator-colors) shows how a theme of your own can do the same.
+Anna Light has soft gray surfaces and white controls. Selection is a violet tint rather than a solid fill, so secondary text in a selected row stays readable. The deep violet stands out well on the light surface, so it draws slider ranges, switches and the rest as it is.
 
 ## Compare the Themes
 
-|               | Mona                                    | Luna                                    | Anna             |
-| ------------- | --------------------------------------- | --------------------------------------- | ---------------- |
-| Variants      | Light, dark                             | Light, dark                             | Dark             |
-| Primary color | Near-black in light, near-white in dark | Blue                                    | Deep violet      |
-| Selection     | Gray tint                               | Blue tint                               | Violet           |
-| Materials     | Opaque                                  | Translucent glass, or opaque if reduced | Opaque           |
-| Shadows       | Subtle                                  | Soft and wide                           | None on controls |
-| Motion        | 200 ms and 300 ms                       | 180 ms and 320 ms                       | 150 ms           |
-| Corner radii  | 4, 6 and 8 px                           | 4, 6 and 8 px                           | 4, 6 and 8 px    |
+|               | Mona                                    | Luna                                    | Anna                                 |
+| ------------- | --------------------------------------- | --------------------------------------- | ------------------------------------ |
+| Variants      | Light, dark                             | Light, dark                             | Light, dark                          |
+| Primary color | Near-black in light, near-white in dark | Blue                                    | Deep violet                          |
+| Selection     | Gray tint                               | Blue tint                               | Violet tint in light, violet in dark |
+| Materials     | Opaque                                  | Translucent glass, or opaque if reduced | Opaque                               |
+| Shadows       | Subtle                                  | Soft and wide                           | None on controls                     |
+| Motion        | 200 ms and 300 ms                       | 180 ms and 320 ms                       | 150 ms                               |
+| Corner radii  | 4, 6 and 8 px                           | 4, 6 and 8 px                           | 4, 6 and 8 px                        |
 
 ## Start from a Built-in Theme
 
