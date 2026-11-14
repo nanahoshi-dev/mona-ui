@@ -1150,6 +1150,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./textbox/slots/slots-example.component").then(module => module.TextboxSlotsExampleComponent),
         mainFile: "slots-example.component.ts"
     },
+    "theming-custom-colors/runtime-primary": {
+        files: ["runtime-primary-example.component.ts", "runtime-primary-example.component.html"],
+        load: () => import("./theming-custom-colors/runtime-primary/runtime-primary-example.component").then(module => module.ThemingCustomColorsRuntimePrimaryExampleComponent),
+        mainFile: "runtime-primary-example.component.ts"
+    },
     "tooltip-directive/content-mode": {
         files: ["content-mode-example.component.ts", "content-mode-example.component.html"],
         load: () => import("./tooltip-directive/content-mode/content-mode-example.component").then(module => module.TooltipDirectiveContentModeExampleComponent),

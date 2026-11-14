@@ -63,10 +63,17 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
         pages: [
             guide("introduction", "Introduction", "What Mona UI is, what it includes and how it is built."),
             guide("installation", "Installation", "Install the package, set up its styles and choose a theme."),
-            guide("theming", "Theming", "Customize colors, density and shape through design tokens.", "theme"),
-            guide("forms", "Forms", "Connect Mona UI controls to Angular signal forms."),
-            guide("theme-colors", "Theme Colors", "The color tokens each theme defines, with live swatches."),
-            guide("theme-luna", "Luna Theme", "The Luna theme and how to enable it.")
+            {
+                ...guide("theming", "Theming", "Choose and switch themes, follow the system's dark mode, and use theme tokens in your own styles.", "theme"),
+                children: [
+                    guide("theming/built-in-themes", "Built-in Themes", "Mona, Luna and Anna side by side, and when to use each one."),
+                    guide("theming/colors", "Theme Colors", "The current theme's color roles, with live swatches and contrast ratios."),
+                    guide("theming/custom-colors", "Custom Colors", "Generate a palette from brand colors, override tokens, or let users choose a color."),
+                    guide("theming/custom-themes", "Custom Themes", "Register a theme of your own, from scratch or based on a built-in theme."),
+                    guide("theming/luna", "Luna Showcase", "Luna's translucent materials on a full page of everyday controls.")
+                ]
+            },
+            guide("forms", "Forms", "Connect Mona UI controls to Angular signal forms.")
         ]
     },
     {

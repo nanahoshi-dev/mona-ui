@@ -6,9 +6,7 @@ import {
     LucideChevronRight,
     LucideCompass,
     LucideDynamicIcon,
-    LucideMoon,
     LucidePaintbrush,
-    LucidePalette,
     LucideTextCursorInput
 } from "@lucide/angular";
 import type { LucideIconInput } from "@lucide/angular";
@@ -20,8 +18,6 @@ const PAGE_ICONS: Readonly<Record<string, LucideIconInput>> = {
     forms: LucideTextCursorInput,
     installation: LucideBookOpen,
     introduction: LucideCompass,
-    "theme-colors": LucidePalette,
-    "theme-luna": LucideMoon,
     theming: LucidePaintbrush
 };
 

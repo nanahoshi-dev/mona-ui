@@ -31,18 +31,42 @@ export const routes: Routes = [
                 loadComponent: () => import("./docs/theming-doc/theming-doc.component").then(m => m.ThemingDocComponent)
             },
             {
-                path: "forms",
-                loadComponent: () => import("./docs/forms-doc/forms-doc.component").then(m => m.FormsDocComponent)
+                path: "theming/built-in-themes",
+                loadComponent: () =>
+                    import("./docs/theming-built-in-themes-doc/theming-built-in-themes-doc.component").then(
+                        m => m.ThemingBuiltInThemesDocComponent
+                    )
             },
             {
-                path: "theme-colors",
+                path: "theming/colors",
                 loadComponent: () =>
                     import("./docs/theme-colors-doc/theme-colors-doc.component").then(m => m.ThemeColorsDocComponent)
             },
             {
-                path: "theme-luna",
+                path: "theming/custom-colors",
+                loadComponent: () =>
+                    import("./docs/theming-custom-colors-doc/theming-custom-colors-doc.component").then(
+                        m => m.ThemingCustomColorsDocComponent
+                    )
+            },
+            {
+                path: "theming/custom-themes",
+                loadComponent: () =>
+                    import("./docs/theming-custom-themes-doc/theming-custom-themes-doc.component").then(
+                        m => m.ThemingCustomThemesDocComponent
+                    )
+            },
+            {
+                path: "theming/luna",
                 loadComponent: () =>
                     import("./docs/luna-theme-doc/luna-theme-doc.component").then(m => m.LunaThemeDocComponent)
+            },
+            // The theme pages' addresses before they were nested under Theming.
+            { path: "theme-colors", redirectTo: "theming/colors" },
+            { path: "theme-luna", redirectTo: "theming/luna" },
+            {
+                path: "forms",
+                loadComponent: () => import("./docs/forms-doc/forms-doc.component").then(m => m.FormsDocComponent)
             },
             {
                 path: "auto-complete",

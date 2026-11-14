@@ -15,7 +15,12 @@ describe("DocsNavigationService", () => {
 
     function setUp(): { router: Router; service: DocsNavigationService } {
         TestBed.configureTestingModule({
-            providers: [provideRouter([{ path: "components/:page", component: EmptyComponent }])]
+            providers: [
+                provideRouter([
+                    { path: "components/:page", component: EmptyComponent },
+                    { path: "components/:page/:child", component: EmptyComponent }
+                ])
+            ]
         });
         return { router: TestBed.inject(Router), service: TestBed.inject(DocsNavigationService) };
     }

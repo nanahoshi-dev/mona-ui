@@ -178,7 +178,7 @@ The documentation is also available as markdown, for coding agents. Point an age
 
 ## Next Steps
 
-- [Theming](/components/theming): customize colors, density and shape.
+- [Theming](/components/theming): choose a theme, and match it to your brand.
 - [Forms](/components/forms): connect the form controls to Angular's signal forms.
 
 From there, open any component in the sidebar. Each page has live examples and a full API reference.

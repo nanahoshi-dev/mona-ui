@@ -21,7 +21,7 @@ The sidebar lists every component.
 
 - **Made for modern Angular.** Every component is standalone and uses signals for its inputs, outputs and state.
 - **Accessible.** Components follow the WAI-ARIA patterns, work with the keyboard and screen readers, and stay usable in forced colors mode.
-- **Themeable.** Colors, density and shape come from design tokens. Pick a built-in theme in light or dark, follow the system's setting, or define your own. See [Theming](/components/theming).
+- **Themeable.** Colors, shadows, corner radii and motion come from design tokens. Pick a built-in theme in light or dark, follow the system's setting, or define your own. See [Theming](/components/theming).
 - **Ready for forms.** The form controls work with Angular's signal forms through `[formField]`. See [Forms](/components/forms).
 - **Localizable.** Built-in text is in English by default, and can be translated or switched at runtime. Layouts mirror for right-to-left languages.
 - **Typed.** Inputs, events and template contexts are fully typed, so your editor catches mistakes as you write.
