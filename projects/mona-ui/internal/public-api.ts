@@ -20,6 +20,7 @@ export * from "./utils/core/focusCanReturn";
 export * from "./utils/core/focusElement";
 export * from "./utils/core/inertOutside";
 export * from "./utils/core/injectLabelledByText";
+export * from "./utils/core/pageScrollBlock";
 export * from "./utils/core/positionGlobalOverlay";
 export * from "./utils/core/rxFromResize";
 export * from "./utils/core/rovingToolbar";

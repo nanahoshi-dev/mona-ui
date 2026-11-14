@@ -90,21 +90,42 @@ describe("PopupService", () => {
         });
     });
 
-    it("uses the CDK block scroll strategy when requested", () => {
-        const anchor = createAnchor();
-        const overlay = TestBed.inject(Overlay);
-        const blockScrollStrategy = overlay.scrollStrategies.block();
-        const blockSpy = vi.spyOn(overlay.scrollStrategies, "block").mockReturnValue(blockScrollStrategy);
+    describe("blockScroll", () => {
+        const root = document.documentElement;
 
-        popupRef = service.create({
-            anchor,
-            animation: false,
-            blockScroll: true,
-            content: PopupTestContentComponent
+        // CDK only blocks a page that can scroll, which nothing can with no layout.
+        beforeEach(() => vi.spyOn(root, "scrollHeight", "get").mockReturnValue(100000));
+
+        afterEach(() => {
+            vi.restoreAllMocks();
+            root.style.removeProperty("overflow-y");
+            root.classList.remove("cdk-global-scrollblock");
         });
 
-        expect(blockSpy).toHaveBeenCalledOnce();
-        expect(popupRef.overlayRef.getConfig().scrollStrategy).toBe(blockScrollStrategy);
+        it("blocks the page's scroll while the popup is open", () => {
+            popupRef = service.create({
+                anchor: createAnchor(),
+                animation: false,
+                blockScroll: true,
+                content: PopupTestContentComponent
+            });
+            expect(root.classList.contains("cdk-global-scrollblock")).toBe(true);
+
+            popupRef.close(undefined, 0);
+            expect(root.classList.contains("cdk-global-scrollblock")).toBe(false);
+        });
+
+        it("doesn't force a scrollbar onto a page whose root doesn't scroll", () => {
+            // The longhand, since jsdom doesn't expand the `overflow` shorthand into its computed `overflow-y`.
+            root.style.overflowY = "hidden";
+            popupRef = service.create({
+                anchor: createAnchor(),
+                animation: false,
+                blockScroll: true,
+                content: PopupTestContentComponent
+            });
+            expect(root.classList.contains("cdk-global-scrollblock")).toBe(false);
+        });
     });
 
     it("should update position when a plain scrollable ancestor scrolls", () => {

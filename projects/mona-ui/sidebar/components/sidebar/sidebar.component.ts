@@ -19,7 +19,7 @@ import {
 } from "@angular/core";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { inertOutside } from "@nanahoshi/mona-ui/internal";
+import { createPageScrollBlockStrategy, inertOutside } from "@nanahoshi/mona-ui/internal";
 import { TooltipDirective } from "@nanahoshi/mona-ui/tooltip";
 import { twMerge } from "tailwind-merge";
 import { SIDEBAR_DEFAULT_MESSAGES } from "../../i18n/sidebar.default-messages";
@@ -374,7 +374,7 @@ export class SidebarComponent {
         if (!modal) {
             return release;
         }
-        const scroll = createBlockScrollStrategy(this.#injector);
+        const scroll = createPageScrollBlockStrategy(this.#document, createBlockScrollStrategy(this.#injector));
         scroll.enable();
         return () => {
             release();

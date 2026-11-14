@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference Layout Concepts</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    code, pre, .font-mono {
+      font-family: 'JetBrains Mono', 'Fira Code', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .inline-code {
+      font-family: 'JetBrains Mono', 'Fira Code', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.8125rem;
+      padding: 0.125rem 0.375rem;
+      border-radius: 0.375rem;
+    }
+    .hidden { display: none; }
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200 min-h-screen pb-20">
+
+  <!-- Top Control Bar -->
+  <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800/70">
+            Symbol Detail UX
+          </span>
+          <h1 class="text-lg font-semibold tracking-tight">Component &amp; Directive API Page Variations</h1>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          5 cohesive designs for <code class="font-mono text-[11px]">SplitterComponent</code> matching your Soft Tinted Wash &amp; Semantic Grid system
+        </p>
+      </div>
+
+      <!-- Interactive Preview Controls -->
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Width Simulator -->
+        <div class="inline-flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-slate-200/70 dark:border-slate-700/70 text-xs">
+          <span class="px-2 text-slate-500 dark:text-slate-400 hidden sm:inline">Container:</span>
+          <button onclick="setWidth('max-w-2xl', this)" class="width-btn px-2.5 py-1 rounded-md font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition">
+            Narrow (672px)
+          </button>
+          <button onclick="setWidth('max-w-4xl', this)" class="width-btn active px-2.5 py-1 rounded-md font-medium bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm transition">
+            Docs (896px)
+          </button>
+          <button onclick="setWidth('max-w-5xl', this)" class="width-btn px-2.5 py-1 rounded-md font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition">
+            Wide (1024px)
+          </button>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button onclick="toggleTheme()" aria-label="Toggle Dark Mode" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+          <svg id="sun-icon" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg id="moon-icon" class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Concept Tabs -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 overflow-x-auto">
+      <nav class="flex gap-1 border-t border-slate-100 dark:border-slate-800/80 pt-2 pb-0 text-sm" id="tabs-nav">
+        <button onclick="selectTab('soft-wash-cards', this)" class="tab-btn active px-3.5 py-2 font-medium border-b-2 border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400 whitespace-nowrap transition">
+          1. Cohesive Soft Wash
+        </button>
+        <button onclick="selectTab('signature-header', this)" class="tab-btn px-3.5 py-2 font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 whitespace-nowrap transition">
+          2. Signature Bar Cards
+        </button>
+        <button onclick="selectTab('two-col-split', this)" class="tab-btn px-3.5 py-2 font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 whitespace-nowrap transition">
+          3. 2-Col Signature Split
+        </button>
+        <button onclick="selectTab('spec-table', this)" class="tab-btn px-3.5 py-2 font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 whitespace-nowrap transition">
+          4. Compact Spec Matrix
+        </button>
+        <button onclick="selectTab('editorial-rules', this)" class="tab-btn px-3.5 py-2 font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 whitespace-nowrap transition">
+          5. Borderless Left-Rule
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Preview Canvas -->
+  <main id="preview-container" class="max-w-4xl mx-auto px-4 sm:px-6 mt-8 transition-all duration-300">
+    <!-- Rationale Banner -->
+    <div id="rationale-box" class="mb-6 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h2 id="concept-title" class="text-base font-semibold text-slate-900 dark:text-white"></h2>
+        <p id="concept-desc" class="text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed"></p>
+      </div>
+      <div class="shrink-0 flex flex-wrap gap-1.5" id="concept-tags"></div>
+    </div>
+
+    <!-- Rendered Design Area -->
+    <div id="design-stage" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm p-6 sm:p-8">
+      <!-- Injected dynamically -->
+    </div>
+  </main>
+
+  <!-- Copy Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-12 opacity-0 transition-all duration-200 pointer-events-none bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-medium px-3.5 py-2.5 rounded-lg shadow-lg flex items-center gap-2">
+    <svg class="w-4 h-4 text-emerald-400 dark:text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="toast-msg">Copied to clipboard</span>
+  </div>
+
+  <script>
+    // Exact data from SplitterComponent screenshot
+    const symbolDoc = {
+      kind: 'Component',
+      name: 'SplitterComponent',
+      entryPoint: '@nanahoshi/mona-ui/splitter',
+      importStatement: 'import { SplitterComponent } from "@nanahoshi/mona-ui/splitter";',
+      selector: 'mona-splitter',
+      guideTitle: 'Splitter',
+      guideHref: '#guide-splitter',
+      inputs: [
+        {
+          name: 'keyboardStep',
+          type: 'number',
+          defaultValue: '10',
+          descriptionHtml: 'How far an arrow key moves a separator, in pixels.'
+        },
+        {
+          name: 'orientation',
+          type: '"horizontal" | "vertical"',
+          defaultValue: '"horizontal"',
+          descriptionHtml: 'The layout direction of the splitter panes.'
+        }
+      ],
+      outputs: [
+        {
+          name: 'resizeEnd',
+          type: 'readonly (string | number)[]',
+          descriptionHtml: 'Emitted with every pane\'s <code class="inline-code bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700">size</code>, in order, once a drag ends, after each key that resizes, and when the separator collapses or expands a pane. Use it to save a layout: <code class="inline-code bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700">sizeChange</code> on a pane fires on every move, and these values can go straight back into <code class="inline-code bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700">size</code>.'
+        }
+      ]
+    };
+
+    // Interactive state
+    let activeTabKey = 'soft-wash-cards';
+    let memberFilter = 'ALL'; // 'ALL' | 'INPUTS' | 'OUTPUTS'
+    let searchQuery = '';
+
+    // Semantic tokens aligned with your chosen Soft Tinted Wash system
+    const kindTokens = {
+      Component: {
+        dot: 'bg-sky-500 dark:bg-sky-400',
+        eyebrowBg: 'bg-sky-50 dark:bg-sky-950/70 border-sky-200/80 dark:border-sky-800/70 text-sky-700 dark:text-sky-300',
+        accentBorder: 'border-l-sky-500 dark:border-l-sky-400'
+      },
+      Input: {
+        dot: 'bg-sky-500 dark:bg-sky-400',
+        label: 'text-sky-700 dark:text-sky-300',
+        washCard: 'border-sky-200/80 dark:border-sky-900/60 border-l-sky-500 dark:border-l-sky-400 bg-sky-50/30 dark:bg-sky-950/15',
+        headerTint: 'bg-sky-50/60 dark:bg-sky-950/25 border-sky-200/70 dark:border-sky-900/60',
+        leftRule: 'border-l-sky-500 dark:border-l-sky-400',
+        typePill: 'bg-sky-100/70 dark:bg-sky-950/80 text-sky-800 dark:text-sky-200 border-sky-200/80 dark:border-sky-800/70'
+      },
+      Output: {
+        dot: 'bg-emerald-500 dark:bg-emerald-400',
+        label: 'text-emerald-700 dark:text-emerald-300',
+        washCard: 'border-emerald-200/80 dark:border-emerald-900/60 border-l-emerald-500 dark:border-l-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/15',
+        headerTint: 'bg-emerald-50/60 dark:bg-emerald-950/25 border-emerald-200/70 dark:border-emerald-900/60',
+        leftRule: 'border-l-emerald-500 dark:border-l-emerald-400',
+        typePill: 'bg-emerald-100/70 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-200 border-emerald-200/80 dark:border-emerald-800/70'
+      }
+    };
+
+    function getFilteredMembers() {
+      const q = searchQuery.trim().toLowerCase();
+      const matchItem = (item) => {
+        if (!q) return true;
+        const plainDesc = item.descriptionHtml.replace(/<[^>]*>/g, '').toLowerCase();
+        return (
+          item.name.toLowerCase().includes(q) ||
+          item.type.toLowerCase().includes(q) ||
+          plainDesc.includes(q)
+        );
+      };
+
+      return {
+        inputs: memberFilter === 'OUTPUTS' ? [] : symbolDoc.inputs.filter(matchItem),
+        outputs: memberFilter === 'INPUTS' ? [] : symbolDoc.outputs.filter(matchItem)
+      };
+    }
+
+    function escapeAttr(str) {
+      return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, "\\'");
+    }
+
+    function renderCopyIconBtn(textToCopy, ariaLabel = 'Copy') {
+      return `
+        <button
+          onclick="copySelector('${escapeAttr(textToCopy)}')"
+          aria-label="${ariaLabel}"
+          title="Copy to clipboard"
+          class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700/70 transition shrink-0 cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+      `;
+    }
+
+    function renderImportBox() {
+      return `
+        <div class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
+          <code class="font-mono text-xs sm:text-[13px] text-slate-800 dark:text-slate-200 overflow-x-auto whitespace-nowrap py-0.5">
+            <span class="text-indigo-600 dark:text-indigo-400">import</span> { ${symbolDoc.name} } <span class="text-indigo-600 dark:text-indigo-400">from</span> <span class="text-emerald-700 dark:text-emerald-400">"${symbolDoc.entryPoint}"</span>;
+          </code>
+          ${renderCopyIconBtn(symbolDoc.importStatement, 'Copy import statement')}
+        </div>
+      `;
+    }
+
+    function renderMemberFilterBar() {
+      const total = symbolDoc.inputs.length + symbolDoc.outputs.length;
+      return `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button onclick="setMemberFilter('ALL')" class="px-2.5 py-1 rounded-lg text-xs font-medium border transition ${memberFilter === 'ALL' ? 'bg-slate-900 text-white border-slate-900 dark:bg-white dark:text-slate-900 dark:border-white' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300'}">
+              All <span class="opacity-70 ml-0.5">${total}</span>
+            </button>
+            <button onclick="setMemberFilter('INPUTS')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition ${memberFilter === 'INPUTS' ? 'bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300'}">
+              <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+              Inputs <span class="opacity-70">${symbolDoc.inputs.length}</span>
+            </button>
+            <button onclick="setMemberFilter('OUTPUTS')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition ${memberFilter === 'OUTPUTS' ? 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300'}">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Outputs <span class="opacity-70">${symbolDoc.outputs.length}</span>
+            </button>
+          </div>
+
+          <div class="relative w-full sm:w-60">
+            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input
+              type="text"
+              value="${searchQuery.replace(/"/g, '&quot;')}"
+              oninput="handleSearch(this.value)"
+              placeholder="Filter inputs & outputs..."
+              class="w-full pl-8 pr-7 py-1.5 text-xs rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition"
+            />
+            ${searchQuery ? `
+              <button onclick="handleSearch('')" aria-label="Clear filter" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderEmptyState() {
+      return `
+        <div class="py-10 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+          <p class="text-sm text-slate-500 dark:text-slate-400">No properties match "<span class="font-mono text-slate-700 dark:text-slate-200">${searchQuery}</span>"</p>
+          <button onclick="resetFilters()" class="mt-2 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline">Reset filters</button>
+        </div>
+      `;
+    }
+
+    function renderDefaultChip(val) {
+      if (!val) return '';
+      return `
+        <span class="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-slate-900/80 px-2.5 py-1 rounded-md border border-slate-200/80 dark:border-slate-700/80 shrink-0">
+          <span class="text-[11px] uppercase tracking-wider font-medium text-slate-400 dark:text-slate-500">Default</span>
+          <code class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">${val}</code>
+        </span>
+      `;
+    }
+
+    function renderTypeBadge(typeStr, customClass = '') {
+      return `
+        <code class="font-mono text-xs px-2 py-0.5 rounded-md border ${customClass || 'bg-slate-100/90 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700'}">
+          ${typeStr}
+        </code>
+      `;
+    }
+
+    const concepts = {
+      'soft-wash-cards': {
+        title: '1. Cohesive Soft Tinted Wash Cards (Matches Your Design System)',
+        desc: 'Directly extends the Soft Tinted Wash pattern from your tables and entry-point grid. Unifies the import snippet, copyable selector, and Guide link in a crisp header, then renders Inputs (sky wash) and Outputs (emerald wash) with inline type chips and top-right Default pills.',
+        tags: ['100% consistent with previous pages', 'Top-right Default pill', 'Copyable selector & import'],
+        render: () => {
+          const { inputs, outputs } = getFilteredMembers();
+          const ct = kindTokens.Component;
+          return `
+            <div class="space-y-7">
+              <!-- Unified Component Header -->
+              <div class="space-y-4">
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md font-semibold uppercase tracking-wider border ${ct.eyebrowBg}">
+                    <span class="w-1.5 h-1.5 rounded-full ${ct.dot}"></span>
+                    ${symbolDoc.kind}
+                  </span>
+                  <span class="text-slate-300 dark:text-slate-700">/</span>
+                  <a href="#entry-point" onclick="event.preventDefault()" class="font-mono text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                    ${symbolDoc.entryPoint}
+                  </a>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <h2 class="font-mono text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                    ${symbolDoc.name}
+                  </h2>
+
+                  <!-- Metadata Pills: Selector + Guide -->
+                  <div class="flex flex-wrap items-center gap-2">
+                    <button
+                      onclick="copySelector('${symbolDoc.selector}')"
+                      title="Copy selector"
+                      class="group inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs bg-slate-100/90 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 transition cursor-pointer"
+                    >
+                      <span class="text-slate-400 dark:text-slate-500">Selector:</span>
+                      <code class="font-mono font-semibold text-slate-900 dark:text-white">${symbolDoc.selector}</code>
+                      <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+
+                    <a href="${symbolDoc.guideHref}" onclick="event.preventDefault()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-indigo-50/80 hover:bg-indigo-100/80 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/70 transition">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                      <span>Guide: <strong class="font-semibold">${symbolDoc.guideTitle}</strong></span>
+                      <span>&rarr;</span>
+                    </a>
+                  </div>
+                </div>
+
+                ${renderImportBox()}
+                ${renderMemberFilterBar()}
+              </div>
+
+              ${inputs.length === 0 && outputs.length === 0 ? renderEmptyState() : ''}
+
+              <!-- Inputs Section -->
+              ${inputs.length > 0 ? `
+                <section class="space-y-3">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full ${kindTokens.Input.dot}"></span>
+                    <h3 class="text-base font-semibold text-slate-900 dark:text-white">Inputs</h3>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">${inputs.length}</span>
+                  </div>
+                  <div class="space-y-3">
+                    ${inputs.map(item => `
+                      <div class="rounded-xl border border-l-4 ${kindTokens.Input.washCard} p-4 sm:px-5 sm:py-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                          <div class="flex flex-wrap items-center gap-2.5">
+                            <button onclick="copySelector('[${item.name}]')" title="Copy binding [${item.name}]" class="font-mono text-sm sm:text-[15px] font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition cursor-pointer">
+                              ${item.name}
+                            </button>
+                            ${renderTypeBadge(item.type, kindTokens.Input.typePill)}
+                          </div>
+                          ${renderDefaultChip(item.defaultValue)}
+                        </div>
+                        <p class="mt-2.5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                          ${item.descriptionHtml}
+                        </p>
+                      </div>
+                    `).join('')}
+                  </div>
+                </section>
+              ` : ''}
+
+              <!-- Outputs Section -->
+              ${outputs.length > 0 ? `
+                <section class="space-y-3">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full ${kindTokens.Output.dot}"></span>
+                    <h3 class="text-base font-semibold text-slate-900 dark:text-white">Outputs</h3>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">${outputs.length}</span>
+                  </div>
+                  <div class="space-y-3">
+                    ${outputs.map(item => `
+                      <div class="rounded-xl border border-l-4 ${kindTokens.Output.washCard} p-4 sm:px-5 sm:py-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                          <div class="flex flex-wrap items-center gap-2.5">
+                            <button onclick="copySelector('(${item.name})')" title="Copy event (${item.name})" class="font-mono text-sm sm:text-[15px] font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition cursor-pointer">
+                              ${item.name}
+                            </button>
+                            ${renderTypeBadge(item.type, kindTokens.Output.typePill)}
+                          </div>
+                        </div>
+                        <p class="mt-2.5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                          ${item.descriptionHtml}
+                        </p>
+                      </div>
+                    `).join('')}
+                  </div>
+                </section>
+              ` : ''}
+            </div>
+          `;
+        }
+      },
+      'signature-header': {
+        title: '2. Tinted Signature Header + Prose Body',
+        desc: 'Places the property name, type signature, and Default pill inside a single tinted header bar on each card, keeping the description prose crisp and uncluttered below. Great for long union or generic type signatures.',
+        tags: ['Single-line signature bar', 'Handles complex types', 'Clear visual separation'],
+        render: () => {
+          const { inputs, outputs } = getFilteredMembers();
+          const ct = kindTokens.Component;
+          return `
+            <div class="space-y-7">
+              <!-- Header -->
+              <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                  <div>
+                    <div class="flex items-center gap-2 text-xs">
+                      <span class="font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400">${symbolDoc.kind}</span>
+                      <span class="text-slate-300 dark:text-slate-700">&bull;</span>
+                      <a href="#entry-point" onclick="event.preventDefault()" class="font-mono text-slate-500 dark:text-slate-400 hover:underline">${symbolDoc.entryPoint}</a>
+                    </div>
+                    <h2 class="mt-1 font-mono text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">${symbolDoc.name}</h2>
+                  </div>
+
+                  <!-- Compact Key-Value Summary Box -->
+                  <div class="flex flex-wrap sm:flex-nowrap items-center divide-x divide-slate-200 dark:divide-slate-700 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-xs shrink-0">
+                    <button onclick="copySelector('${symbolDoc.selector}')" class="px-3.5 py-2 text-left hover:bg-slate-100/80 dark:hover:bg-slate-800 transition rounded-l-xl cursor-pointer">
+                      <div class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">Selector</div>
+                      <div class="font-mono font-semibold text-slate-800 dark:text-slate-100 mt-0.5">${symbolDoc.selector}</div>
+                    </button>
+                    <a href="${symbolDoc.guideHref}" onclick="event.preventDefault()" class="px-3.5 py-2 text-left hover:bg-slate-100/80 dark:hover:bg-slate-800 transition rounded-r-xl">
+                      <div class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">Guide</div>
+                      <div class="font-semibold text-indigo-600 dark:text-indigo-400 mt-0.5">${symbolDoc.guideTitle} &rarr;</div>
+                    </a>
+                  </div>
+                </div>
+
+                ${renderImportBox()}
+                ${renderMemberFilterBar()}
+              </div>
+
+              ${inputs.length === 0 && outputs.length === 0 ? renderEmptyState() : ''}
+
+              ${inputs.length > 0 ? `
+                <section class="space-y-3">
+                  <h3 class="text-base font-semibold text-slate-900 dark:text-white">Inputs</h3>
+                  <div class="space-y-3">
+                    ${inputs.map(item => `
+                      <div class="rounded-xl border border-slate-200/90 dark:border-slate-800 overflow-hidden">
+                        <div class="px-4 py-2.5 border-b ${kindTokens.Input.headerTint} flex flex-wrap items-center justify-between gap-2">
+                          <div class="flex flex-wrap items-baseline gap-2">
+                            <span class="font-mono text-sm font-bold text-slate-900 dark:text-white">${item.name}</span>
+                            <span class="text-slate-400 font-mono text-xs">:</span>
+                            <code class="font-mono text-xs text-sky-800 dark:text-sky-300">${item.type}</code>
+                          </div>
+                          ${renderDefaultChip(item.defaultValue)}
+                        </div>
+                        <div class="px-4 py-3 bg-white dark:bg-slate-900/50 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                          ${item.descriptionHtml}
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </section>
+              ` : ''}
+
+              ${outputs.length > 0 ? `
+                <section class="space-y-3">
+                  <h3 class="text-base font-semibold text-slate-900 dark:text-white">Outputs</h3>
+                  <div class="space-y-3">
+                    ${outputs.map(item => `
+                      <div class="rounded-xl border border-slate-200/90 dark:border-slate-800 overflow-hidden">
+                        <div class="px-4 py-2.5 border-b ${kindTokens.Output.headerTint} flex flex-wrap items-center justify-between gap-2">
+                          <div class="flex flex-wrap items-baseline gap-2">
+                            <span class="font-mono text-sm font-bold text-slate-900 dark:text-white">${item.name}</span>
+                            <span class="text-slate-400 font-mono text-xs">:</span>
+                            <code class="font-mono text-xs text-emerald-800 dark:text-emerald-300">${item.type}</code>
+                          </div>
+                        </div>
+                        <div class="px-4 py-3 bg-white dark:bg-slate-900/50 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                          ${item.descriptionHtml}
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </section>
+              ` : ''}
+            </div>
+          `;
+        }
+      },
+      'two-col-split': {
+        title: '3. 2-Column Signature & Prose Split (Ultra-Scannable)',
+        desc: 'Splits each property horizontally into a left signature column (name, type, and Default) and a right prose column (~60% width). Reduces vertical page height by ~35% while keeping descriptions wide and readable.',
+        tags: ['~35% more compact', 'Wide prose column', 'Ideal for 10+ inputs'],
+        render: () => {
+          const { inputs, outputs } = getFilteredMembers();
+          const ct = kindTokens.Component;
+          return `
+            <div class="space-y-7">
+              <!-- Header -->
+              <div class="space-y-4">
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md font-semibold uppercase tracking-wider border ${ct.eyebrowBg}">
+                    <span class="w-1.5 h-1.5 rounded-full ${ct.dot}"></span>
+                    ${symbolDoc.kind}
+                  </span>
+                  <a href="#entry-point" onclick="event.preventDefault()" class="font-mono text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400">
+                    ${symbolDoc.entryPoint}
+                  </a>
+                </div>
+                <h2 class="font-mono text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">${symbolDoc.name}</h2>
+
+                <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-3 items-stretch">
+                  ${renderImportBox()}
+                  <div class="flex items-center gap-2">
+                    <button onclick="copySelector('${symbolDoc.selector}')" class="h-full px-3 py-2 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs flex items-center gap-1.5 transition cursor-pointer">
+                      <span class="text-slate-400">Selector:</span>
+                      <code class="font-mono font-semibold text-slate-800 dark:text-slate-100">${symbolDoc.selector}</code>
+                    </button>
+                    <a href="${symbolDoc.guideHref}" onclick="event.preventDefault()" class="h-full px-3 py-2 rounded-xl border border-indigo-200/80 dark:border-indigo-800/70 bg-indigo-50/70 dark:bg-indigo-950/40 hover:bg-indigo-100/70 text-xs font-medium text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5 transition">
+                      <span>Guide: <strong>${symbolDoc.guideTitle}</strong></span>
+                      <span>&rarr;</span>
+                    </a>
+                  </div>
+                </div>
+
+                ${renderMemberFilterBar()}
+              </div>
+
+              ${inputs.length === 0 && outputs.length === 0 ? renderEmptyState() : ''}
+
+              ${inputs.length > 0 ? `
+                <section class="space-y-3">
+                  <h3 class="text-base font-semibold text-slate-900 dark:text-white">Inputs</h3>
+                  <div class="rounded-xl border border-slate-200/90 dark:border-slate-800 divide-y divide-slate-200/80 dark:divide-slate-800 overflow-hidden">
+                    ${inputs.map(item => `
+                      <div class="grid grid-cols-1 md:grid-cols-[240px_1fr] lg:grid-cols-[270px_1fr]">
+                        <div class="p-4 bg-sky-50/35 dark:bg-sky-950/15 md:border-r border-slate-200/80 dark:border-slate-800 flex flex-col justify-between gap-2.5">
+                          <div>
+                            <div class="font-mono text-sm font-bold text-slate-900 dark:text-white">${item.name}</div>
+                            <div class="mt-1.5">
+                              ${renderTypeBadge(item.type, kindTokens.Input.typePill)}
+                            </div>
+                          </div>
+                          ${item.defaultValue ? `
+                            <div class="text-xs text-slate-500 dark:text-slate-400">
+                              Default: <code class="font-mono font-semibold text-slate-800 dark:text-slate-200">${item.defaultValue}</code>
+                            </div>
+                          ` : ''}
+                        </div>
+                        <div class="p-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed flex items-center">
+                          <p>${item.descriptionHtml}</p>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </section>
+              ` : ''}
+
+              ${outputs.length > 0 ? `
+                <section class="space-y-3">
+                  <h3 class="text-base font-semibold text-slate-900 dark:text-white">Outputs</h3>
+                  <div class="rounded-xl border border-slate-200/90 dark:border-slate-800 divide-y divide-slate-200/80 dark:divide-slate-800 overflow-hidden">
+                    ${outputs.map(item => `
+                      <div class="grid grid-cols-1 md:grid-cols-[240px_1fr] lg:grid-cols-[270px_1fr]">
+                        <div class="p-4 bg-emerald-50/35 dark:bg-emerald-950/15 md:border-r border-slate-200/80 dark:border-slate-800 flex flex-col justify-center gap-1.5">
+                          <div class="font-mono text-sm font-bold text-slate-900 dark:text-white">${item.name}</div>
+                          <div>
+                            ${renderTypeBadge(item.type, kindTokens.Output.typePill)}
+                          </div>
+                        </div>
+                        <div class="p-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed flex items-center">
+                          <p>${item.descriptionHtml}</p>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </section>
+              ` : ''}
+            </div>
+          `;
+        }
+      },
+      'spec-table': {
+        title: '4. Compact API Spec Matrix (High-Density Reference)',
+        desc: 'Aligns Property + Type, Default, and Description in a clean, responsive reference matrix. Gives Description 55%+ horizontal width while making defaults vertically aligned for instant comparison.',
+        tags: ['Aligned Default column', 'Generous description width', 'Responsive mobile fallback'],
+        render: () => {
+          const { inputs, outputs } = getFilteredMembers();
+          const ct = kindTokens.Component;
+          return `
+            <div class="space-y-7">
+              <!-- Header -->
+              <div class="space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md font-semibold uppercase tracking-wider border ${ct.eyebrowBg}">
+                      <span class="w-1.5 h-1.5 rounded-full ${ct.dot}"></span>
+                      ${symbolDoc.kind}
+                    </span>
+                    <a href="#entry-point" onclick="event.preventDefault()" class="font-mono text-slate-500 dark:text-slate-400 hover:underline">${symbolDoc.entryPoint}</a>
+                  </div>
+                  <div class="flex items-center gap-3 text-xs">
+                    <button onclick="copySelector('${symbolDoc.selector}')" class="font-mono text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer">
+                      &lt;${symbolDoc.selector}&gt;
+                    </button>
+                    <span class="text-slate-300 dark:text-slate-700">|</span>
+                    <a href="${symbolDoc.guideHref}" onclick="event.preventDefault()" class="font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
+                      ${symbolDoc.guideTitle} Guide &rarr;
+                    </a>
+                  </div>
+                </div>
+
+                <h2 class="font-mono text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">${symbolDoc.name}</h2>
+                ${renderImportBox()}
+                ${renderMemberFilterBar()}
+              </div>
+
+              ${inputs.length === 0 && outputs.length === 0 ? renderEmptyState() : ''}
+
+              ${inputs.length > 0 ? `
+                <section class="space-y-2.5">
+                  <h3 class="text-base font-semibold text-slate-900 dark:text-white">Inputs</h3>
+                  <div class="rounded-xl border border-slate-200/90 dark:border-slate-800 overflow-hidden">
+                    <div class="hidden md:grid md:grid-cols-[220px_110px_1fr] px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 bg-sky-50/60 dark:bg-sky-950/25 border-b border-slate-200/80 dark:border-slate-800">
+                      <div>Input &amp; Type</div>
+                      <div>Default</div>
+                      <div>Description</div>
+                    </div>
+                    <div class="divide-y divide-slate-200/80 dark:divide-slate-800">
+                      ${inputs.map(item => `
+                        <div class="grid grid-cols-1 md:grid-cols-[220px_110px_1fr] gap-2 md:gap-4 px-4 py-3.5 items-start">
+                          <div>
+                            <div class="font-mono text-sm font-bold text-slate-900 dark:text-white">${item.name}</div>
+                            <code class="block mt-1 font-mono text-xs text-sky-700 dark:text-sky-300 break-words">${item.type}</code>
+                          </div>
+                          <div>
+                            ${item.defaultValue ? `<code class="inline-code bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200/70 dark:border-slate-700">${item.defaultValue}</code>` : '<span class="text-xs text-slate-400">—</span>'}
+                          </div>
+                          <div class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                            ${item.descriptionHtml}
+                          </div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                </section>
+              ` : ''}
+
+              ${outputs.length > 0 ? `
+                <section class="space-y-2.5">
+                  <h3 class="text-base font-semibold text-slate-900 dark:text-white">Outputs</h3>
+                  <div class="rounded-xl border border-slate-200/90 dark:border-slate-800 overflow-hidden">
+                    <div class="hidden md:grid md:grid-cols-[260px_1fr] px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 bg-emerald-50/60 dark:bg-emerald-950/25 border-b border-slate-200/80 dark:border-slate-800">
+                      <div>Output &amp; Payload Type</div>
+                      <div>Description</div>
+                    </div>
+                    <div class="divide-y divide-slate-200/80 dark:divide-slate-800">
+                      ${outputs.map(item => `
+                        <div class="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-2 md:gap-4 px-4 py-3.5 items-start">
+                          <div>
+                            <div class="font-mono text-sm font-bold text-slate-900 dark:text-white">${item.name}</div>
+                            <code class="block mt-1 font-mono text-xs text-emerald-700 dark:text-emerald-300 break-words">${item.type}</code>
+                          </div>
+                          <div class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                            ${item.descriptionHtml}
+                          </div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                </section>
+              ` : ''}
+            </div>
+          `;
+        }
+      },
+      'editorial-rules': {
+        title: '5. Borderless Left-Rule Editorial (Minimal & Airy)',
+        desc: 'Removes enclosing cards around inputs and outputs in favor of semantic left accent stripes, inline type badges, and clean horizontal hairlines. Zero box-in-box nesting.',
+        tags: ['Zero card nesting', 'Semantic left accent stripes', 'Fast typographic hierarchy'],
+        render: () => {
+          const { inputs, outputs } = getFilteredMembers();
+          const ct = kindTokens.Component;
+          return `
+            <div class="space-y-8">
+              <!-- Header -->
+              <div class="space-y-4">
+                <div class="flex items-center gap-2 text-xs">
+                  <span class="font-semibold uppercase tracking-widest text-sky-600 dark:text-sky-400">${symbolDoc.kind}</span>
+                  <span class="text-slate-300 dark:text-slate-700">/</span>
+                  <a href="#entry-point" onclick="event.preventDefault()" class="font-mono text-slate-500 dark:text-slate-400 hover:underline">${symbolDoc.entryPoint}</a>
+                </div>
+
+                <h2 class="font-mono text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">${symbolDoc.name}</h2>
+
+                ${renderImportBox()}
+
+                <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-600 dark:text-slate-300">
+                  <div class="flex items-center gap-2">
+                    <span class="text-slate-400 dark:text-slate-500">Selector</span>
+                    <button onclick="copySelector('${symbolDoc.selector}')" class="font-mono font-semibold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer">
+                      ${symbolDoc.selector}
+                    </button>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-slate-400 dark:text-slate-500">Guide</span>
+                    <a href="${symbolDoc.guideHref}" onclick="event.preventDefault()" class="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                      ${symbolDoc.guideTitle} &rarr;
+                    </a>
+                  </div>
+                </div>
+
+                ${renderMemberFilterBar()}
+              </div>
+
+              ${inputs.length === 0 && outputs.length === 0 ? renderEmptyState() : ''}
+
+              ${inputs.length > 0 ? `
+                <section class="space-y-4">
+                  <h3 class="text-base font-semibold text-slate-900 dark:text-white">Inputs</h3>
+                  <div class="divide-y divide-slate-200/70 dark:divide-slate-800/80 border-t border-b border-slate-200/70 dark:border-slate-800/80">
+                    ${inputs.map(item => `
+                      <div class="py-4 pl-4 border-l-[3px] ${kindTokens.Input.leftRule}">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                          <div class="flex flex-wrap items-center gap-2.5">
+                            <span class="font-mono text-sm sm:text-[15px] font-bold text-slate-900 dark:text-white">${item.name}</span>
+                            ${renderTypeBadge(item.type)}
+                          </div>
+                          ${item.defaultValue ? `
+                            <span class="text-xs text-slate-500 dark:text-slate-400">
+                              Default <code class="inline-code bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 ml-1">${item.defaultValue}</code>
+                            </span>
+                          ` : ''}
+                        </div>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                          ${item.descriptionHtml}
+                        </p>
+                      </div>
+                    `).join('')}
+                  </div>
+                </section>
+              ` : ''}
+
+              ${outputs.length > 0 ? `
+                <section class="space-y-4">
+                  <h3 class="text-base font-semibold text-slate-900 dark:text-white">Outputs</h3>
+                  <div class="divide-y divide-slate-200/70 dark:divide-slate-800/80 border-t border-b border-slate-200/70 dark:border-slate-800/80">
+                    ${outputs.map(item => `
+                      <div class="py-4 pl-4 border-l-[3px] ${kindTokens.Output.leftRule}">
+                        <div class="flex flex-wrap items-center gap-2.5">
+                          <span class="font-mono text-sm sm:text-[15px] font-bold text-slate-900 dark:text-white">${item.name}</span>
+                          ${renderTypeBadge(item.type)}
+                        </div>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                          ${item.descriptionHtml}
+                        </p>
+                      </div>
+                    `).join('')}
+                  </div>
+                </section>
+              ` : ''}
+            </div>
+          `;
+        }
+      }
+    };
+
+    function renderActiveConcept() {
+      const concept = concepts[activeTabKey];
+      document.getElementById('concept-title').textContent = concept.title;
+      document.getElementById('concept-desc').textContent = concept.desc;
+      document.getElementById('concept-tags').innerHTML = concept.tags.map(tag => `
+        <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60">
+          ${tag}
+        </span>
+      `).join('');
+      document.getElementById('design-stage').innerHTML = concept.render();
+    }
+
+    function selectTab(key, btnEl) {
+      activeTabKey = key;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active', 'border-indigo-600', 'text-indigo-600', 'dark:border-indigo-400', 'dark:text-indigo-400');
+        btn.classList.add('border-transparent', 'text-slate-500', 'dark:text-slate-400');
+      });
+      if (btnEl) {
+        btnEl.classList.add('active', 'border-indigo-600', 'text-indigo-600', 'dark:border-indigo-400', 'dark:text-indigo-400');
+        btnEl.classList.remove('border-transparent', 'text-slate-500', 'dark:text-slate-400');
+      }
+      renderActiveConcept();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val;
+      const activeEl = document.activeElement;
+      const selectionStart = activeEl && activeEl.selectionStart;
+      renderActiveConcept();
+      const newInput = document.querySelector('#design-stage input[type="text"]');
+      if (newInput) {
+        newInput.focus();
+        if (typeof selectionStart === 'number') {
+          newInput.setSelectionRange(selectionStart, selectionStart);
+        }
+      }
+    }
+
+    function setMemberFilter(filter) {
+      memberFilter = filter;
+      renderActiveConcept();
+    }
+
+    function resetFilters() {
+      searchQuery = '';
+      memberFilter = 'ALL';
+      renderActiveConcept();
+    }
+
+    function setWidth(maxWidthClass, btnEl) {
+      const container = document.getElementById('preview-container');
+      if (container) {
+        container.classList.remove('max-w-2xl', 'max-w-4xl', 'max-w-5xl');
+        container.classList.add(maxWidthClass);
+      }
+
+      document.querySelectorAll('.width-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-sm');
+        btn.classList.add('text-slate-600', 'dark:text-slate-300');
+      });
+
+      if (btnEl) {
+        btnEl.classList.add('active', 'bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-sm');
+        btnEl.classList.remove('text-slate-600', 'dark:text-slate-300');
+      }
+    }
+
+    function toggleTheme() {
+      const htmlEl = document.documentElement;
+      if (htmlEl.classList.contains('dark')) {
+        htmlEl.classList.remove('dark');
+        htmlEl.classList.add('light');
+      } else {
+        htmlEl.classList.remove('light');
+        htmlEl.classList.add('dark');
+      }
+    }
+
+    let toastTimeoutId = null;
+    function copySelector(text) {
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast(`Copied: ${text}`);
+      } catch (err) {
+        showToast('Unable to copy to clipboard');
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      if (!toast || !toastMsg) return;
+
+      toastMsg.textContent = message;
+      toast.classList.remove('translate-y-12', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      if (toastTimeoutId) {
+        clearTimeout(toastTimeoutId);
+      }
+      toastTimeoutId = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-12', 'opacity-0');
+      }, 2200);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      selectTab('soft-wash-cards', document.querySelector('.tab-btn'));
+    });
+  </script>
+</body>
+</html>
