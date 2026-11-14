@@ -69,8 +69,7 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                     guide("theming/built-in-themes", "Built-in Themes", "Mona, Luna and Anna side by side, and when to use each one."),
                     guide("theming/colors", "Theme Colors", "The current theme's color roles, with live swatches and contrast ratios."),
                     guide("theming/custom-colors", "Custom Colors", "Generate a palette from brand colors, override tokens, or let users choose a color."),
-                    guide("theming/custom-themes", "Custom Themes", "Register a theme of your own, from scratch or based on a built-in theme."),
-                    guide("theming/luna", "Luna Showcase", "Luna's translucent materials on a full page of everyday controls.")
+                    guide("theming/custom-themes", "Custom Themes", "Register a theme of your own, from scratch or based on a built-in theme.")
                 ]
             },
             guide("forms", "Forms", "Connect Mona UI controls to Angular signal forms.")

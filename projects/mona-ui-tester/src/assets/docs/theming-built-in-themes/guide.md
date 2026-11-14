@@ -20,7 +20,7 @@ provideThemeOptions({ initialTheme: { name: "luna", variant: "system" } });
 
 The glass needs the browser's `backdrop-filter`. When the browser doesn't support it, or the user asks for less transparency in their system settings, Luna uses opaque versions of the same colors. The root element's `data-mona-transparency` attribute says which is in effect: `full` or `reduced`. A server-rendered page starts with the opaque versions, because only the browser can tell.
 
-The [Luna Showcase](/components/theming/luna) shows the materials on a full page. This site gives Luna its own primary color with `provideThemeColorPalette()`, so the Luna you see here has a muted navy primary instead of the blue in the previews.
+This site gives Luna its own primary color with `provideThemeColorPalette()`, so when you choose Luna from the site's theme menu, it has a muted navy primary instead of the blue in the previews.
 
 ## Anna
 

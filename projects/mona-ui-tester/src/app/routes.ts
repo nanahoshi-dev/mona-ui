@@ -56,14 +56,10 @@ export const routes: Routes = [
                         m => m.ThemingCustomThemesDocComponent
                     )
             },
-            {
-                path: "theming/luna",
-                loadComponent: () =>
-                    import("./docs/luna-theme-doc/luna-theme-doc.component").then(m => m.LunaThemeDocComponent)
-            },
-            // The theme pages' addresses before they were nested under Theming.
+            // The theme pages' addresses before they were nested under Theming. Luna's showcase is gone, and the Built-in
+            // Themes page describes Luna instead.
             { path: "theme-colors", redirectTo: "theming/colors" },
-            { path: "theme-luna", redirectTo: "theming/luna" },
+            { path: "theme-luna", redirectTo: "theming/built-in-themes" },
             {
                 path: "forms",
                 loadComponent: () => import("./docs/forms-doc/forms-doc.component").then(m => m.FormsDocComponent)

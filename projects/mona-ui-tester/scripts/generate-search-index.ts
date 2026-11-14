@@ -15,7 +15,7 @@ import type { DocsPage } from "../src/app/layout/docs-manifest";
  * serves at `/pagefind`.
  */
 
-export const PAGES_WITHOUT_MARKDOWN: readonly string[] = ["theming/colors", "theming/luna"];
+export const PAGES_WITHOUT_MARKDOWN: readonly string[] = ["theming/colors"];
 
 const ROUTE = /path: "([^"]+)",\s*loadComponent: \(\) =>\s*import\("([^"]+)"\)/g;
 const MARKDOWN_SOURCE = /src="(docs\/[^"]+\.md)"/g;
