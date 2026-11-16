@@ -512,7 +512,10 @@ console.log("Runtime package import verified successfully.");
             console.log("✓ ESM consumer runtime import verified via package specifiers '@nanahoshi/mona-ui/locales' and '@nanahoshi/mona-ui/i18n'");
         } catch (err: unknown) {
             const execErr = err as { stderr?: string; stdout?: string; message?: string };
-            throw new Error(`Consumer runtime import test failed:\n${execErr.stderr || execErr.stdout || execErr.message}`);
+            throw new Error(
+                `Consumer runtime import test failed:\n${execErr.stderr || execErr.stdout || execErr.message}`,
+                { cause: err }
+            );
         }
 
         // 2. TypeScript consumer compilation test
@@ -631,7 +634,10 @@ getLocaleFirstDayOfWeek();
             console.log("✓ TypeScript consumer compilation verified via NodeNext resolution");
         } catch (err: unknown) {
             const execErr = err as { stderr?: string; stdout?: string; message?: string };
-            throw new Error(`Consumer TypeScript compilation failed:\n${execErr.stderr || execErr.stdout || execErr.message}`);
+            throw new Error(
+                `Consumer TypeScript compilation failed:\n${execErr.stderr || execErr.stdout || execErr.message}`,
+                { cause: err }
+            );
         }
     } finally {
         try {
@@ -688,7 +694,10 @@ for (const expected of [".bg-primary", ".border-input-border", "--color-primary:
             execFileSync(process.execPath, [scriptPath], { cwd: tempDir, encoding: "utf-8", stdio: ["ignore", "pipe", "pipe"] });
         } catch (err: unknown) {
             const execErr = err as { message?: string; stderr?: string; stdout?: string };
-            throw new Error(`Compiling the package's styles failed:\n${execErr.stderr || execErr.stdout || execErr.message}`);
+            throw new Error(
+                `Compiling the package's styles failed:\n${execErr.stderr || execErr.stdout || execErr.message}`,
+                { cause: err }
+            );
         }
     } finally {
         rmSync(tempDir, { force: true, recursive: true });

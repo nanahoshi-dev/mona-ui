@@ -68,7 +68,7 @@ export class FunnelLayoutEngine {
         const isVisible = registration.visible();
 
         const rawOrientation = registration.orientation ? registration.orientation() : "vertical";
-        let orientation: ChartFunnelOrientation = "vertical";
+        let orientation: ChartFunnelOrientation;
         if (rawOrientation === "horizontal") {
             orientation = "horizontal";
         } else if (rawOrientation === "vertical") {

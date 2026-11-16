@@ -205,7 +205,6 @@ function extractInputsFromInheritanceChain(
 
             if (kind) {
                 const inputName = property.getName();
-                let inputType = "any";
 
                 // Try to get type from the explicit generic argument first
                 const typeArguments = callExpression.getTypeArguments();
@@ -213,12 +212,8 @@ function extractInputsFromInheritanceChain(
                     kind === "output"
                         ? undefined
                         : (typeArguments[0]?.getType() ?? property.getType().getTypeArguments()[0]);
-                if (typeArguments.length > 0) {
-                    inputType = typeArguments[0].getText();
-                } else {
-                    const fullType = property.getType().getText();
-                    inputType = simplifyType(fullType);
-                }
+                const inputType =
+                    typeArguments.length > 0 ? typeArguments[0].getText() : simplifyType(property.getType().getText());
 
                 let description = "";
                 let defaultValue: string | undefined;

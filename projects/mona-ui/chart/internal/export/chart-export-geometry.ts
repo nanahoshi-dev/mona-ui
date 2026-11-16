@@ -77,7 +77,7 @@ export function resolvePdfLayout(request: NormalizedChartExportRequest): Resolve
         baseHeight = pageSize.height;
     }
 
-    let orientation: "portrait" | "landscape" = "portrait";
+    let orientation: "portrait" | "landscape";
     if (request.pdfPage.orientation === "auto") {
         orientation = chartWidthPt > chartHeightPt ? "landscape" : "portrait";
     } else {

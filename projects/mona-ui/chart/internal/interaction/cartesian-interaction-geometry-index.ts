@@ -55,8 +55,8 @@ export function resolveInteractionGeometryDistance(
     const dx = nearestPoint.x - pointer.x;
     const dy = nearestPoint.y - pointer.y;
 
-    let primaryDistance = 0;
-    let secondaryDistance = 0;
+    let primaryDistance: number;
+    let secondaryDistance: number;
 
     if (dimension === "x") {
         primaryDistance = Math.abs(dx);

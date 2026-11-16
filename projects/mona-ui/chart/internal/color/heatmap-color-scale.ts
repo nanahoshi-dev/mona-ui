@@ -59,7 +59,7 @@ export class HeatmapColorScale {
 
         const [min, max] = domain;
 
-        let resolvedStops: string[] = [];
+        let resolvedStops: string[];
         let midpoint: number | undefined;
 
         const isStopValid = (c: string): boolean => {

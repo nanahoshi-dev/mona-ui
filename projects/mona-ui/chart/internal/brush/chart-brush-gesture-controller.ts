@@ -209,7 +209,7 @@ export class ChartBrushGestureController {
 
         const dx = clampedPoint.x - this.#session.startPoint.x;
         const dy = clampedPoint.y - this.#session.startPoint.y;
-        let dist = 0;
+        let dist: number;
         switch (this.#session.mode) {
             case "x":
                 dist = Math.abs(dx);

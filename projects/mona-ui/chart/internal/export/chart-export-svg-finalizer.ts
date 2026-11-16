@@ -81,7 +81,7 @@ export class ChartExportSvgFinalizer {
         // 2. Strictly validate standalone SVG structure and references (EXP-11 / R2-07)
         ChartExportSvgValidator.validate(svgElement);
 
-        let rawXml = "";
+        let rawXml: string;
         try {
             const serializer = new XMLSerializer();
             rawXml = serializer.serializeToString(svgElement);

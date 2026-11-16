@@ -468,16 +468,10 @@ export class CartesianMultiAxisCoordinator {
         const axisSpacing = 8;
         const maxIterations = 3;
 
-        let finalScales: { xScales: Map<string, ChartPositionScale>; yScales: Map<string, ChartPositionScale> } = {
-            xScales: new Map(),
-            yScales: new Map()
-        };
-
         const allDescriptors: ResolvedCartesianAxisDescriptor[] = [...axisResolution.xAxes, ...axisResolution.yAxes];
 
         for (let iter = 0; iter < maxIterations; iter++) {
             const currentScales = this.#buildScales(axisResolution, resolvedTypes, baseDomains, plotRect);
-            finalScales = currentScales;
 
             for (const xAxis of axisResolution.xAxes) {
                 const scale = currentScales.xScales.get(xAxis.axisId)!;
@@ -575,7 +569,7 @@ export class CartesianMultiAxisCoordinator {
             }
         }
 
-        finalScales = this.#buildScales(axisResolution, resolvedTypes, baseDomains, plotRect);
+        const finalScales = this.#buildScales(axisResolution, resolvedTypes, baseDomains, plotRect);
 
         const baseScaleRegistry = new CartesianScaleRegistry({
             primaryXAxisId: axisResolution.primaryXAxisId,

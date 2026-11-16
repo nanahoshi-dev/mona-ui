@@ -20,7 +20,7 @@ export function tryCanonicalizeLocaleId(localeId: string | null | undefined): st
     if (canonicalLocaleCache.has(raw)) {
         return canonicalLocaleCache.get(raw) ?? null;
     }
-    let canonical: string | null = null;
+    let canonical: string | null;
     try {
         const tag = raw.replace(/[.@].*$/, "").replace(/_/g, "-");
         canonical = Intl.getCanonicalLocales(tag)[0] ?? null;

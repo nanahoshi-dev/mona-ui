@@ -208,8 +208,8 @@ export class CartesianAxisDomainResolver {
         if (stackAnalysis && stackAnalysis.axisUnitMode === "percent") {
             const hasPos = stackAnalysis.visibleLayout.visibleHasPositive;
             const hasNeg = stackAnalysis.visibleLayout.visibleHasNegative;
-            let defaultMin = 0;
-            let defaultMax = 100;
+            let defaultMin: number;
+            let defaultMax: number;
 
             if (hasPos && !hasNeg) {
                 defaultMin = 0;

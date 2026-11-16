@@ -578,8 +578,8 @@ export class CartesianStackEngine {
                     if (record) {
                         const rawVal = record.rawValue;
                         const isPositive = rawVal >= 0;
-                        let stackStart = 0;
-                        let stackEnd = 0;
+                        let stackStart: number;
+                        let stackEnd: number;
                         let stackPercentage: number | undefined;
                         let stackTotal: number | undefined;
 
