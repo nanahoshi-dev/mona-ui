@@ -5,6 +5,7 @@ export { MONA_FR_FR_LOCALE } from "@nanahoshi/mona-ui/locales/fr-fr";
 export { MONA_IT_IT_LOCALE } from "@nanahoshi/mona-ui/locales/it-it";
 export { MONA_JA_JP_LOCALE } from "@nanahoshi/mona-ui/locales/ja-jp";
 export { MONA_KO_KR_LOCALE } from "@nanahoshi/mona-ui/locales/ko-kr";
+export { MONA_PL_PL_LOCALE } from "@nanahoshi/mona-ui/locales/pl-pl";
 export { MONA_PT_BR_LOCALE } from "@nanahoshi/mona-ui/locales/pt-br";
 export { MONA_ZH_CN_LOCALE } from "@nanahoshi/mona-ui/locales/zh-cn";
 export { MONA_ZH_TW_LOCALE } from "@nanahoshi/mona-ui/locales/zh-tw";

@@ -67,6 +67,8 @@ import JA_JP_SOURCE from "./ja-jp/ja-jp.messages.json";
 import { MONA_JA_JP_LOCALE } from "./ja-jp/ja-jp.locale";
 import KO_KR_SOURCE from "./ko-kr/ko-kr.messages.json";
 import { MONA_KO_KR_LOCALE } from "./ko-kr/ko-kr.locale";
+import PL_PL_SOURCE from "./pl-pl/pl-pl.messages.json";
+import { MONA_PL_PL_LOCALE } from "./pl-pl/pl-pl.locale";
 import PT_BR_SOURCE from "./pt-br/pt-br.messages.json";
 import { MONA_PT_BR_LOCALE } from "./pt-br/pt-br.locale";
 import RU_RU_SOURCE from "./ru-ru/ru-ru.messages.json";
@@ -151,6 +153,7 @@ const CASES: readonly CatalogCase[] = [
         [MONA_IT_IT_LOCALE, IT_IT_SOURCE],
         [MONA_JA_JP_LOCALE, JA_JP_SOURCE],
         [MONA_KO_KR_LOCALE, KO_KR_SOURCE],
+        [MONA_PL_PL_LOCALE, PL_PL_SOURCE],
         [MONA_PT_BR_LOCALE, PT_BR_SOURCE],
         [MONA_RU_RU_LOCALE, RU_RU_SOURCE],
         [MONA_TR_TR_LOCALE, TR_TR_SOURCE],
