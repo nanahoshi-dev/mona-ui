@@ -369,21 +369,16 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         const firstDayIso = FIRST_DAY_OF_WEEK_TO_ISO[this.effectiveFirstDay()];
         const locale = this.#i18n.localeId();
         // 2024-01-01 was a Monday (ISO 1)
-        const days = range(0, 7)
+        const names = range(0, 7)
             .select(i => {
                 const dt = gregorianDateTimeFromObject({ year: 2024, month: 1, day: 1 + i }, locale);
-                const short = dt.toFormat("ccc");
-                const full = dt.toFormat("cccc");
-                const narrow = dt.toFormat("ccccc");
-                const display = short.length > 4 || (short === full && short.length > 3) ? narrow : short;
-                return {
-                    display,
-                    short,
-                    narrow,
-                    full
-                };
+                return { full: dt.toFormat("cccc"), narrow: dt.toFormat("ccccc"), short: dt.toFormat("ccc") };
             })
             .toArray();
+        // One form for the whole row: Polish shortens only Sunday past four letters ("niedz."), and a lone "N"
+        // among "pon.", "wt." reads as a different kind of label.
+        const useNarrow = names.some(({ full, short }) => short.length > 4 || (short === full && short.length > 3));
+        const days = names.map(name => ({ ...name, display: useNarrow ? name.narrow : name.short }));
         const startIndex = firstDayIso - 1;
         return [...days.slice(startIndex), ...days.slice(0, startIndex)];
     });
