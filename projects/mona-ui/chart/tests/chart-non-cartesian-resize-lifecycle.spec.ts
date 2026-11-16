@@ -85,6 +85,7 @@ describe("Non-Cartesian chart resize lifecycle", () => {
             TestBed.createComponent(ResizableTreemapHostComponent);
         const host = fixture.componentInstance;
         fixture.detectChanges();
+        TestBed.tick();
 
         const initialWidth = host.chart().scene()?.width;
         expect(initialWidth).toBeGreaterThan(0);
@@ -107,6 +108,7 @@ describe("Non-Cartesian chart resize lifecycle", () => {
             TestBed.createComponent(ResizableGaugeHostComponent);
         const host = fixture.componentInstance;
         fixture.detectChanges();
+        TestBed.tick();
 
         const initialWidth = host.chart().scene()?.width;
         expect(initialWidth).toBeGreaterThan(0);

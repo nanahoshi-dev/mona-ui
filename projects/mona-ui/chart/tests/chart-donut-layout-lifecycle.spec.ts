@@ -131,6 +131,7 @@ describe("Donut chart layout lifecycle", () => {
         fixture.detectChanges();
         host.showChart.set(true);
         fixture.detectChanges();
+        TestBed.tick();
 
         const svg = requireSvg(fixture);
         expect(svg.querySelector("g[data-series-id] path")).toBeNull();
@@ -162,6 +163,7 @@ describe("Donut chart layout lifecycle", () => {
         fixture.detectChanges();
         host.showChart.set(true);
         fixture.detectChanges();
+        TestBed.tick();
 
         host.layoutReady.set(true);
         const resizeObserver = findPlotResizeObserver();

@@ -732,12 +732,13 @@ describe("Chart Export Dependency Closure and Payload Validation Regressions", (
             expect(finalizedXml).not.toContain("shared-id");
             expect(finalizedXml).not.toContain("<script");
             expect(finalizedXml).not.toContain("foreignObject");
-        });
+            // Freezing copies every computed property, which jsdom resolves far more slowly than a browser.
+        }, 30_000);
 
         it("keeps the live-document colliding ID untouched after export", async () => {
             const { outsideGradient } = await runHappyPath();
             expect(outsideGradient.getAttribute("id")).toBe("shared-id");
-        });
+        }, 30_000);
 
         it("rejects an external gradient inheritance href at the pipeline boundary", async () => {
             const host = withRect(document.createElement("div"), 600, 400);

@@ -139,7 +139,7 @@ export class CollapsibleContentDirective {
     #getTransitionDuration(): number {
         const declared = getComputedStyle(this.#element).transitionDuration;
         const durations = declared.split(",").map(part => {
-            // Only a resolved time counts. Where nothing resolves `var()`, as in jsdom, its fallback isn't one.
+            // Only a resolved time counts. Where nothing resolves `var()`, its fallback isn't one.
             const match = /^([\d.]+)(ms|s)$/.exec(part.trim());
             if (!match) {
                 return 0;

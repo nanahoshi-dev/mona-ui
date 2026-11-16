@@ -183,8 +183,9 @@ describe("Chart Export Resource Capture and Font Fidelity Regressions", () => {
             expect(island.hasComplexTransform).toBe(true);
             expect(island.layoutWidth).toBe(80);
             expect(island.layoutHeight).toBe(24);
-            expect(island.transform).toBe("translate(-100%, 0) rotate(-45deg)");
-            expect(island.transformOrigin).toBe("top right");
+            // As the engine serializes them: `translate(-100%, 0)` may read back as `translate(-100%)`, `top right` as `right top`.
+            expect(island.transform).toBe(el.style.transform);
+            expect(island.transformOrigin).toBe(el.style.transformOrigin);
         });
     });
 

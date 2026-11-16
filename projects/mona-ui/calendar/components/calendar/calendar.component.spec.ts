@@ -415,8 +415,9 @@ interface CalendarFormModel {
 }
 
 declare module "vitest" {
-    interface Assertion<T> {
-        toEqualCalendarDate(expected: string): T;
-        toEqualCalendarDates(expected: string[]): T;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- declaration merging needs Vitest's exact <R, T> parameters
+    interface Assertion<R, T> {
+        toEqualCalendarDate(expected: string): R;
+        toEqualCalendarDates(expected: string[]): R;
     }
 }

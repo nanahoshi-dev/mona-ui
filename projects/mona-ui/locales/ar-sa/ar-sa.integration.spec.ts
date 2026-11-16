@@ -652,6 +652,7 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
 
         const fixture = TestBed.createComponent(TimeSelectorIntegrationHostComponent);
         fixture.detectChanges();
+        TestBed.tick();
         await fixture.whenStable();
 
         const hostEl = fixture.nativeElement as HTMLElement;

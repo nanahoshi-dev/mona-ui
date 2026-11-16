@@ -340,6 +340,23 @@ describe("monaCollapsible behavior", () => {
             fixture.componentInstance.animate.set(true);
             await settle(fixture);
             const content = fixture.nativeElement.querySelector(".content") as HTMLElement;
+            // jsdom resolves `var()` as a browser does; this stands in for an environment that leaves it as declared.
+            const real = globalThis.getComputedStyle;
+            vi.spyOn(globalThis, "getComputedStyle").mockImplementation((element, pseudo) => {
+                const style = real(element, pseudo);
+                if (element !== content) {
+                    return style;
+                }
+                return new Proxy(style, {
+                    get: (target, name) => {
+                        if (name === "transitionDuration") {
+                            return content.style.transitionDuration;
+                        }
+                        const value: unknown = Reflect.get(target, name);
+                        return typeof value === "function" ? value.bind(target) : value;
+                    }
+                });
+            });
 
             fixture.componentInstance.expanded.set(true);
             fixture.detectChanges();

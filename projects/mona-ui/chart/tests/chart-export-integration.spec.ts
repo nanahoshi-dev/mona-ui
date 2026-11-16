@@ -39,7 +39,7 @@ const VALID_1X1_PNG_BYTES = new Uint8Array([
             [subtitle]="subtitle()"
             [renderer]="renderer()"
             [xField]="'category'"
-            style="display: block; width: 600px; height: 400px;">
+            style="display: block; width: 600px; height: 400px; font-family: Helvetica;">
             <mona-chart-x-axis />
             <mona-chart-y-axis />
             <mona-line-series [name]="'Revenue'" [field]="'value'" />

@@ -120,7 +120,8 @@ describe("Chart Export Resource Policy and Transform Classification Regressions"
             const clonedImg = clone.querySelector("img") as HTMLImageElement;
             expect(clonedImg.getAttribute("srcset")).toBeNull();
             expect(clonedImg.getAttribute("sizes")).toBeNull();
-        });
+            // Freezing copies every computed property, which jsdom resolves far more slowly than a browser.
+        }, 30_000);
 
         it("resource capture neutralizes every live srcset/sizes/<source> in the frozen island", async () => {
             const restore = installResourceCaptureMocks("data:image/png;base64,AAA");

@@ -2218,6 +2218,12 @@ describe("ScrollViewComponent", () => {
             unobserve: ReturnType<typeof vi.fn>;
         }> = [];
 
+        // The pager observer is set up after render, which Angular now runs only once the zone settles.
+        const render = (fixture: ComponentFixture<ScrollViewComponent>): void => {
+            fixture.detectChanges();
+            TestBed.tick();
+        };
+
         // The slide area has an observer of its own.
         const pagerObservers = (): typeof observerInstances =>
             observerInstances.filter(observer =>
@@ -2280,7 +2286,7 @@ describe("ScrollViewComponent", () => {
             localFixture.componentRef.setInput("height", 375);
             localFixture.componentRef.setInput("pageable", false);
             localFixture.componentRef.setInput("data", ["Page 1", "Page 2"]);
-            localFixture.detectChanges();
+            render(localFixture);
 
             const localComp = localFixture.componentInstance;
             expect(localComp["pagerArrowVisible"]()).toBe(false);
@@ -2289,7 +2295,7 @@ describe("ScrollViewComponent", () => {
 
             // Transition to pageable: true with non-overflowing data
             localFixture.componentRef.setInput("pageable", true);
-            localFixture.detectChanges();
+            render(localFixture);
 
             expect(localComp["pagerListElementRef"]()?.nativeElement).toBeInstanceOf(HTMLUListElement);
             expect(localComp["pagerArrowVisible"]()).toBe(false);
@@ -2305,7 +2311,7 @@ describe("ScrollViewComponent", () => {
             localFixture.componentRef.setInput("height", 375);
             localFixture.componentRef.setInput("pageable", false);
             localFixture.componentRef.setInput("data", ["Page 1", "Page 2", "Page 3", "Page 4", "Page 5"]);
-            localFixture.detectChanges();
+            render(localFixture);
 
             const localComp = localFixture.componentInstance;
             expect(localComp["pagerArrowVisible"]()).toBe(false);
@@ -2313,7 +2319,7 @@ describe("ScrollViewComponent", () => {
 
             // Transition to pageable: true with overflowing data
             localFixture.componentRef.setInput("pageable", true);
-            localFixture.detectChanges();
+            render(localFixture);
 
             expect(localComp["pagerListElementRef"]()?.nativeElement).toBeInstanceOf(HTMLUListElement);
             expect(localComp["pagerArrowVisible"]()).toBe(true);
@@ -2329,7 +2335,7 @@ describe("ScrollViewComponent", () => {
             localFixture.componentRef.setInput("height", 375);
             localFixture.componentRef.setInput("pageable", true);
             localFixture.componentRef.setInput("data", ["Page 1", "Page 2"]);
-            localFixture.detectChanges();
+            render(localFixture);
 
             const localComp = localFixture.componentInstance;
             expect(pagerObservers().length).toBe(1);
@@ -2340,7 +2346,7 @@ describe("ScrollViewComponent", () => {
 
             // Transition to pageable: false
             localFixture.componentRef.setInput("pageable", false);
-            localFixture.detectChanges();
+            render(localFixture);
 
             expect(firstObserver.disconnect).toHaveBeenCalled();
             expect(localComp["pagerArrowVisible"]()).toBe(false);
@@ -2348,7 +2354,7 @@ describe("ScrollViewComponent", () => {
 
             // Transition back to pageable: true
             localFixture.componentRef.setInput("pageable", true);
-            localFixture.detectChanges();
+            render(localFixture);
 
             expect(pagerObservers().length).toBe(2);
             const secondObserver = pagerObservers()[1];
@@ -2369,7 +2375,7 @@ describe("ScrollViewComponent", () => {
             localFixture.componentRef.setInput("height", 375);
             localFixture.componentRef.setInput("pageable", true);
             localFixture.componentRef.setInput("data", ["Page 1", "Page 2"]);
-            localFixture.detectChanges();
+            render(localFixture);
 
             const localComp = localFixture.componentInstance;
             expect(localComp["pagerArrowVisible"]()).toBe(false);
@@ -2379,14 +2385,14 @@ describe("ScrollViewComponent", () => {
             localFixture.componentRef.setInput("data", [
                 "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P10"
             ]);
-            localFixture.detectChanges();
+            render(localFixture);
 
             expect(localComp["pagerArrowVisible"]()).toBe(true);
 
             // Transition back to few items (non-overflowing)
             mockScrollWidth = 100;
             localFixture.componentRef.setInput("data", ["P1", "P2"]);
-            localFixture.detectChanges();
+            render(localFixture);
 
             expect(localComp["pagerArrowVisible"]()).toBe(false);
             localFixture.destroy();
@@ -2401,7 +2407,7 @@ describe("ScrollViewComponent", () => {
             localFixture.componentRef.setInput("height", 375);
             localFixture.componentRef.setInput("pageable", true);
             localFixture.componentRef.setInput("data", ["Page 1", "Page 2"]);
-            localFixture.detectChanges();
+            render(localFixture);
 
             const localComp = localFixture.componentInstance;
             expect(localComp["pagerArrowVisible"]()).toBe(false);
@@ -2455,7 +2461,7 @@ describe("ScrollViewComponent", () => {
             localFixture.componentRef.setInput("height", 375);
             localFixture.componentRef.setInput("pageable", true);
             localFixture.componentRef.setInput("data", ["Page 1", "Page 2", "Page 3", "Page 4", "Page 5"]);
-            localFixture.detectChanges();
+            render(localFixture);
 
             const localComp = localFixture.componentInstance;
             expect(localComp["pagerArrowVisible"]()).toBe(false);
@@ -2474,7 +2480,7 @@ describe("ScrollViewComponent", () => {
             localFixture.componentRef.setInput("height", 375);
             localFixture.componentRef.setInput("pageable", true);
             localFixture.componentRef.setInput("data", ["Page 1", "Page 2", "Page 3", "Page 4", "Page 5"]);
-            localFixture.detectChanges();
+            render(localFixture);
 
             const localComp = localFixture.componentInstance;
             expect(localComp["pagerArrowVisible"]()).toBe(true);
@@ -2492,7 +2498,7 @@ describe("ScrollViewComponent", () => {
             localFixture.componentRef.setInput("height", 375);
             localFixture.componentRef.setInput("pageable", true);
             localFixture.componentRef.setInput("data", ["Page 1", "Page 2"]);
-            localFixture.detectChanges();
+            render(localFixture);
 
             const localComp = localFixture.componentInstance;
             expect(localComp["pagerArrowVisible"]()).toBe(true);
@@ -2524,7 +2530,7 @@ describe("ScrollViewComponent", () => {
             localFixture.componentRef.setInput("height", 375);
             localFixture.componentRef.setInput("pageable", true);
             localFixture.componentRef.setInput("data", ["Page 1", "Page 2"]);
-            localFixture.detectChanges();
+            render(localFixture);
 
             const localComp = localFixture.componentInstance;
             expect(pagerObservers().length).toBe(1);
