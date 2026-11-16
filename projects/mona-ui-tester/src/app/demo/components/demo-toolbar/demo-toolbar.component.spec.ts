@@ -49,6 +49,12 @@ describe("DemoToolbarComponent", () => {
                 locale: expect.objectContaining({ id: "ru-RU" })
             })
         );
+        expect(options).toContainEqual(
+            expect.objectContaining({
+                label: "Polski (Polska)",
+                locale: expect.objectContaining({ id: "pl-PL" })
+            })
+        );
         const ids = options.map(option => option.locale.id);
         expect(new Set(ids).size).toBe(ids.length);
 

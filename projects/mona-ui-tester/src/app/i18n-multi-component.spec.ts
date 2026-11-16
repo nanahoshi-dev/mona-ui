@@ -11,6 +11,7 @@ import {
     MONA_IT_IT_LOCALE,
     MONA_JA_JP_LOCALE,
     MONA_KO_KR_LOCALE,
+    MONA_PL_PL_LOCALE,
     MONA_PT_BR_LOCALE,
     MONA_RU_RU_LOCALE,
     MONA_TR_TR_LOCALE,
@@ -1005,6 +1006,55 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
 
         expect(i18n.localeId()).toBe("en-US");
         expect(ruPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
+        expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
+    });
+
+    it("integrates official Polish (pl-PL) locale reactively with runtime overrides and formatting", async () => {
+        const root = fixture.nativeElement as HTMLElement;
+        const input = root.querySelector("mona-numeric-text-box input") as HTMLInputElement;
+
+        i18n.use(MONA_PL_PL_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("pl-PL");
+        expect(i18n.direction()).toBe("ltr");
+
+        const plPager = root.querySelector("mona-pager");
+        expect(plPager?.querySelector("button[aria-label='Pierwsza strona']")).not.toBeNull();
+
+        const plScroll = root.querySelector("mona-scroll-view");
+        expect(plScroll?.querySelector("button[aria-label='Poprzednia strona']")).not.toBeNull();
+
+        // Calendar controls, a Monday-first narrow header row (P), and the live region in Polish
+        const plCalendar = root.querySelector("mona-calendar");
+        expect(plCalendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("Dzisiaj");
+        expect(plCalendar?.querySelector("button[aria-label='Poprzedni miesiąc']")).not.toBeNull();
+        expect(plCalendar?.querySelector("button[aria-label='Następny miesiąc']")).not.toBeNull();
+        expect(plCalendar?.querySelector("[aria-live='polite']")?.textContent?.toLowerCase()).toContain("kalendarz");
+
+        const headerRow = plCalendar?.querySelector("div[style*='grid-template-columns']") as HTMLElement;
+        expect(headerRow?.querySelector("span[aria-hidden='true']")?.textContent?.trim()).toBe("P");
+
+        // Polish groups only from five digits, so 1234,50 stays ungrouped
+        expect(input.getAttribute("aria-valuetext")).toBe("1234,50");
+
+        i18n.patchMessages({ pager: { firstPageLabel: "Na początek" } });
+        await fixture.whenStable();
+        fixture.detectChanges();
+        expect(plPager?.querySelector("button[aria-label='Na początek']")).not.toBeNull();
+
+        i18n.clearMessages();
+        await fixture.whenStable();
+        fixture.detectChanges();
+        expect(plPager?.querySelector("button[aria-label='Pierwsza strona']")).not.toBeNull();
+
+        i18n.use(MONA_DEFAULT_LOCALE);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(i18n.localeId()).toBe("en-US");
+        expect(plPager?.querySelector("button[aria-label='First page']")).not.toBeNull();
         expect(input.getAttribute("aria-valuetext")).toBe("1234.50");
     });
 

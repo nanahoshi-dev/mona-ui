@@ -70,6 +70,10 @@ describe("locale-date-formats", () => {
             expect(getLocaleDateInputFormat("ru-RU")).toBe("dd.MM.yyyy");
         });
 
+        it("returns Polish day.month.year format for pl-PL", () => {
+            expect(getLocaleDateInputFormat("pl-PL")).toBe("dd.MM.yyyy");
+        });
+
         it("falls back to the en-US format for invalid or empty locale", () => {
             expect(getLocaleDateInputFormat("")).toBe("MM/dd/yyyy");
             expect(getLocaleDateInputFormat("invalid-locale-!!!")).toBe("MM/dd/yyyy");
@@ -171,6 +175,16 @@ describe("locale-date-formats", () => {
         it("returns Russian 12-hour hh:mm a and hh:mm:ss a with day period in suffix position for ru-RU", () => {
             expect(getLocaleTimeInputFormat("ru-RU", { hourFormat: "12", showSeconds: false })).toBe("hh:mm a");
             expect(getLocaleTimeInputFormat("ru-RU", { hourFormat: "12", showSeconds: true })).toBe("hh:mm:ss a");
+        });
+
+        it("returns Polish 24-hour HH:mm and HH:mm:ss for pl-PL", () => {
+            expect(getLocaleTimeInputFormat("pl-PL", { hourFormat: "24", showSeconds: false })).toBe("HH:mm");
+            expect(getLocaleTimeInputFormat("pl-PL", { hourFormat: "24", showSeconds: true })).toBe("HH:mm:ss");
+        });
+
+        it("returns Polish 12-hour hh:mm a and hh:mm:ss a with day period in suffix position for pl-PL", () => {
+            expect(getLocaleTimeInputFormat("pl-PL", { hourFormat: "12", showSeconds: false })).toBe("hh:mm a");
+            expect(getLocaleTimeInputFormat("pl-PL", { hourFormat: "12", showSeconds: true })).toBe("hh:mm:ss a");
         });
     });
 
@@ -296,6 +310,15 @@ describe("locale-date-formats", () => {
                 "dd.MM.yyyy, hh:mm:ss a"
             );
         });
+
+        it("derives combined Polish date and time format in 24h and 12h", () => {
+            expect(getLocaleDateTimeInputFormat("pl-PL", { hourFormat: "24", showSeconds: false })).toBe(
+                "dd.MM.yyyy, HH:mm"
+            );
+            expect(getLocaleDateTimeInputFormat("pl-PL", { hourFormat: "12", showSeconds: false })).toBe(
+                "dd.MM.yyyy, hh:mm a"
+            );
+        });
     });
 
     describe("getLocaleFirstDayOfWeek", () => {
@@ -358,6 +381,10 @@ describe("locale-date-formats", () => {
 
             it("returns monday for Russian (ru-RU)", () => {
                 expect(getLocaleFirstDayOfWeek("ru-RU")).toBe("monday");
+            });
+
+            it("returns monday for Polish (pl-PL)", () => {
+                expect(getLocaleFirstDayOfWeek("pl-PL")).toBe("monday");
             });
 
             it("returns sunday for Traditional Chinese (zh-TW)", () => {
@@ -446,6 +473,7 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("tr-TR")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("is-IS")).toBe("monday");
                     expect(resolveFallbackFirstDayOfWeek("ru-RU")).toBe("monday");
+                    expect(resolveFallbackFirstDayOfWeek("pl-PL")).toBe("monday");
 
                     // Verified Sunday-first regions in the current CLDR dataset.
                     expect(resolveFallbackFirstDayOfWeek("zh-TW")).toBe("sunday");

@@ -13,6 +13,7 @@ const OFFICIAL_LOCALE_LOADERS: Readonly<Record<string, () => Promise<MonaLocale>
     "it-IT": () => import("@nanahoshi/mona-ui/locales/it-it").then(m => m.MONA_IT_IT_LOCALE),
     "ja-JP": () => import("@nanahoshi/mona-ui/locales/ja-jp").then(m => m.MONA_JA_JP_LOCALE),
     "ko-KR": () => import("@nanahoshi/mona-ui/locales/ko-kr").then(m => m.MONA_KO_KR_LOCALE),
+    "pl-PL": () => import("@nanahoshi/mona-ui/locales/pl-pl").then(m => m.MONA_PL_PL_LOCALE),
     "pt-BR": () => import("@nanahoshi/mona-ui/locales/pt-br").then(m => m.MONA_PT_BR_LOCALE),
     "ru-RU": () => import("@nanahoshi/mona-ui/locales/ru-ru").then(m => m.MONA_RU_RU_LOCALE),
     "tr-TR": () => import("@nanahoshi/mona-ui/locales/tr-tr").then(m => m.MONA_TR_TR_LOCALE),
