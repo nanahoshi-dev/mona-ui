@@ -93,6 +93,7 @@
                             "projects/mona-ui-tester/src/styles.css"
                         ],
                         "scripts": [],
+                        "externalDependencies": ["marked-katex-extension"],
                         "browser": "projects/mona-ui-tester/src/main.ts"
                     },
                     "configurations": {
