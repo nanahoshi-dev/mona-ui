@@ -2679,9 +2679,21 @@ export function scanFile(filePath: string, violations: AuditViolation[]): void {
     scanFileContent(normalizedPath, content, violations);
 }
 
+/** The specifier of an import or `export ... from`, static or dynamic. */
+const MODULE_SPECIFIER_PATTERN = /(\bfrom\s*|\bimport\s*\(?\s*)(["'`])[^"'`]*\2/g;
+
+/**
+ * Empties the module specifiers on a line of TypeScript. A specifier names a file, not classes, and locale folders
+ * look like utilities: `./pl-pl.locale` is Polish, not `pl-*` padding, and so would `ml-in` or `mr-in` be.
+ */
+export function stripModuleSpecifiers(line: string): string {
+    return line.replace(MODULE_SPECIFIER_PATTERN, "$1$2$2");
+}
+
 export function scanFileContent(filePath: string, content: string, violations: AuditViolation[]): void {
     const normalizedPath = filePath.replace(/\\/g, "/");
     const lines = content.split("\n");
+    const isTypeScript = normalizedPath.endsWith(".ts");
 
     // 1. Line-by-line scanning for physical styles and regex patterns
     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
@@ -2693,12 +2705,13 @@ export function scanFileContent(filePath: string, content: string, violations: A
         if (trimmed.startsWith("//") || trimmed.startsWith("/*") || trimmed.startsWith("*")) {
             continue;
         }
+        const scannedLine = isTypeScript ? stripModuleSpecifiers(line) : line;
 
         // Scan physical Tailwind utilities (only in TS and HTML files)
-        if (normalizedPath.endsWith(".ts") || normalizedPath.endsWith(".html")) {
+        if (isTypeScript || normalizedPath.endsWith(".html")) {
             for (const pattern of PHYSICAL_TAILWIND_PATTERNS) {
                 pattern.regex.lastIndex = 0;
-                const matches = line.match(pattern.regex);
+                const matches = scannedLine.match(pattern.regex);
                 if (matches) {
                     for (const match of matches) {
                         const violation: AuditViolation = {
@@ -2718,7 +2731,7 @@ export function scanFileContent(filePath: string, content: string, violations: A
         // Scan physical CSS properties
         for (const pattern of PHYSICAL_CSS_PATTERNS) {
             pattern.regex.lastIndex = 0;
-            const matches = line.match(pattern.regex);
+            const matches = scannedLine.match(pattern.regex);
             if (matches) {
                 for (const match of matches) {
                     const violation: AuditViolation = {

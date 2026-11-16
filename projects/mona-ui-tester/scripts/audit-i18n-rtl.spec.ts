@@ -18,7 +18,8 @@ import {
     scanFile,
     scanFileContent,
     scanTemplateNodes,
-    scanTypeScriptAst
+    scanTypeScriptAst,
+    stripModuleSpecifiers
 } from "./audit-i18n-rtl";
 
 describe("audit-i18n-rtl", () => {
@@ -2800,6 +2801,35 @@ describe("audit-i18n-rtl", () => {
             `;
             scanFileContent("projects/mona-ui/locales/es-es/es-es.messages.ts", codeWithPhysicalStyle, violations);
             expect(violations.some(v => v.category === "rtl-physical-style")).toBe(true);
+        });
+
+        it("does not read locale folders in module specifiers as physical utilities", () => {
+            const violations: AuditViolation[] = [];
+            const code = [
+                `import { PL_PL_MESSAGES } from "./pl-pl.messages";`,
+                `export { MONA_PL_PL_LOCALE } from "@nanahoshi/mona-ui/locales/pl-pl";`,
+                `export * from './ml-in';`,
+                `import "./mr-in/side-effect";`,
+                `const load = () => import("@nanahoshi/mona-ui/locales/pl-pl").then(m => m.MONA_PL_PL_LOCALE);`
+            ].join("\n");
+            scanFileContent("projects/mona-ui/locales/public-api.ts", code, violations);
+            expect(violations).toEqual([]);
+        });
+
+        it("still detects physical utilities on a line that also has a module specifier", () => {
+            const violations: AuditViolation[] = [];
+            scanFileContent(
+                "projects/mona-ui/test/test.component.ts",
+                `const load = () => import("./pl-pl").then(() => "pl-4");`,
+                violations
+            );
+            expect(violations.map(v => v.detail)).toEqual(['Physical padding utility (pl-*/pr-* -> ps-*/pe-*): "pl-4"']);
+        });
+
+        it("empties only the module specifiers of a line", () => {
+            expect(stripModuleSpecifiers(`export { A } from "./pl-pl";`)).toBe(`export { A } from "";`);
+            expect(stripModuleSpecifiers(`import("./pl-pl")`)).toBe(`import("")`);
+            expect(stripModuleSpecifiers(`const c = "pl-4";`)).toBe(`const c = "pl-4";`);
         });
 
         it("skips files in /i18n/ directory", () => {
