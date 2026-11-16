@@ -36,9 +36,11 @@ export class ChartPdfExporter {
         try {
             jsPdfModule = await import("jspdf");
         } catch (err) {
-            throw new ChartExportError("pdf-generation-failed", "Failed to dynamically load jsPDF library.", {
-                cause: err
-            });
+            throw new ChartExportError(
+                "pdf-generation-failed",
+                "Failed to load jsPDF. To export a chart as a PDF, install the jspdf and svg2pdf.js packages.",
+                { cause: err }
+            );
         }
 
         if (request.signal?.aborted) {
@@ -71,7 +73,7 @@ export class ChartPdfExporter {
                 if (request.pdfMode === "vector") {
                     throw new ChartExportError(
                         "pdf-generation-failed",
-                        "Failed to dynamically load svg2pdf.js vector converter.",
+                        "Failed to load svg2pdf.js. To export a chart as a vector PDF, install the svg2pdf.js package.",
                         { cause: err }
                     );
                 }

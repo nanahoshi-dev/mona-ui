@@ -1,5 +1,14 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+    existsSync,
+    mkdirSync,
+    mkdtempSync,
+    readdirSync,
+    readFileSync,
+    rmSync,
+    symlinkSync,
+    writeFileSync
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { discoverOfficialLocales } from "./audit-locales";
@@ -503,7 +512,10 @@ console.log("Runtime package import verified successfully.");
             console.log("✓ ESM consumer runtime import verified via package specifiers '@nanahoshi/mona-ui/locales' and '@nanahoshi/mona-ui/i18n'");
         } catch (err: unknown) {
             const execErr = err as { stderr?: string; stdout?: string; message?: string };
-            throw new Error(`Consumer runtime import test failed:\n${execErr.stderr || execErr.stdout || execErr.message}`);
+            throw new Error(
+                `Consumer runtime import test failed:\n${execErr.stderr || execErr.stdout || execErr.message}`,
+                { cause: err }
+            );
         }
 
         // 2. TypeScript consumer compilation test
@@ -622,7 +634,10 @@ getLocaleFirstDayOfWeek();
             console.log("✓ TypeScript consumer compilation verified via NodeNext resolution");
         } catch (err: unknown) {
             const execErr = err as { stderr?: string; stdout?: string; message?: string };
-            throw new Error(`Consumer TypeScript compilation failed:\n${execErr.stderr || execErr.stdout || execErr.message}`);
+            throw new Error(
+                `Consumer TypeScript compilation failed:\n${execErr.stderr || execErr.stdout || execErr.message}`,
+                { cause: err }
+            );
         }
     } finally {
         try {
@@ -679,11 +694,68 @@ for (const expected of [".bg-primary", ".border-input-border", "--color-primary:
             execFileSync(process.execPath, [scriptPath], { cwd: tempDir, encoding: "utf-8", stdio: ["ignore", "pipe", "pipe"] });
         } catch (err: unknown) {
             const execErr = err as { message?: string; stderr?: string; stdout?: string };
-            throw new Error(`Compiling the package's styles failed:\n${execErr.stderr || execErr.stdout || execErr.message}`);
+            throw new Error(
+                `Compiling the package's styles failed:\n${execErr.stderr || execErr.stdout || execErr.message}`,
+                { cause: err }
+            );
         }
     } finally {
         rmSync(tempDir, { force: true, recursive: true });
     }
+}
+
+/** The bundles a button, the theme and nearly every component load, which mustn't import {@link heavyImports}. */
+const leanBundles: readonly string[] = [
+    "nanahoshi-mona-ui-button.mjs",
+    "nanahoshi-mona-ui-internal.mjs",
+    "nanahoshi-mona-ui-internal-indicator-icon.mjs",
+    "nanahoshi-mona-ui-theme.mjs"
+];
+
+/**
+ * What the {@link leanBundles} mustn't import. A class of ts-collections, or any of its functions that returns a
+ * sequence, brings some 100 kB of it. A value import of the overlay module puts it in the initial bundle, even unused,
+ * as soon as lazily loaded code opens an overlay.
+ */
+const heavyImports: readonly string[] = ["@mirei/ts-collections", "@angular/cdk/overlay"];
+
+/** What a bundle imports statically. `import()` isn't matched. */
+function staticImports(source: string): string[] {
+    return Array.from(source.matchAll(/^import\s+(?:[^'";]*?\bfrom\s*)?['"]([^'"]+)['"]/gm), match => match[1]);
+}
+
+/**
+ * Checks that the bundles every application loads stay small: see {@link leanBundles}. No bundle may import
+ * "culori" itself either, which registers every color space it has; "culori/css" and "culori/fn" register the CSS ones.
+ * @returns how many bundles were checked
+ */
+export function verifyLeanBundles(distDir: string): number {
+    const fesmDir = resolve(distDir, "fesm2022");
+    if (!existsSync(fesmDir)) {
+        throw new Error(`Bundles not found at: ${fesmDir}`);
+    }
+    const problems: string[] = [];
+    for (const file of leanBundles) {
+        const path = resolve(fesmDir, file);
+        if (!existsSync(path)) {
+            throw new Error(`Bundle not found at: ${path}`);
+        }
+        for (const specifier of staticImports(readFileSync(path, "utf-8"))) {
+            if (heavyImports.includes(specifier)) {
+                problems.push(`${file} imports ${specifier}`);
+            }
+        }
+    }
+    const bundles = readdirSync(fesmDir).filter(file => file.endsWith(".mjs"));
+    for (const file of bundles) {
+        if (staticImports(readFileSync(resolve(fesmDir, file), "utf-8")).includes("culori")) {
+            problems.push(`${file} imports "culori" rather than "culori/css" and "culori/fn"`);
+        }
+    }
+    if (problems.length > 0) {
+        throw new Error(`Bundles import more than they should:\n${problems.join("\n")}`);
+    }
+    return bundles.length;
 }
 
 export function verifyBuiltPackage(options: PackageVerificationOptions = {}): void {
@@ -819,6 +891,9 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
 
     const agentPages = verifyAgentDocs(distDir);
     console.log(`✓ Agent docs verified: llms.txt and the ${agentPages} pages it links to`);
+
+    const bundles = verifyLeanBundles(distDir);
+    console.log(`✓ ${bundles} bundles checked: none imports what would undo tree-shaking`);
 
     runConsumerSmokeTest({
         distDir,

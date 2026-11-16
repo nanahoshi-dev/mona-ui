@@ -18,11 +18,11 @@ describe("generate-search-index", () => {
                 loadComponent: () =>
                     import("./docs/popup-menu-doc").then(m => m.Doc)
             },
-            { path: "theme-luna", loadComponent: () => import("./docs/luna-doc") }
+            { path: "theming/colors", loadComponent: () => import("./docs/theme-colors-doc") }
         `;
         const components = new Map([
             ["./docs/forms-doc", '<app-markdown-doc src="docs/guides/forms.md"></app-markdown-doc>'],
-            ["./docs/luna-doc", "<p>No markdown</p>"],
+            ["./docs/theme-colors-doc", "<p>No markdown</p>"],
             ["./docs/popup-menu-doc", '<a src="docs/popup-menu/intro.md"></a> <a src="docs/popup-menu/api.md"></a>']
         ]);
 
@@ -31,7 +31,7 @@ describe("generate-search-index", () => {
         expect(Object.fromEntries(sources)).toEqual({
             forms: ["docs/guides/forms.md"],
             "popup-menu": ["docs/popup-menu/intro.md", "docs/popup-menu/api.md"],
-            "theme-luna": []
+            "theming/colors": []
         });
     });
 

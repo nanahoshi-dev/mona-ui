@@ -39,15 +39,24 @@ const ACTIVE_TIMING_ELEMENTS = new Set(["animate", "animatetransform", "animatem
 const LAYOUT_OVERFLOW_TOLERANCE_PX = 1;
 
 /**
+ * Whether a computed box-shadow paints anything. A shadow list never contains `none`, so a value that does has no
+ * shadow, as with jsdom's `currentcolor none`.
+ */
+function paintsBoxShadow(boxShadow: string | null | undefined): boolean {
+    const trimmed = (boxShadow ?? "").trim();
+    return trimmed !== "" && !/(?:^|\s)none(?:\s|$)/i.test(trimmed);
+}
+
+/**
  * Parses a CSS box-shadow value and determines whether any shadow entry is non-inset.
  * Inset shadows paint inside the border box and are contained within raster capture bounds;
  * non-inset shadows paint outside the border box and can be silently cropped (R5-07).
  */
 export function hasNonInsetBoxShadow(boxShadow: string | null | undefined): boolean {
-    const trimmed = (boxShadow ?? "").trim();
-    if (!trimmed || trimmed === "none") {
+    if (!paintsBoxShadow(boxShadow)) {
         return false;
     }
+    const trimmed = (boxShadow ?? "").trim();
 
     // Split shadows by comma while ignoring commas inside rgb/rgba/hsl/hsla/color() functions
     const shadowEntries: string[] = [];
@@ -180,7 +189,7 @@ function pseudoMayPaint(style: CSSStyleDeclaration | null): boolean {
     }
 
     // Box shadow
-    if (style.boxShadow && style.boxShadow !== "none") {
+    if (paintsBoxShadow(style.boxShadow)) {
         return true;
     }
 

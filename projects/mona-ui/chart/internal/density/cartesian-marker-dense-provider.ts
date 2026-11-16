@@ -149,7 +149,7 @@ export class CartesianMarkerSpatialInteractionProvider implements CartesianDense
 
             const pt = target.point;
             const radius = target.visualRadius ?? target.radius ?? 4;
-            let matchesFilter = false;
+            let matchesFilter: boolean;
             if (query.hitPolicy === "intersect") {
                 matchesFilter =
                     pt.x + radius >= minPxX &&

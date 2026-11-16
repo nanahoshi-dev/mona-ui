@@ -1,4 +1,6 @@
-import { formatRgb, parse, wcagContrast } from "culori";
+// The CSS color spaces only, the ones chart colors come in. "culori" would register every color space it has.
+import "culori/css";
+import { formatRgb, parse, wcagContrast } from "culori/fn";
 import type { ChartBrushLineStyle } from "../../models/chart-brush.models";
 import type { ChartSeriesStyle } from "../../models/chart-style.models";
 import type {

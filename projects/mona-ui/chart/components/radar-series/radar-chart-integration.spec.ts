@@ -261,6 +261,6 @@ describe("Radar Chart Integration", () => {
         expect(maxRadialLeft).toBeGreaterThan(strengthLeft);
         expect(maxRadialTop).toBeGreaterThan(strengthTop);
         expect(strengthLabel!.nativeElement.style.transform).toBe("translate(-50%, -100%)");
-        expect(maxRadialLabel!.nativeElement.style.transform).toBe("translate(0, -50%)");
+        expect(maxRadialLabel!.nativeElement.style.transform).toBe("translate(0px, -50%)");
     });
 });

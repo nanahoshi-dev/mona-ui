@@ -110,7 +110,7 @@ export class ChartExportSnapshotBuilder {
         // Collect and freeze DOM overlays and raster clones synchronously (EXP-01, EXP-03, EXP-05, EXP-06, EXP-14)
         const domLayers = ChartExportDomCollector.collect(hostEl, plotEl, styleSnapshot);
 
-        let resolvedBackground: string | null = null;
+        let resolvedBackground: string | null;
         if (request.background === "auto") {
             resolvedBackground = ChartExportColorNormalizer.resolveAutoBackground(hostEl, styleSnapshot);
         } else if (request.background === "transparent") {

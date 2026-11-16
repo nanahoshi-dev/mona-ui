@@ -199,7 +199,7 @@ export class CartesianAxisLayoutEngine {
 
         // 3. Resolve rotation
         const normRotation = CartesianAxisLabelGeometry.normalizeRotation(userRotation);
-        let resolvedRotation = 0;
+        let resolvedRotation: number;
         if (normRotation === "auto") {
             if (axis === "x" && axisType === "category" && intermediateTicks.length > 1) {
                 const maxUnrotatedWidth = intermediateTicks.reduce((max, t) => Math.max(max, t.unrotatedWidth), 12);

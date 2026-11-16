@@ -7,6 +7,7 @@ import { DropdownItemTemplateDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { SwitchComponent } from "@nanahoshi/mona-ui/switch";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
+import { ApiProseComponent } from "../../../api/components/api-prose/api-prose.component";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { InputPropertyPipe } from "../../pipes/input-type.pipe";
 import { ProcessedConfigItem } from "../../utils/componentConfig";
@@ -14,6 +15,7 @@ import { ProcessedConfigItem } from "../../utils/componentConfig";
 @Component({
     selector: "app-api-input-list-item",
     imports: [
+        ApiProseComponent,
         InputPropertyPipe,
         ColorPickerComponent,
         DropdownListComponent,

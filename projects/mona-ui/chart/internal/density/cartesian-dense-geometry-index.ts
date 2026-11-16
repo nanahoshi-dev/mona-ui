@@ -154,8 +154,8 @@ export class DensePointGeometryIndex {
 
                     const dx = px - pixel.x;
                     const dy = py - pixel.y;
-                    let dist = 0;
-                    let secDist = 0;
+                    let dist: number;
+                    let secDist: number;
 
                     if (dimension === "x") {
                         dist = Math.abs(dx);
@@ -329,8 +329,8 @@ export class DenseSegmentGeometryIndex {
                     const dx = px - pixel.x;
                     const dy = pixel.y < minY ? minY - pixel.y : pixel.y > maxY ? pixel.y - maxY : 0;
 
-                    let dist = 0;
-                    let secDist = 0;
+                    let dist: number;
+                    let secDist: number;
 
                     if (dimension === "x") {
                         dist = Math.abs(dx);

@@ -1,4 +1,3 @@
-import { isDevMode } from "@angular/core";
 import { builtInThemes } from "../definitions/built-in-themes";
 import type { ThemeAvailability, ThemeSelection, ThemeVariant } from "../models/Theme";
 import {
@@ -51,8 +50,10 @@ export class DefaultThemeStrategy implements ThemeStrategy {
             validateCustomVariables(override.theme, override.dark?.custom);
         }
         this.#overrides = overrides;
-        if (isDevMode()) {
-            this.#reportProblems(registrations, overrides);
+        // `isDevMode()` is a call a production build can't remove. This drops the check, and the color parsing it
+        // needs, from production bundles.
+        if (typeof ngDevMode === "undefined" || ngDevMode) {
+            reportThemeProblems(this, registrations, overrides);
         }
     }
 
@@ -106,21 +107,6 @@ export class DefaultThemeStrategy implements ThemeStrategy {
         }
         this.#themes.set(registration.name, registration);
     }
-
-    /** Custom themes, and built-in ones as overridden. The built-in ones as written have specs of their own. */
-    #reportProblems(
-        registrations: readonly ThemeFamilyRegistration[],
-        overrides: readonly ThemeOverrideRegistration[]
-    ): void {
-        const names = new Set([...registrations.map(({ name }) => name), ...overrides.map(({ theme }) => theme)]);
-        for (const name of names) {
-            for (const [variant] of getDefinedVariants(this.#themes.get(name) as ThemeFamilyRegistration)) {
-                for (const problem of findThemeProblems(name, variant, this.resolve({ name, variant }))) {
-                    console.warn(`Mona UI: ${problem}`);
-                }
-            }
-        }
-    }
 }
 
 function getDefinedVariants(registration: ThemeFamilyRegistration): readonly [ThemeVariant, ThemeProfile][] {
@@ -134,6 +120,26 @@ function getDefinedVariants(registration: ThemeFamilyRegistration): readonly [Th
     return (entries as readonly [ThemeVariant, ThemeProfile | undefined][]).filter(
         (entry): entry is [ThemeVariant, ThemeProfile] => entry[1] !== undefined
     );
+}
+
+/**
+ * Custom themes, and built-in ones as overridden. The built-in ones as written have specs of their own. A function
+ * rather than a method, so that production builds can drop it.
+ */
+function reportThemeProblems(
+    strategy: DefaultThemeStrategy,
+    registrations: readonly ThemeFamilyRegistration[],
+    overrides: readonly ThemeOverrideRegistration[]
+): void {
+    const variants = new Map(strategy.availableThemes().map(theme => [theme.name, theme.variants]));
+    const names = new Set([...registrations.map(({ name }) => name), ...overrides.map(({ theme }) => theme)]);
+    for (const name of names) {
+        for (const variant of variants.get(name) ?? []) {
+            for (const problem of findThemeProblems(name, variant, strategy.resolve({ name, variant }))) {
+                console.warn(`Mona UI: ${problem}`);
+            }
+        }
+    }
 }
 
 function applyOverrides(profile: ThemeProfile, overrides: ThemeProfileOverrides | undefined): ThemeProfile {

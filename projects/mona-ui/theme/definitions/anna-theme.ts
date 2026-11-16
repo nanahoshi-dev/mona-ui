@@ -1,4 +1,4 @@
-import type { ThemeFamilyRegistration, ThemeComponents, ThemeMotion } from "../models/ThemeDefinition";
+import type { ThemeComponents, ThemeFamilyRegistration, ThemeMotion } from "../models/ThemeDefinition";
 import { annaThemeColors } from "./anna-theme-colors";
 import { annaThemeShadows } from "./anna-theme-shadows";
 import { createDefaultThemeEffects, createDefaultThemeShape } from "./theme-primitives";
@@ -9,7 +9,8 @@ const motion: ThemeMotion = Object.freeze({
 });
 
 const components: ThemeComponents = Object.freeze({
-    "--mona-calendar-background": "var(--color-input-background)",
+    // A calendar is a panel, not a field, so it keeps the surface rather than the lifted control fill.
+    "--mona-calendar-background": "var(--color-surface)",
     "--mona-calendar-shadow": "none",
     "--mona-list-background": "var(--color-surface)",
     "--mona-list-disabled-background": "var(--color-disabled-background)",
@@ -25,6 +26,20 @@ const components: ThemeComponents = Object.freeze({
 export const annaTheme = Object.freeze({
     name: "anna",
     variants: {
+        light: Object.freeze({
+            colors: annaThemeColors.light,
+            components,
+            // The deep violet is 8.4:1 on the light surface, so what's drawn by a fill alone takes it as it is. It's
+            // set here anyway, so that a part of the page in Anna Light doesn't inherit the dark variant's lighter one.
+            custom: Object.freeze({
+                "--mona-indicator-color": "var(--color-primary)",
+                "--mona-indicator-foreground": "var(--color-primary-foreground)"
+            }),
+            effects: createDefaultThemeEffects(),
+            motion,
+            shape: createDefaultThemeShape(),
+            shadows: annaThemeShadows.light
+        }),
         dark: Object.freeze({
             colors: annaThemeColors.dark,
             components,

@@ -3709,6 +3709,7 @@ export class ChartComponent implements AfterContentChecked {
 
     /**
      * @description Exports and triggers a browser file download of the chart in PNG, SVG, or PDF format.
+     * Export needs the `jspdf`, `svg2pdf.js` and `html2canvas-pro` packages, which aren't installed with Mona UI.
      * @param options Download options including export format, file name, dimensions, and presentation options.
      */
     public async downloadChart(options: ChartDownloadOptions): Promise<ChartExportResult> {
@@ -3735,6 +3736,7 @@ export class ChartComponent implements AfterContentChecked {
 
     /**
      * @description Exports the chart as a binary Blob in PNG, SVG, or PDF format.
+     * Export needs the `jspdf`, `svg2pdf.js` and `html2canvas-pro` packages, which aren't installed with Mona UI.
      * @param options Export configuration including format, dimensions, background, and presentation options.
      */
     public async exportChart(options: ChartExportOptions): Promise<ChartExportResult> {

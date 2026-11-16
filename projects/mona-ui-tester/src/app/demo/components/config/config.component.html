@@ -7,7 +7,7 @@
             @if (inputProperties().length > 0) {
                 <mona-tab title="Inputs">
                     <ng-template monaTabContentTemplate>
-                        <ul class="bg-demo-background/10 divide-y divide-border select-none">
+                        <ul class="divide-y divide-border select-none">
                             @for (entry of inputProperties(); track $index) {
                                 <li class="flex flex-col gap-2 py-2">
                                     <app-api-input-list-item
@@ -25,7 +25,7 @@
             @if (outputProperties().length > 0) {
                 <mona-tab title="Outputs">
                     <ng-template monaTabContentTemplate>
-                        <ul class="bg-demo-background/10 divide-y divide-border select-none">
+                        <ul class="divide-y divide-border select-none">
                             @for (entry of outputProperties(); track $index) {
                                 <li class="flex flex-col gap-2 py-2">
                                     <app-api-input-list-item
@@ -43,7 +43,7 @@
             @if (handler) {
                 <mona-tab title="Features">
                     <ng-template monaTabContentTemplate>
-                        <ul class="bg-demo-background/10 divide-y divide-border select-none">
+                        <ul class="divide-y divide-border select-none">
                             <ng-container
                                 [ngTemplateOutlet]="featureListTemplate"
                                 [ngTemplateOutletContext]="{
@@ -64,7 +64,7 @@
             <div class="flex">
                 <div class="flex flex-col flex-1 px-2 gap-2 text-sm">
                     <div class="font-semibold">{{ entry[1].name }}</div>
-                    <div class="font-light text-gray-500">{{ entry[1].description }}</div>
+                    <div class="text-muted-foreground leading-relaxed">{{ entry[1].description }}</div>
                 </div>
                 <div class="flex items-center justify-center px-2 gap-2">
                     @if (entry[1].hasCode !== false) {

@@ -1020,8 +1020,8 @@ export function projectScalarIndexView(input: {
     }
 
     const monotonicAscending = scalar.monotonicity === "ascending" || scalar.monotonicity === "non-decreasing";
-    let visStart = 0;
-    let visEnd = sourceCount;
+    let visStart: number;
+    let visEnd: number;
     if (monotonicAscending) {
         ChartDensityTracker.current?.onBinaryXQuery?.();
         visStart = lowerBoundAscending(scalar.x, 0, sourceCount, windowMin);
@@ -1208,8 +1208,8 @@ export function projectRangeEnvelopeIndexView(input: {
     }
 
     const monotonicAscending = monotonicity === "ascending" || monotonicity === "non-decreasing";
-    let visStart = 0;
-    let visEnd = sourceCount;
+    let visStart: number;
+    let visEnd: number;
     if (monotonicAscending) {
         ChartDensityTracker.current?.onBinaryXQuery?.();
         visStart = lowerBoundAscending(x, 0, sourceCount, windowMin);

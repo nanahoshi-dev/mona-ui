@@ -723,8 +723,8 @@ export class CartesianSpatialDensityIndex {
             onNodeVisited?.();
 
             const consider = (idx: number): void => {
-                let d = 0;
-                let secD = 0;
+                let d: number;
+                let secD: number;
                 if (metric) {
                     d = metric.distanceToPoint(idx);
                     secD = metric.secondaryDistanceToPoint ? metric.secondaryDistanceToPoint(idx) : 0;

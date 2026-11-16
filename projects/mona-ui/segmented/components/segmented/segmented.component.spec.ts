@@ -436,7 +436,7 @@ describe("SegmentedComponent", () => {
 
             const indicator = getIndicator(fixture);
             expect(indicator).not.toBeNull();
-            expect(indicator?.style.transform).toBe("translate3d(4px, 4px, 0)");
+            expect(indicator?.style.transform).toBe("translate3d(4px, 4px, 0px)");
             expect(indicator?.style.width).toBe("140px");
             expect(indicator?.style.height).toBe("32px");
             expect(indicator?.classList.contains("transition-none")).toBe(true);
@@ -455,7 +455,7 @@ describe("SegmentedComponent", () => {
             await waitForStable(fixture);
 
             const indicator = getIndicator(fixture);
-            expect(indicator?.style.transform).toBe("translate3d(148px, 4px, 0)");
+            expect(indicator?.style.transform).toBe("translate3d(148px, 4px, 0px)");
             expect(indicator?.classList.contains("transition-[transform,width,height]")).toBe(true);
         });
 
@@ -472,7 +472,7 @@ describe("SegmentedComponent", () => {
             await waitForStable(fixture);
 
             const indicator = getIndicator(fixture);
-            expect(indicator?.style.transform).toBe("translate3d(148px, 4px, 0)");
+            expect(indicator?.style.transform).toBe("translate3d(148px, 4px, 0px)");
         });
 
         it("hides indicator when value is null", async () => {
@@ -532,7 +532,7 @@ describe("SegmentedComponent", () => {
             await waitForStable(fixture);
 
             const indicator = getIndicator(fixture);
-            expect(indicator?.style.transform).toBe("translate3d(4px, 4px, 0)");
+            expect(indicator?.style.transform).toBe("translate3d(4px, 4px, 0px)");
             expect(indicator?.style.width).toBe("140px");
             expect(indicator?.style.height).toBe("32px");
         });
@@ -574,7 +574,7 @@ describe("SegmentedComponent", () => {
                 await waitForStable(localFixture);
 
                 const indicatorAfter = getIndicator(localFixture);
-                expect(indicatorAfter?.style.transform).toBe("translate3d(4px, 4px, 0)");
+                expect(indicatorAfter?.style.transform).toBe("translate3d(4px, 4px, 0px)");
                 expect(indicatorAfter?.style.width).toBe("130px");
             } finally {
                 globalThis.ResizeObserver = originalResizeObserver;
@@ -599,7 +599,7 @@ describe("SegmentedComponent", () => {
 
             const indicator = getIndicator(fixture);
             expect(indicator).not.toBeNull();
-            expect(indicator?.style.transform).toBe("translate3d(192px, 4px, 0)");
+            expect(indicator?.style.transform).toBe("translate3d(192px, 4px, 0px)");
             expect(indicator?.classList.contains("transition-none")).toBe(true);
         });
     });

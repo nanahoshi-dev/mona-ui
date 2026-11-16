@@ -77,24 +77,20 @@ export class PolarAxisHitTester {
 
         if (shared && interactionBuckets.length > 0) {
             let nearestBucket: ChartInteractionBucket;
-            let minAngularDelta: number;
 
             if (axisMode === "radar") {
                 const categoryCount = interactionBuckets.length;
                 const normalized = normalizeAngle(pointerAngle - rotationRad);
                 const bucketIndex = Math.round((normalized / (2 * Math.PI)) * categoryCount) % categoryCount;
                 nearestBucket = interactionBuckets[bucketIndex];
-                const spokeAngle = normalizeAngle(rotationRad + (bucketIndex * 2 * Math.PI) / categoryCount);
-                minAngularDelta = circularAngleDistance(pointerAngle, spokeAngle);
             } else {
                 const relativeAngle = normalizeAngle(pointerAngle - rotationRad);
                 const pointerDeg = radiansToDegrees(relativeAngle);
                 const result = findNearestPolarBucket(interactionBuckets, pointerDeg);
                 nearestBucket = result.bucket;
-                minAngularDelta = result.deltaRad;
 
                 // Shared polar proximity requirement
-                const arcDistance = minAngularDelta * Math.max(radius, outerRadius * 0.5);
+                const arcDistance = result.deltaRad * Math.max(radius, outerRadius * 0.5);
                 if (arcDistance > maxHoverDistance) {
                     return {
                         activeHitTarget: null,

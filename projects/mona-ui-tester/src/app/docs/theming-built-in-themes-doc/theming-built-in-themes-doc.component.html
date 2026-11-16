@@ -1,0 +1,42 @@
+<app-markdown-doc src="docs/theming-built-in-themes/intro.md"></app-markdown-doc>
+
+<ul class="my-6 grid list-none grid-cols-1 gap-x-4 gap-y-6 p-0 md:grid-cols-2">
+    @for (preview of previews; track preview.id) {
+        <li class="m-0 flex flex-col gap-2 p-0">
+            <div
+                class="flex flex-1 flex-col rounded-xl border border-border bg-canvas p-4 text-foreground"
+                role="group"
+                [attr.aria-label]="preview.label + ' preview'"
+                [style]="preview.style">
+                <div
+                    class="flex flex-1 flex-col gap-4 rounded-lg border border-border-subtle bg-surface p-4 shadow-raised">
+                    <div>
+                        <p class="m-0 font-semibold">Weekly report</p>
+                        <p class="m-0 text-sm text-muted-foreground">Updated 2 hours ago</p>
+                    </div>
+                    <mona-text-box aria-label="Search reports" placeholder="Search reports"></mona-text-box>
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <mona-check-box label="Email me" [checked]="true"></mona-check-box>
+                        <mona-switch aria-label="Notifications" [checked]="true"></mona-switch>
+                    </div>
+                    <mona-slider aria-label="Progress" [max]="100" [value]="60"></mona-slider>
+                    <div class="flex flex-wrap gap-2 text-xs font-medium">
+                        <span class="rounded-md bg-success-subtle px-2 py-0.5 text-success-subtle-foreground">
+                            On track
+                        </span>
+                        <span class="rounded-md bg-warning-subtle px-2 py-0.5 text-warning-subtle-foreground">
+                            2 reviews due
+                        </span>
+                    </div>
+                    <div class="mt-auto flex justify-end gap-2">
+                        <button monaButton type="button">Cancel</button>
+                        <button monaButton look="primary" type="button">Publish</button>
+                    </div>
+                </div>
+            </div>
+            <p class="m-0 text-sm font-medium text-foreground">{{ preview.label }}</p>
+        </li>
+    }
+</ul>
+
+<app-markdown-doc src="docs/theming-built-in-themes/guide.md" parentSectionId="built-in-themes"></app-markdown-doc>

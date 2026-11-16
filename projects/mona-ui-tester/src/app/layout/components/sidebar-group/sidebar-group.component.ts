@@ -4,11 +4,9 @@ import { RouterLink } from "@angular/router";
 import {
     LucideBookOpen,
     LucideChevronRight,
+    LucideCompass,
     LucideDynamicIcon,
-    LucideMoon,
     LucidePaintbrush,
-    LucidePalette,
-    LucideSparkles,
     LucideTextCursorInput
 } from "@lucide/angular";
 import type { LucideIconInput } from "@lucide/angular";
@@ -19,9 +17,7 @@ import { DocsNavigationService } from "../../services/docs-navigation.service";
 const PAGE_ICONS: Readonly<Record<string, LucideIconInput>> = {
     forms: LucideTextCursorInput,
     installation: LucideBookOpen,
-    introduction: LucideSparkles,
-    "theme-colors": LucidePalette,
-    "theme-luna": LucideMoon,
+    introduction: LucideCompass,
     theming: LucidePaintbrush
 };
 

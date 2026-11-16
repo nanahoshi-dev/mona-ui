@@ -63,6 +63,16 @@ describe("Notification behavior", () => {
         return () => done;
     }
 
+    /** Ends the leave animation that closing waits for: jsdom applies it from the styles but never plays it. */
+    function finishLeaving(): void {
+        for (const element of notifications()) {
+            if (element.hasAttribute("data-closing")) {
+                element.dispatchEvent(new Event("animationend"));
+            }
+        }
+        settle();
+    }
+
     afterEach(() => {
         service?.hideAll();
         settle();
@@ -113,6 +123,7 @@ describe("Notification behavior", () => {
                 expect(container.getAttribute("lang")).toBeTruthy();
                 ref.hide();
                 settle();
+                finishLeaving();
                 expect(containers()).toHaveLength(0);
             } finally {
                 document.documentElement.removeAttribute("dir");
@@ -161,6 +172,7 @@ describe("Notification behavior", () => {
             expect(isHidden()).toBe(false);
             vi.advanceTimersByTime(1);
             settle();
+            finishLeaving();
             expect(isHidden()).toBe(true);
             expect(containers()).toHaveLength(0);
         });
@@ -189,6 +201,7 @@ describe("Notification behavior", () => {
             expect(isHidden()).toBe(false);
             vi.advanceTimersByTime(1);
             settle();
+            finishLeaving();
             expect(isHidden()).toBe(true);
         });
 
@@ -206,6 +219,7 @@ describe("Notification behavior", () => {
             settle();
             vi.advanceTimersByTime(500);
             settle();
+            finishLeaving();
             expect(isHidden()).toBe(true);
         });
 
@@ -229,6 +243,7 @@ describe("Notification behavior", () => {
             expect(scaled()).toBe(false);
             vi.advanceTimersByTime(1);
             settle();
+            finishLeaving();
             expect(scaled()).toBe(true);
 
             const oldest = hidden(service.show({ content: "1" }));
@@ -236,6 +251,7 @@ describe("Notification behavior", () => {
             settle();
             service.show({ content: "3" });
             settle();
+            finishLeaving();
             expect(oldest()).toBe(true);
             expect(notifications()).toHaveLength(2);
         });
@@ -303,6 +319,7 @@ describe("Notification behavior", () => {
             expect(document.querySelector("#templated")?.textContent).toBe("Moved moved");
             (document.querySelector("#undo") as HTMLButtonElement).click();
             settle();
+            finishLeaving();
             expect(isHidden()).toBe(true);
             fixture.destroy();
         });

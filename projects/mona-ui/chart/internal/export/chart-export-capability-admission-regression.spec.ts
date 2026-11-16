@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, onTestFinished } from "vitest";
 import { ChartPdfCapabilityAnalyzer } from "./chart-pdf-capability-analyzer";
 import { ChartExportDomCollector } from "./chart-export-dom-collector";
 import { ChartExportDomFreezer } from "./chart-export-dom-freezer";
@@ -120,6 +120,9 @@ describe("Chart Export Capability Admission and Style Freezing Regressions", () 
             const source = document.createElement("div");
             source.style.backgroundColor = "rgb(100, 150, 200)";
             source.style.color = "rgb(255, 255, 255)";
+            // Connected, as a chart is: a detached element has no computed style.
+            document.body.appendChild(source);
+            onTestFinished(() => source.remove());
 
             const input = document.createElement("input");
             input.type = "text";
@@ -148,7 +151,8 @@ describe("Chart Export Capability Admission and Style Freezing Regressions", () 
             expect(clone.style.backgroundColor).toBe("rgb(100, 150, 200)");
             expect(clone.style.transition).toBe("none");
             expect(clone.style.animation).toBe("none");
-        });
+            // Freezing copies every computed property, which jsdom resolves far more slowly than a browser.
+        }, 30_000);
     });
 
     // -------------------------------------------------------------------------
@@ -305,6 +309,8 @@ describe("Chart Export Capability Admission and Style Freezing Regressions", () 
             Object.defineProperty(host, "getBoundingClientRect", {
                 value: () => ({ bottom: 400, height: 400, left: 0, right: 600, top: 0, width: 600, x: 0, y: 0 })
             });
+            document.body.appendChild(host);
+            onTestFinished(() => host.remove());
 
             const consumerHidden = document.createElement("div");
             consumerHidden.setAttribute("data-mona-chart-export-role", "label");

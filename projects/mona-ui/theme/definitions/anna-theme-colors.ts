@@ -11,29 +11,136 @@ const generatedRoles = generateThemeColorPalette({
     info: "#4DA3FF"
 });
 
+// What both variants share: the roles that only point at other roles, and the sidebar. Anna's sidebar takes the muted
+// surface and recedes behind the content rather than lifting off it, as its scrollbar track does.
+const sharedRoles: ThemeColors = Object.freeze({
+    "--color-card": "var(--color-surface-raised)",
+    "--color-card-foreground": "var(--color-foreground)",
+    "--color-input-foreground": "var(--color-foreground)",
+    "--color-accent-dark": "var(--color-accent-active)",
+    "--color-focus-surface": "var(--color-surface)",
+    "--color-background": "var(--color-surface)",
+    "--color-background-dark": "var(--color-surface-muted)",
+    "--color-header-background": "var(--color-surface-muted)",
+    "--color-header-foreground": "var(--color-foreground)",
+    "--color-input-border": "var(--color-border-control)",
+    "--color-input-hover": "var(--color-hover)",
+    "--color-input-active": "var(--color-surface-raised)",
+    "--color-popover": "var(--color-surface-overlay)",
+    "--color-popover-foreground": "var(--color-foreground)",
+    "--color-muted": "var(--color-surface-muted)",
+    "--color-destructive": "var(--color-error)",
+    "--color-destructive-foreground": "var(--color-error-foreground)",
+    "--color-input": "var(--color-border-control)",
+    "--color-disabled": "var(--color-disabled-foreground)",
+    ...createSidebarColorRoles({ background: "var(--color-surface-muted)" }),
+    "--color-scrollbar-thumb-focus": "var(--color-focus-indicator)"
+});
+
+// Anna Light keeps the dark variant's structure: graphite surfaces, with every control a step brighter than any of them.
+// The controls stop short of white, as far above the canvas as the dark variant's are, so they don't glare on the soft
+// gray surfaces. Selection becomes a violet tint, since secondary text must stay readable on it.
+const light: ThemeColors = Object.freeze({
+    "--color-canvas": "#E9E9EC",
+    "--color-surface": "#EFEFF1",
+    "--color-surface-muted": "#E4E4E7",
+    "--color-surface-raised": "#F3F3F5",
+    "--color-surface-overlay": "#F3F3F5",
+
+    "--color-foreground": "#1E1F22",
+    "--color-muted-foreground": "#53545A",
+
+    "--color-input-background": "#F7F7F9",
+    "--color-border-subtle": "#DFDFE3",
+    "--color-border": "#D5D5DA",
+    "--color-border-control": "#C4C5CA",
+    "--color-border-control-hover": "#A9AAB0",
+    "--color-border-control-contrast": "#7A7B82",
+    "--color-border-control-contrast-hover": "#68696F",
+
+    // A hovered control comes down to about the canvas's tone, a small step, while rows on a surface still darken.
+    "--color-hover": "#EAEAED",
+    "--color-active": "#E2E2E6",
+
+    "--color-disabled-foreground": "#5A5B61",
+    "--color-disabled-background": "#E6E6E9",
+    "--color-disabled-border": "#D5D5DA",
+
+    ...generatedRoles.light,
+
+    "--color-primary": "#583573",
+    "--color-primary-foreground": "#FFFFFF",
+    "--color-primary-hover": "#4A2B61",
+    "--color-primary-active": "#3D2350",
+    "--color-primary-selected": "#3D2350",
+    "--color-primary-subtle": "#EFE7F6",
+    "--color-primary-subtle-foreground": "#4A2B61",
+    "--color-primary-border": "#76489C",
+
+    "--color-secondary": "#DCDCE0",
+    "--color-secondary-foreground": "#1E1F22",
+    "--color-secondary-hover": "#CFCFD4",
+    "--color-secondary-active": "#C3C3C9",
+    "--color-secondary-selected": "#C3C3C9",
+    "--color-secondary-subtle": "#E9E9EC",
+    "--color-secondary-subtle-foreground": "#2E2F33",
+    "--color-secondary-border": "#7A7B82",
+
+    "--color-accent": "#EFE7F6",
+    "--color-accent-foreground": "#4A2B61",
+    "--color-accent-hover": "#E6DAF1",
+    "--color-accent-active": "#DCCCEB",
+    "--color-selected": "#E9DDF2",
+    "--color-selected-foreground": "#40245A",
+    "--color-selected-hover": "#E1D2EE",
+    "--color-selected-hover-foreground": "#40245A",
+    "--color-selected-active": "#D7C4E8",
+    "--color-selected-active-foreground": "#40245A",
+    "--color-selected-focus": "#E1D2EE",
+    "--color-selected-focus-foreground": "#40245A",
+    "--color-selected-border": "var(--color-primary)",
+    "--color-focus-indicator": "#76489C",
+
+    ...sharedRoles,
+
+    "--color-chart-1": "#6B3F8E",
+    "--color-chart-2": "#9B66C2",
+    "--color-chart-3": "#2F6DB5",
+    "--color-chart-4": "#13806F",
+    "--color-chart-5": "#9A6500",
+
+    "--color-scrollbar-thumb": "#7A7B82",
+    "--color-scrollbar-thumb-hover": "#68696F",
+    "--color-scrollbar-thumb-active": "#55565C",
+    "--color-scrollbar-track": "#E4E4E7",
+    "--color-scrollbar-track-hover": "#DCDCE0",
+    "--color-scrollbar-track-active": "#D3D3D8",
+    "--color-scrollbar-track-focus": "#EFE7F6",
+    "--color-scrollbar-corner": "#E4E4E7"
+});
+
 const dark: ThemeColors = Object.freeze({
     "--color-canvas": "#202123",
     "--color-surface": "#1D1E20",
     "--color-surface-muted": "#161718",
     "--color-surface-raised": "#242528",
     "--color-surface-overlay": "#161718",
-    "--color-card": "var(--color-surface-raised)",
-    "--color-card-foreground": "var(--color-foreground)",
 
     "--color-foreground": "#D6D6D8",
     "--color-muted-foreground": "#B4B4B9",
 
-    "--color-input-background": "#1D1E20",
-    "--color-input-foreground": "var(--color-foreground)",
+    // Fields and other controls sit a step above every surface, sunken ones included, so they read by their fill and
+    // not by the near-black border alone. Hover and active go on up from there.
+    "--color-input-background": "#2A2B2E",
     "--color-border-subtle": "#0F0F10",
     "--color-border": "#131416",
     "--color-border-control": "#0F0F10",
     "--color-border-control-hover": "#17181A",
-    "--color-border-control-contrast": "#6F7077",
+    "--color-border-control-contrast": "#74757B",
     "--color-border-control-contrast-hover": "#818289",
 
-    "--color-hover": "#242528",
-    "--color-active": "#2A2B2E",
+    "--color-hover": "#313236",
+    "--color-active": "#38393D",
 
     "--color-disabled-foreground": "#9A9AA0",
     "--color-disabled-background": "#1A1B1D",
@@ -63,7 +170,6 @@ const dark: ThemeColors = Object.freeze({
     "--color-accent-foreground": "#F5EFF8",
     "--color-accent-hover": "#684484",
     "--color-accent-active": "#472A5E",
-    "--color-accent-dark": "var(--color-accent-active)",
     "--color-selected": "var(--color-primary)",
     "--color-selected-foreground": "var(--color-primary-foreground)",
     "--color-selected-hover": "var(--color-primary-hover)",
@@ -73,27 +179,9 @@ const dark: ThemeColors = Object.freeze({
     "--color-selected-focus": "var(--color-primary)",
     "--color-selected-focus-foreground": "var(--color-primary-foreground)",
     "--color-selected-border": "var(--color-focus-indicator)",
-    "--color-focus-surface": "var(--color-surface)",
     "--color-focus-indicator": "#BC94DB",
 
-    "--color-background": "var(--color-surface)",
-    "--color-background-dark": "var(--color-surface-muted)",
-    "--color-header-background": "var(--color-surface-muted)",
-    "--color-header-foreground": "var(--color-foreground)",
-    "--color-input-border": "var(--color-border-control)",
-    "--color-input-hover": "var(--color-hover)",
-    "--color-input-active": "var(--color-surface-raised)",
-    "--color-popover": "var(--color-surface-overlay)",
-    "--color-popover-foreground": "var(--color-foreground)",
-    "--color-muted": "var(--color-surface-muted)",
-    "--color-destructive": "var(--color-error)",
-    "--color-destructive-foreground": "var(--color-error-foreground)",
-    "--color-input": "var(--color-border-control)",
-    "--color-disabled": "var(--color-disabled-foreground)",
-
-    // Anna's canvas is already dark, so the sidebar recedes below it rather than lifting off it —
-    // the same relationship its scrollbar track and popovers use.
-    ...createSidebarColorRoles({ background: "var(--color-surface-muted)" }),
+    ...sharedRoles,
 
     "--color-chart-1": "#A174C2",
     "--color-chart-2": "#C39BDF",
@@ -104,7 +192,6 @@ const dark: ThemeColors = Object.freeze({
     "--color-scrollbar-thumb": "#686970",
     "--color-scrollbar-thumb-hover": "#7B7C83",
     "--color-scrollbar-thumb-active": "#94959C",
-    "--color-scrollbar-thumb-focus": "var(--color-focus-indicator)",
     "--color-scrollbar-track": "#161718",
     "--color-scrollbar-track-hover": "#1D1E20",
     "--color-scrollbar-track-active": "#242528",
@@ -112,4 +199,4 @@ const dark: ThemeColors = Object.freeze({
     "--color-scrollbar-corner": "#161718"
 });
 
-export const annaThemeColors = Object.freeze({ dark } satisfies ThemeDefinition);
+export const annaThemeColors = Object.freeze({ light, dark } satisfies ThemeDefinition);

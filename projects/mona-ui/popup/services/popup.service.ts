@@ -14,7 +14,7 @@ import { ScrollDispatcher, type ScrollDispatcherTarget } from "@angular/cdk/scro
 import { DestroyRef, DOCUMENT, ElementRef, inject, Injectable, Injector, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MonaI18nService, observeComponentDirection, resolveComponentDirection } from "@nanahoshi/mona-ui/i18n";
-import { focusCanReturn } from "@nanahoshi/mona-ui/internal";
+import { createPageScrollBlockStrategy, focusCanReturn } from "@nanahoshi/mona-ui/internal";
 import { fromEvent, merge, Subject, Subscription, take, takeUntil } from "rxjs";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
 import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
@@ -153,7 +153,9 @@ export class PopupService {
                 panelClass,
                 backdropClass: settings.backdropClass ?? "transparent",
                 direction,
-                scrollStrategy: settings.blockScroll ? this.#overlay.scrollStrategies.block() : undefined
+                scrollStrategy: settings.blockScroll
+                    ? createPageScrollBlockStrategy(this.#document, this.#overlay.scrollStrategies.block())
+                    : undefined
             })
         );
         const lang = resolvePopupLanguage(anchorElement, this.#i18n?.localeId());

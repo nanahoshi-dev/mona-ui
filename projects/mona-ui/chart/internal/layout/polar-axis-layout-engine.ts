@@ -98,7 +98,7 @@ export class PolarAxisLayoutEngine {
         // 1. Data Preparation
         let radarDataResult: ReturnType<typeof prepareRadarData> | null = null;
         let polarDataResult: ReturnType<typeof prepareContinuousPolarData> | null = null;
-        let allValues: readonly number[] = [];
+        let allValues: readonly number[];
 
         if (isRadar) {
             const radarSeriesList = series.filter((s): s is ChartRadarSeriesRegistration => s.type === "radar");

@@ -11,13 +11,12 @@
                 {{ metadata().inputs | inputProperty: entry().name : "kind" }}
             </div>
         </div>
-        <div class="font-light text-gray-500 whitespace-pre-line text-sm/3">
-            <span [innerHTML]="metadata().inputs | inputProperty: entry().name : 'description'"></span>
+        <div class="text-muted-foreground leading-relaxed">
+            <app-api-prose
+                class="api-prose block"
+                [markdown]="metadata().inputs | inputProperty: entry().name : 'description'"></app-api-prose>
             @if (entry().note) {
-                <div class="mt-1">
-                    <span class="text-sm font-medium">Note: </span
-                    ><span class="text-sm text-gray-400">{{ entry().note }}</span>
-                </div>
+                <div class="mt-1"><span class="font-medium text-foreground">Note: </span>{{ entry().note }}</div>
             }
         </div>
     </div>

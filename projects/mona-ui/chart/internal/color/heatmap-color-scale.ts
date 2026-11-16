@@ -1,5 +1,7 @@
 import { isDevMode } from "@angular/core";
-import { formatRgb, interpolate, parse, wcagContrast, type Color } from "culori";
+// The CSS color spaces only, the ones chart colors come in. "culori" would register every color space it has.
+import "culori/css";
+import { formatRgb, interpolate, parse, wcagContrast, type Color } from "culori/fn";
 import type {
     ChartColorLegendStop,
     ChartColorLegendTick,
@@ -57,7 +59,7 @@ export class HeatmapColorScale {
 
         const [min, max] = domain;
 
-        let resolvedStops: string[] = [];
+        let resolvedStops: string[];
         let midpoint: number | undefined;
 
         const isStopValid = (c: string): boolean => {

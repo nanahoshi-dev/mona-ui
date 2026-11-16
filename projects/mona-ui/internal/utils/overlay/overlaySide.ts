@@ -1,4 +1,4 @@
-import { ConnectionPositionPair } from "@angular/cdk/overlay";
+import type { ConnectionPositionPair } from "@angular/cdk/overlay";
 
 /**
  * The side of its anchor a tooltip or popover opens on. `left` and `right` are physical in every direction; `start`
@@ -27,39 +27,31 @@ export const resolveOverlaySide = (side: OverlaySide, direction: "ltr" | "rtl"):
     return side;
 };
 
+/**
+ * A position pair as a plain object. Constructing `ConnectionPositionPair` would make this a value import of
+ * `@angular/cdk/overlay`, which, even unused, puts the overlay module in the initial bundle of an application whose
+ * overlays are all in lazily loaded code.
+ */
+const position = (
+    origin: Pick<ConnectionPositionPair, "originX" | "originY">,
+    overlay: Pick<ConnectionPositionPair, "overlayX" | "overlayY">,
+    offsetX: number,
+    offsetY: number
+): ConnectionPositionPair => ({ ...origin, ...overlay, offsetX, offsetY });
+
 const positionFor = (side: PhysicalOverlaySide, gap: number, direction: "ltr" | "rtl"): ConnectionPositionPair => {
     // The overlay's start and end follow its direction, so a physical side is translated for RTL.
     const left = direction === "rtl" ? "end" : "start";
     const right = direction === "rtl" ? "start" : "end";
     switch (side) {
         case "top":
-            return new ConnectionPositionPair(
-                { originX: "center", originY: "top" },
-                { overlayX: "center", overlayY: "bottom" },
-                0,
-                -gap
-            );
+            return position({ originX: "center", originY: "top" }, { overlayX: "center", overlayY: "bottom" }, 0, -gap);
         case "bottom":
-            return new ConnectionPositionPair(
-                { originX: "center", originY: "bottom" },
-                { overlayX: "center", overlayY: "top" },
-                0,
-                gap
-            );
+            return position({ originX: "center", originY: "bottom" }, { overlayX: "center", overlayY: "top" }, 0, gap);
         case "left":
-            return new ConnectionPositionPair(
-                { originX: left, originY: "center" },
-                { overlayX: right, overlayY: "center" },
-                -gap,
-                0
-            );
+            return position({ originX: left, originY: "center" }, { overlayX: right, overlayY: "center" }, -gap, 0);
         case "right":
-            return new ConnectionPositionPair(
-                { originX: right, originY: "center" },
-                { overlayX: left, overlayY: "center" },
-                gap,
-                0
-            );
+            return position({ originX: right, originY: "center" }, { overlayX: left, overlayY: "center" }, gap, 0);
     }
 };
 

@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { booleanAttribute, Component, computed, inject, input, model } from "@angular/core";
+import { booleanAttribute, Component, computed, inject, input, model, numberAttribute } from "@angular/core";
 import { LucideFlame, LucideHeart } from "@lucide/angular";
 import {
     RatingComponent,
@@ -180,7 +180,7 @@ class RatingWrapperComponent implements ComponentInputsAsSignal<RatingComponent>
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly icon = input<ReturnType<RatingComponent["icon"]>>("star");
     public readonly invalid = input(false, { transform: booleanAttribute });
-    public readonly itemsCount = input<ReturnType<RatingComponent["itemsCount"]>>(5);
+    public readonly itemsCount = input<ReturnType<RatingComponent["itemsCount"]>>(5, { transform: numberAttribute });
     public readonly label = input<ReturnType<RatingComponent["label"]>>(null);
     public readonly labelPosition = input<ReturnType<RatingComponent["labelPosition"]>>("after");
     public readonly precision = input<ReturnType<RatingComponent["precision"]>>("item");

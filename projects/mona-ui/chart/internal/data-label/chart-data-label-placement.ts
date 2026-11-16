@@ -28,8 +28,8 @@ export class ChartDataLabelPlacement {
         const centerX = b.x + b.width / 2;
         const centerY = b.y + b.height / 2;
 
-        let boundsX = centerX - width / 2;
-        let boundsY = centerY - height / 2;
+        let boundsX: number;
+        let boundsY: number;
         let anchorX = centerX;
         let anchorY = centerY;
 
@@ -224,8 +224,8 @@ export class ChartDataLabelPlacement {
         const visualRadius = CartesianMarkVisualGeometry.getVisualRadius(hit, 0);
         const effectiveOffset = Math.max(0, visualRadius) + offset;
 
-        let boundsX = center.x - width / 2;
-        let boundsY = center.y - height / 2;
+        let boundsX: number;
+        let boundsY: number;
 
         switch (position) {
             case "top":
@@ -277,8 +277,8 @@ export class ChartDataLabelPlacement {
         const minY = Math.min(highPt.y, lowPt.y);
         const maxY = Math.max(highPt.y, lowPt.y);
 
-        let boundsX = centerX - width / 2;
-        let boundsY = centerY - height / 2;
+        let boundsX: number;
+        let boundsY: number;
 
         switch (position) {
             case "top":

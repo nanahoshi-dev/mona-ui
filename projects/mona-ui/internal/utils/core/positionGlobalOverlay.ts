@@ -1,4 +1,4 @@
-import { GlobalPositionStrategy, type OverlayRef } from "@angular/cdk/overlay";
+import type { GlobalPositionStrategy, OverlayRef, PositionStrategy } from "@angular/cdk/overlay";
 
 export interface GlobalOverlayPosition {
     /** Distance from the viewport's left edge in pixels; centered horizontally when omitted. Physical in RTL too. */
@@ -14,7 +14,7 @@ export interface GlobalOverlayPosition {
  */
 export const positionGlobalOverlay = (overlayRef: OverlayRef, position: GlobalOverlayPosition): void => {
     const strategy = overlayRef.getConfig().positionStrategy;
-    if (!(strategy instanceof GlobalPositionStrategy)) {
+    if (!isGlobalPositionStrategy(strategy)) {
         return;
     }
     if (position.left != null) {
@@ -29,3 +29,18 @@ export const positionGlobalOverlay = (overlayRef: OverlayRef, position: GlobalOv
     }
     overlayRef.updatePosition();
 };
+
+/**
+ * Recognizes a global strategy by its methods, not with `instanceof`. A value import of `@angular/cdk/overlay` here,
+ * even an unused one, puts the overlay module in the initial bundle of an application whose overlays are all in lazily
+ * loaded code.
+ */
+function isGlobalPositionStrategy(strategy: PositionStrategy | undefined): strategy is GlobalPositionStrategy {
+    const candidate = strategy as Partial<GlobalPositionStrategy> | undefined;
+    return (
+        typeof candidate?.centerHorizontally === "function" &&
+        typeof candidate.centerVertically === "function" &&
+        typeof candidate.left === "function" &&
+        typeof candidate.top === "function"
+    );
+}

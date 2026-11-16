@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, onTestFinished } from "vitest";
 import { ChartExportDomCollector } from "./chart-export-dom-collector";
 
 describe("ChartExportDomCollector", () => {
@@ -7,6 +7,9 @@ describe("ChartExportDomCollector", () => {
         Object.defineProperty(host, "getBoundingClientRect", {
             value: () => ({ bottom: 400, height: 400, left: 100, right: 700, top: 50, width: 600, x: 100, y: 50 })
         });
+        // Connected, as a chart is: a detached element has no computed style.
+        document.body.appendChild(host);
+        onTestFinished(() => host.remove());
         return host;
     }
 

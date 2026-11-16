@@ -1,4 +1,6 @@
-import { formatRgb, parse } from "culori";
+// The CSS color spaces only, the ones chart colors come in. "culori" would register every color space it has.
+import "culori/css";
+import { formatRgb, parse } from "culori/fn";
 import { createSvgElement } from "./svg-element-utils";
 import { formatSvgNumber, setSvgAttribute } from "./svg-attribute-utils";
 import type { SvgIdNamespace } from "./svg-id-namespace";

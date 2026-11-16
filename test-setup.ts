@@ -13,6 +13,20 @@ class ResizeObserverMock {
 globalThis.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
 
 /**
+ * jsdom runs requestAnimationFrame callbacks and focus fixup off one setInterval it starts on demand. Started while a
+ * spec fakes timers (removing a focused element is enough), it belongs to the fake clock, and once real timers are back
+ * no frame runs again in this process: every later spec that waits for one times out. Moving the fake clock on by a
+ * frame first lets it finish and stop.
+ */
+const useRealTimers = vi.useRealTimers.bind(vi);
+vi.useRealTimers = (): typeof vi => {
+    if (vi.isFakeTimers()) {
+        vi.advanceTimersByTime(Math.ceil(1000 / 60));
+    }
+    return useRealTimers();
+};
+
+/**
  * jsdom does not implement scrollIntoView/scrollTo, which CDK's virtual scroll
  * viewport and list navigation call directly.
  */
@@ -109,13 +123,3 @@ HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, cont
 } as typeof HTMLCanvasElement.prototype.getContext;
 
 HTMLCanvasElement.prototype.toDataURL = vi.fn().mockReturnValue('data:image/png;base64,');
-
-/**
- * jsdom supports getComputedStyle's pseudo-element argument in signature only;
- * passing a non-empty pseudo-element string logs "Not implemented" because it
- * cannot resolve generated content. The chart export capability analyzer probes
- * ::before/::after presence this way; falling back to the plain element style
- * keeps that probe working without the warning.
- */
-const originalGetComputedStyle = window.getComputedStyle.bind(window);
-window.getComputedStyle = ((element: Element) => originalGetComputedStyle(element)) as typeof window.getComputedStyle;

@@ -145,7 +145,7 @@ export class ChartExportRasterIslandRenderer {
         } catch (err: unknown) {
             throw new ChartExportError(
                 "template-rasterization-failed",
-                "Failed to dynamically load DOM rasterizer (html2canvas-pro).",
+                "Failed to load html2canvas-pro, which draws the chart's HTML content, such as templates, into an export. To export this chart, install the html2canvas-pro package.",
                 { cause: err }
             );
         }

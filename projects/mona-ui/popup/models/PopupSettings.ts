@@ -38,7 +38,8 @@ export interface PopupSettings<T = unknown, C = void> {
     backdropClass?: string | string[];
 
     /**
-     * Whether scrolling behind the popup should be blocked while it is open.
+     * Whether scrolling behind the popup should be blocked while it is open. A page whose root doesn't scroll, because
+     * `html` or `body` hides its overflow, is left as it is, so no scrollbar appears and the page doesn't shift.
      * Default: false.
      * @type {boolean}
      */
