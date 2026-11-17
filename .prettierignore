@@ -18,6 +18,3 @@ projects/mona-ui/i18n/utilities/locale-week-likely-data.ts
 projects/mona-ui-tester/scripts/i18n-rtl-baseline.json
 projects/mona-ui-tester/src/app/examples/examples.generated.ts
 projects/mona-ui-tester/src/assets/component-metadata.json
-
-# Saved reference pages, not source.
-/api_reference_layout_concepts*.html
