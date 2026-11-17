@@ -10,6 +10,7 @@ import { ColorPaletteComponent } from "@nanahoshi/mona-ui/color-palette";
 import { ColorPickerComponent } from "@nanahoshi/mona-ui/color-picker";
 import { ComboBoxComponent } from "@nanahoshi/mona-ui/combo-box";
 import { DatePickerComponent } from "@nanahoshi/mona-ui/date-picker";
+import { DateRangePickerComponent } from "@nanahoshi/mona-ui/date-range-picker";
 import { DateTimePickerComponent } from "@nanahoshi/mona-ui/datetime-picker";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { EditorComponent } from "@nanahoshi/mona-ui/editor";
@@ -43,11 +44,15 @@ const OPTIONS = [
 ];
 
 /**
- * Each control in the host, by its form field's label, with the elements that carry its role. A range slider's group
- * and both handles are named by the label; only the handles are described.
+ * Each control in the host, by its form field's label, with the elements that carry its role: the label names them and
+ * the hint describes them. A range slider's group and both handles are named by the label; only the handles are
+ * described. A date range picker's group is named by the label, and the hint describes its two inputs.
  */
 interface ControlCase {
     readonly caption: string;
+    /** The elements the hint describes, when they aren't the ones with the role. */
+    readonly described?: string;
+    /** The elements the label names, when they aren't the ones with the role. */
     readonly named?: string;
     readonly role: string;
 }
@@ -57,6 +62,7 @@ const CONTROLS: readonly ControlCase[] = [
     { caption: "Amount", role: "mona-numeric-text-box input" },
     { caption: "Price", role: "mona-decimal-text-box input" },
     { caption: "Birthday", role: "mona-date-picker input" },
+    { caption: "Stay", described: "mona-date-range-picker input", role: "mona-date-range-picker" },
     { caption: "Alarm", role: "mona-time-picker input" },
     { caption: "Meeting", role: "mona-datetime-picker input" },
     { caption: "Fruit", role: "mona-dropdown-list" },
@@ -90,6 +96,7 @@ const CONTROLS: readonly ControlCase[] = [
         <mona-form-field label="Amount" hint="Hint for Amount"><mona-numeric-text-box /></mona-form-field>
         <mona-form-field label="Price" hint="Hint for Price"><mona-decimal-text-box /></mona-form-field>
         <mona-form-field label="Birthday" hint="Hint for Birthday"><mona-date-picker /></mona-form-field>
+        <mona-form-field label="Stay" hint="Hint for Stay"><mona-date-range-picker /></mona-form-field>
         <mona-form-field label="Alarm" hint="Hint for Alarm"><mona-time-picker /></mona-form-field>
         <mona-form-field label="Meeting" hint="Hint for Meeting"><mona-datetime-picker /></mona-form-field>
         <mona-form-field label="Fruit" hint="Hint for Fruit"><mona-dropdown-list [data]="fruits" /></mona-form-field>
@@ -140,6 +147,7 @@ const CONTROLS: readonly ControlCase[] = [
         ColorPickerComponent,
         ComboBoxComponent,
         DatePickerComponent,
+        DateRangePickerComponent,
         DateTimePickerComponent,
         DecimalTextBoxComponent,
         DropdownListComponent,
@@ -189,31 +197,35 @@ describe("the form field contract", () => {
         return field!;
     }
 
-    it.each(CONTROLS)("names and describes $caption", ({ caption, role }) => {
+    it.each(CONTROLS)("names and describes $caption", ({ caption, described, named, role }) => {
         const field = fieldOf(caption);
         const captionId = field.querySelector("label")!.id;
         const hintId = Array.from(field.querySelectorAll<HTMLElement>("[id]")).find(
             element => element.textContent?.trim() === `Hint for ${caption}`
         )!.id;
-        const elements = Array.from(field.querySelectorAll(role));
-        expect(elements.length, role).toBeGreaterThan(0);
-        for (const element of elements) {
-            expect(ids(element, "aria-labelledby"), `${role} name`).toContain(captionId);
-            expect(ids(element, "aria-describedby"), `${role} description`).toContain(hintId);
+        const namedElements = Array.from(field.querySelectorAll(named ?? role));
+        const describedElements = Array.from(field.querySelectorAll(described ?? role));
+        expect(namedElements.length, named ?? role).toBeGreaterThan(0);
+        expect(describedElements.length, described ?? role).toBeGreaterThan(0);
+        for (const element of namedElements) {
+            expect(ids(element, "aria-labelledby"), `${named ?? role} name`).toContain(captionId);
+        }
+        for (const element of describedElements) {
+            expect(ids(element, "aria-describedby"), `${described ?? role} description`).toContain(hintId);
         }
     });
 
-    it.each(CONTROLS)("keeps $caption's label and hint off the parts inside it", ({ caption, named, role }) => {
+    it.each(CONTROLS)("keeps $caption's label and hint off the parts inside it", ({ caption, described, named, role }) => {
         const field = fieldOf(caption);
         const captionId = field.querySelector("label")!.id;
         const labelled = Array.from(field.querySelectorAll("[aria-labelledby]")).filter(element =>
             ids(element, "aria-labelledby").includes(captionId)
         );
         expect(labelled).toEqual(Array.from(field.querySelectorAll(named ?? role)));
-        const described = Array.from(field.querySelectorAll("[aria-describedby]")).filter(
+        const describedElements = Array.from(field.querySelectorAll("[aria-describedby]")).filter(
             element => ids(element, "aria-describedby").length > 0 && element.closest("mona-form-field") === field
         );
-        expect(described.filter(element => !element.matches(role))).toEqual([]);
+        expect(describedElements.filter(element => !element.matches(described ?? role))).toEqual([]);
     });
 
     it.each(CONTROLS)("moves focus into $caption from its label", async ({ caption }) => {

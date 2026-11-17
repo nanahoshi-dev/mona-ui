@@ -1,0 +1,135 @@
+<span [class]="fieldClass">
+    <span aria-hidden="true" [class]="sizerClass()">
+        @for (text of startSizerTexts(); track $index) {
+            <span class="block">{{ text }}</span>
+        }
+    </span>
+    <mona-text-box
+        (inputBlur)="onInputBlur('start')"
+        (inputFocus)="onInputFocus('start')"
+        (valueChange)="typedInput.edit('start', $event)"
+        [aria-describedby]="describedBy() ?? ''"
+        [aria-label]="messages().start"
+        [clearButton]="showClearButton()"
+        [disabled]="effectiveDisabled()"
+        [inputAttributes]="inputAttributes()"
+        [inputClass]="inputClass"
+        [inputId]="startInputId"
+        [inputStyle]="inputStyle"
+        [invalid]="startInvalid()"
+        [placeholder]="startPlaceholder()"
+        [readonly]="readonly()"
+        [required]="required()"
+        [rounded]="rounded()"
+        [size]="size()"
+        [touched]="startInvalid() || touched()"
+        [value]="typedInput.text.start()" />
+</span>
+<span aria-hidden="true" [class]="separatorClass">–</span>
+<span [class]="fieldClass">
+    <span aria-hidden="true" [class]="sizerClass()">
+        @for (text of endSizerTexts(); track $index) {
+            <span class="block">{{ text }}</span>
+        }
+    </span>
+    <mona-text-box
+        (inputBlur)="onInputBlur('end')"
+        (inputFocus)="onInputFocus('end')"
+        (valueChange)="typedInput.edit('end', $event)"
+        [aria-describedby]="describedBy() ?? ''"
+        [aria-label]="messages().end"
+        [clearButton]="showClearButton()"
+        [disabled]="effectiveDisabled()"
+        [inputAttributes]="inputAttributes()"
+        [inputClass]="inputClass"
+        [inputId]="endInputId"
+        [inputStyle]="inputStyle"
+        [invalid]="endInvalid()"
+        [placeholder]="endPlaceholder()"
+        [readonly]="readonly()"
+        [required]="required()"
+        [rounded]="rounded()"
+        [size]="size()"
+        [touched]="endInvalid() || touched()"
+        [value]="typedInput.text.end()" />
+</span>
+<button
+    monaButton
+    look="ghost"
+    [class]="buttonClass()"
+    [attr.aria-controls]="popupId"
+    [attr.aria-expanded]="expanded()"
+    [attr.aria-label]="messages().openCalendar"
+    [disabled]="effectiveDisabled() || readonly()"
+    [iconOnly]="true"
+    [rounded]="'none'"
+    [size]="size()"
+    [tabindex]="-1"
+    (click)="onCalendarButtonClick()">
+    <svg lucideCalendar [size]="16" aria-hidden="true"></svg>
+</button>
+
+<ng-template #popupTemplate>
+    <div
+        [class]="pickerPopupClass()"
+        [id]="popupId"
+        aria-modal="true"
+        role="dialog"
+        [attr.aria-label]="messages().dateRangePicker"
+        cdkTrapFocus>
+        @if (presetItems().length > 0) {
+            <div role="group" [attr.aria-label]="messages().presets" [class]="presetListClass" (keydown)="onPresetKeydown($event)">
+                @for (item of presetItems(); track $index) {
+                    <button
+                        monaButton
+                        look="ghost"
+                        type="button"
+                        [class]="presetClass()"
+                        [disabled]="item.disabled"
+                        [rounded]="rounded()"
+                        [selected]="item.selected"
+                        size="small"
+                        [toggleable]="true"
+                        (click)="onPresetClick(item)">
+                        {{ item.label }}
+                    </button>
+                }
+            </div>
+        }
+        <mona-calendar
+            focusOnMount
+            selection="range"
+            [disabledDates]="disabledDates()"
+            [firstDay]="firstDay()"
+            [maxDate]="maxDate()"
+            [minDate]="minDate()"
+            [months]="months()"
+            [readonly]="readonly()"
+            [rounded]="rounded()"
+            [value]="calendarValue()"
+            [weekNumber]="weekNumber()"
+            (valueChange)="onCalendarValueChange($event)">
+            @if (decadeCellTemplate()) {
+                <ng-template monaCalendarDecadeCellTemplate let-year>
+                    <ng-container
+                        [ngTemplateOutlet]="decadeCellTemplate()?.templateRef"
+                        [ngTemplateOutletContext]="{ $implicit: year }"></ng-container>
+                </ng-template>
+            }
+            @if (monthCellTemplate()) {
+                <ng-template monaCalendarMonthCellTemplate let-day let-date="date">
+                    <ng-container
+                        [ngTemplateOutlet]="monthCellTemplate()?.templateRef"
+                        [ngTemplateOutletContext]="{ $implicit: day, date }"></ng-container>
+                </ng-template>
+            }
+            @if (yearCellTemplate()) {
+                <ng-template monaCalendarYearCellTemplate let-year let-text="text">
+                    <ng-container
+                        [ngTemplateOutlet]="yearCellTemplate()?.templateRef"
+                        [ngTemplateOutletContext]="{ $implicit: year, text }"></ng-container>
+                </ng-template>
+            }
+        </mona-calendar>
+    </div>
+</ng-template>
