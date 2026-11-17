@@ -193,7 +193,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     protected readonly labelledBy = this.#label.labelledBy;
     protected readonly messages = this.#i18n.componentMessages("dateTimePicker", DATETIME_PICKER_DEFAULT_MESSAGES);
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
-    protected readonly navigatedDate = linkedSignal(() => this.value() ?? new Date());
+    protected readonly navigatedDate = linkedSignal(() => this.value() ?? this.startDate());
     protected readonly panelId = createElementControlId();
     protected readonly pickerPopupClass = computed(() => {
         const rounded = this.rounded();
@@ -499,7 +499,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     }
 
     protected onCancelClick(): void {
-        this.navigatedDate.set(this.value() ?? new Date());
+        this.navigatedDate.set(this.value() ?? this.startDate());
         this.closePopup();
     }
 
@@ -639,7 +639,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
             }
             this.activeView.set("date");
             this.focusViewOnMount.set(true);
-            this.navigatedDate.set(this.value() ?? new Date());
+            this.navigatedDate.set(this.value() ?? this.startDate());
         });
     }
 
@@ -672,6 +672,11 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
                     this.onSetDateClick();
                 }
             });
+    }
+
+    /** Where the popup starts without a value: now, moved into the min and max range so Set can't leave it. */
+    private startDate(): Date {
+        return this.updateDateIfNotInRange(new Date());
     }
 
     private updateDateIfNotInRange(date: Date): Date {

@@ -18,6 +18,8 @@ export class DropdownPopupHandlerDirective {
     readonly #host = inject(DROPDOWN_POPUP_INPUT_TOKEN);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #popupService = inject(PopupService);
+    /** Set once the host is destroyed: its outputs can no longer emit, so closing the popup stays silent. */
+    #hostDestroyed = false;
 
     public constructor() {
         afterNextRender({
@@ -30,7 +32,10 @@ export class DropdownPopupHandlerDirective {
                     .subscribe(s => this.togglePopup(s));
             }
         });
-        this.#destroyRef.onDestroy(() => this.closePopup());
+        this.#destroyRef.onDestroy(() => {
+            this.#hostDestroyed = true;
+            this.closePopup();
+        });
     }
 
     private closePopup(): void {
@@ -116,6 +121,9 @@ export class DropdownPopupHandlerDirective {
         this.#dropdownService.popupRef.set(popupRef);
         this.setPopupCloseSubscriptions(popupRef);
         window.setTimeout(() => {
+            if (this.#hostDestroyed) {
+                return;
+            }
             this.#dropdownService.popupOpenComplete$.next();
             this.#host.opened.emit();
         });
@@ -123,7 +131,10 @@ export class DropdownPopupHandlerDirective {
 
     private setPopupCloseSubscriptions(popupRef: PopupRef): void {
         popupRef.beforeClose.pipe(takeUntil(popupRef.closed)).subscribe(event => {
-            this.#host.close.emit(event);
+            // A destroyed host can't keep its popup open, so it isn't asked.
+            if (!this.#hostDestroyed) {
+                this.#host.close.emit(event);
+            }
         });
         popupRef.closeStart.pipe(takeUntil(popupRef.closed)).subscribe(event => {
             this.#dropdownService.popupCloseStart$.next(event);
@@ -135,7 +146,9 @@ export class DropdownPopupHandlerDirective {
             );
             this.#dropdownService.popupRef.set(null);
             this.#dropdownService.popupCloseComplete$.next(event);
-            this.#host.closed.emit();
+            if (!this.#hostDestroyed) {
+                this.#host.closed.emit();
+            }
         });
     }
 

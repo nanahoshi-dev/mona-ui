@@ -1,5 +1,17 @@
-import { ApplicationRef, Component, signal, type TemplateRef, viewChild } from "@angular/core";
+import {
+    ApplicationRef,
+    Component,
+    forwardRef,
+    input,
+    output,
+    signal,
+    type TemplateRef,
+    viewChild
+} from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
+import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import type { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
+import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { DROPDOWN_POPUP_INPUT_TOKEN, type DropdownPopupInput } from "../models/DropdownPopupInput";
 import { DropdownService } from "../services/dropdown.service";
 import { DropdownPopupHandlerDirective } from "./dropdown-popup-handler.directive";
@@ -17,6 +29,29 @@ class TestHostComponent {}
 })
 class TestFocusHostComponent {
     public readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("popup");
+}
+
+/** A host with real outputs, which warn when they emit after the host is destroyed. */
+@Component({
+    template: `<ng-template #popup><p>Popup</p></ng-template>`,
+    hostDirectives: [DropdownPopupHandlerDirective],
+    providers: [
+        DropdownService,
+        { provide: DROPDOWN_POPUP_INPUT_TOKEN, useExisting: forwardRef(() => TestOutputsHostComponent) }
+    ]
+})
+class TestOutputsHostComponent implements DropdownPopupInput {
+    // eslint-disable-next-line @angular-eslint/no-output-native
+    public readonly close = output<PopupCloseEvent>();
+    public readonly closed = output();
+    public readonly disabled = signal(false);
+    public readonly open = output<PreventableEvent>();
+    public readonly opened = output();
+    public readonly popupHeight = input<ListSizeInputType>();
+    public readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("popup");
+    public readonly popupWidth = input<ListSizeInputType>();
+    public readonly readonly = signal(false);
+    public readonly touch = output();
 }
 
 function createPopupInput(): DropdownPopupInput {
@@ -119,5 +154,62 @@ describe("DropdownPopupHandlerDirective focus", () => {
         expect(dropdownService.popupRef()).toBeNull();
         expect(dropdownService.focusCanReturn()).toBe(false);
         expect(document.activeElement).toBe(otherField);
+    });
+});
+
+describe("DropdownPopupHandlerDirective when its host is destroyed", () => {
+    afterEach(() => {
+        document.querySelectorAll(".cdk-overlay-container").forEach(node => node.replaceChildren());
+    });
+
+    async function createOpen(): Promise<ComponentFixture<TestOutputsHostComponent>> {
+        TestBed.configureTestingModule({ imports: [TestOutputsHostComponent] });
+        const fixture = TestBed.createComponent(TestOutputsHostComponent);
+        document.body.append(fixture.nativeElement as HTMLElement);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        const dropdownService = fixture.debugElement.injector.get(DropdownService);
+        dropdownService.popupTemplate.set(fixture.componentInstance.popupTemplate());
+        dropdownService.triggerPopupOpen$.next({});
+        await TestBed.inject(ApplicationRef).tick();
+        return fixture;
+    }
+
+    it("closes the popup without emitting through the destroyed host", async () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+        try {
+            const fixture = await createOpen();
+            await new Promise(resolve => setTimeout(resolve, 0));
+            const emitted: string[] = [];
+            fixture.componentInstance.close.subscribe(() => emitted.push("close"));
+            fixture.componentInstance.closed.subscribe(() => emitted.push("closed"));
+            expect(document.querySelector(".cdk-overlay-pane p")?.textContent).toBe("Popup");
+
+            fixture.destroy();
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            expect(document.querySelector(".cdk-overlay-pane p")).toBeNull();
+            expect(emitted).toEqual([]);
+            expect(warn).not.toHaveBeenCalled();
+        } finally {
+            warn.mockRestore();
+        }
+    });
+
+    it("does not report the popup as opened when the host is destroyed first", async () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+        try {
+            const fixture = await createOpen();
+            const opened: string[] = [];
+            fixture.componentInstance.opened.subscribe(() => opened.push("opened"));
+
+            fixture.destroy();
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            expect(opened).toEqual([]);
+            expect(warn).not.toHaveBeenCalled();
+        } finally {
+            warn.mockRestore();
+        }
     });
 });

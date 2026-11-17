@@ -64,6 +64,13 @@ describe("FilterMenuComponent behaviour", () => {
         return host.applied[host.applied.length - 1]?.filters[0] as FilterDescriptor;
     }
 
+    /** Moves an operator list to its next operator, as ArrowDown does on the closed list. */
+    async function nextOperator(index: 0 | 1): Promise<void> {
+        const list = root.querySelectorAll("mona-dropdown-list")[index];
+        list.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "ArrowDown" }));
+        await settle();
+    }
+
     beforeEach(async () => {
         // No FilterService provider: the menu brings its own.
         TestBed.configureTestingModule({});
@@ -116,6 +123,22 @@ describe("FilterMenuComponent behaviour", () => {
         expect(lastFilter()).toEqual(expect.objectContaining({ value: "ann" }));
     });
 
+    it("reports its conditions with the text trimmed", async () => {
+        await type(valueInput(), " a ");
+        button("OR").click();
+        await settle();
+        await type(valueInput(1), " b");
+
+        const menu = getDebugNode(root.querySelector("mona-filter-menu"))?.componentInstance as FilterMenuComponent;
+        expect(menu.getFilterValues()).toEqual({
+            logic: "or",
+            operator1: "contains",
+            operator2: "contains",
+            value1: "a",
+            value2: "b"
+        });
+    });
+
     it("applies on Enter in a value, but not while an IME is composing", async () => {
         await type(valueInput(), "ann");
 
@@ -125,6 +148,62 @@ describe("FilterMenuComponent behaviour", () => {
         valueInput().dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }));
         expect(host.applied).toHaveLength(1);
         expect(lastFilter()).toEqual(expect.objectContaining({ value: "ann" }));
+    });
+
+    it("applies the operator picked from the list", async () => {
+        await nextOperator(0);
+        await type(valueInput(), "ann");
+
+        button("Apply").click();
+        expect(lastFilter()).toEqual({ field: "name", operator: "doesnotcontain", value: "ann" });
+    });
+
+    it("applies a valueless operator without a value, and disables the value input", async () => {
+        host.operators.set(["isempty", "contains"]);
+        await settle();
+        expect(valueInput().disabled).toBe(true);
+        expect(button("Apply").disabled).toBe(false);
+
+        button("Apply").click();
+        expect(lastFilter()).toEqual({ field: "name", operator: "isempty" });
+    });
+
+    it("keeps Apply disabled until the second condition is complete", async () => {
+        await type(valueInput(), "a");
+        button("AND").click();
+        await settle();
+        expect(button("Apply").disabled).toBe(true);
+
+        await type(valueInput(1), "b");
+        expect(button("Apply").disabled).toBe(false);
+    });
+
+    it("drops the second condition when the connector is turned off", async () => {
+        await type(valueInput(), "a");
+        button("OR").click();
+        await settle();
+        await nextOperator(1);
+        await type(valueInput(1), "b");
+
+        button("OR").click();
+        await settle();
+        expect(root.querySelectorAll("mona-text-box input")).toHaveLength(1);
+        button("Apply").click();
+        expect(host.applied[0]).toEqual({
+            filters: [{ field: "name", operator: "contains", value: "a" }],
+            logic: "and"
+        });
+
+        button("AND").click();
+        await settle();
+        expect(valueInput(1).value).toBe("");
+    });
+
+    it("keeps Apply disabled when `operators` allows none of the type's operators", async () => {
+        host.operators.set(["istrue"]);
+        await settle();
+        await type(valueInput(), "ann");
+        expect(button("Apply").disabled).toBe(true);
     });
 
     it("does not apply on Enter while the condition is incomplete", async () => {

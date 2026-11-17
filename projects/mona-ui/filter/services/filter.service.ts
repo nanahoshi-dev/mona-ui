@@ -44,7 +44,6 @@ export class FilterService {
         ];
     }
 
-    // TODO: Add null and empty filter operators
     public get numericFilterMenuItems(): FilterMenuDataItem[] {
         const m = this.#messages();
         return [
