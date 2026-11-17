@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { codeRegionLabel, watchScrollableRegion } from "./scrollableRegion";
+import { codeRegionLabel, tableRegionLabel, watchScrollableRegion } from "./scrollableRegion";
 
 /** jsdom doesn't lay anything out, so the sizes the check reads are set by hand. */
 function sized(element: HTMLElement, scrollWidth: number, clientWidth: number): void {
@@ -62,5 +62,17 @@ describe("codeRegionLabel", () => {
     it("falls back to Code", () => {
         expect(codeRegionLabel("plaintext")).toBe("Code");
         expect(codeRegionLabel(undefined)).toBe("Code");
+    });
+});
+
+describe("tableRegionLabel", () => {
+    it("names the table after the heading it sits under", () => {
+        expect(tableRegionLabel("Anatomy")).toBe("Anatomy table");
+        expect(tableRegionLabel("  Keyboard\n")).toBe("Keyboard table");
+    });
+
+    it("falls back to Table", () => {
+        expect(tableRegionLabel(undefined)).toBe("Table");
+        expect(tableRegionLabel(" ")).toBe("Table");
     });
 });

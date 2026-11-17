@@ -62,7 +62,7 @@
     @for (entry of features; track $index) {
         <li class="flex flex-col gap-2 py-2 select-none" [style.padding-left.rem]="level * 1.5">
             <div class="flex">
-                <div class="flex flex-col flex-1 px-2 gap-2 text-sm">
+                <div class="flex min-w-0 flex-col flex-1 px-2 gap-2 text-sm [overflow-wrap:anywhere]">
                     <div class="font-semibold">{{ entry[1].name }}</div>
                     <div class="text-muted-foreground leading-relaxed">{{ entry[1].description }}</div>
                 </div>

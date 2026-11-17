@@ -1,7 +1,7 @@
 /**
- * A code block that scrolls has to take keyboard focus, or its hidden part can't be read without a mouse. This makes
- * `element` a named, focusable region while its content overflows, and takes that away again once it fits, so a short
- * block doesn't add a tab stop. It re-checks when the element resizes or its content changes.
+ * A code block or table that scrolls has to take keyboard focus, or its hidden part can't be read without a mouse.
+ * This makes `element` a named, focusable region while its content overflows, and takes that away again once it fits,
+ * so a short block doesn't add a tab stop. It re-checks when the element resizes or its content changes.
  *
  * @param element the element that scrolls
  * @param label what to call the region, read each time it's checked
@@ -51,4 +51,10 @@ const LANGUAGE_NAMES: Readonly<Record<string, string>> = {
 export function codeRegionLabel(language: string | null | undefined): string {
     const name = language == null ? undefined : LANGUAGE_NAMES[language.toLowerCase()];
     return name == null ? "Code" : `${name} code`;
+}
+
+/** What a table that scrolls is called: the heading it sits under, such as "Anatomy table", or just "Table". */
+export function tableRegionLabel(heading: string | null | undefined): string {
+    const text = heading?.trim();
+    return text ? `${text} table` : "Table";
 }

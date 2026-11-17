@@ -47,7 +47,8 @@ export class PlaceholderDemoComponent extends AbstractDemoComponent<PlaceholderC
     imports: [PlaceholderComponent],
     template: `
         @let featureData = features();
-        <div class="flex items-center justify-center border border-border bg-background p-4 w-120 h-20 rounded-sm">
+        <div
+            class="flex items-center justify-center border border-border bg-background p-4 w-120 max-w-full h-20 rounded-sm">
             @if (featureData["content"].active) {
                 <div class="text-foreground">This is the actual content replacing the placeholder.</div>
             } @else {

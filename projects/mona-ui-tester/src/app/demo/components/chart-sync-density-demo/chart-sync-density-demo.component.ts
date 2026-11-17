@@ -75,7 +75,7 @@ function generateDenseRange(count: number): Array<{ readonly from: number; reado
             .demo-grid {
                 display: grid;
                 gap: 1rem;
-                grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr));
             }
             .controls {
                 align-items: center;

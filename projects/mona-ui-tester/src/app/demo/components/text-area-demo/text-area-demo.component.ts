@@ -37,13 +37,13 @@ export class TextAreaDemoComponent extends AbstractDemoComponent<TextAreaDirecti
 
 @Component({
     template: `
-        <div class="flex flex-col gap-4">
+        <div class="flex max-w-full flex-col gap-4">
             <span>Text: {{ form.longText().value() }}</span>
             <textarea
                 monaTextArea
                 [formField]="form.longText"
                 [rounded]="rounded()"
-                [class]="userClass()"></textarea>
+                [class]="'max-w-full ' + userClass()"></textarea>
         </div>
     `,
     imports: [TextAreaDirective, FormField]

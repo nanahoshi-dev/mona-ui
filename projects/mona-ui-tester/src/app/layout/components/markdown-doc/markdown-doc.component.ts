@@ -14,7 +14,7 @@ import {
 } from "@angular/core";
 import { Router } from "@angular/router";
 import { MarkdownComponent } from "ngx-markdown";
-import { codeRegionLabel, watchScrollableRegion } from "../../../demo/utils/scrollableRegion";
+import { codeRegionLabel, tableRegionLabel, watchScrollableRegion } from "../../../demo/utils/scrollableRegion";
 import { createUniqueHeadingId } from "../../docs-heading-id";
 import { routeInternalLink } from "../../internal-links";
 import type { SectionItem } from "../../models/SectionItem";
@@ -39,7 +39,7 @@ export class MarkdownDocComponent {
     readonly #registeredItems = signal<SectionItem[]>([]);
     readonly #router = inject(Router);
     #examples: ComponentRef<ExampleComponent>[] = [];
-    #stopWatchingCodeBlocks: Array<() => void> = [];
+    #stopWatchingRegions: Array<() => void> = [];
 
     protected readonly assetUrl = computed(() => `/assets/${this.src()}`);
     /**
@@ -54,7 +54,7 @@ export class MarkdownDocComponent {
     public constructor() {
         this.#destroyRef.onDestroy(() => {
             this.#destroyExamples();
-            this.#unwatchCodeBlocks();
+            this.#unwatchScrollableRegions();
             this.#registeredItems().forEach(item => this.#pageService.removeSection(item));
         });
     }
@@ -103,7 +103,7 @@ export class MarkdownDocComponent {
 
         this.#rewriteFragmentLinks();
         this.#mountExamples();
-        this.#watchCodeBlocks();
+        this.#watchScrollableRegions(headings);
 
         this.#registeredItems.set(items);
         this.#pageService.setSections(items);
@@ -137,19 +137,42 @@ export class MarkdownDocComponent {
         }
     }
 
-    #unwatchCodeBlocks(): void {
-        this.#stopWatchingCodeBlocks.forEach(stop => stop());
-        this.#stopWatchingCodeBlocks = [];
+    #unwatchScrollableRegions(): void {
+        this.#stopWatchingRegions.forEach(stop => stop());
+        this.#stopWatchingRegions = [];
     }
 
-    /** A fenced block that's too wide scrolls, so it has to take focus while it does. */
-    #watchCodeBlocks(): void {
-        this.#unwatchCodeBlocks();
-        const blocks = Array.from(this.#elementRef.nativeElement.querySelectorAll("pre")) as HTMLPreElement[];
-        this.#stopWatchingCodeBlocks = blocks.map(block => {
-            const language = /\blanguage-([\w-]+)/.exec(block.querySelector("code")?.className ?? "")?.[1];
-            return watchScrollableRegion(block, () => codeRegionLabel(language));
-        });
+    /**
+     * A fenced block or a table that's too wide scrolls on its own, so the page keeps its width on a phone, and it
+     * takes focus while it does. A table scrolls inside a wrapper, named after the heading it's under, since a table
+     * given `display: block` to scroll stops being a table to some screen readers.
+     */
+    #watchScrollableRegions(headings: readonly HTMLHeadingElement[]): void {
+        this.#unwatchScrollableRegions();
+        const root = this.#elementRef.nativeElement as HTMLElement;
+        const blocks = Array.from(root.querySelectorAll("pre")) as HTMLPreElement[];
+        const tables = (Array.from(root.querySelectorAll("table")) as HTMLTableElement[]).filter(
+            table => table.closest("app-example") == null
+        );
+        this.#stopWatchingRegions = [
+            ...blocks.map(block => {
+                const language = /\blanguage-([\w-]+)/.exec(block.querySelector("code")?.className ?? "")?.[1];
+                return watchScrollableRegion(block, () => codeRegionLabel(language));
+            }),
+            ...tables.map(table => {
+                let wrapper = table.parentElement as HTMLElement;
+                if (!wrapper.classList.contains("docs-table-scroll")) {
+                    wrapper = (root.ownerDocument as Document).createElement("div");
+                    wrapper.className = "docs-table-scroll";
+                    table.replaceWith(wrapper);
+                    wrapper.appendChild(table);
+                }
+                const heading = headings
+                    .filter(candidate => candidate.compareDocumentPosition(table) & Node.DOCUMENT_POSITION_FOLLOWING)
+                    .at(-1);
+                return watchScrollableRegion(wrapper, () => tableRegionLabel(heading?.textContent));
+            })
+        ];
     }
 
     /**
