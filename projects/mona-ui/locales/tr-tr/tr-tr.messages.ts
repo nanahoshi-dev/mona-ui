@@ -473,6 +473,9 @@ export const TR_TR_MESSAGES = {
     progressBar: {
         label: "İlerleme"
     },
+    qrCode: {
+        label: "QR kodu"
+    },
     rating: {
         notRated: "Değerlendirilmedi",
         valueText: (value: number, max: number) => `${localizeNumber(max)} üzerinden ${localizeNumber(value)}`

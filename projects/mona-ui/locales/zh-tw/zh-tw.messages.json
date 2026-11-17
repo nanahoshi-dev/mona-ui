@@ -423,6 +423,9 @@
     "progressBar": {
         "label": "進度"
     },
+    "qrCode": {
+        "label": "QR 碼"
+    },
     "rating": {
         "notRated": "未評分",
         "valueText": "第 {value} 級，共 {max} 級"

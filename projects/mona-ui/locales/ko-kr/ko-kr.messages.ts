@@ -452,6 +452,9 @@ export const KO_KR_MESSAGES = {
     progressBar: {
         label: "진행률"
     },
+    qrCode: {
+        label: "QR 코드"
+    },
     rating: {
         notRated: "평가되지 않음",
         valueText: (value: number, max: number) => `${localizeNumber(max)}점 만점에 ${localizeNumber(value)}점`

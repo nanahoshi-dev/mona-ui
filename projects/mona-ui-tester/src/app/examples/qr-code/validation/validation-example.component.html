@@ -1,0 +1,16 @@
+<div class="flex max-w-sm flex-col items-start gap-3">
+    <mona-label text="Label text">
+        <mona-text-box aria-describedby="qr-code-label-error" [formField]="shelf.label" />
+    </mona-label>
+    <p aria-live="polite" class="text-sm text-error" id="qr-code-label-error">
+        @for (error of shelf.label().errors(); track error.kind) {
+            {{ error.message }}
+        }
+    </p>
+    @if (shelf.label().valid()) {
+        <mona-qr-code
+            encoding="iso-8859-1"
+            [aria-label]="'QR code for ' + shelf.label().value()"
+            [value]="shelf.label().value()" />
+    }
+</div>

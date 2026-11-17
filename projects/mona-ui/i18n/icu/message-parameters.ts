@@ -538,6 +538,9 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
     progressBar: {
         label: null
     },
+    qrCode: {
+        label: null
+    },
     rating: {
         notRated: null,
         valueText: [

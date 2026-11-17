@@ -1,0 +1,30 @@
+@if (scene(); as scene) {
+    <svg [attr.viewBox]="viewBox()" aria-hidden="true" focusable="false" shape-rendering="crispEdges">
+        <rect [attr.width]="scene.size" [attr.height]="scene.size" [style.fill]="background()" />
+        <path [attr.d]="scene.modulesPath" [style.fill]="color()" />
+        @if (swissOverlay(); as swiss) {
+            <rect
+                [attr.x]="swiss.box.x"
+                [attr.y]="swiss.box.y"
+                [attr.width]="swiss.box.size"
+                [attr.height]="swiss.box.size"
+                [style.fill]="background()" />
+            <rect
+                [attr.x]="swiss.badge.x"
+                [attr.y]="swiss.badge.y"
+                [attr.width]="swiss.badge.size"
+                [attr.height]="swiss.badge.size"
+                [style.fill]="color()" />
+            <path [attr.d]="crossPath()" [style.fill]="background()" />
+        }
+        @if (imageOverlay(); as image) {
+            <image
+                [attr.href]="image.src"
+                [attr.x]="image.box.x"
+                [attr.y]="image.box.y"
+                [attr.width]="image.box.size"
+                [attr.height]="image.box.size"
+                preserveAspectRatio="xMidYMid meet" />
+        }
+    </svg>
+}

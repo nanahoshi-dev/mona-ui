@@ -77,6 +77,7 @@ const coveredEntryPoints: readonly (readonly [entry: string, docs: readonly stri
     ["otp-input", ["otp-input"]],
     ["placeholder", ["placeholder"]],
     ["progress-bar", ["progress-bar"]],
+    ["qr-code", ["qr-code"]],
     ["radio-button", ["radio-button"]],
     ["rating", ["rating"]],
     ["scroll-view", ["scroll-view"]],

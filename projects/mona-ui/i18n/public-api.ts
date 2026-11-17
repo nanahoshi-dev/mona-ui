@@ -37,6 +37,7 @@ export * from "./message-types/numeric-text-box.messages";
 export * from "./message-types/otp-input.messages";
 export * from "./message-types/pager.messages";
 export * from "./message-types/progress-bar.messages";
+export * from "./message-types/qr-code.messages";
 export * from "./message-types/sidebar.messages";
 export * from "./message-types/rating.messages";
 export * from "./message-types/scroll-view.messages";

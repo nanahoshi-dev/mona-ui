@@ -448,6 +448,9 @@ export const JA_JP_MESSAGES = {
     progressBar: {
         label: "進行状況"
     },
+    qrCode: {
+        label: "QRコード"
+    },
     rating: {
         notRated: "未評価",
         valueText: (value: number, max: number) => `${localizeNumber(max)}段階中${localizeNumber(value)}`

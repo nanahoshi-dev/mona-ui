@@ -448,6 +448,9 @@ export const ZH_TW_MESSAGES = {
     progressBar: {
         label: "進度"
     },
+    qrCode: {
+        label: "QR 碼"
+    },
     rating: {
         notRated: "未評分",
         valueText: (value: number, max: number) => `第 ${localizeNumber(value)} 級，共 ${localizeNumber(max)} 級`

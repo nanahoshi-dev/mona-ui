@@ -423,6 +423,9 @@
     "progressBar": {
         "label": "進行状況"
     },
+    "qrCode": {
+        "label": "QRコード"
+    },
     "rating": {
         "notRated": "未評価",
         "valueText": "{max}段階中{value}"

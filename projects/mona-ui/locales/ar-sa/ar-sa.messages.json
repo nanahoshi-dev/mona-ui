@@ -423,6 +423,9 @@
     "progressBar": {
         "label": "التقدم"
     },
+    "qrCode": {
+        "label": "رمز QR"
+    },
     "rating": {
         "notRated": "غير مقيّم",
         "valueText": "{value} من {max}"

@@ -870,6 +870,31 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./progress-bar/upload/upload-example.component").then(module => module.ProgressBarUploadExampleComponent),
         mainFile: "upload-example.component.ts"
     },
+    "qr-code/appearance": {
+        files: ["appearance-example.component.ts", "appearance-example.component.html"],
+        load: () => import("./qr-code/appearance/appearance-example.component").then(module => module.QrCodeAppearanceExampleComponent),
+        mainFile: "appearance-example.component.ts"
+    },
+    "qr-code/export": {
+        files: ["export-example.component.ts", "export-example.component.html"],
+        load: () => import("./qr-code/export/export-example.component").then(module => module.QrCodeExportExampleComponent),
+        mainFile: "export-example.component.ts"
+    },
+    "qr-code/logo": {
+        files: ["logo-example.component.ts", "logo-example.component.html"],
+        load: () => import("./qr-code/logo/logo-example.component").then(module => module.QrCodeLogoExampleComponent),
+        mainFile: "logo-example.component.ts"
+    },
+    "qr-code/swiss": {
+        files: ["swiss-example.component.ts", "swiss-example.component.html"],
+        load: () => import("./qr-code/swiss/swiss-example.component").then(module => module.QrCodeSwissExampleComponent),
+        mainFile: "swiss-example.component.ts"
+    },
+    "qr-code/validation": {
+        files: ["validation-example.component.ts", "validation-example.component.html"],
+        load: () => import("./qr-code/validation/validation-example.component").then(module => module.QrCodeValidationExampleComponent),
+        mainFile: "validation-example.component.ts"
+    },
     "radio-button/directive": {
         files: ["directive-example.component.ts", "directive-example.component.html"],
         load: () => import("./radio-button/directive/directive-example.component").then(module => module.RadioButtonDirectiveExampleComponent),

@@ -75,6 +75,7 @@
             "@nanahoshi/mona-ui/popup": ["./projects/mona-ui/popup/public-api.ts"],
             "@nanahoshi/mona-ui/popup-menu": ["./projects/mona-ui/popup-menu/public-api.ts"],
             "@nanahoshi/mona-ui/progress-bar": ["./projects/mona-ui/progress-bar/public-api.ts"],
+            "@nanahoshi/mona-ui/qr-code": ["./projects/mona-ui/qr-code/public-api.ts"],
             "@nanahoshi/mona-ui/query": ["./projects/mona-ui/query/public-api.ts"],
             "@nanahoshi/mona-ui/radio-button": ["./projects/mona-ui/radio-button/public-api.ts"],
             "@nanahoshi/mona-ui/rating": ["./projects/mona-ui/rating/public-api.ts"],

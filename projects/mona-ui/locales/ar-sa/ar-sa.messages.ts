@@ -487,6 +487,9 @@ export const AR_SA_MESSAGES = {
     progressBar: {
         label: "التقدم"
     },
+    qrCode: {
+        label: "رمز QR"
+    },
     rating: {
         notRated: "غير مقيّم",
         valueText: (value: number, max: number) => `${localizeNumber(value)} من ${localizeNumber(max)}`
