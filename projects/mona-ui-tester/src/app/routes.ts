@@ -415,6 +415,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "qr-code",
+                loadComponent: () =>
+                    import("./docs/components/qr-code-doc/qr-code-doc.component").then(m => m.QrCodeDocComponent)
+            },
+            {
                 path: "radio-button",
                 loadComponent: () =>
                     import("./docs/components/radio-button-doc/radio-button-doc.component").then(

@@ -139,6 +139,7 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
             component("list-box", "List Box", "list-box", "A selectable list with a toolbar for moving items and transferring them between lists."),
             component("list-view", "List View", "list-view", "Renders a collection as a list, with optional selection, grouping and paging."),
             component("pager", "Pager", "pager", "Pagination controls with page buttons, a page-size selector and a page-jump input."),
+            component("qr-code", "QR Code", "qr-code", "Encodes text or a URL as a scannable QR code, with logo overlays and PNG, SVG and PDF export."),
             component("tree-view", "Tree View", "tree-view", "Hierarchical data as an expandable, keyboard-navigable tree.")
         ]
     },

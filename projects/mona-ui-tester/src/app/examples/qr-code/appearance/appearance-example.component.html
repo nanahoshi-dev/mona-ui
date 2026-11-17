@@ -1,0 +1,12 @@
+<div class="flex flex-wrap items-end gap-6">
+    <mona-qr-code aria-label="QR code for the Mona UI docs" [size]="96" [value]="link" />
+    <mona-qr-code aria-label="QR code for the Mona UI docs" color="#1e3a8a" background="#eff6ff" [value]="link" />
+    <div class="w-40 rounded-lg bg-white p-3 shadow-sm">
+        <mona-qr-code
+            aria-label="QR code for the Mona UI docs"
+            background="transparent"
+            size="100%"
+            [quietZone]="0"
+            [value]="link" />
+    </div>
+</div>

@@ -14557,6 +14557,94 @@
       }
     ]
   },
+  "QrCodeComponent": {
+    "name": "QrCodeComponent",
+    "selector": "\"mona-qr-code\"",
+    "inputs": [
+      {
+        "description": "Accessible name of the code. Say what scanning it does, such as \"QR code for the event page\". When\nempty, falls back to the localized \"QR code\". The host has `role=\"img\"` while there's a code to show.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Color of the light modules and the quiet zone, as any CSS color. `\"transparent\"` lets the page show\nthrough, which only scans on a light page.",
+        "kind": "input",
+        "name": "background",
+        "type": "string",
+        "defaultValue": "\"#ffffff\""
+      },
+      {
+        "description": "Color of the dark modules, as any CSS color. Readers need it much darker than `background`.",
+        "kind": "input",
+        "name": "color",
+        "type": "string",
+        "defaultValue": "\"#000000\""
+      },
+      {
+        "description": "Character set the text is stored in. `\"utf-8\"` stores any text; `\"iso-8859-1\"` stores Latin-1 only,\nwithout the ECI header some older readers don't support.",
+        "kind": "input",
+        "name": "encoding",
+        "type": "QrCodeEncoding",
+        "options": [
+          "utf-8",
+          "iso-8859-1"
+        ],
+        "defaultValue": "\"utf-8\""
+      },
+      {
+        "description": "How much of the code can be damaged or hidden and still read. Use `\"H\"` with an image overlay.\nA higher level needs more modules for the same value.",
+        "kind": "input",
+        "name": "errorCorrection",
+        "type": "QrCodeErrorCorrection",
+        "options": [
+          "L",
+          "M",
+          "Q",
+          "H"
+        ],
+        "defaultValue": "\"M\""
+      },
+      {
+        "description": "An image or the Swiss cross to draw over the center. The modules beneath it are cleared, so raise\n`errorCorrection` to keep the code readable; a warning is logged in development when it hides too much. With an\noverlay, the code is version 2 at least, since version 1 has no room for one.",
+        "kind": "input",
+        "name": "overlay",
+        "type": "QrCodeOverlay | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Width of the light border around the code, in modules. Readers expect 4; a smaller one only scans\nwhen the surroundings are light.",
+        "kind": "input",
+        "name": "quietZone",
+        "type": "number",
+        "defaultValue": "4"
+      },
+      {
+        "description": "Width and height, quiet zone included. A number is pixels; a string can be any CSS length, such as\n`\"100%\"`. The code never grows wider than its container.",
+        "kind": "input",
+        "name": "size",
+        "type": "number | string",
+        "defaultValue": "200"
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Text to encode, such as a URL. A number is encoded as its digits. An empty value draws nothing.",
+        "kind": "input",
+        "name": "value",
+        "type": "string | number",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
   "RadioButtonComponent": {
     "name": "RadioButtonComponent",
     "selector": "\"mona-radio-button\"",

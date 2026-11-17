@@ -60,6 +60,7 @@ const ROUTES = [
     "numeric-textbox",
     "otp-input",
     "pager",
+    "qr-code",
     "radio-button",
     "rating",
     "range-slider",
