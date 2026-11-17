@@ -18,9 +18,11 @@
                 [disabled]="effectiveDisabled()"
                 (click)="onViewChangeClick('year')"
                 [attr.aria-label]="viewSwitchButtonLabel()">
-                <span class="text-primary font-semibold" [id]="gridId + '-heading'">{{
-                    headerMonthYear()
-                }}</span>
+                <span
+                    class="font-semibold text-[var(--mona-primary-text-color,var(--color-primary))]"
+                    [id]="gridId + '-heading'"
+                    >{{ headerMonthYear() }}</span
+                >
             </button>
         }
         @case ("year") {
@@ -31,16 +33,18 @@
                 [disabled]="effectiveDisabled()"
                 (click)="onViewChangeClick('decade')"
                 [attr.aria-label]="viewSwitchButtonLabel()">
-                <span class="text-primary font-semibold" [id]="gridId + '-heading'">{{
-                    headerYear()
-                }}</span>
+                <span
+                    class="font-semibold text-[var(--mona-primary-text-color,var(--color-primary))]"
+                    [id]="gridId + '-heading'"
+                    >{{ headerYear() }}</span
+                >
             </button>
         }
         @case ("decade") {
             <!-- The decade is the top view, so its heading isn't a button. It names the grid with the locale's
                  wording of the range, and shows the digits. -->
             <span
-                class="text-primary inline-flex h-9 items-center px-4 text-sm font-semibold"
+                class="inline-flex h-9 items-center px-4 text-sm font-semibold text-[var(--mona-primary-text-color,var(--color-primary))]"
                 [id]="gridId + '-heading'"
                 ><span aria-hidden="true">{{ formatInteger(decadeStart()) }} - {{ formatInteger(decadeEnd()) }}</span
                 ><span class="sr-only">{{ viewSwitchButtonLabel() }}</span></span
