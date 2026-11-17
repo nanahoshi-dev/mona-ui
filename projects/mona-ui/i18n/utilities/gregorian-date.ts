@@ -64,6 +64,25 @@ export function formatGregorianDateToLocaleString(
 }
 
 /**
+ * Formats the span between two dates in the Gregorian calendar, with the locale's own range pattern: the parts both
+ * dates share are written once, as in "November – December 2026" or "Nov 3 – 9, 2026".
+ * Without `Intl.DateTimeFormat.prototype.formatRange`, the two dates are joined with an en dash.
+ */
+export function formatGregorianDateRangeToLocaleString(
+    start: Date,
+    end: Date,
+    localeId: string,
+    options: Intl.DateTimeFormatOptions
+): string {
+    const locale = normalizeGregorianLocale(localeId);
+    const format = new Intl.DateTimeFormat(locale, options);
+    if (typeof format.formatRange === "function") {
+        return format.formatRange(start, end);
+    }
+    return `${format.format(start)} – ${format.format(end)}`;
+}
+
+/**
  * Regular expression matching Unicode bidirectional formatting controls
  * (such as LRM, RLM, ALM, embeddings, overrides, and isolates).
  */

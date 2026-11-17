@@ -58,6 +58,13 @@ export const calendarMonthViewDayThemeVariants = cva(
             outside: {
                 true: "text-muted-foreground"
             },
+            rangeMiddle: {
+                true: `
+                    bg-(--color-selected) text-(--color-selected-foreground)
+                    hover:bg-(--color-selected-hover) hover:text-(--color-selected-hover-foreground)
+                    forced-color-adjust-none forced-colors:bg-[Highlight]! forced-colors:text-[HighlightText]
+                `
+            },
             rangePreview: {
                 true: "bg-active hover:bg-active"
             },
@@ -87,6 +94,12 @@ export const calendarMonthViewDayThemeVariants = cva(
         }
     }
 );
+
+/** The months of the month view, side by side, wrapping onto new rows when the calendar is narrow. */
+export const calendarMonthViewThemeVariants = cva(`flex flex-wrap items-start justify-center gap-x-4 gap-y-3`);
+
+/** The caption above each month when the month view shows more than one. */
+export const calendarMonthCaptionThemeVariants = cva(`pb-1 text-center text-sm font-semibold text-foreground`);
 
 export const calendarMonthViewGridThemeVariants = cva(
     `
@@ -215,7 +228,10 @@ export type CalendarVariantInput = CalendarBaseVariantInput &
     CalendarHeaderVariantInput &
     CalendarDecadeViewGridVariantInput &
     Omit<CalendarDecadeViewCellVariantInput, "focused"> &
-    Omit<CalendarMonthViewDayVariantInput, "disabled" | "focused" | "outside" | "rangePreview" | "selected" | "today"> &
+    Omit<
+        CalendarMonthViewDayVariantInput,
+        "disabled" | "focused" | "outside" | "rangeMiddle" | "rangePreview" | "selected" | "today"
+    > &
     CalendarMonthViewGridVariantInput &
     CalendarMonthViewGridHeaderVariantInput &
     CalendarYearViewGridVariantInput &
