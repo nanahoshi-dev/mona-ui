@@ -327,6 +327,41 @@ export const FR_FR_MESSAGES = {
         undo: "Annuler",
         widthPx: "Largeur (px)"
     },
+    fileUpload: {
+        browse: "Parcourir les fichiers",
+        browseFile: "Choisir un fichier",
+        cancel: (name: string) => `Annuler l’envoi de ${name}`,
+        clear: "Effacer",
+        dropFile: "Faites glisser un fichier ici",
+        dropFiles: "Faites glisser des fichiers ici",
+        dropToAdd: "Déposez pour ajouter",
+        fileFailed: (name: string) => `${name} n’a pas pu être envoyé.`,
+        fileRejected: (name: string, reason: string) => `${name} n’a pas été ajouté. ${reason}`,
+        fileRemoved: (name: string) => `${name} retiré.`,
+        fileTypes: (types: string) => `Types de fichiers : ${types}`,
+        fileUploaded: (name: string) => `${name} envoyé.`,
+        files: "Fichiers",
+        filesAdded: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} fichier ajouté.`,
+                other: () => `${localizeNumber(count)} fichiers ajoutés.`
+            }),
+        invalidType: "Ce type de fichier n’est pas accepté.",
+        maxFileSize: (size: string) => `Taille max. du fichier : ${size}`,
+        maxFiles: (count: number) =>
+            `Jusqu’à ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} fichier`, other: () => `${localizeNumber(count)} fichiers` })}`,
+        readyToUpload: "Prêt à envoyer",
+        remove: (name: string) => `Retirer ${name}`,
+        retry: (name: string) => `Relancer l’envoi de ${name}`,
+        tooLarge: (size: string) => `Le fichier dépasse ${size}.`,
+        tooMany: (count: number) =>
+            `Vous ne pouvez pas ajouter plus de ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} fichier`, other: () => `${localizeNumber(count)} fichiers` })}.`,
+        tooSmall: (size: string) => `Le fichier fait moins de ${size}.`,
+        upload: "Envoyer",
+        uploadFailed: "L’envoi a échoué.",
+        uploaded: "Envoyé",
+        uploading: "Envoi en cours"
+    },
     filter: {
         and: "Et",
         apply: "Appliquer",

@@ -333,6 +333,43 @@ export const RU_RU_MESSAGES = {
         undo: "Отменить",
         widthPx: "Ширина (px)"
     },
+    fileUpload: {
+        browse: "Выбрать файлы",
+        browseFile: "Выбрать файл",
+        cancel: (name: string) => `Отменить загрузку ${name}`,
+        clear: "Очистить",
+        dropFile: "Перетащите файл сюда",
+        dropFiles: "Перетащите файлы сюда",
+        dropToAdd: "Отпустите, чтобы добавить",
+        fileFailed: (name: string) => `Не удалось загрузить ${name}.`,
+        fileRejected: (name: string, reason: string) => `Файл ${name} не добавлен. ${reason}`,
+        fileRemoved: (name: string) => `Файл ${name} удалён.`,
+        fileTypes: (types: string) => `Типы файлов: ${types}`,
+        fileUploaded: (name: string) => `Файл ${name} загружен.`,
+        files: "Файлы",
+        filesAdded: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Добавлен ${localizeNumber(count)} файл.`,
+                few: () => `Добавлено ${localizeNumber(count)} файла.`,
+                many: () => `Добавлено ${localizeNumber(count)} файлов.`,
+                other: () => `Добавлено ${localizeNumber(count)} файла.`
+            }),
+        invalidType: "Этот тип файлов не принимается.",
+        maxFileSize: (size: string) => `Макс. размер файла: ${size}`,
+        maxFiles: (count: number) =>
+            `Не более ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} файла`, few: () => `${localizeNumber(count)} файлов`, many: () => `${localizeNumber(count)} файлов`, other: () => `${localizeNumber(count)} файла` })}`,
+        readyToUpload: "Готов к загрузке",
+        remove: (name: string) => `Удалить ${name}`,
+        retry: (name: string) => `Повторить загрузку ${name}`,
+        tooLarge: (size: string) => `Размер файла больше ${size}.`,
+        tooMany: (count: number) =>
+            `Можно добавить не более ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} файла`, few: () => `${localizeNumber(count)} файлов`, many: () => `${localizeNumber(count)} файлов`, other: () => `${localizeNumber(count)} файла` })}.`,
+        tooSmall: (size: string) => `Размер файла меньше ${size}.`,
+        upload: "Загрузить",
+        uploadFailed: "Не удалось загрузить.",
+        uploaded: "Загружено",
+        uploading: "Загрузка"
+    },
     filter: {
         and: "И",
         apply: "Применить",

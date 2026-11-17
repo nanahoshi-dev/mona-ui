@@ -327,6 +327,41 @@ export const DE_DE_MESSAGES = {
         undo: "Rückgängig",
         widthPx: "Breite (px)"
     },
+    fileUpload: {
+        browse: "Dateien durchsuchen",
+        browseFile: "Datei auswählen",
+        cancel: (name: string) => `Hochladen von ${name} abbrechen`,
+        clear: "Leeren",
+        dropFile: "Datei hierher ziehen",
+        dropFiles: "Dateien hierher ziehen",
+        dropToAdd: "Zum Hinzufügen ablegen",
+        fileFailed: (name: string) => `${name} konnte nicht hochgeladen werden.`,
+        fileRejected: (name: string, reason: string) => `${name} wurde nicht hinzugefügt. ${reason}`,
+        fileRemoved: (name: string) => `${name} entfernt.`,
+        fileTypes: (types: string) => `Dateitypen: ${types}`,
+        fileUploaded: (name: string) => `${name} hochgeladen.`,
+        files: "Dateien",
+        filesAdded: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} Datei hinzugefügt.`,
+                other: () => `${localizeNumber(count)} Dateien hinzugefügt.`
+            }),
+        invalidType: "Dieser Dateityp wird nicht akzeptiert.",
+        maxFileSize: (size: string) => `Max. Dateigröße: ${size}`,
+        maxFiles: (count: number) =>
+            `Bis zu ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} Datei`, other: () => `${localizeNumber(count)} Dateien` })}`,
+        readyToUpload: "Bereit zum Hochladen",
+        remove: (name: string) => `${name} entfernen`,
+        retry: (name: string) => `Hochladen von ${name} wiederholen`,
+        tooLarge: (size: string) => `Die Datei ist größer als ${size}.`,
+        tooMany: (count: number) =>
+            `Es können höchstens ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} Datei`, other: () => `${localizeNumber(count)} Dateien` })} hinzugefügt werden.`,
+        tooSmall: (size: string) => `Die Datei ist kleiner als ${size}.`,
+        upload: "Hochladen",
+        uploadFailed: "Das Hochladen ist fehlgeschlagen.",
+        uploaded: "Hochgeladen",
+        uploading: "Wird hochgeladen"
+    },
     filter: {
         and: "Und",
         apply: "Anwenden",

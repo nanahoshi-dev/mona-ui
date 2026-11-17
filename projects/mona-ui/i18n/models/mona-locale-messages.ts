@@ -16,6 +16,7 @@ import type { MonaDialogMessages } from "../message-types/dialog.messages";
 import type { MonaDropdownListMessages } from "../message-types/dropdown-list.messages";
 import type { MonaDropdownsMessages } from "../message-types/dropdowns.messages";
 import type { MonaEditorMessages } from "../message-types/editor.messages";
+import type { MonaFileUploadMessages } from "../message-types/file-upload.messages";
 import type { MonaFilterMessages } from "../message-types/filter.messages";
 import type { MonaFormFieldMessages } from "../message-types/form-field.messages";
 import type { MonaGridMessages } from "../message-types/grid.messages";
@@ -66,6 +67,7 @@ export interface MonaLocaleMessages {
     dropdownList: MonaDropdownListMessages;
     dropdowns: MonaDropdownsMessages;
     editor: MonaEditorMessages;
+    fileUpload: MonaFileUploadMessages;
     filter: MonaFilterMessages;
     formField: MonaFormFieldMessages;
     grid: MonaGridMessages;

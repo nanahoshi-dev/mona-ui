@@ -28,6 +28,7 @@ export * from "./message-types/dialog.messages";
 export * from "./message-types/dropdown-list.messages";
 export * from "./message-types/dropdowns.messages";
 export * from "./message-types/editor.messages";
+export * from "./message-types/file-upload.messages";
 export * from "./message-types/filter.messages";
 export * from "./message-types/form-field.messages";
 export * from "./message-types/grid.messages";

@@ -345,6 +345,43 @@ export const PL_PL_MESSAGES = {
         undo: "Cofnij",
         widthPx: "Szerokość (px)"
     },
+    fileUpload: {
+        browse: "Przeglądaj pliki",
+        browseFile: "Wybierz plik",
+        cancel: (name: string) => `Anuluj przesyłanie pliku ${name}`,
+        clear: "Wyczyść",
+        dropFile: "Przeciągnij plik tutaj",
+        dropFiles: "Przeciągnij pliki tutaj",
+        dropToAdd: "Upuść, aby dodać",
+        fileFailed: (name: string) => `Nie udało się przesłać pliku ${name}.`,
+        fileRejected: (name: string, reason: string) => `Nie dodano pliku ${name}. ${reason}`,
+        fileRemoved: (name: string) => `Usunięto plik ${name}.`,
+        fileTypes: (types: string) => `Typy plików: ${types}`,
+        fileUploaded: (name: string) => `Przesłano plik ${name}.`,
+        files: "Pliki",
+        filesAdded: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Dodano ${localizeNumber(count)} plik.`,
+                few: () => `Dodano ${localizeNumber(count)} pliki.`,
+                many: () => `Dodano ${localizeNumber(count)} plików.`,
+                other: () => `Dodano ${localizeNumber(count)} pliku.`
+            }),
+        invalidType: "Ten typ pliku nie jest akceptowany.",
+        maxFileSize: (size: string) => `Maks. rozmiar pliku: ${size}`,
+        maxFiles: (count: number) =>
+            `Maksymalnie ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} plik`, few: () => `${localizeNumber(count)} pliki`, many: () => `${localizeNumber(count)} plików`, other: () => `${localizeNumber(count)} pliku` })}`,
+        readyToUpload: "Gotowy do przesłania",
+        remove: (name: string) => `Usuń plik ${name}`,
+        retry: (name: string) => `Ponów przesyłanie pliku ${name}`,
+        tooLarge: (size: string) => `Plik jest większy niż ${size}.`,
+        tooMany: (count: number) =>
+            `Można dodać najwyżej ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} plik`, few: () => `${localizeNumber(count)} pliki`, many: () => `${localizeNumber(count)} plików`, other: () => `${localizeNumber(count)} pliku` })}.`,
+        tooSmall: (size: string) => `Plik jest mniejszy niż ${size}.`,
+        upload: "Prześlij",
+        uploadFailed: "Przesyłanie nie powiodło się.",
+        uploaded: "Przesłano",
+        uploading: "Przesyłanie"
+    },
     filter: {
         and: "I",
         apply: "Zastosuj",

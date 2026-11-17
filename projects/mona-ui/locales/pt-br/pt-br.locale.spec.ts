@@ -46,6 +46,7 @@ describe("MONA_PT_BR_LOCALE", () => {
             "dropdownList",
             "dropdowns",
             "editor",
+            "fileUpload",
             "filter",
             "formField",
             "grid",
@@ -76,8 +77,8 @@ describe("MONA_PT_BR_LOCALE", () => {
             "window"
         ] as const;
 
-        it("defines all 47 canonical message namespaces", () => {
-            expect(Object.keys(MONA_PT_BR_LOCALE.messages)).toHaveLength(47);
+        it("defines all 48 canonical message namespaces", () => {
+            expect(Object.keys(MONA_PT_BR_LOCALE.messages)).toHaveLength(48);
             expect(Object.keys(MONA_PT_BR_LOCALE.messages).sort()).toEqual([...expectedNamespaces].sort());
             for (const ns of expectedNamespaces) {
                 expect(MONA_PT_BR_LOCALE.messages[ns], `Namespace ${ns} must be defined`).toBeDefined();

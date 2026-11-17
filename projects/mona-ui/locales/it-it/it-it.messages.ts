@@ -327,6 +327,41 @@ export const IT_IT_MESSAGES = {
         undo: "Annulla",
         widthPx: "Larghezza (px)"
     },
+    fileUpload: {
+        browse: "Sfoglia i file",
+        browseFile: "Scegli un file",
+        cancel: (name: string) => `Annulla il caricamento di ${name}`,
+        clear: "Cancella",
+        dropFile: "Trascina qui un file",
+        dropFiles: "Trascina qui i file",
+        dropToAdd: "Rilascia per aggiungere",
+        fileFailed: (name: string) => `Impossibile caricare ${name}.`,
+        fileRejected: (name: string, reason: string) => `${name} non è stato aggiunto. ${reason}`,
+        fileRemoved: (name: string) => `${name} rimosso.`,
+        fileTypes: (types: string) => `Tipi di file: ${types}`,
+        fileUploaded: (name: string) => `${name} caricato.`,
+        files: "Elenco dei file",
+        filesAdded: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} file aggiunto.`,
+                other: () => `${localizeNumber(count)} file aggiunti.`
+            }),
+        invalidType: "Questo tipo di file non è accettato.",
+        maxFileSize: (size: string) => `Dimensione max. del file: ${size}`,
+        maxFiles: (count: number) =>
+            `Fino a ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} file`, other: () => `${localizeNumber(count)} file` })}`,
+        readyToUpload: "Pronto per il caricamento",
+        remove: (name: string) => `Rimuovi ${name}`,
+        retry: (name: string) => `Riprova il caricamento di ${name}`,
+        tooLarge: (size: string) => `Il file supera ${size}.`,
+        tooMany: (count: number) =>
+            `Non si possono aggiungere più di ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} file`, other: () => `${localizeNumber(count)} file` })}.`,
+        tooSmall: (size: string) => `Il file è più piccolo di ${size}.`,
+        upload: "Carica",
+        uploadFailed: "Caricamento non riuscito.",
+        uploaded: "Caricato",
+        uploading: "Caricamento in corso"
+    },
     filter: {
         and: "E",
         apply: "Applica",
