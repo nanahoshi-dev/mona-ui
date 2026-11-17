@@ -6,7 +6,7 @@ export const radioGroupThemeVariants = cva("flex", {
     variants: {
         orientation: {
             horizontal: "flex-row flex-wrap gap-4",
-            vertical: "flex-col gap-2"
+            vertical: "flex-col items-start gap-2"
         }
     },
     defaultVariants: {

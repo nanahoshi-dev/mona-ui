@@ -188,7 +188,8 @@ The directive applies styles directly to the `<input>` element's `class` attribu
 
 ### Radio groups
 
-- **Name:** a group needs an accessible name from `aria-label`, `aria-labelledby` or a `mona-label`. It warns in development when it has none. Inside a `mona-label` with `text`, a click on the caption focuses the selected radio button, or the first enabled one.
+- **Name:** a group needs an accessible name from `aria-label`, `aria-labelledby`, a `mona-label` or a `mona-form-field`. It warns in development when it has none. Inside a `mona-label` with `text`, a click on the caption focuses the selected radio button, or the first enabled one.
+- **Layout:** a vertical group fills its container's width and lines its radio buttons up at the start, each as wide as its label. A horizontal group wraps its radio buttons onto new rows.
 - **Invalid:** `aria-invalid` is on the group, once `touched` and `invalid` are both `true`. The radio buttons only paint it.
 - **Touched:** `touch` emits on selection and when focus leaves the group. Moving focus between its radio buttons doesn't count.
 - **Disabled, read-only and required:** each applies to every radio button in the group. A radio button's own `disabled`, `readonly` and `required` still work next to it.
