@@ -21,10 +21,7 @@ export interface PackageVerificationOptions {
     tscPath?: string;
 }
 
-export function verifyThirdPartyNotices(
-    noticePath: string,
-    canonicalLicensePath?: string
-): void {
+export function verifyThirdPartyNotices(noticePath: string, canonicalLicensePath?: string): void {
     if (!existsSync(noticePath)) {
         throw new Error(`Third-party notices file not found at: ${noticePath}`);
     }
@@ -509,7 +506,9 @@ console.log("Runtime package import verified successfully.");
                 stdio: ["ignore", "pipe", "pipe"],
                 encoding: "utf-8"
             });
-            console.log("✓ ESM consumer runtime import verified via package specifiers '@nanahoshi/mona-ui/locales' and '@nanahoshi/mona-ui/i18n'");
+            console.log(
+                "✓ ESM consumer runtime import verified via package specifiers '@nanahoshi/mona-ui/locales' and '@nanahoshi/mona-ui/i18n'"
+            );
         } catch (err: unknown) {
             const execErr = err as { stderr?: string; stdout?: string; message?: string };
             throw new Error(
@@ -668,7 +667,11 @@ export function verifyPackageStyles(distDir: string, repoRoot: string = process.
         mkdirSync(scope, { recursive: true });
         const linkType = process.platform === "win32" ? "junction" : "dir";
         symlinkSync(distDir, join(scope, "mona-ui"), linkType);
-        symlinkSync(resolve(repoRoot, "node_modules/tailwindcss"), join(tempDir, "node_modules", "tailwindcss"), linkType);
+        symlinkSync(
+            resolve(repoRoot, "node_modules/tailwindcss"),
+            join(tempDir, "node_modules", "tailwindcss"),
+            linkType
+        );
 
         const scriptPath = join(tempDir, "styles.mjs");
         writeFileSync(
@@ -691,7 +694,11 @@ for (const expected of [".bg-primary", ".border-input-border", "--color-primary:
 `
         );
         try {
-            execFileSync(process.execPath, [scriptPath], { cwd: tempDir, encoding: "utf-8", stdio: ["ignore", "pipe", "pipe"] });
+            execFileSync(process.execPath, [scriptPath], {
+                cwd: tempDir,
+                encoding: "utf-8",
+                stdio: ["ignore", "pipe", "pipe"]
+            });
         } catch (err: unknown) {
             const execErr = err as { message?: string; stderr?: string; stdout?: string };
             throw new Error(
@@ -760,9 +767,7 @@ export function verifyLeanBundles(distDir: string): number {
 
 export function verifyBuiltPackage(options: PackageVerificationOptions = {}): void {
     const distDir = resolve(options.distDir ?? resolve(process.cwd(), "dist/mona-ui"));
-    const sourceLocalesDir = resolve(
-        options.sourceLocalesDir ?? resolve(process.cwd(), "projects/mona-ui/locales")
-    );
+    const sourceLocalesDir = resolve(options.sourceLocalesDir ?? resolve(process.cwd(), "projects/mona-ui/locales"));
     const repoRoot = resolve(options.repoRoot ?? process.cwd());
     const tscPath = options.tscPath ?? resolveTypeScriptCompilerPath(repoRoot);
 
@@ -810,9 +815,7 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
         const rootContent = readFileSync(rootNoticePath, "utf-8").replace(/\r\n/g, "\n");
         const libContent = readFileSync(libNoticePath, "utf-8").replace(/\r\n/g, "\n");
         if (rootContent !== libContent) {
-            throw new Error(
-                `Repository notice mismatch: ${rootNoticePath} and ${libNoticePath} differ`
-            );
+            throw new Error(`Repository notice mismatch: ${rootNoticePath} and ${libNoticePath} differ`);
         }
     }
 
@@ -879,7 +882,10 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
             if (!existsSync(builtFile)) {
                 throw new Error(`JSON catalog not found in the package at: ${builtFile}`);
             }
-            if (readFileSync(builtFile, "utf-8").replace(/\r\n/g, "\n") !== readFileSync(sourceFile, "utf-8").replace(/\r\n/g, "\n")) {
+            if (
+                readFileSync(builtFile, "utf-8").replace(/\r\n/g, "\n") !==
+                readFileSync(sourceFile, "utf-8").replace(/\r\n/g, "\n")
+            ) {
                 throw new Error(`JSON catalog in the package differs from its source: ${file}`);
             }
         }

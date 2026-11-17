@@ -3,7 +3,12 @@ import { annaTheme } from "../definitions/anna-theme";
 import { monaTheme } from "../definitions/mona-theme";
 import { THEME_FAMILY_REGISTRATIONS, THEME_OPTIONS, THEME_OVERRIDE_REGISTRATIONS } from "../tokens/theme.tokens";
 import { ThemeService } from "../services/theme.service";
-import { provideThemeColorPalette, provideThemeFamily, provideThemeOptions, provideThemeOverrides } from "./theme.providers";
+import {
+    provideThemeColorPalette,
+    provideThemeFamily,
+    provideThemeOptions,
+    provideThemeOverrides
+} from "./theme.providers";
 
 describe("theme providers", () => {
     afterEach(() => TestBed.resetTestingModule());

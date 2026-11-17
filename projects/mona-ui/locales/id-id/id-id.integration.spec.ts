@@ -30,12 +30,7 @@ import {
 import { MONA_ID_ID_LOCALE } from "./id-id.locale";
 
 @Component({
-    template: `
-        <mona-date-picker
-            [(value)]="value"
-            [format]="format()"
-            [firstDay]="firstDay()" />
-    `,
+    template: ` <mona-date-picker [(value)]="value" [format]="format()" [firstDay]="firstDay()" /> `,
     imports: [DatePickerComponent]
 })
 class DatePickerIntegrationHostComponent {
@@ -131,14 +126,8 @@ interface Item {
             [textField]="'text'"
             [selectBy]="'id'"
             [toolbar]="{ actions: ['transferTo', 'transferFrom', 'transferAllTo', 'transferAllFrom'] }"
-            [connectedList]="second"
-        />
-        <mona-list-box
-            #second
-            [items]="secondItems"
-            [textField]="'text'"
-            [selectBy]="'id'"
-        />
+            [connectedList]="second" />
+        <mona-list-box #second [items]="secondItems" [textField]="'text'" [selectBy]="'id'" />
     `,
     imports: [ListBoxComponent]
 })
@@ -166,12 +155,7 @@ class ScrollViewIntegrationHostComponent {
 
 @Component({
     template: `
-        <mona-grid
-            [data]="rows"
-            [rowKey]="'id'"
-            [resizeMethod]="120"
-            [responsivePager]="false"
-            monaGridRowReorderable>
+        <mona-grid [data]="rows" [rowKey]="'id'" [resizeMethod]="120" [responsivePager]="false" monaGridRowReorderable>
             <mona-grid-column field="name" title="Nama" [width]="120" />
         </mona-grid>
     `,
@@ -427,9 +411,7 @@ describe("MONA_ID_ID_LOCALE Integration with MonaI18nService", () => {
         expect(nextButton).not.toBeNull();
 
         // 2. Locale-formatted Indonesian month/year header (e.g. September 2026)
-        const viewButton = hostEl.querySelector(
-            'button[aria-label*="Beralih ke tampilan tahun"]'
-        ) as HTMLButtonElement;
+        const viewButton = hostEl.querySelector('button[aria-label*="Beralih ke tampilan tahun"]') as HTMLButtonElement;
         expect(viewButton).not.toBeNull();
         expect(viewButton.textContent).toContain("September");
         expect(viewButton.textContent).toContain("2026");
@@ -450,7 +432,9 @@ describe("MONA_ID_ID_LOCALE Integration with MonaI18nService", () => {
 
         expect(liveRegion.textContent).toContain("Tampilan tahun, 2026");
 
-        const yearViewButton = hostEl.querySelector('button[aria-label*="Beralih ke tampilan dekade"]') as HTMLButtonElement;
+        const yearViewButton = hostEl.querySelector(
+            'button[aria-label*="Beralih ke tampilan dekade"]'
+        ) as HTMLButtonElement;
         expect(yearViewButton).not.toBeNull();
         expect(yearViewButton.getAttribute("aria-label")).toContain("Beralih ke tampilan dekade, saat ini 2026");
 
@@ -550,10 +534,10 @@ describe("MONA_ID_ID_LOCALE Integration with MonaI18nService", () => {
         fixture.detectChanges();
 
         const hostEl = fixture.nativeElement as HTMLElement;
-        expect(hostEl.querySelector("button[aria-label=\"Pindahkan ke daftar lain\"]")).not.toBeNull();
-        expect(hostEl.querySelector("button[aria-label=\"Pindahkan dari daftar lain\"]")).not.toBeNull();
-        expect(hostEl.querySelector("button[aria-label=\"Pindahkan semua ke daftar lain\"]")).not.toBeNull();
-        expect(hostEl.querySelector("button[aria-label=\"Pindahkan semua dari daftar lain\"]")).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Pindahkan ke daftar lain"]')).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Pindahkan dari daftar lain"]')).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Pindahkan semua ke daftar lain"]')).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Pindahkan semua dari daftar lain"]')).not.toBeNull();
     });
 
     it("renders Pager component with singular count-aware status in Indonesian", () => {
@@ -1013,12 +997,12 @@ describe("MONA_ID_ID_LOCALE Integration with MonaI18nService", () => {
         expect(gridMessages().moveRow).toBe("Pindahkan baris");
         expect(gridMessages().reorderRow(3)).toBe("Susun ulang baris 3");
         expect(gridMessages().rowReorderDisabled).toBe("Penyusunan ulang baris dinonaktifkan.");
-        expect(gridMessages().rowReorderDisabledEditing).toBe(
-            "Selesaikan pengeditan sebelum menyusun ulang baris."
-        );
+        expect(gridMessages().rowReorderDisabledEditing).toBe("Selesaikan pengeditan sebelum menyusun ulang baris.");
         expect(gridMessages().rowReorderDisabledFiltered).toBe("Hapus filter sebelum menyusun ulang baris.");
         expect(gridMessages().rowReorderDisabledGrouped).toBe("Hapus pengelompokan sebelum menyusun ulang baris.");
-        expect(gridMessages().rowReorderDisabledSingleRow).toBe("Diperlukan setidaknya dua baris untuk menyusun ulang.");
+        expect(gridMessages().rowReorderDisabledSingleRow).toBe(
+            "Diperlukan setidaknya dua baris untuk menyusun ulang."
+        );
         expect(gridMessages().rowReorderDisabledSorted).toBe("Hapus pengurutan sebelum menyusun ulang baris.");
         expect(gridMessages().rowReorderDisabledVirtualScroll).toBe(
             "Baris tidak dapat disusun ulang saat pengguliran virtual aktif."

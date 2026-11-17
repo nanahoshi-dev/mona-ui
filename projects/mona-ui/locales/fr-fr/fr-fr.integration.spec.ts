@@ -44,14 +44,8 @@ interface Item {
             [textField]="'text'"
             [selectBy]="'id'"
             [toolbar]="{ actions: ['transferTo', 'transferFrom', 'transferAllTo', 'transferAllFrom'] }"
-            [connectedList]="second"
-        />
-        <mona-list-box
-            #second
-            [items]="secondItems"
-            [textField]="'text'"
-            [selectBy]="'id'"
-        />
+            [connectedList]="second" />
+        <mona-list-box #second [items]="secondItems" [textField]="'text'" [selectBy]="'id'" />
     `,
     imports: [ListBoxComponent]
 })

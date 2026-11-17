@@ -168,7 +168,8 @@ describe("SliderComponent", () => {
             await waitForStable(fixture);
 
             const track = fixture.debugElement.query(By.css(".bg-surface-muted")).nativeElement as HTMLElement;
-            const selection = fixture.debugElement.query(By.css("[class*='mona-indicator-color']")).nativeElement as HTMLElement;
+            const selection = fixture.debugElement.query(By.css("[class*='mona-indicator-color']"))
+                .nativeElement as HTMLElement;
             const handle = getHandle(fixture);
 
             expect(track.classList.contains("border-input-border")).toBe(false);
@@ -338,7 +339,9 @@ describe("SliderComponent", () => {
             await waitForStable(fixture);
 
             const handle = getHandle(fixture);
-            const selection = fixture.nativeElement.querySelector("mona-slider [class*='mona-indicator-color']") as HTMLElement;
+            const selection = fixture.nativeElement.querySelector(
+                "mona-slider [class*='mona-indicator-color']"
+            ) as HTMLElement;
 
             // Under semantic Option A, Tailwind rtl: is inactive and matches LTR behavior
             expect(handle.matches(":dir(rtl)")).toBe(false);
@@ -347,7 +350,7 @@ describe("SliderComponent", () => {
             expect(handle.style.right).toBe("");
             expect(selection.style.left).toBe("0%");
             expect(selection.style.right).toBe("50%");
-            expect(handle.classList.contains("data-[orientation=\"horizontal\"]:translate-x-[-50%]")).toBe(true);
+            expect(handle.classList.contains('data-[orientation="horizontal"]:translate-x-[-50%]')).toBe(true);
 
             // ArrowRight still increases value in LTR
             dispatchKeydown(handle, "ArrowRight");
@@ -376,7 +379,9 @@ describe("SliderComponent", () => {
             await waitForStable(fixture);
 
             const handle = getHandle(fixture);
-            const selection = fixture.nativeElement.querySelector("mona-slider [class*='mona-indicator-color']") as HTMLElement;
+            const selection = fixture.nativeElement.querySelector(
+                "mona-slider [class*='mona-indicator-color']"
+            ) as HTMLElement;
 
             expect(handle.matches(":dir(rtl)")).toBe(true);
             expect(handle.matches(":dir(ltr)")).toBe(false);
@@ -385,7 +390,9 @@ describe("SliderComponent", () => {
             expect(handle.style.left).toBe("");
             expect(selection.style.right).toBe("0%");
             expect(selection.style.left).toBe("50%");
-            expect(handle.classList.contains("data-[rtl=\"true\"]:data-[orientation=\"horizontal\"]:translate-x-[50%]")).toBe(true);
+            expect(
+                handle.classList.contains('data-[rtl="true"]:data-[orientation="horizontal"]:translate-x-[50%]')
+            ).toBe(true);
 
             // ArrowRight decreases value in RTL
             dispatchKeydown(handle, "ArrowRight");
@@ -408,12 +415,7 @@ describe("SliderComponent", () => {
             @Component({
                 imports: [SliderComponent],
                 template: `
-                    <mona-slider
-                        [showTicks]="true"
-                        [showLabels]="true"
-                        [minValue]="0"
-                        [maxValue]="10"
-                        [value]="0" />
+                    <mona-slider [showTicks]="true" [showLabels]="true" [minValue]="0" [maxValue]="10" [value]="0" />
                 `
             })
             class RtlTicksSliderHostComponent {}

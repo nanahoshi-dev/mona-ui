@@ -40,8 +40,28 @@ describe("SvgAreaSeriesRenderer", () => {
             id: "area-1",
             name: "Area 1",
             points: [
-                { animationKey: "p1", baseY: 100, datum: {}, defined: true, index: 0, x: 0, xValue: 0, y: 50, yValue: 10 },
-                { animationKey: "p2", baseY: 100, datum: {}, defined: true, index: 1, x: 100, xValue: 1, y: 20, yValue: 20 }
+                {
+                    animationKey: "p1",
+                    baseY: 100,
+                    datum: {},
+                    defined: true,
+                    index: 0,
+                    x: 0,
+                    xValue: 0,
+                    y: 50,
+                    yValue: 10
+                },
+                {
+                    animationKey: "p2",
+                    baseY: 100,
+                    datum: {},
+                    defined: true,
+                    index: 1,
+                    x: 100,
+                    xValue: 1,
+                    y: 20,
+                    yValue: 20
+                }
             ],
             showPoints,
             style,
@@ -49,9 +69,6 @@ describe("SvgAreaSeriesRenderer", () => {
             xAxisId: "default-x",
             yAxisId: "default-y"
         };
-
-
-
     };
 
     it("should render solid boundary stroke without stroke-dasharray (SVG-ARE-001)", () => {

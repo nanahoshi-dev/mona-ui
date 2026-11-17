@@ -6,7 +6,9 @@
     <mona-sheet aria-label="Main navigation" side="start" width="16rem" [closable]="false" (closed)="open.set(false)">
         <nav aria-label="Main" class="flex flex-col gap-1 p-4">
             @for (page of pages; track page) {
-                <a class="rounded-md px-2 py-1.5 text-sm hover:bg-accent" href="/" (click)="go($event, page)">{{ page }}</a>
+                <a class="rounded-md px-2 py-1.5 text-sm hover:bg-accent" href="/" (click)="go($event, page)">{{
+                    page
+                }}</a>
             }
         </nav>
     </mona-sheet>

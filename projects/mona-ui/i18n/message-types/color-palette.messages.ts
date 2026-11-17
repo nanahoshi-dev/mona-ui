@@ -3,4 +3,3 @@ export interface MonaColorPaletteMessages {
     readonly colorPalette: string;
     readonly namedColor: (name: string, color: string) => string;
 }
-

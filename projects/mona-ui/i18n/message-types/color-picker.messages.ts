@@ -5,4 +5,3 @@ export interface MonaColorPickerMessages {
     readonly colorPicker: string;
     readonly noColor: string;
 }
-

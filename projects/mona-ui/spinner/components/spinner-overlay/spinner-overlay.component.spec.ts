@@ -120,4 +120,3 @@ describe("SpinnerOverlayComponent", () => {
         expect(button?.textContent?.trim()).toBe("İptal");
     });
 });
-

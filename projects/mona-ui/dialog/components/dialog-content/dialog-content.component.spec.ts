@@ -34,7 +34,9 @@ describe("DialogContentComponent", () => {
         const closeBtn = fixture.nativeElement.querySelector("button[monaButton][aria-label]") as HTMLButtonElement;
         expect(closeBtn.getAttribute("aria-label")).toBe("Close dialog");
 
-        const actionBtns = fixture.nativeElement.querySelectorAll("button[monaButton]") as NodeListOf<HTMLButtonElement>;
+        const actionBtns = fixture.nativeElement.querySelectorAll(
+            "button[monaButton]"
+        ) as NodeListOf<HTMLButtonElement>;
         // Action buttons are in footer; close button is in header
         const footerBtns = Array.from(actionBtns).filter(b => b !== closeBtn);
         expect(footerBtns.length).toBe(2);
@@ -59,7 +61,9 @@ describe("DialogContentComponent", () => {
         const closeBtn = fixture.nativeElement.querySelector("button[monaButton][aria-label]") as HTMLButtonElement;
         expect(closeBtn.getAttribute("aria-label")).toBe("Kapat");
 
-        const actionBtns = fixture.nativeElement.querySelectorAll("button[monaButton]") as NodeListOf<HTMLButtonElement>;
+        const actionBtns = fixture.nativeElement.querySelectorAll(
+            "button[monaButton]"
+        ) as NodeListOf<HTMLButtonElement>;
         const footerBtns = Array.from(actionBtns).filter(b => b !== closeBtn);
         expect(footerBtns[0].textContent?.trim()).toBe("Tamam");
         expect(footerBtns[1].textContent?.trim()).toBe("İptal");
@@ -88,10 +92,14 @@ describe("DialogContentComponent", () => {
         const overrideFixture = TestBed.createComponent(DialogContentComponent);
         overrideFixture.detectChanges();
 
-        const closeBtn = overrideFixture.nativeElement.querySelector("button[monaButton][aria-label]") as HTMLButtonElement;
+        const closeBtn = overrideFixture.nativeElement.querySelector(
+            "button[monaButton][aria-label]"
+        ) as HTMLButtonElement;
         expect(closeBtn.getAttribute("aria-label")).toBe("Fermer le dialogue");
 
-        const actionBtns = overrideFixture.nativeElement.querySelectorAll("button[monaButton]") as NodeListOf<HTMLButtonElement>;
+        const actionBtns = overrideFixture.nativeElement.querySelectorAll(
+            "button[monaButton]"
+        ) as NodeListOf<HTMLButtonElement>;
         const footerBtns = Array.from(actionBtns).filter(b => b !== closeBtn);
         expect(footerBtns[0].textContent?.trim()).toBe("Valider");
         expect(footerBtns[1].textContent?.trim()).toBe("Cancel");

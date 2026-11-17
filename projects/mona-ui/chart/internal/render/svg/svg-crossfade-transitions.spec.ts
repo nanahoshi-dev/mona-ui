@@ -36,7 +36,6 @@ function createMockSeriesStyle(color: string): ChartSeriesStyle {
     };
 }
 
-
 function createMockCartesianXYScene(partial: Partial<CartesianXYChartScene> = {}): CartesianXYChartScene {
     return {
         axes: [

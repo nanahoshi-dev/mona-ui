@@ -222,9 +222,7 @@ export function normalizeLocalizedMinus(text: string, symbols?: NumberSymbols): 
     if (!text) {
         return text;
     }
-    let result = text
-        .replace(/[\u2212\uFE63\uFF0D]/g, "-")
-        .replace(/[\u061C\u200E\u200F]/g, "");
+    let result = text.replace(/[\u2212\uFE63\uFF0D]/g, "-").replace(/[\u061C\u200E\u200F]/g, "");
     if (symbols?.minus && symbols.minus !== "-") {
         result = result.replaceAll(symbols.minus, "-");
     }
@@ -393,8 +391,7 @@ function parseLocalizedNumberParts(
         return null;
     }
 
-    const mode: LocalizedNumberParseMode =
-        options?.mode ?? (options?.alternateDecimal ? "edit" : "locale");
+    const mode: LocalizedNumberParseMode = options?.mode ?? (options?.alternateDecimal ? "edit" : "locale");
 
     if (mode === "locale") {
         const grouping = getNumberGroupingPattern(localeId);
@@ -642,7 +639,12 @@ export function validateLocalizedNumber(
                 }
             }
         } else {
-            if (symbols.decimal && symbols.decimal !== "." && symbols.decimal !== "," && normalized.includes(symbols.decimal)) {
+            if (
+                symbols.decimal &&
+                symbols.decimal !== "." &&
+                symbols.decimal !== "," &&
+                normalized.includes(symbols.decimal)
+            ) {
                 sep = symbols.decimal;
             } else if (normalized.includes(".")) {
                 sep = ".";

@@ -34,7 +34,6 @@ describe("RangeBarSeriesRenderer", () => {
         pointRadius: 4
     };
 
-
     it("should render floating range bar with 4-corner rounded rect", () => {
         const ctx = createMockContext();
         const scene: ChartRangeBarSeriesScene = {

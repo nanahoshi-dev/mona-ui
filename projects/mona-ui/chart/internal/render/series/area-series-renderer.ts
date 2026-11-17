@@ -85,7 +85,6 @@ export class AreaSeriesRenderer {
         context.stroke();
         context.setLineDash([]);
 
-
         // 3. Draw Point Markers
         if (showPoints) {
             for (const p of validPoints) {

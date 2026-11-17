@@ -8,12 +8,7 @@
 
 <div [class]="infoContainerClass()">
     <span>{{ navigatedDateText() }}</span>
-    <button
-        monaButton
-        look="ghost"
-        [rounded]="rounded()"
-        [size]="'small'"
-        (click)="onNowClick()">
+    <button monaButton look="ghost" [rounded]="rounded()" [size]="'small'" (click)="onNowClick()">
         {{ messages().now }}
     </button>
 </div>

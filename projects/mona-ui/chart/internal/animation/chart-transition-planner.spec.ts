@@ -606,7 +606,6 @@ describe("ChartTransitionPlanner", () => {
                 yAxisType: "category"
             };
 
-
             const options = normalizeChartAnimationOptions(true);
             const plan = ChartTransitionPlanner.plan(prevVertical, nextHorizontal, "data", options);
 

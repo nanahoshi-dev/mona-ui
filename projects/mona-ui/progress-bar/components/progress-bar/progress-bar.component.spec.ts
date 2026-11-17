@@ -110,4 +110,3 @@ describe("ProgressBarComponent", () => {
         expect(filledTrack.style.clipPath).toBe("inset(-1px 0px -1px 8px)");
     });
 });
-

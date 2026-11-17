@@ -136,9 +136,8 @@ export const descriptorToPredicate = <T>(
 };
 
 /** @internal */
-export const isFilterDescriptor = (
-    filter: FilterDescriptor | CompositeFilterDescriptor
-): filter is FilterDescriptor => Object.hasOwn(filter, "field");
+export const isFilterDescriptor = (filter: FilterDescriptor | CompositeFilterDescriptor): filter is FilterDescriptor =>
+    Object.hasOwn(filter, "field");
 
 const isNullOrEmpty = (value: unknown): boolean => value == null || value === "";
 

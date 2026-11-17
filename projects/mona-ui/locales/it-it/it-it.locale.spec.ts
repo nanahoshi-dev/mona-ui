@@ -215,21 +215,11 @@ describe("MONA_IT_IT_LOCALE", () => {
 
         it("translates Grid row-reorder disabled reasons correctly", () => {
             expect(m.grid?.rowReorderDisabled).toBe("Il riordinamento delle righe è disabilitato.");
-            expect(m.grid?.rowReorderDisabledEditing).toBe(
-                "Completa la modifica prima di riordinare le righe."
-            );
-            expect(m.grid?.rowReorderDisabledFiltered).toBe(
-                "Rimuovi i filtri prima di riordinare le righe."
-            );
-            expect(m.grid?.rowReorderDisabledGrouped).toBe(
-                "Rimuovi il raggruppamento prima di riordinare le righe."
-            );
-            expect(m.grid?.rowReorderDisabledSingleRow).toBe(
-                "Sono necessarie almeno due righe per riordinarle."
-            );
-            expect(m.grid?.rowReorderDisabledSorted).toBe(
-                "Rimuovi l'ordinamento prima di riordinare le righe."
-            );
+            expect(m.grid?.rowReorderDisabledEditing).toBe("Completa la modifica prima di riordinare le righe.");
+            expect(m.grid?.rowReorderDisabledFiltered).toBe("Rimuovi i filtri prima di riordinare le righe.");
+            expect(m.grid?.rowReorderDisabledGrouped).toBe("Rimuovi il raggruppamento prima di riordinare le righe.");
+            expect(m.grid?.rowReorderDisabledSingleRow).toBe("Sono necessarie almeno due righe per riordinarle.");
+            expect(m.grid?.rowReorderDisabledSorted).toBe("Rimuovi l'ordinamento prima di riordinare le righe.");
             expect(m.grid?.rowReorderDisabledVirtualScroll).toBe(
                 "Il riordinamento delle righe non è disponibile con lo scorrimento virtuale attivo."
             );
@@ -252,9 +242,7 @@ describe("MONA_IT_IT_LOCALE", () => {
             expect(m.calendar?.switchToYearView?.("settembre 2026")).toBe(
                 "Passa alla vista dell'anno, attualmente settembre 2026"
             );
-            expect(m.calendar?.switchToDecadeView?.("2026")).toBe(
-                "Passa alla vista del decennio, attualmente 2026"
-            );
+            expect(m.calendar?.switchToDecadeView?.("2026")).toBe("Passa alla vista del decennio, attualmente 2026");
         });
 
         it("formats Chart functions and preserves Italian financial terminology", () => {

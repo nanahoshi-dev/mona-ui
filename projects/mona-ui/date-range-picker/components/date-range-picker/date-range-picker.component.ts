@@ -44,7 +44,12 @@ import {
     DROPDOWN_POPUP_INPUT_TOKEN,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
-import { getLocaleDateInputFormat, getLocaleFirstDayOfWeek, gregorianDateTime, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import {
+    getLocaleDateInputFormat,
+    getLocaleFirstDayOfWeek,
+    gregorianDateTime,
+    MonaI18nService
+} from "@nanahoshi/mona-ui/i18n";
 import {
     type AttributeConfig,
     createElementControlId,
@@ -72,7 +77,11 @@ import {
     type DateRangePickerVariantProps
 } from "../../styles/date-range-picker.styles";
 import { type DateRangePresetItem, resolveDateRangePresets } from "../../utils/dateRangePresets";
-import { createTypedDateRangeInput, type DateRangePart, type TypedDateRangeInput } from "../../utils/typedDateRangeInput";
+import {
+    createTypedDateRangeInput,
+    type DateRangePart,
+    type TypedDateRangeInput
+} from "../../utils/typedDateRangeInput";
 
 /** Today's date, at the start of the day. */
 function startOfToday(): Date {
@@ -134,7 +143,11 @@ function sizerTexts(samples: readonly string[], placeholder: string): string[] {
     }
 })
 export class DateRangePickerComponent
-    implements FormValueControl<DateRange | null>, DropdownPopupInput, DateRangePickerVariantInput, DatePopupVariantInput
+    implements
+        FormValueControl<DateRange | null>,
+        DropdownPopupInput,
+        DateRangePickerVariantInput,
+        DatePopupVariantInput
 {
     /** The input focused last, which gets focus back when the popup closes. */
     readonly #activePart = signal<DateRangePart>("start");
@@ -185,11 +198,11 @@ export class DateRangePickerComponent
     protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective);
     protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
-    protected readonly effectiveFormat = computed(() => this.format() ?? getLocaleDateInputFormat(this.#i18n.localeId()));
-    protected readonly endInputId = createElementControlId();
-    protected readonly endInvalid = computed(
-        () => this.typedInput.partErrors().end.length > 0 || this.fieldInvalid()
+    protected readonly effectiveFormat = computed(
+        () => this.format() ?? getLocaleDateInputFormat(this.#i18n.localeId())
     );
+    protected readonly endInputId = createElementControlId();
+    protected readonly endInvalid = computed(() => this.typedInput.partErrors().end.length > 0 || this.fieldInvalid());
     protected readonly endSizerTexts = computed(() => sizerTexts(this.#sampleTexts(), this.endPlaceholder()));
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
     protected readonly fieldClass = dateRangePickerFieldThemeVariants();
@@ -238,7 +251,9 @@ export class DateRangePickerComponent
     });
     protected readonly presetListClass = dateRangePickerPresetListThemeVariants();
     protected readonly separatorClass = dateRangePickerSeparatorThemeVariants();
-    protected readonly sizerClass = computed(() => dateRangePickerSizerThemeVariants({ clearButton: this.showClearButton() }));
+    protected readonly sizerClass = computed(() =>
+        dateRangePickerSizerThemeVariants({ clearButton: this.showClearButton() })
+    );
     protected readonly startInputId = createElementControlId();
     protected readonly startInvalid = computed(
         () => this.typedInput.partErrors().start.length > 0 || this.fieldInvalid()

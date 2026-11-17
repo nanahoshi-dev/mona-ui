@@ -106,7 +106,9 @@ function comparable(date: Date, unit: TypedDateUnit): number {
         case "date":
             return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
         case "time":
-            return ((date.getHours() * 60 + date.getMinutes()) * 60 + date.getSeconds()) * 1000 + date.getMilliseconds();
+            return (
+                ((date.getHours() * 60 + date.getMinutes()) * 60 + date.getSeconds()) * 1000 + date.getMilliseconds()
+            );
         default:
             return date.getTime();
     }
@@ -117,10 +119,7 @@ function comparable(date: Date, unit: TypedDateUnit): number {
  * @returns The error to report, or null when the date is allowed. Range errors are Angular's `minDate` and `maxDate`
  * errors, so they read like the signal-forms validators.
  */
-export function checkTypedDate(
-    date: Date,
-    constraints: TypedDateConstraints
-): ValidationError.WithoutFieldTree | null {
+export function checkTypedDate(date: Date, constraints: TypedDateConstraints): ValidationError.WithoutFieldTree | null {
     const { disabledDates, max, min, unit } = constraints;
     const value = comparable(date, unit);
     if (min && value < comparable(min, unit)) {

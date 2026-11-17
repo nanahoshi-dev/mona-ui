@@ -90,7 +90,9 @@ describe("CardComponent", () => {
         const descriptionElement: HTMLElement = fixture.nativeElement.querySelector("p");
 
         expect(document.getElementById(element.getAttribute("aria-labelledby")!)?.contains(titleElement)).toBe(true);
-        expect(document.getElementById(element.getAttribute("aria-describedby")!)?.contains(descriptionElement)).toBe(true);
+        expect(document.getElementById(element.getAttribute("aria-describedby")!)?.contains(descriptionElement)).toBe(
+            true
+        );
     });
 
     it("omits aria-labelledby/aria-describedby when there is no header", async () => {
@@ -130,4 +132,3 @@ describe("CardComponent", () => {
         expect(group.getAttribute("aria-label")).toBe("Kart eylemleri");
     });
 });
-

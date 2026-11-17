@@ -30,12 +30,7 @@ import {
 import { MONA_TR_TR_LOCALE } from "./tr-tr.locale";
 
 @Component({
-    template: `
-        <mona-date-picker
-            [(value)]="value"
-            [format]="format()"
-            [firstDay]="firstDay()" />
-    `,
+    template: ` <mona-date-picker [(value)]="value" [format]="format()" [firstDay]="firstDay()" /> `,
     imports: [DatePickerComponent]
 })
 class DatePickerIntegrationHostComponent {
@@ -131,14 +126,8 @@ interface Item {
             [textField]="'text'"
             [selectBy]="'id'"
             [toolbar]="{ actions: ['transferTo', 'transferFrom', 'transferAllTo', 'transferAllFrom'] }"
-            [connectedList]="second"
-        />
-        <mona-list-box
-            #second
-            [items]="secondItems"
-            [textField]="'text'"
-            [selectBy]="'id'"
-        />
+            [connectedList]="second" />
+        <mona-list-box #second [items]="secondItems" [textField]="'text'" [selectBy]="'id'" />
     `,
     imports: [ListBoxComponent]
 })
@@ -166,12 +155,7 @@ class ScrollViewIntegrationHostComponent {
 
 @Component({
     template: `
-        <mona-grid
-            [data]="rows"
-            [rowKey]="'id'"
-            [resizeMethod]="120"
-            [responsivePager]="false"
-            monaGridRowReorderable>
+        <mona-grid [data]="rows" [rowKey]="'id'" [resizeMethod]="120" [responsivePager]="false" monaGridRowReorderable>
             <mona-grid-column field="name" title="Ad" [width]="120" />
         </mona-grid>
     `,
@@ -435,9 +419,7 @@ describe("MONA_TR_TR_LOCALE Integration with MonaI18nService", () => {
         expect(nextButton).not.toBeNull();
 
         // 2. Locale-formatted Turkish month/year header (e.g. Eylül 2026)
-        const viewButton = hostEl.querySelector(
-            'button[aria-label*="Yıl görünümüne geç"]'
-        ) as HTMLButtonElement;
+        const viewButton = hostEl.querySelector('button[aria-label*="Yıl görünümüne geç"]') as HTMLButtonElement;
         expect(viewButton).not.toBeNull();
         expect(viewButton.textContent).toContain("Eylül");
         expect(viewButton.textContent).toContain("2026");
@@ -458,7 +440,9 @@ describe("MONA_TR_TR_LOCALE Integration with MonaI18nService", () => {
 
         expect(liveRegion.textContent).toContain("Yıl görünümü, 2026");
 
-        const yearViewButton = hostEl.querySelector('button[aria-label*="On yıllık görünüme geç"]') as HTMLButtonElement;
+        const yearViewButton = hostEl.querySelector(
+            'button[aria-label*="On yıllık görünüme geç"]'
+        ) as HTMLButtonElement;
         expect(yearViewButton).not.toBeNull();
         expect(yearViewButton.getAttribute("aria-label")).toContain("On yıllık görünüme geç, şu anda 2026");
 
@@ -558,10 +542,10 @@ describe("MONA_TR_TR_LOCALE Integration with MonaI18nService", () => {
         fixture.detectChanges();
 
         const hostEl = fixture.nativeElement as HTMLElement;
-        expect(hostEl.querySelector("button[aria-label=\"Diğer listeye taşı\"]")).not.toBeNull();
-        expect(hostEl.querySelector("button[aria-label=\"Diğer listeden taşı\"]")).not.toBeNull();
-        expect(hostEl.querySelector("button[aria-label=\"Tümünü diğer listeye taşı\"]")).not.toBeNull();
-        expect(hostEl.querySelector("button[aria-label=\"Tümünü diğer listeden taşı\"]")).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Diğer listeye taşı"]')).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Diğer listeden taşı"]')).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Tümünü diğer listeye taşı"]')).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Tümünü diğer listeden taşı"]')).not.toBeNull();
     });
 
     it("renders Pager component with singular count-aware status in Turkish", () => {
@@ -980,8 +964,12 @@ describe("MONA_TR_TR_LOCALE Integration with MonaI18nService", () => {
         expect(gridMessages().rowReorderDisabledEditing).toBe(
             "Satırları yeniden sıralamadan önce düzenlemeyi tamamlayın."
         );
-        expect(gridMessages().rowReorderDisabledFiltered).toBe("Satırları yeniden sıralamadan önce filtreleri kaldırın.");
-        expect(gridMessages().rowReorderDisabledGrouped).toBe("Satırları yeniden sıralamadan önce gruplamayı kaldırın.");
+        expect(gridMessages().rowReorderDisabledFiltered).toBe(
+            "Satırları yeniden sıralamadan önce filtreleri kaldırın."
+        );
+        expect(gridMessages().rowReorderDisabledGrouped).toBe(
+            "Satırları yeniden sıralamadan önce gruplamayı kaldırın."
+        );
         expect(gridMessages().rowReorderDisabledSingleRow).toBe("Yeniden sıralamak için en az iki satır gerekir.");
         expect(gridMessages().rowReorderDisabledSorted).toBe("Satırları yeniden sıralamadan önce sıralamayı kaldırın.");
         expect(gridMessages().rowReorderDisabledVirtualScroll).toBe(

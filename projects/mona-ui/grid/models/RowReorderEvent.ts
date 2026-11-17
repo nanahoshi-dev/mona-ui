@@ -35,9 +35,7 @@ export class RowReorderEvent<
     }
 }
 
-export interface RowReorderEventOptions<
-    TData extends Record<PropertyKey, unknown> = Record<PropertyKey, unknown>
-> {
+export interface RowReorderEventOptions<TData extends Record<PropertyKey, unknown> = Record<PropertyKey, unknown>> {
     currentIndex: number;
     currentPageIndex: number;
     previousIndex: number;

@@ -98,7 +98,9 @@ export class ConfigComponent<C> {
         this.outputObject.update(o => ({ ...o, [key]: value }));
     }
 
-    protected featureEntries(features: ComponentConfigFeatureItem): Array<[string, ComponentConfigFeatureItem[string]]> {
+    protected featureEntries(
+        features: ComponentConfigFeatureItem
+    ): Array<[string, ComponentConfigFeatureItem[string]]> {
         return Object.entries(features);
     }
 
@@ -106,7 +108,11 @@ export class ConfigComponent<C> {
         if (item.directiveBinding) {
             const allFeatures = this.templateHandler()?.data();
             if (allFeatures) {
-                return generateDirectiveBindingCodeSample(this.metadata().selector ?? "", item.directiveBinding, allFeatures);
+                return generateDirectiveBindingCodeSample(
+                    this.metadata().selector ?? "",
+                    item.directiveBinding,
+                    allFeatures
+                );
             }
         }
         if (item.code) {

@@ -38,8 +38,9 @@ describe("CalendarComponent with several months", () => {
         expect(new Set(labels).size).toBe(labels.length);
         // September 2023 starts on a Friday, so its first week has five blank cells in a Sunday-first week.
         const firstWeek = september.querySelectorAll("[role='row']")[1];
-        expect(Array.from(firstWeek.querySelectorAll("[role='gridcell']")).filter(cell => !cell.textContent?.trim()))
-            .toHaveLength(5);
+        expect(
+            Array.from(firstWeek.querySelectorAll("[role='gridcell']")).filter(cell => !cell.textContent?.trim())
+        ).toHaveLength(5);
     });
 
     it("keeps one focusable day, in the month that holds the active date", async () => {

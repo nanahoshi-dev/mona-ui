@@ -46,7 +46,9 @@ describe("ListViewPageableDirective", () => {
 
 @Component({
     imports: [ListViewPageableDirective, ListViewComponent],
-    template: ` <mona-list-view [items]="data" textField="name" [monaListViewPageable]="{ pageSize: 25 }"></mona-list-view> `
+    template: `
+        <mona-list-view [items]="data" textField="name" [monaListViewPageable]="{ pageSize: 25 }"></mona-list-view>
+    `
 })
 class CustomPageSizeTestComponent {
     protected readonly data = [
@@ -65,7 +67,7 @@ describe("ListViewPageableDirective with custom pageSize", () => {
     let fixture: ComponentFixture<CustomPageSizeTestComponent>;
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [CustomPageSizeTestComponent],
+            imports: [CustomPageSizeTestComponent]
         }).compileComponents();
         fixture = TestBed.createComponent(CustomPageSizeTestComponent);
         fixture.detectChanges();
@@ -80,11 +82,13 @@ describe("ListViewPageableDirective with custom pageSize", () => {
 
 @Component({
     imports: [ListViewPageableDirective, ListViewComponent],
-    template: ` <mona-list-view
-        [items]="data"
-        textField="name"
-        [monaListViewPageable]="{ pageSize: 1 }"
-        [(page)]="page"></mona-list-view> `
+    template: `
+        <mona-list-view
+            [items]="data"
+            textField="name"
+            [monaListViewPageable]="{ pageSize: 1 }"
+            [(page)]="page"></mona-list-view>
+    `
 })
 class PageBindingTestComponent {
     protected readonly data = [
@@ -100,7 +104,7 @@ describe("ListViewPageableDirective page binding", () => {
     let component: PageBindingTestComponent;
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [PageBindingTestComponent],
+            imports: [PageBindingTestComponent]
         }).compileComponents();
         fixture = TestBed.createComponent(PageBindingTestComponent);
         component = fixture.componentInstance;

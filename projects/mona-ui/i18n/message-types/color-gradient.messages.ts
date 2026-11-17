@@ -23,4 +23,3 @@ export interface MonaColorGradientMessages {
     readonly switchColorMode: string;
     readonly value: string;
 }
-

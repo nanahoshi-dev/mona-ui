@@ -12,7 +12,9 @@ describe("parseTypedDate", () => {
         expect(iso(" 3/4/25 ", "MM/dd/yyyy")).toBe("2025-03-04 00:00:00");
         expect(iso("3/4/75", "MM/dd/yyyy")).toBe("1975-03-04 00:00:00");
         expect(iso("4.3.2025", "dd.MM.yyyy", "de-DE")).toBe("2025-03-04 00:00:00");
-        expect(iso("9:05", "HH:mm")).toBe(`${parseTypedDate("9:05", "HH:mm", "en-US")?.toFormat("yyyy-MM-dd")} 09:05:00`);
+        expect(iso("9:05", "HH:mm")).toBe(
+            `${parseTypedDate("9:05", "HH:mm", "en-US")?.toFormat("yyyy-MM-dd")} 09:05:00`
+        );
         expect(iso("9:05 pm", "hh:mm a")?.endsWith("21:05:00")).toBe(true);
     });
 

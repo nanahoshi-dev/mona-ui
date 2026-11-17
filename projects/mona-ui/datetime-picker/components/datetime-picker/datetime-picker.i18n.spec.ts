@@ -9,10 +9,7 @@ describe("DateTimePickerComponent i18n", () => {
     it("derives default format based on locale, hourFormat, and showSeconds", async () => {
         @Component({
             template: `
-                <mona-datetime-picker
-                    [(value)]="value"
-                    [hourFormat]="hourFormat()"
-                    [showSeconds]="showSeconds()" />
+                <mona-datetime-picker [(value)]="value" [hourFormat]="hourFormat()" [showSeconds]="showSeconds()" />
             `,
             imports: [DateTimePickerComponent]
         })
@@ -107,11 +104,7 @@ describe("DateTimePickerComponent i18n", () => {
 
     it("passes week start to calendar based on locale and supports explicit override", async () => {
         @Component({
-            template: `
-                <mona-datetime-picker
-                    [firstDay]="firstDay()"
-                    [(value)]="value" />
-            `,
+            template: ` <mona-datetime-picker [firstDay]="firstDay()" [(value)]="value" /> `,
             imports: [DateTimePickerComponent]
         })
         class WeekStartHostComponent {

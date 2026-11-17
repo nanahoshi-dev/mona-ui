@@ -90,9 +90,7 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
     protected readonly nextTrackClipPath = computed(() => {
         const progress = this.progress();
         const isRtl = this.isRtl();
-        return isRtl
-            ? `inset(-1px ${progress}% -1px -1px)`
-            : `inset(-1px -1px -1px ${progress}%)`;
+        return isRtl ? `inset(-1px ${progress}% -1px -1px)` : `inset(-1px -1px -1px ${progress}%)`;
     });
     protected readonly prevTrackClipPath = computed(() => {
         const progress = this.progress();
@@ -102,9 +100,7 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
         }
         const offset = progress < 100 ? 8 : 0;
         const isRtl = this.isRtl();
-        return isRtl
-            ? `inset(-1px 0px -1px ${offset}px)`
-            : `inset(-1px ${offset}px -1px 0px)`;
+        return isRtl ? `inset(-1px 0px -1px ${offset}px)` : `inset(-1px ${offset}px -1px 0px)`;
     });
     protected readonly progress = computed(() => getPercentage(this.value(), this.min(), this.max()));
     protected readonly trackClasses = computed(() => {

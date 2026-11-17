@@ -51,14 +51,8 @@ interface Item {
             [textField]="'text'"
             [selectBy]="'id'"
             [toolbar]="{ actions: ['transferTo', 'transferFrom', 'transferAllTo', 'transferAllFrom'] }"
-            [connectedList]="second"
-        />
-        <mona-list-box
-            #second
-            [items]="secondItems"
-            [textField]="'text'"
-            [selectBy]="'id'"
-        />
+            [connectedList]="second" />
+        <mona-list-box #second [items]="secondItems" [textField]="'text'" [selectBy]="'id'" />
     `,
     imports: [ListBoxComponent]
 })
@@ -445,7 +439,9 @@ describe("MONA_ES_ES_LOCALE Integration with MonaI18nService", () => {
 
         expect(hostEl.textContent).toContain("9:30 p. m.");
 
-        const setButton = Array.from(hostEl.querySelectorAll("button")).find(b => b.textContent?.trim() === "Establecer");
+        const setButton = Array.from(hostEl.querySelectorAll("button")).find(
+            b => b.textContent?.trim() === "Establecer"
+        );
         setButton?.click();
         fixture.detectChanges();
         expect(fixture.componentInstance.testTime()?.getHours()).toBe(21);

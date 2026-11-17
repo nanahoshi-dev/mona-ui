@@ -57,11 +57,7 @@ class TestHostComponent {
 
 @Component({
     imports: [AreaSeriesComponent],
-    template: `
-        <mona-area-series
-            [field]="field()"
-            [lineStyle]="lineStyle()" />
-    `
+    template: ` <mona-area-series [field]="field()" [lineStyle]="lineStyle()" /> `
 })
 class IsolatedAreaSeriesHostComponent {
     public readonly field = signal<ChartField>("value");
@@ -137,7 +133,7 @@ describe("AreaSeriesComponent", () => {
 
             const fakeContext: Partial<ChartRegistrationContext> = {
                 invalidate: invalidateSpy,
-                registerSeries: (reg) => {
+                registerSeries: reg => {
                     registeredSeries = reg as ChartAreaSeriesRegistration;
                     return () => {};
                 }
@@ -170,4 +166,3 @@ describe("AreaSeriesComponent", () => {
         });
     });
 });
-

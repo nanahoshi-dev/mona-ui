@@ -295,10 +295,17 @@ describe("MONA_KO_KR_LOCALE", () => {
         });
 
         it("evaluates Grid row reorder accessibility announcements", () => {
-            const handleLabel = m.grid.rowReorderHandleAriaLabel("1행", "Alt + 위쪽 화살표 또는 Alt + 아래쪽 화살표로 이동합니다.");
+            const handleLabel = m.grid.rowReorderHandleAriaLabel(
+                "1행",
+                "Alt + 위쪽 화살표 또는 Alt + 아래쪽 화살표로 이동합니다."
+            );
             expect(handleLabel).toBe("1행. Alt + 위쪽 화살표 또는 Alt + 아래쪽 화살표로 이동합니다.");
 
-            const disabledHandle = m.grid.rowReorderHandleAriaLabel("1행", "방향키로 이동합니다.", "행 순서 변경을 사용할 수 없습니다.");
+            const disabledHandle = m.grid.rowReorderHandleAriaLabel(
+                "1행",
+                "방향키로 이동합니다.",
+                "행 순서 변경을 사용할 수 없습니다."
+            );
             expect(disabledHandle).toBe("1행. 방향키로 이동합니다. 행 순서 변경을 사용할 수 없습니다.");
 
             expect(m.grid.rowReorderMoved(3, 1)).toBe("3행을 1번째 위치로 이동했습니다.");
@@ -321,10 +328,10 @@ describe("MONA_KO_KR_LOCALE", () => {
         // Test arbitrary strings ending with vowel, consonant, Latin letter, number, symbol
         const testLabels = [
             "프로젝트", // ends with vowel
-            "이메일",   // ends with consonant (ㄹ)
-            "Angular",  // Latin letters
-            "2026",     // digits
-            "A/B"       // symbols
+            "이메일", // ends with consonant (ㄹ)
+            "Angular", // Latin letters
+            "2026", // digits
+            "A/B" // symbols
         ];
 
         it("chip removeLabel is particle-neutral for diverse labels", () => {

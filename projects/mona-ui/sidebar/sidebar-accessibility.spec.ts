@@ -1,6 +1,10 @@
 import { Component, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
-import { CollapsibleContentDirective, CollapsibleDirective, CollapsibleTriggerDirective } from "@nanahoshi/mona-ui/collapsible";
+import {
+    CollapsibleContentDirective,
+    CollapsibleDirective,
+    CollapsibleTriggerDirective
+} from "@nanahoshi/mona-ui/collapsible";
 
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { SidebarLayoutComponent } from "./components/sidebar-layout/sidebar-layout.component";
@@ -30,7 +34,11 @@ import { SidebarService } from "./services/sidebar.service";
                             </a>
                         </li>
                         <li monaSidebarMenuItem monaCollapsible class="collapsible-item">
-                            <button monaSidebarMenuButton monaCollapsibleTrigger [closeOnSelect]="false" class="disclosure">
+                            <button
+                                monaSidebarMenuButton
+                                monaCollapsibleTrigger
+                                [closeOnSelect]="false"
+                                class="disclosure">
                                 Lists
                             </button>
                             <ul monaSidebarMenuSub monaCollapsibleContent class="sub-menu">

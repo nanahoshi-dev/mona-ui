@@ -226,18 +226,10 @@ describe("MONA_TR_TR_LOCALE", () => {
             expect(m.grid?.rowReorderDisabledEditing).toBe(
                 "Satırları yeniden sıralamadan önce düzenlemeyi tamamlayın."
             );
-            expect(m.grid?.rowReorderDisabledFiltered).toBe(
-                "Satırları yeniden sıralamadan önce filtreleri kaldırın."
-            );
-            expect(m.grid?.rowReorderDisabledGrouped).toBe(
-                "Satırları yeniden sıralamadan önce gruplamayı kaldırın."
-            );
-            expect(m.grid?.rowReorderDisabledSingleRow).toBe(
-                "Yeniden sıralamak için en az iki satır gerekir."
-            );
-            expect(m.grid?.rowReorderDisabledSorted).toBe(
-                "Satırları yeniden sıralamadan önce sıralamayı kaldırın."
-            );
+            expect(m.grid?.rowReorderDisabledFiltered).toBe("Satırları yeniden sıralamadan önce filtreleri kaldırın.");
+            expect(m.grid?.rowReorderDisabledGrouped).toBe("Satırları yeniden sıralamadan önce gruplamayı kaldırın.");
+            expect(m.grid?.rowReorderDisabledSingleRow).toBe("Yeniden sıralamak için en az iki satır gerekir.");
+            expect(m.grid?.rowReorderDisabledSorted).toBe("Satırları yeniden sıralamadan önce sıralamayı kaldırın.");
             expect(m.grid?.rowReorderDisabledVirtualScroll).toBe(
                 "Sanal kaydırma etkinken satırlar yeniden sıralanamaz."
             );
@@ -269,12 +261,8 @@ describe("MONA_TR_TR_LOCALE", () => {
             expect(m.calendar?.yearCellLabel?.(2026)).toBe("2026 yılı");
             expect(m.calendar?.yearViewLabel?.("2026")).toBe("Yıl görünümü, 2026");
             expect(m.calendar?.goToToday?.("15.09.2026")).toBe("Bugüne git, 15.09.2026");
-            expect(m.calendar?.switchToYearView?.("Eylül 2026")).toBe(
-                "Yıl görünümüne geç, şu anda Eylül 2026"
-            );
-            expect(m.calendar?.switchToDecadeView?.("2026")).toBe(
-                "On yıllık görünüme geç, şu anda 2026"
-            );
+            expect(m.calendar?.switchToYearView?.("Eylül 2026")).toBe("Yıl görünümüne geç, şu anda Eylül 2026");
+            expect(m.calendar?.switchToDecadeView?.("2026")).toBe("On yıllık görünüme geç, şu anda 2026");
         });
 
         it("formats Chart functions and preserves Turkish financial terminology", () => {

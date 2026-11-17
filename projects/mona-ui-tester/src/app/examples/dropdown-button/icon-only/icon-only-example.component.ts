@@ -8,7 +8,12 @@ import {
 
 @Component({
     selector: "app-dropdown-button-icon-only-example",
-    imports: [DropdownButtonComponent, DropdownButtonItemComponent, DropdownButtonTextTemplateDirective, LucideEllipsis],
+    imports: [
+        DropdownButtonComponent,
+        DropdownButtonItemComponent,
+        DropdownButtonTextTemplateDirective,
+        LucideEllipsis
+    ],
     templateUrl: "./icon-only-example.component.html"
 })
 export class DropdownButtonIconOnlyExampleComponent {}

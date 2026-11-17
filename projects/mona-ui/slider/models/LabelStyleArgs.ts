@@ -8,4 +8,3 @@ export interface LabelStyleArgs {
     orientation: Orientation;
     tickCount: number;
 }
-

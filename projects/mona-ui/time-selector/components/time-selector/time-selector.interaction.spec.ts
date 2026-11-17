@@ -65,7 +65,9 @@ function getList(fixture: ComponentFixture<unknown>, label: string): HTMLElement
 }
 
 function getOption(fixture: ComponentFixture<unknown>, label: string, text: string): HTMLElement {
-    const option = Array.from(getList(fixture, label).querySelectorAll("li")).find(li => li.textContent?.trim() === text);
+    const option = Array.from(getList(fixture, label).querySelectorAll("li")).find(
+        li => li.textContent?.trim() === text
+    );
     if (!option) {
         throw new Error(`Option ${text} isn't in the ${label} list.`);
     }
@@ -241,7 +243,9 @@ describe("TimeSelectorComponent interaction", () => {
             await stable(fixture);
             expect(field().touched()).toBe(false);
 
-            getList(fixture, "Minutes").dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: null }));
+            getList(fixture, "Minutes").dispatchEvent(
+                new FocusEvent("focusout", { bubbles: true, relatedTarget: null })
+            );
             await stable(fixture);
             expect(field().touched()).toBe(true);
         });
@@ -254,7 +258,9 @@ describe("TimeSelectorComponent interaction", () => {
             expect(host.hasAttribute("aria-readonly")).toBe(false);
             expect(getList(fixture, "Hours").getAttribute("aria-required")).toBe("true");
 
-            const results = await axe.run(fixture.nativeElement as HTMLElement, { rules: { region: { enabled: false } } });
+            const results = await axe.run(fixture.nativeElement as HTMLElement, {
+                rules: { region: { enabled: false } }
+            });
             expect(results.violations.map(violation => violation.id)).toEqual([]);
         });
 
@@ -270,7 +276,9 @@ describe("TimeSelectorComponent interaction", () => {
             const hours = getList(fixture, "Hours");
             const focusSpy = vi.spyOn(hours, "focus");
 
-            (fixture.debugElement.children[0].componentInstance as TimeSelectorComponent).focus({ preventScroll: true });
+            (fixture.debugElement.children[0].componentInstance as TimeSelectorComponent).focus({
+                preventScroll: true
+            });
 
             expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
         });

@@ -2,15 +2,16 @@
     <div [class]="headerClass()">
         @if (titleTemplate()) {
             <div [class]="titleCellClass" [attr.id]="titleCellId()">
-                <ng-container [ngTemplateOutlet]="titleTemplate()" [ngTemplateOutletContext]="{ $implicit: titleId() }" />
+                <ng-container
+                    [ngTemplateOutlet]="titleTemplate()"
+                    [ngTemplateOutletContext]="{ $implicit: titleId() }" />
             </div>
         }
         @if (descriptionTemplate()) {
             <div [class]="descriptionCellClass" [attr.id]="descriptionCellId()">
                 <ng-container
                     [ngTemplateOutlet]="descriptionTemplate()"
-                    [ngTemplateOutletContext]="{ $implicit: descriptionId() }"
-                />
+                    [ngTemplateOutletContext]="{ $implicit: descriptionId() }" />
             </div>
         }
         @if (actionTemplate().length > 0) {

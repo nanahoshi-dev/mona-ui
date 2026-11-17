@@ -10,6 +10,8 @@
     </mona-progress-bar>
     <div class="flex gap-2">
         <button monaButton type="button" [disabled]="completed() === 0" (click)="back()">Back</button>
-        <button monaButton look="primary" type="button" [disabled]="completed() === total" (click)="next()">Next</button>
+        <button monaButton look="primary" type="button" [disabled]="completed() === total" (click)="next()">
+            Next
+        </button>
     </div>
 </div>

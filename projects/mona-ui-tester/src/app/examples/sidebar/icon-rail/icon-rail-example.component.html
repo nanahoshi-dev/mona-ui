@@ -9,7 +9,11 @@
                     <ul monaSidebarMenu>
                         @for (folder of folders; track folder.label) {
                             <li monaSidebarMenuItem [active]="current() === folder.label">
-                                <a monaSidebarMenuButton [href]="folder.href" [tooltip]="folder.label" (click)="open($event, folder.label)">
+                                <a
+                                    monaSidebarMenuButton
+                                    [href]="folder.href"
+                                    [tooltip]="folder.label"
+                                    (click)="open($event, folder.label)">
                                     <svg aria-hidden="true" [lucideIcon]="folder.icon" [size]="16"></svg>
                                     <span>{{ folder.label }}</span>
                                 </a>

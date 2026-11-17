@@ -35,11 +35,11 @@ class LimitsHostComponent {
 
 @Component({
     template: `<mona-date-picker
-        aria-label="Due date"
-        aria-describedby="due-hint"
-        readonly
-        weekNumber
-        [value]="value"></mona-date-picker>
+            aria-label="Due date"
+            aria-describedby="due-hint"
+            readonly
+            weekNumber
+            [value]="value"></mona-date-picker>
         <p id="due-hint">Pick a weekday.</p>`,
     imports: [DatePickerComponent]
 })
@@ -126,7 +126,11 @@ describe("DatePickerComponent interaction", () => {
             expect(day(field().value())).toBe("2025-3-4");
             expect(input.value).toBe("02/30/2025");
             expect(input.getAttribute("aria-invalid")).toBe("true");
-            expect(field().errors().map(error => error.kind)).toEqual(["parse"]);
+            expect(
+                field()
+                    .errors()
+                    .map(error => error.kind)
+            ).toEqual(["parse"]);
 
             await typeAndBlur(fixture, "03/05/2025");
             expect(day(field().value())).toBe("2025-3-5");
@@ -210,7 +214,9 @@ describe("DatePickerComponent interaction", () => {
             try {
                 const fixture = await create(FormHostComponent);
                 const field = fixture.componentInstance.form.date;
-                const toggle = getHost(fixture).querySelector("button[aria-label='Open calendar']") as HTMLButtonElement;
+                const toggle = getHost(fixture).querySelector(
+                    "button[aria-label='Open calendar']"
+                ) as HTMLButtonElement;
 
                 toggle.click();
                 await stable(fixture);
@@ -237,7 +243,9 @@ describe("DatePickerComponent interaction", () => {
             expect(input.getAttribute("aria-expanded")).toBe("false");
             expect(input.getAttribute("aria-haspopup")).toBe("dialog");
 
-            const results = await axe.run(fixture.nativeElement as HTMLElement, { rules: { region: { enabled: false } } });
+            const results = await axe.run(fixture.nativeElement as HTMLElement, {
+                rules: { region: { enabled: false } }
+            });
             expect(results.violations.map(violation => violation.id)).toEqual([]);
         });
 
@@ -249,7 +257,9 @@ describe("DatePickerComponent interaction", () => {
             expect(input.getAttribute("aria-describedby")).toBe("due-hint");
             expect(getHost(fixture).hasAttribute("aria-label")).toBe(false);
 
-            const results = await axe.run(fixture.nativeElement as HTMLElement, { rules: { region: { enabled: false } } });
+            const results = await axe.run(fixture.nativeElement as HTMLElement, {
+                rules: { region: { enabled: false } }
+            });
             expect(results.violations.map(violation => violation.id)).toEqual([]);
         });
 

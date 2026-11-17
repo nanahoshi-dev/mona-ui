@@ -55,7 +55,6 @@ export function resolveStrokeDashArray(lineStyle?: ChartLineStyle | null): strin
     }
 }
 
-
 export function withSvgAlpha(color: string, alpha: number): string {
     if (!color) {
         return `rgba(0, 0, 0, ${clamp(alpha, 0, 1)})`;

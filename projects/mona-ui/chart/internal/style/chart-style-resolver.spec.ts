@@ -42,7 +42,6 @@ function createMockSeries(
     } as ChartCartesianSeriesRegistration;
 }
 
-
 function createMockPieSeries(options?: {
     colorField?: string;
     colors?: readonly string[];
@@ -166,7 +165,6 @@ describe("ChartStyleResolver", () => {
         expect(resolver.resolveSeriesStyle(lineDefault, 3).lineStyle).toBe("solid");
         expect(resolver.resolveSeriesStyle(barDefault, 4).lineStyle).toBe("solid");
     });
-
 
     it("should resolve polar series styles and slice colors", () => {
         const resolver = new ChartStyleResolver();

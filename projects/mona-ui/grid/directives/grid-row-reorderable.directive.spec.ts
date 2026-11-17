@@ -8,19 +8,21 @@ import { GridRowReorderableDirective } from "./grid-row-reorderable.directive";
 
 @Component({
     template: `
-        <mona-grid [data]="rows()" [rowKey]="'id'" [monaGridRowReorderable]="options()" (rowReorder)="onRowReorder($event)">
+        <mona-grid
+            [data]="rows()"
+            [rowKey]="'id'"
+            [monaGridRowReorderable]="options()"
+            (rowReorder)="onRowReorder($event)">
             <mona-grid-column field="id" title="ID"></mona-grid-column>
         </mona-grid>
     `,
     imports: [GridComponent, GridColumnComponent, GridRowReorderableDirective]
 })
 class HostComponent {
-    public readonly options = signal<{ enabled?: boolean; canReorder?: (rowData: Record<PropertyKey, unknown>) => boolean } | "">("");
-    public readonly rows = signal<Array<Record<PropertyKey, unknown>>>([
-        { id: 1 },
-        { id: 2 },
-        { id: 3 }
-    ]);
+    public readonly options = signal<
+        { enabled?: boolean; canReorder?: (rowData: Record<PropertyKey, unknown>) => boolean } | ""
+    >("");
+    public readonly rows = signal<Array<Record<PropertyKey, unknown>>>([{ id: 1 }, { id: 2 }, { id: 3 }]);
     public emitted: RowReorderEvent[] = [];
     public onRowReorder(event: RowReorderEvent): void {
         this.emitted.push(event);

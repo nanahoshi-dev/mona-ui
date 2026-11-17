@@ -67,10 +67,7 @@ describe("GridRowReorderHandleComponent", () => {
 
         await TestBed.configureTestingModule({
             imports: [GridRowReorderHandleComponent],
-            providers: [
-                GridService,
-                { provide: LiveAnnouncer, useValue: liveAnnouncerMock }
-            ]
+            providers: [GridService, { provide: LiveAnnouncer, useValue: liveAnnouncerMock }]
         }).compileComponents();
 
         gridService = TestBed.inject(GridService);
@@ -173,9 +170,7 @@ describe("GridRowReorderHandleComponent", () => {
                 }
             };
             gridService.appliedFilters.set(
-                ImmutableDictionary.create<string, ColumnFilterState>([
-                    new KeyValuePair("id", filterState)
-                ])
+                ImmutableDictionary.create<string, ColumnFilterState>([new KeyValuePair("id", filterState)])
             );
             fixture.detectChanges();
 
@@ -302,9 +297,7 @@ describe("GridRowReorderHandleComponent", () => {
                 }
             };
             gridService.appliedFilters.set(
-                ImmutableDictionary.create<string, ColumnFilterState>([
-                    new KeyValuePair("id", filterState)
-                ])
+                ImmutableDictionary.create<string, ColumnFilterState>([new KeyValuePair("id", filterState)])
             );
             fixture.detectChanges();
 
@@ -374,7 +367,9 @@ describe("GridRowReorderHandleComponent", () => {
 
             const button = getButton();
             expect(button.getAttribute("title")).toBe("Terminez la modification avant de réordonner les lignes.");
-            expect(button.getAttribute("aria-label")).toContain("Terminez la modification avant de réordonner les lignes.");
+            expect(button.getAttribute("aria-label")).toContain(
+                "Terminez la modification avant de réordonner les lignes."
+            );
         });
 
         it("translates single-row reason to French", () => {
@@ -419,15 +414,15 @@ describe("GridRowReorderHandleComponent", () => {
                 }
             };
             gridService.appliedFilters.set(
-                ImmutableDictionary.create<string, ColumnFilterState>([
-                    new KeyValuePair("id", filterState)
-                ])
+                ImmutableDictionary.create<string, ColumnFilterState>([new KeyValuePair("id", filterState)])
             );
             fixture.detectChanges();
 
             const button = getButton();
             expect(button.getAttribute("title")).toBe("Supprimez les filtres avant de réordonner les lignes.");
-            expect(button.getAttribute("aria-label")).toContain("Supprimez les filtres avant de réordonner les lignes.");
+            expect(button.getAttribute("aria-label")).toContain(
+                "Supprimez les filtres avant de réordonner les lignes."
+            );
         });
 
         it("translates grouped reason to French", () => {
@@ -438,7 +433,9 @@ describe("GridRowReorderHandleComponent", () => {
 
             const button = getButton();
             expect(button.getAttribute("title")).toBe("Supprimez le regroupement avant de réordonner les lignes.");
-            expect(button.getAttribute("aria-label")).toContain("Supprimez le regroupement avant de réordonner les lignes.");
+            expect(button.getAttribute("aria-label")).toContain(
+                "Supprimez le regroupement avant de réordonner les lignes."
+            );
         });
 
         it("announces moved row position with French text on Alt+ArrowDown", () => {
@@ -511,9 +508,7 @@ describe("GridRowReorderHandleComponent", () => {
 
             const button = getButton();
             expect(button.getAttribute("title")).toBe("行を並べ替えるには2行以上必要です。");
-            expect(button.getAttribute("aria-label")).toContain(
-                "行を並べ替えるには2行以上必要です。"
-            );
+            expect(button.getAttribute("aria-label")).toContain("行を並べ替えるには2行以上必要です。");
         });
 
         it("translates virtual-scroll reason to Japanese", () => {
@@ -521,9 +516,7 @@ describe("GridRowReorderHandleComponent", () => {
             fixture.detectChanges();
 
             const button = getButton();
-            expect(button.getAttribute("title")).toBe(
-                "仮想スクロールが有効な場合、行の並べ替えは使用できません。"
-            );
+            expect(button.getAttribute("title")).toBe("仮想スクロールが有効な場合、行の並べ替えは使用できません。");
             expect(button.getAttribute("aria-label")).toContain(
                 "仮想スクロールが有効な場合、行の並べ替えは使用できません。"
             );
@@ -546,9 +539,7 @@ describe("GridRowReorderHandleComponent", () => {
                 }
             };
             gridService.appliedFilters.set(
-                ImmutableDictionary.create<string, ColumnFilterState>([
-                    new KeyValuePair("id", filterState)
-                ])
+                ImmutableDictionary.create<string, ColumnFilterState>([new KeyValuePair("id", filterState)])
             );
             fixture.detectChanges();
 
@@ -653,9 +644,7 @@ describe("GridRowReorderHandleComponent", () => {
             i18nService.use(MONA_JA_JP_LOCALE);
             fixture.detectChanges();
             expect(button.getAttribute("aria-label")).toContain("1行目を並べ替え。");
-            expect(button.getAttribute("aria-label")).toContain(
-                "Alt + 上矢印または Alt + 下矢印で行を移動します。"
-            );
+            expect(button.getAttribute("aria-label")).toContain("Alt + 上矢印または Alt + 下矢印で行を移動します。");
 
             button.dispatchEvent(
                 new KeyboardEvent("keydown", { key: "ArrowDown", altKey: true, bubbles: true, cancelable: true })

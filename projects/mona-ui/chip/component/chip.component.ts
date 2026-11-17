@@ -24,10 +24,16 @@ import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ChipPrefixTemplateDirective } from "../directives/chip-prefix-template.directive";
 import { CHIP_DEFAULT_MESSAGES } from "../i18n/chip.default-messages";
-import { CHIP_BODY_CONTROL_CLASSES, chipThemeVariants, ChipVariantInputs, ChipVariantProps } from "../styles/chip.styles";
+import {
+    CHIP_BODY_CONTROL_CLASSES,
+    chipThemeVariants,
+    ChipVariantInputs,
+    ChipVariantProps
+} from "../styles/chip.styles";
 
 /** Projected controls keep their own clicks and keys. */
-const PROJECTED_CONTROL_SELECTOR = "a[href], button, input, select, textarea, [role='button'], [role='link'], [tabindex]";
+const PROJECTED_CONTROL_SELECTOR =
+    "a[href], button, input, select, textarea, [role='button'], [role='link'], [tabindex]";
 
 @Component({
     selector: "mona-chip",
@@ -67,9 +73,7 @@ export class ChipComponent implements ChipVariantInputs {
     });
     protected readonly bodyClasses = computed(() => (this.split() ? CHIP_BODY_CONTROL_CLASSES : "contents"));
     protected readonly bodyElement = viewChild.required<ElementRef<HTMLElement>>("body");
-    protected readonly bodyInteractive = computed(
-        () => !this.disabled() && (this.toggleable() || this.isLink())
-    );
+    protected readonly bodyInteractive = computed(() => !this.disabled() && (this.toggleable() || this.isLink()));
     /** The role of the chip's own control, wherever it ends up. */
     protected readonly controlRole = computed(() => {
         if (this.toggleable()) {

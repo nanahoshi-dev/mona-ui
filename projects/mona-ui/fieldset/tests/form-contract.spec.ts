@@ -762,7 +762,10 @@ describe("form control contract", () => {
             ]) {
                 const inputs = Array.from(root.querySelectorAll<HTMLInputElement>(selector + " input"));
                 expect(inputs.length, selector).toBeGreaterThan(0);
-                expect(inputs.every(input => input.disabled), selector).toBe(true);
+                expect(
+                    inputs.every(input => input.disabled),
+                    selector
+                ).toBe(true);
             }
         });
 

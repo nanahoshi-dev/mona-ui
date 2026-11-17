@@ -9,11 +9,9 @@ describe("ChartSeriesMarkIdentityAuthority", () => {
 
     it("does not allocate occurrence ranks for unique source keys", () => {
         const instrumentation = ChartDensityTracker.install();
-        const authority = new ChartSeriesMarkIdentityAuthority(
-            "series-1",
-            [{ x: 10 }, { x: 20 }, { x: 30 }],
-            { extractNaturalKey: datum => (datum as { x: number }).x }
-        );
+        const authority = new ChartSeriesMarkIdentityAuthority("series-1", [{ x: 10 }, { x: 20 }, { x: 30 }], {
+            extractNaturalKey: datum => (datum as { x: number }).x
+        });
 
         expect(authority.occurrenceRankAt(0)).toBe(0);
         expect(authority.occurrenceRankAt(2)).toBe(0);
@@ -48,21 +46,15 @@ describe("ChartSeriesMarkIdentityAuthority", () => {
 
     it("releases reverse lookup and source-dependent state", () => {
         const instrumentation = ChartDensityTracker.install();
-        const authority = new ChartSeriesMarkIdentityAuthority(
-            "series-1",
-            [{ x: "A" }, { x: "A" }],
-            { extractNaturalKey: datum => (datum as { x: string }).x }
-        );
+        const authority = new ChartSeriesMarkIdentityAuthority("series-1", [{ x: "A" }, { x: "A" }], {
+            extractNaturalKey: datum => (datum as { x: string }).x
+        });
 
-        expect(
-            authority.locate({ occurrenceRank: 1, partType: "s", seriesPrefix: "series-1", value: "A" })
-        ).toBe(1);
+        expect(authority.locate({ occurrenceRank: 1, partType: "s", seriesPrefix: "series-1", value: "A" })).toBe(1);
         authority.release("destroy");
         authority.release("destroy");
 
-        expect(
-            authority.locate({ occurrenceRank: 1, partType: "s", seriesPrefix: "series-1", value: "A" })
-        ).toBeNull();
+        expect(authority.locate({ occurrenceRank: 1, partType: "s", seriesPrefix: "series-1", value: "A" })).toBeNull();
         expect(instrumentation.snapshot.destroyReleases).toBe(1);
         expect(instrumentation.snapshot.sourceGenerationReleases).toBe(0);
     });

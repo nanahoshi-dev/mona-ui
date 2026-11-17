@@ -6,12 +6,7 @@ import { TabListItemDirective } from "./tab-list-item.directive";
 
 @Component({
     template: `
-        <li
-            monaTabListItem
-            [active]="active()"
-            [disabled]="disabled()"
-            [position]="position()"
-            [size]="size()"></li>
+        <li monaTabListItem [active]="active()" [disabled]="disabled()" [position]="position()" [size]="size()"></li>
     `,
     imports: [TabListItemDirective]
 })
@@ -39,7 +34,9 @@ describe("TabListItemDirective", () => {
     const tabItem = (): HTMLElement => fixture.debugElement.query(By.css("li[monaTabListItem]")).nativeElement;
 
     it("should create an instance", () => {
-        const directive = fixture.debugElement.query(By.directive(TabListItemDirective)).injector.get(TabListItemDirective);
+        const directive = fixture.debugElement
+            .query(By.directive(TabListItemDirective))
+            .injector.get(TabListItemDirective);
         expect(directive).toBeTruthy();
     });
 

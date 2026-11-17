@@ -128,11 +128,7 @@ export const ARIA_TEXT_ATTRIBUTES = new Set([
 ]);
 
 // General user-facing text attributes that require internationalization
-export const GENERAL_TEXT_ATTRIBUTES = new Set([
-    "title",
-    "placeholder",
-    "alt"
-]);
+export const GENERAL_TEXT_ATTRIBUTES = new Set(["title", "placeholder", "alt"]);
 
 // Patterns for hard-coded TS ARIA and titles
 export const HARD_CODED_ARIA_PATTERNS = [
@@ -294,13 +290,13 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/slider/slider.component.html",
-        lineSnippet: '[style.left.%]="orientation() === \'horizontal\' && !isRtl() ? handlePosition() : undefined"',
+        lineSnippet: "[style.left.%]=\"orientation() === 'horizontal' && !isRtl() ? handlePosition() : undefined\"",
         reason: "Slider horizontal handle physical left coordinate intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/slider/slider.component.html",
-        lineSnippet: '[style.right.%]="orientation() === \'horizontal\' && isRtl() ? handlePosition() : undefined"',
+        lineSnippet: "[style.right.%]=\"orientation() === 'horizontal' && isRtl() ? handlePosition() : undefined\"",
         reason: "Slider horizontal handle physical right coordinate intentionally chosen from Mona semantic direction"
     },
     {
@@ -318,25 +314,29 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
-        lineSnippet: '[style.left.%]="orientation() === \'horizontal\' && !isRtl() ? primaryHandlePosition() : undefined"',
+        lineSnippet:
+            "[style.left.%]=\"orientation() === 'horizontal' && !isRtl() ? primaryHandlePosition() : undefined\"",
         reason: "RangeSlider primary handle physical left coordinate intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
-        lineSnippet: '[style.right.%]="orientation() === \'horizontal\' && isRtl() ? primaryHandlePosition() : undefined"',
+        lineSnippet:
+            "[style.right.%]=\"orientation() === 'horizontal' && isRtl() ? primaryHandlePosition() : undefined\"",
         reason: "RangeSlider primary handle physical right coordinate intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
-        lineSnippet: '[style.left.%]="orientation() === \'horizontal\' && !isRtl() ? secondaryHandlePosition() : undefined"',
+        lineSnippet:
+            "[style.left.%]=\"orientation() === 'horizontal' && !isRtl() ? secondaryHandlePosition() : undefined\"",
         reason: "RangeSlider secondary handle physical left coordinate intentionally chosen from Mona semantic direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
-        lineSnippet: '[style.right.%]="orientation() === \'horizontal\' && isRtl() ? secondaryHandlePosition() : undefined"',
+        lineSnippet:
+            "[style.right.%]=\"orientation() === 'horizontal' && isRtl() ? secondaryHandlePosition() : undefined\"",
         reason: "RangeSlider secondary handle physical right coordinate intentionally chosen from Mona semantic direction"
     },
     {
@@ -673,7 +673,8 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-manual-review",
-        filePattern: "projects/mona-ui/numeric-text-box/components/numeric-text-box-base/numeric-text-box-base.component.ts",
+        filePattern:
+            "projects/mona-ui/numeric-text-box/components/numeric-text-box-base/numeric-text-box-base.component.ts",
         lineSnippet: "scrollLeft",
         reason: "Numeric and decimal text boxes scroll the input to the end on focus"
     },
@@ -1190,7 +1191,7 @@ function isFunctionLikeScope(node: Node): boolean {
 export function getDirectReturnStatements(scopeNode: Node): ReturnStatement[] {
     const functionScope = isFunctionLikeScope(scopeNode)
         ? scopeNode
-        : scopeNode.getFirstAncestor(ancestor => isFunctionLikeScope(ancestor)) ?? scopeNode;
+        : (scopeNode.getFirstAncestor(ancestor => isFunctionLikeScope(ancestor)) ?? scopeNode);
 
     const returns = scopeNode.getDescendantsOfKind(SyntaxKind.ReturnStatement);
     return returns.filter(returnStmt => {
@@ -1233,10 +1234,7 @@ export function collectLiteralFragments(node: Node | undefined): LiteralFragment
         return collectLiteralFragments(node.getExpression());
     }
     if (Node.isConditionalExpression(node)) {
-        return [
-            ...collectLiteralFragments(node.getWhenTrue()),
-            ...collectLiteralFragments(node.getWhenFalse())
-        ];
+        return [...collectLiteralFragments(node.getWhenTrue()), ...collectLiteralFragments(node.getWhenFalse())];
     }
     if (Node.isBinaryExpression(node)) {
         const op = node.getOperatorToken().getKind();
@@ -1246,10 +1244,7 @@ export function collectLiteralFragments(node: Node | undefined): LiteralFragment
             op === SyntaxKind.QuestionQuestionToken ||
             op === SyntaxKind.AmpersandAmpersandToken
         ) {
-            return [
-                ...collectLiteralFragments(node.getLeft()),
-                ...collectLiteralFragments(node.getRight())
-            ];
+            return [...collectLiteralFragments(node.getLeft()), ...collectLiteralFragments(node.getRight())];
         }
         return [];
     }
@@ -1281,10 +1276,7 @@ export function collectLiteralFragments(node: Node | undefined): LiteralFragment
             }
             return fragments;
         }
-        if (
-            exprText === "linkedSignal" ||
-            exprText.endsWith(".linkedSignal")
-        ) {
+        if (exprText === "linkedSignal" || exprText.endsWith(".linkedSignal")) {
             const fragments: LiteralFragment[] = [];
             for (const arg of node.getArguments()) {
                 if (Node.isObjectLiteralExpression(arg)) {
@@ -1325,26 +1317,11 @@ const ROLE_TOKENS = new Set([
     "presentation"
 ]);
 
-const ORIENTATION_TOKENS = new Set([
-    "horizontal",
-    "vertical"
-]);
+const ORIENTATION_TOKENS = new Set(["horizontal", "vertical"]);
 
-const PLACEMENT_TOKENS = new Set([
-    "start",
-    "center",
-    "end",
-    "left",
-    "right",
-    "top",
-    "bottom",
-    "auto"
-]);
+const PLACEMENT_TOKENS = new Set(["start", "center", "end", "left", "right", "top", "bottom", "auto"]);
 
-const SORT_TOKENS = new Set([
-    "ascending",
-    "descending"
-]);
+const SORT_TOKENS = new Set(["ascending", "descending"]);
 
 const FILTER_OPERATOR_TOKENS = new Set([
     "contains",
@@ -1363,15 +1340,7 @@ const FILTER_OPERATOR_TOKENS = new Set([
     "isnotempty"
 ]);
 
-const COLOR_CHANNEL_TOKENS = new Set([
-    "A",
-    "H",
-    "S",
-    "V",
-    "R",
-    "G",
-    "B"
-]);
+const COLOR_CHANNEL_TOKENS = new Set(["A", "H", "S", "V", "R", "G", "B"]);
 
 const TECHNICAL_ARIA_STATE_PROPERTIES = new Set([
     "ariadisabled",
@@ -1418,11 +1387,7 @@ const TECHNICAL_ARIA_STATE_VALUES = new Set([
 ]);
 
 export type SemanticMapKind =
-    | "announcements-map"
-    | "aria-labels-map"
-    | "labels-map"
-    | "configuration-text-map"
-    | "generic-text-map";
+    "announcements-map" | "aria-labels-map" | "labels-map" | "configuration-text-map" | "generic-text-map";
 
 export function classifySemanticMapName(name: string): SemanticMapKind {
     const clean = name.replace(/^#/, "").replace(/^_+/, "");
@@ -1441,77 +1406,46 @@ export function classifySemanticMapName(name: string): SemanticMapKind {
     return "generic-text-map";
 }
 
-export function isTechnicalSemanticMapValue(
-    mapName: string,
-    propertyName: string,
-    value: string
-): boolean {
+export function isTechnicalSemanticMapValue(mapName: string, propertyName: string, value: string): boolean {
     if (!value || !value.trim()) {
         return true;
     }
 
     const cleanProp = propertyName.replace(/^#/, "").replace(/^_+/, "").replace(/-/g, "").toLowerCase();
 
-    if (
-        TECHNICAL_ARIA_STATE_PROPERTIES.has(cleanProp) &&
-        TECHNICAL_ARIA_STATE_VALUES.has(value.toLowerCase())
-    ) {
+    if (TECHNICAL_ARIA_STATE_PROPERTIES.has(cleanProp) && TECHNICAL_ARIA_STATE_VALUES.has(value.toLowerCase())) {
         return true;
     }
 
-    if (
-        /^(?:role|ariaRole|roleName)$/i.test(propertyName) &&
-        ROLE_TOKENS.has(value)
-    ) {
+    if (/^(?:role|ariaRole|roleName)$/i.test(propertyName) && ROLE_TOKENS.has(value)) {
         return true;
     }
 
-    if (
-        /^(?:orientation|axis)$/i.test(propertyName) &&
-        ORIENTATION_TOKENS.has(value)
-    ) {
+    if (/^(?:orientation|axis)$/i.test(propertyName) && ORIENTATION_TOKENS.has(value)) {
         return true;
     }
 
-    if (
-        /^(?:placement|position|alignment|align)$/i.test(propertyName) &&
-        PLACEMENT_TOKENS.has(value)
-    ) {
+    if (/^(?:placement|position|alignment|align)$/i.test(propertyName) && PLACEMENT_TOKENS.has(value)) {
         return true;
     }
 
-    if (
-        /^(?:sortDirection|sortOrder|sort|direction)$/i.test(propertyName) &&
-        SORT_TOKENS.has(value)
-    ) {
+    if (/^(?:sortDirection|sortOrder|sort|direction)$/i.test(propertyName) && SORT_TOKENS.has(value)) {
         return true;
     }
 
-    if (
-        /^(?:operator|filterOperator|op)$/i.test(propertyName) &&
-        FILTER_OPERATOR_TOKENS.has(value)
-    ) {
+    if (/^(?:operator|filterOperator|op)$/i.test(propertyName) && FILTER_OPERATOR_TOKENS.has(value)) {
         return true;
     }
 
-    if (
-        /^(?:channel|colorChannel)$/i.test(propertyName) &&
-        COLOR_CHANNEL_TOKENS.has(value)
-    ) {
+    if (/^(?:channel|colorChannel)$/i.test(propertyName) && COLOR_CHANNEL_TOKENS.has(value)) {
         return true;
     }
 
-    if (
-        /^(?:encoding|charset|mode)$/i.test(propertyName) &&
-        /^(?:utf-?8|utf-?16|ascii)$/i.test(value)
-    ) {
+    if (/^(?:encoding|charset|mode)$/i.test(propertyName) && /^(?:utf-?8|utf-?16|ascii)$/i.test(value)) {
         return true;
     }
 
-    if (
-        /^(?:format|serializationFormat)$/i.test(propertyName) &&
-        /^(?:json|xml|yaml|yml)$/i.test(value)
-    ) {
+    if (/^(?:format|serializationFormat)$/i.test(propertyName) && /^(?:json|xml|yaml|yml)$/i.test(value)) {
         return true;
     }
 
@@ -1647,7 +1581,14 @@ function scanSemanticMapNode(
                 if (Node.isObjectLiteralExpression(arg)) {
                     const computation = arg.getProperty("computation");
                     if (computation && Node.isPropertyAssignment(computation)) {
-                        scanSemanticMapNode(mapName, propertyName, computation.getInitializer(), filePath, isAria, violations);
+                        scanSemanticMapNode(
+                            mapName,
+                            propertyName,
+                            computation.getInitializer(),
+                            filePath,
+                            isAria,
+                            violations
+                        );
                     } else if (
                         computation &&
                         (Node.isMethodDeclaration(computation) || Node.isGetAccessorDeclaration(computation))
@@ -1655,7 +1596,14 @@ function scanSemanticMapNode(
                         const body = computation.getBody();
                         if (body) {
                             for (const ret of getDirectReturnStatements(computation)) {
-                                scanSemanticMapNode(mapName, propertyName, ret.getExpression(), filePath, isAria, violations);
+                                scanSemanticMapNode(
+                                    mapName,
+                                    propertyName,
+                                    ret.getExpression(),
+                                    filePath,
+                                    isAria,
+                                    violations
+                                );
                             }
                         }
                     }
@@ -1760,106 +1708,111 @@ export function scanTypeScriptAst(
     try {
         if (!isMessageCatalog) {
             // 1. Angular host metadata inspection
-        for (const classDecl of sf.getClasses()) {
-            for (const decorator of classDecl.getDecorators()) {
-                const name = decorator.getName();
-                if (name === "Component" || name === "Directive") {
-                    const args = decorator.getArguments();
-                    if (args.length > 0 && Node.isObjectLiteralExpression(args[0])) {
-                        const hostProp = args[0].getProperty("host");
-                        if (hostProp && Node.isPropertyAssignment(hostProp)) {
-                            const hostInit = hostProp.getInitializer();
-                            if (hostInit && Node.isObjectLiteralExpression(hostInit)) {
-                                for (const prop of hostInit.getProperties()) {
-                                    if (Node.isPropertyAssignment(prop)) {
-                                        const rawPropName = prop.getName().replace(/['"]/g, "").toLowerCase();
-                                        const strippedPropName =
-                                            rawPropName.startsWith("[") && rawPropName.endsWith("]")
-                                                ? rawPropName.slice(1, -1)
-                                                : rawPropName;
-                                        const cleanPropName = strippedPropName.startsWith("attr.")
-                                            ? strippedPropName.slice(5)
-                                            : strippedPropName;
-                                        const isAria = ARIA_TEXT_ATTRIBUTES.has(cleanPropName);
-                                        const isText = GENERAL_TEXT_ATTRIBUTES.has(cleanPropName);
-                                        if (isAria || isText) {
-                                            const init = prop.getInitializer();
-                                            if (
-                                                init &&
-                                                (Node.isStringLiteral(init) ||
-                                                    Node.isNoSubstitutionTemplateLiteral(init))
-                                            ) {
-                                                const rawVal = init.getLiteralText().trim();
-                                                const isBound = rawPropName.startsWith("[");
-                                                if (isBound) {
-                                                    try {
-                                                        const escapedVal = rawVal.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
-                                                        const dummyHtml = `<div [${cleanPropName}]="${escapedVal}"></div>`;
-                                                        const parsed = parseTemplate(dummyHtml, filePath, {
-                                                            preserveWhitespaces: false
-                                                        });
-                                                        if (parsed.errors && parsed.errors.length > 0) {
-                                                            for (const e of parsed.errors) {
-                                                                violations.push({
-                                                                    category: isAria ? "i18n-aria" : "i18n-text",
-                                                                    detail: `Host binding parse error in ${rawPropName}: ${e.msg}`,
-                                                                    file: filePath,
-                                                                    line: prop.getStartLineNumber()
-                                                                });
+            for (const classDecl of sf.getClasses()) {
+                for (const decorator of classDecl.getDecorators()) {
+                    const name = decorator.getName();
+                    if (name === "Component" || name === "Directive") {
+                        const args = decorator.getArguments();
+                        if (args.length > 0 && Node.isObjectLiteralExpression(args[0])) {
+                            const hostProp = args[0].getProperty("host");
+                            if (hostProp && Node.isPropertyAssignment(hostProp)) {
+                                const hostInit = hostProp.getInitializer();
+                                if (hostInit && Node.isObjectLiteralExpression(hostInit)) {
+                                    for (const prop of hostInit.getProperties()) {
+                                        if (Node.isPropertyAssignment(prop)) {
+                                            const rawPropName = prop.getName().replace(/['"]/g, "").toLowerCase();
+                                            const strippedPropName =
+                                                rawPropName.startsWith("[") && rawPropName.endsWith("]")
+                                                    ? rawPropName.slice(1, -1)
+                                                    : rawPropName;
+                                            const cleanPropName = strippedPropName.startsWith("attr.")
+                                                ? strippedPropName.slice(5)
+                                                : strippedPropName;
+                                            const isAria = ARIA_TEXT_ATTRIBUTES.has(cleanPropName);
+                                            const isText = GENERAL_TEXT_ATTRIBUTES.has(cleanPropName);
+                                            if (isAria || isText) {
+                                                const init = prop.getInitializer();
+                                                if (
+                                                    init &&
+                                                    (Node.isStringLiteral(init) ||
+                                                        Node.isNoSubstitutionTemplateLiteral(init))
+                                                ) {
+                                                    const rawVal = init.getLiteralText().trim();
+                                                    const isBound = rawPropName.startsWith("[");
+                                                    if (isBound) {
+                                                        try {
+                                                            const escapedVal = rawVal
+                                                                .replace(/&/g, "&amp;")
+                                                                .replace(/"/g, "&quot;");
+                                                            const dummyHtml = `<div [${cleanPropName}]="${escapedVal}"></div>`;
+                                                            const parsed = parseTemplate(dummyHtml, filePath, {
+                                                                preserveWhitespaces: false
+                                                            });
+                                                            if (parsed.errors && parsed.errors.length > 0) {
+                                                                for (const e of parsed.errors) {
+                                                                    violations.push({
+                                                                        category: isAria ? "i18n-aria" : "i18n-text",
+                                                                        detail: `Host binding parse error in ${rawPropName}: ${e.msg}`,
+                                                                        file: filePath,
+                                                                        line: prop.getStartLineNumber()
+                                                                    });
+                                                                }
                                                             }
-                                                        }
-                                                        if (
-                                                            parsed.nodes &&
-                                                            parsed.nodes.length > 0 &&
-                                                            parsed.nodes[0] instanceof TmplAstElement
-                                                        ) {
-                                                            const el = parsed.nodes[0] as TmplAstElement;
-                                                            for (const inp of el.inputs) {
-                                                                const literals = collectLiteralStrings(inp.value);
-                                                                for (const strVal of literals) {
-                                                                    if (
-                                                                        isUserFacingText(strVal) &&
-                                                                        !isTechnicalLiteralForContext(
-                                                                            isAria ? "host-aria-text" : "host-visible-text",
-                                                                            cleanPropName,
-                                                                            strVal
-                                                                        )
-                                                                    ) {
-                                                                        violations.push({
-                                                                            category: isAria
-                                                                                ? "i18n-aria"
-                                                                                : "i18n-text",
-                                                                            detail: `Literal string in host binding ${rawPropName}: "${strVal.trim()}"`,
-                                                                            file: filePath,
-                                                                            line: prop.getStartLineNumber()
-                                                                        });
+                                                            if (
+                                                                parsed.nodes &&
+                                                                parsed.nodes.length > 0 &&
+                                                                parsed.nodes[0] instanceof TmplAstElement
+                                                            ) {
+                                                                const el = parsed.nodes[0] as TmplAstElement;
+                                                                for (const inp of el.inputs) {
+                                                                    const literals = collectLiteralStrings(inp.value);
+                                                                    for (const strVal of literals) {
+                                                                        if (
+                                                                            isUserFacingText(strVal) &&
+                                                                            !isTechnicalLiteralForContext(
+                                                                                isAria
+                                                                                    ? "host-aria-text"
+                                                                                    : "host-visible-text",
+                                                                                cleanPropName,
+                                                                                strVal
+                                                                            )
+                                                                        ) {
+                                                                            violations.push({
+                                                                                category: isAria
+                                                                                    ? "i18n-aria"
+                                                                                    : "i18n-text",
+                                                                                detail: `Literal string in host binding ${rawPropName}: "${strVal.trim()}"`,
+                                                                                file: filePath,
+                                                                                line: prop.getStartLineNumber()
+                                                                            });
+                                                                        }
                                                                     }
                                                                 }
                                                             }
+                                                        } catch (err) {
+                                                            violations.push({
+                                                                category: isAria ? "i18n-aria" : "i18n-text",
+                                                                detail: `Exception parsing host binding ${rawPropName}: ${String(err)}`,
+                                                                file: filePath,
+                                                                line: prop.getStartLineNumber()
+                                                            });
                                                         }
-                                                    } catch (err) {
-                                                        violations.push({
-                                                            category: isAria ? "i18n-aria" : "i18n-text",
-                                                            detail: `Exception parsing host binding ${rawPropName}: ${String(err)}`,
-                                                            file: filePath,
-                                                            line: prop.getStartLineNumber()
-                                                        });
-                                                    }
-                                                } else {
-                                                    if (
-                                                        isUserFacingText(rawVal) &&
-                                                        !isTechnicalLiteralForContext(
-                                                            isAria ? "host-aria-text" : "host-visible-text",
-                                                            cleanPropName,
-                                                            rawVal
-                                                        )
-                                                    ) {
-                                                        violations.push({
-                                                            category: isAria ? "i18n-aria" : "i18n-text",
-                                                            detail: `Static host binding ${rawPropName}: "${rawVal}"`,
-                                                            file: filePath,
-                                                            line: prop.getStartLineNumber()
-                                                        });
+                                                    } else {
+                                                        if (
+                                                            isUserFacingText(rawVal) &&
+                                                            !isTechnicalLiteralForContext(
+                                                                isAria ? "host-aria-text" : "host-visible-text",
+                                                                cleanPropName,
+                                                                rawVal
+                                                            )
+                                                        ) {
+                                                            violations.push({
+                                                                category: isAria ? "i18n-aria" : "i18n-text",
+                                                                detail: `Static host binding ${rawPropName}: "${rawVal}"`,
+                                                                file: filePath,
+                                                                line: prop.getStartLineNumber()
+                                                            });
+                                                        }
                                                     }
                                                 }
                                             }
@@ -1867,49 +1820,49 @@ export function scanTypeScriptAst(
                                     }
                                 }
                             }
-                        }
 
-                        if (name === "Component") {
-                            const templateProp = args[0].getProperty("template");
-                            if (templateProp && Node.isPropertyAssignment(templateProp)) {
-                                const templateInit = templateProp.getInitializer();
-                                if (
-                                    templateInit &&
-                                    (Node.isStringLiteral(templateInit) ||
-                                        Node.isNoSubstitutionTemplateLiteral(templateInit))
-                                ) {
-                                    const templateText = templateInit.getLiteralText();
-                                    if (templateText.trim()) {
-                                        const templateStartLine = templateInit.getStartLineNumber();
-                                        try {
-                                            const parsed = parseTemplate(templateText, filePath, {
-                                                preserveWhitespaces: false
-                                            });
-                                            if (parsed.errors && parsed.errors.length > 0) {
-                                                for (const e of parsed.errors) {
-                                                    violations.push({
-                                                        category: "i18n-text",
-                                                        detail: `Inline template parse error: ${e.msg}`,
-                                                        file: filePath,
-                                                        line: templateStartLine + (e.span?.start?.line ?? 0)
-                                                    });
+                            if (name === "Component") {
+                                const templateProp = args[0].getProperty("template");
+                                if (templateProp && Node.isPropertyAssignment(templateProp)) {
+                                    const templateInit = templateProp.getInitializer();
+                                    if (
+                                        templateInit &&
+                                        (Node.isStringLiteral(templateInit) ||
+                                            Node.isNoSubstitutionTemplateLiteral(templateInit))
+                                    ) {
+                                        const templateText = templateInit.getLiteralText();
+                                        if (templateText.trim()) {
+                                            const templateStartLine = templateInit.getStartLineNumber();
+                                            try {
+                                                const parsed = parseTemplate(templateText, filePath, {
+                                                    preserveWhitespaces: false
+                                                });
+                                                if (parsed.errors && parsed.errors.length > 0) {
+                                                    for (const e of parsed.errors) {
+                                                        violations.push({
+                                                            category: "i18n-text",
+                                                            detail: `Inline template parse error: ${e.msg}`,
+                                                            file: filePath,
+                                                            line: templateStartLine + (e.span?.start?.line ?? 0)
+                                                        });
+                                                    }
                                                 }
-                                            }
-                                            if (parsed.nodes) {
-                                                const inlineViolations: AuditViolation[] = [];
-                                                scanTemplateNodes(parsed.nodes, filePath, inlineViolations);
-                                                for (const iv of inlineViolations) {
-                                                    iv.line = templateStartLine + iv.line - 1;
-                                                    violations.push(iv);
+                                                if (parsed.nodes) {
+                                                    const inlineViolations: AuditViolation[] = [];
+                                                    scanTemplateNodes(parsed.nodes, filePath, inlineViolations);
+                                                    for (const iv of inlineViolations) {
+                                                        iv.line = templateStartLine + iv.line - 1;
+                                                        violations.push(iv);
+                                                    }
                                                 }
+                                            } catch (err) {
+                                                violations.push({
+                                                    category: "i18n-text",
+                                                    detail: `Exception parsing inline template: ${String(err)}`,
+                                                    file: filePath,
+                                                    line: templateStartLine
+                                                });
                                             }
-                                        } catch (err) {
-                                            violations.push({
-                                                category: "i18n-text",
-                                                detail: `Exception parsing inline template: ${String(err)}`,
-                                                file: filePath,
-                                                line: templateStartLine
-                                            });
                                         }
                                     }
                                 }
@@ -1918,276 +1871,319 @@ export function scanTypeScriptAst(
                     }
                 }
             }
-        }
 
-        // 2. Object literal properties with semantic keys
-        for (const obj of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
-            for (const prop of obj.getProperties()) {
-                if (Node.isPropertyAssignment(prop)) {
-                    const propName = prop.getName();
-                    if (SEMANTIC_OBJECT_KEYS.has(propName)) {
-                        const init = prop.getInitializer();
-                        if (init) {
-                            const fragments = collectLiteralFragments(init);
-                            for (const frag of fragments) {
-                                const val = frag.text.trim();
-                                if (isUserFacingText(val) && !isTechnicalLiteralForContext("generic-semantic-object", propName, val)) {
-                                    const isAria = propName.toLowerCase().startsWith("aria");
-                                    violations.push({
-                                        category: isAria ? "i18n-aria" : "i18n-text",
-                                        detail: `Hard-coded literal property "${propName}": "${val}"`,
-                                        file: filePath,
-                                        line: frag.node.getStartLineNumber()
-                                    });
+            // 2. Object literal properties with semantic keys
+            for (const obj of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
+                for (const prop of obj.getProperties()) {
+                    if (Node.isPropertyAssignment(prop)) {
+                        const propName = prop.getName();
+                        if (SEMANTIC_OBJECT_KEYS.has(propName)) {
+                            const init = prop.getInitializer();
+                            if (init) {
+                                const fragments = collectLiteralFragments(init);
+                                for (const frag of fragments) {
+                                    const val = frag.text.trim();
+                                    if (
+                                        isUserFacingText(val) &&
+                                        !isTechnicalLiteralForContext("generic-semantic-object", propName, val)
+                                    ) {
+                                        const isAria = propName.toLowerCase().startsWith("aria");
+                                        violations.push({
+                                            category: isAria ? "i18n-aria" : "i18n-text",
+                                            detail: `Hard-coded literal property "${propName}": "${val}"`,
+                                            file: filePath,
+                                            line: frag.node.getStartLineNumber()
+                                        });
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
 
-        // 3. Computed accessibility properties and string getters
-        for (const node of [
-            ...sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration),
-            ...sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)
-        ]) {
-            const propName = node.getName();
-            if (propName.toLowerCase().includes("arialabel") || propName.toLowerCase().includes("announcement")) {
-                const init = node.getInitializer();
-                if (init) {
-                    const fragments = collectLiteralFragments(init);
-                    for (const frag of fragments) {
-                        const val = frag.text.trim();
-                        if (isUserFacingText(val) && !isTechnicalLiteralForContext("aria-property", propName, val)) {
-                            violations.push({
-                                category: "i18n-aria",
-                                detail: `Hard-coded text in accessibility property "${propName}": "${val}"`,
-                                file: filePath,
-                                line: frag.node.getStartLineNumber()
-                            });
+            // 3. Computed accessibility properties and string getters
+            for (const node of [
+                ...sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration),
+                ...sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)
+            ]) {
+                const propName = node.getName();
+                if (propName.toLowerCase().includes("arialabel") || propName.toLowerCase().includes("announcement")) {
+                    const init = node.getInitializer();
+                    if (init) {
+                        const fragments = collectLiteralFragments(init);
+                        for (const frag of fragments) {
+                            const val = frag.text.trim();
+                            if (
+                                isUserFacingText(val) &&
+                                !isTechnicalLiteralForContext("aria-property", propName, val)
+                            ) {
+                                violations.push({
+                                    category: "i18n-aria",
+                                    detail: `Hard-coded text in accessibility property "${propName}": "${val}"`,
+                                    file: filePath,
+                                    line: frag.node.getStartLineNumber()
+                                });
+                            }
                         }
                     }
                 }
             }
-        }
 
-        const isSemanticName = (name: string): boolean => {
-            if (/(?:label|title|message|placeholder|tooltip|description|announcement|emptyText)/i.test(name)) {
-                return true;
-            }
-            if (/(?:^|[a-z0-9_#])Aria(?:[A-Z0-9_]|$)/.test(name) || /^#?aria(?:[A-Z0-9_]|$)/.test(name)) {
-                return true;
-            }
-            return false;
-        };
-        const isAriaSemanticName = (name: string): boolean => {
-            return (
-                /(?:^|[a-z0-9_#])Aria(?:[A-Z0-9_]|$)/.test(name) ||
-                /^#?aria(?:[A-Z0-9_]|$)/.test(name) ||
-                /announcement/i.test(name)
-            );
-        };
-        const predicatePrefixRegex = /^(?:is|has|should|can|check)[A-Z]/;
-        const technicalFnSuffixRegex =
-            /(?:transform|origin|style|styles|class|classes|options|config|rect|size|bounds|width|height|coord|coords|coordinate|coordinates|pattern|regex|index|key|id)$/i;
+            const isSemanticName = (name: string): boolean => {
+                if (/(?:label|title|message|placeholder|tooltip|description|announcement|emptyText)/i.test(name)) {
+                    return true;
+                }
+                if (/(?:^|[a-z0-9_#])Aria(?:[A-Z0-9_]|$)/.test(name) || /^#?aria(?:[A-Z0-9_]|$)/.test(name)) {
+                    return true;
+                }
+                return false;
+            };
+            const isAriaSemanticName = (name: string): boolean => {
+                return (
+                    /(?:^|[a-z0-9_#])Aria(?:[A-Z0-9_]|$)/.test(name) ||
+                    /^#?aria(?:[A-Z0-9_]|$)/.test(name) ||
+                    /announcement/i.test(name)
+                );
+            };
+            const predicatePrefixRegex = /^(?:is|has|should|can|check)[A-Z]/;
+            const technicalFnSuffixRegex =
+                /(?:transform|origin|style|styles|class|classes|options|config|rect|size|bounds|width|height|coord|coords|coordinate|coordinates|pattern|regex|index|key|id)$/i;
 
-        // 3b. Semantic class property declarations (e.g. title, tooltip, message, label, placeholder, description, emptyText)
-        for (const prop of sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration)) {
-            const propName = prop.getName();
-            if (propName.toLowerCase().includes("arialabel") || propName.toLowerCase().includes("announcement")) {
-                continue;
-            }
-            if (isSemanticName(propName) && !predicatePrefixRegex.test(propName) && !technicalFnSuffixRegex.test(propName)) {
-                const init = prop.getInitializer();
-                if (init) {
-                    const fragments = collectLiteralFragments(init);
-                    for (const frag of fragments) {
-                        const val = frag.text.trim();
-                        if (isUserFacingText(val) && !isTechnicalLiteralForContext("semantic-property", propName, val)) {
-                            const isAria = isAriaSemanticName(propName);
-                            violations.push({
-                                category: isAria ? "i18n-aria" : "i18n-text",
-                                detail: `Hard-coded text in semantic property "${propName}": "${val}"`,
-                                file: filePath,
-                                line: frag.node.getStartLineNumber()
-                            });
+            // 3b. Semantic class property declarations (e.g. title, tooltip, message, label, placeholder, description, emptyText)
+            for (const prop of sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration)) {
+                const propName = prop.getName();
+                if (propName.toLowerCase().includes("arialabel") || propName.toLowerCase().includes("announcement")) {
+                    continue;
+                }
+                if (
+                    isSemanticName(propName) &&
+                    !predicatePrefixRegex.test(propName) &&
+                    !technicalFnSuffixRegex.test(propName)
+                ) {
+                    const init = prop.getInitializer();
+                    if (init) {
+                        const fragments = collectLiteralFragments(init);
+                        for (const frag of fragments) {
+                            const val = frag.text.trim();
+                            if (
+                                isUserFacingText(val) &&
+                                !isTechnicalLiteralForContext("semantic-property", propName, val)
+                            ) {
+                                const isAria = isAriaSemanticName(propName);
+                                violations.push({
+                                    category: isAria ? "i18n-aria" : "i18n-text",
+                                    detail: `Hard-coded text in semantic property "${propName}": "${val}"`,
+                                    file: filePath,
+                                    line: frag.node.getStartLineNumber()
+                                });
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // 4. Semantic functions, methods, and getters returning string literals
+            // 4. Semantic functions, methods, and getters returning string literals
 
-        const candidateFunctions: { name: string; returnExprs: (Node | undefined)[] }[] = [];
+            const candidateFunctions: { name: string; returnExprs: (Node | undefined)[] }[] = [];
 
-        for (const fn of sf.getFunctions()) {
-            const name = fn.getName();
-            const returnType = fn.getReturnTypeNode()?.getText().trim();
-            if (name && !predicatePrefixRegex.test(name) && returnType !== "boolean" && returnType !== "number" && returnType !== "void") {
-                candidateFunctions.push({
-                    name,
-                    returnExprs: getDirectReturnStatements(fn).map(r => r.getExpression())
-                });
-            }
-        }
-
-        for (const cls of sf.getClasses()) {
-            for (const method of cls.getMethods()) {
-                const name = method.getName();
-                const returnType = method.getReturnTypeNode()?.getText().trim();
-                if (name && !predicatePrefixRegex.test(name) && returnType !== "boolean" && returnType !== "number" && returnType !== "void") {
+            for (const fn of sf.getFunctions()) {
+                const name = fn.getName();
+                const returnType = fn.getReturnTypeNode()?.getText().trim();
+                if (
+                    name &&
+                    !predicatePrefixRegex.test(name) &&
+                    returnType !== "boolean" &&
+                    returnType !== "number" &&
+                    returnType !== "void"
+                ) {
                     candidateFunctions.push({
                         name,
-                        returnExprs: getDirectReturnStatements(method).map(r => r.getExpression())
+                        returnExprs: getDirectReturnStatements(fn).map(r => r.getExpression())
                     });
                 }
             }
-            for (const getter of cls.getGetAccessors()) {
-                const name = getter.getName();
-                const returnType = getter.getReturnTypeNode()?.getText().trim();
-                if (name && !predicatePrefixRegex.test(name) && returnType !== "boolean" && returnType !== "number" && returnType !== "void") {
-                    candidateFunctions.push({
-                        name,
-                        returnExprs: getDirectReturnStatements(getter).map(r => r.getExpression())
-                    });
-                }
-            }
-        }
 
-        for (const obj of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
-            for (const prop of obj.getProperties()) {
-                if (Node.isGetAccessorDeclaration(prop)) {
-                    const name = prop.getName();
-                    const returnType = prop.getReturnTypeNode()?.getText().trim();
-                    if (name && !predicatePrefixRegex.test(name) && returnType !== "boolean" && returnType !== "number" && returnType !== "void") {
+            for (const cls of sf.getClasses()) {
+                for (const method of cls.getMethods()) {
+                    const name = method.getName();
+                    const returnType = method.getReturnTypeNode()?.getText().trim();
+                    if (
+                        name &&
+                        !predicatePrefixRegex.test(name) &&
+                        returnType !== "boolean" &&
+                        returnType !== "number" &&
+                        returnType !== "void"
+                    ) {
                         candidateFunctions.push({
                             name,
-                            returnExprs: getDirectReturnStatements(prop).map(r => r.getExpression())
+                            returnExprs: getDirectReturnStatements(method).map(r => r.getExpression())
+                        });
+                    }
+                }
+                for (const getter of cls.getGetAccessors()) {
+                    const name = getter.getName();
+                    const returnType = getter.getReturnTypeNode()?.getText().trim();
+                    if (
+                        name &&
+                        !predicatePrefixRegex.test(name) &&
+                        returnType !== "boolean" &&
+                        returnType !== "number" &&
+                        returnType !== "void"
+                    ) {
+                        candidateFunctions.push({
+                            name,
+                            returnExprs: getDirectReturnStatements(getter).map(r => r.getExpression())
                         });
                     }
                 }
             }
-        }
 
-        for (const varDecl of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
-            const name = varDecl.getName();
-            if (name && isSemanticName(name) && !predicatePrefixRegex.test(name)) {
-                const init = varDecl.getInitializer();
-                if (init && Node.isArrowFunction(init)) {
-                    const body = init.getBody();
-                    if (Node.isBlock(body)) {
-                        candidateFunctions.push({
-                            name,
-                            returnExprs: getDirectReturnStatements(body).map(r => r.getExpression())
-                        });
-                    } else {
-                        candidateFunctions.push({
-                            name,
-                            returnExprs: [body]
-                        });
-                    }
-                } else if (init && Node.isFunctionExpression(init)) {
-                    candidateFunctions.push({
-                        name,
-                        returnExprs: getDirectReturnStatements(init).map(r => r.getExpression())
-                    });
-                }
-            }
-        }
-
-        for (const { name: fnName, returnExprs } of candidateFunctions) {
-            if (isSemanticName(fnName) && !technicalFnSuffixRegex.test(fnName)) {
-                for (const expr of returnExprs) {
-                    const fragments = collectLiteralFragments(expr);
-                    for (const frag of fragments) {
-                        const val = frag.text.trim();
-                        if (isUserFacingText(val) && !isTechnicalLiteralForContext("semantic-helper", fnName, val)) {
-                            const isAria = isAriaSemanticName(fnName);
-                            violations.push({
-                                category: isAria ? "i18n-aria" : "i18n-text",
-                                detail: `Hard-coded text returned from semantic helper "${fnName}": "${val}"`,
-                                file: filePath,
-                                line: frag.node.getStartLineNumber()
+            for (const obj of sf.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
+                for (const prop of obj.getProperties()) {
+                    if (Node.isGetAccessorDeclaration(prop)) {
+                        const name = prop.getName();
+                        const returnType = prop.getReturnTypeNode()?.getText().trim();
+                        if (
+                            name &&
+                            !predicatePrefixRegex.test(name) &&
+                            returnType !== "boolean" &&
+                            returnType !== "number" &&
+                            returnType !== "void"
+                        ) {
+                            candidateFunctions.push({
+                                name,
+                                returnExprs: getDirectReturnStatements(prop).map(r => r.getExpression())
                             });
                         }
                     }
                 }
             }
-        }
 
-        // 4b. Hard-coded LiveAnnouncer announcement detection
-        const liveAnnouncerNames = new Set<string>();
-        for (const prop of sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration)) {
-            const typeText = prop.getTypeNode()?.getText() ?? "";
-            const initText = prop.getInitializer()?.getText() ?? "";
-            if (typeText.includes("LiveAnnouncer") || initText.includes("LiveAnnouncer")) {
-                liveAnnouncerNames.add(prop.getName());
-            }
-        }
-        for (const varDecl of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
-            const typeText = varDecl.getTypeNode()?.getText() ?? "";
-            const initText = varDecl.getInitializer()?.getText() ?? "";
-            if (typeText.includes("LiveAnnouncer") || initText.includes("LiveAnnouncer")) {
-                liveAnnouncerNames.add(varDecl.getName());
-            }
-        }
-        for (const param of sf.getDescendantsOfKind(SyntaxKind.Parameter)) {
-            const typeText = param.getTypeNode()?.getText() ?? "";
-            if (typeText.includes("LiveAnnouncer")) {
-                liveAnnouncerNames.add(param.getName());
-            }
-        }
-
-        for (const callExpr of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
-            const expr = callExpr.getExpression();
-            if (!Node.isPropertyAccessExpression(expr)) {
-                continue;
-            }
-            if (expr.getName() !== "announce") {
-                continue;
-            }
-            const receiver = expr.getExpression();
-            const receiverText = receiver.getText();
-            const isLiveAnnouncer =
-                (Node.isIdentifier(receiver) && liveAnnouncerNames.has(receiver.getText())) ||
-                (Node.isPropertyAccessExpression(receiver) &&
-                    (liveAnnouncerNames.has(receiver.getName()) || /(?:^|[.#_])liveannouncer$/i.test(receiverText))) ||
-                /(?:^|[.#_])liveannouncer$/i.test(receiverText);
-
-            if (isLiveAnnouncer) {
-                const args = callExpr.getArguments();
-                if (args.length > 0) {
-                    const fragments = collectLiteralFragments(args[0]);
-                    for (const frag of fragments) {
-                        const val = frag.text.trim();
-                        if (isUserFacingText(val) && !isTechnicalLiteralForContext("live-announcement", undefined, val)) {
-                            violations.push({
-                                category: "i18n-aria",
-                                detail: `Hard-coded accessibility live-announcement text in announce: "${val}"`,
-                                file: filePath,
-                                line: frag.node.getStartLineNumber()
+            for (const varDecl of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+                const name = varDecl.getName();
+                if (name && isSemanticName(name) && !predicatePrefixRegex.test(name)) {
+                    const init = varDecl.getInitializer();
+                    if (init && Node.isArrowFunction(init)) {
+                        const body = init.getBody();
+                        if (Node.isBlock(body)) {
+                            candidateFunctions.push({
+                                name,
+                                returnExprs: getDirectReturnStatements(body).map(r => r.getExpression())
                             });
+                        } else {
+                            candidateFunctions.push({
+                                name,
+                                returnExprs: [body]
+                            });
+                        }
+                    } else if (init && Node.isFunctionExpression(init)) {
+                        candidateFunctions.push({
+                            name,
+                            returnExprs: getDirectReturnStatements(init).map(r => r.getExpression())
+                        });
+                    }
+                }
+            }
+
+            for (const { name: fnName, returnExprs } of candidateFunctions) {
+                if (isSemanticName(fnName) && !technicalFnSuffixRegex.test(fnName)) {
+                    for (const expr of returnExprs) {
+                        const fragments = collectLiteralFragments(expr);
+                        for (const frag of fragments) {
+                            const val = frag.text.trim();
+                            if (
+                                isUserFacingText(val) &&
+                                !isTechnicalLiteralForContext("semantic-helper", fnName, val)
+                            ) {
+                                const isAria = isAriaSemanticName(fnName);
+                                violations.push({
+                                    category: isAria ? "i18n-aria" : "i18n-text",
+                                    detail: `Hard-coded text returned from semantic helper "${fnName}": "${val}"`,
+                                    file: filePath,
+                                    line: frag.node.getStartLineNumber()
+                                });
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // 4c. Semantic text maps with user-facing strings (e.g. *_TEXT, *_LABELS, *_ANNOUNCEMENTS)
-        for (const varDecl of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
-            const varName = varDecl.getName();
-            if (isSemanticTextMapName(varName)) {
-                scanSemanticTextMap(varName, varDecl.getInitializer(), filePath, violations);
+            // 4b. Hard-coded LiveAnnouncer announcement detection
+            const liveAnnouncerNames = new Set<string>();
+            for (const prop of sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration)) {
+                const typeText = prop.getTypeNode()?.getText() ?? "";
+                const initText = prop.getInitializer()?.getText() ?? "";
+                if (typeText.includes("LiveAnnouncer") || initText.includes("LiveAnnouncer")) {
+                    liveAnnouncerNames.add(prop.getName());
+                }
             }
-        }
-        for (const prop of sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration)) {
-            const propName = prop.getName();
-            if (isSemanticTextMapName(propName)) {
-                scanSemanticTextMap(propName, prop.getInitializer(), filePath, violations);
+            for (const varDecl of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+                const typeText = varDecl.getTypeNode()?.getText() ?? "";
+                const initText = varDecl.getInitializer()?.getText() ?? "";
+                if (typeText.includes("LiveAnnouncer") || initText.includes("LiveAnnouncer")) {
+                    liveAnnouncerNames.add(varDecl.getName());
+                }
             }
-        }
+            for (const param of sf.getDescendantsOfKind(SyntaxKind.Parameter)) {
+                const typeText = param.getTypeNode()?.getText() ?? "";
+                if (typeText.includes("LiveAnnouncer")) {
+                    liveAnnouncerNames.add(param.getName());
+                }
+            }
+
+            for (const callExpr of sf.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+                const expr = callExpr.getExpression();
+                if (!Node.isPropertyAccessExpression(expr)) {
+                    continue;
+                }
+                if (expr.getName() !== "announce") {
+                    continue;
+                }
+                const receiver = expr.getExpression();
+                const receiverText = receiver.getText();
+                const isLiveAnnouncer =
+                    (Node.isIdentifier(receiver) && liveAnnouncerNames.has(receiver.getText())) ||
+                    (Node.isPropertyAccessExpression(receiver) &&
+                        (liveAnnouncerNames.has(receiver.getName()) ||
+                            /(?:^|[.#_])liveannouncer$/i.test(receiverText))) ||
+                    /(?:^|[.#_])liveannouncer$/i.test(receiverText);
+
+                if (isLiveAnnouncer) {
+                    const args = callExpr.getArguments();
+                    if (args.length > 0) {
+                        const fragments = collectLiteralFragments(args[0]);
+                        for (const frag of fragments) {
+                            const val = frag.text.trim();
+                            if (
+                                isUserFacingText(val) &&
+                                !isTechnicalLiteralForContext("live-announcement", undefined, val)
+                            ) {
+                                violations.push({
+                                    category: "i18n-aria",
+                                    detail: `Hard-coded accessibility live-announcement text in announce: "${val}"`,
+                                    file: filePath,
+                                    line: frag.node.getStartLineNumber()
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 4c. Semantic text maps with user-facing strings (e.g. *_TEXT, *_LABELS, *_ANNOUNCEMENTS)
+            for (const varDecl of sf.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+                const varName = varDecl.getName();
+                if (isSemanticTextMapName(varName)) {
+                    scanSemanticTextMap(varName, varDecl.getInitializer(), filePath, violations);
+                }
+            }
+            for (const prop of sf.getDescendantsOfKind(SyntaxKind.PropertyDeclaration)) {
+                const propName = prop.getName();
+                if (isSemanticTextMapName(propName)) {
+                    scanSemanticTextMap(propName, prop.getInitializer(), filePath, violations);
+                }
+            }
         }
 
         // 5. Indirect DOMRect access tracking
@@ -2410,9 +2406,7 @@ export function scanTypeScriptAst(
 
             const targetText = targetExpr.getText();
             const isTargetStyle =
-                targetText.endsWith(".style") ||
-                isStyleName(targetText) ||
-                /(?:^|[\s._])styles?$/i.test(targetText);
+                targetText.endsWith(".style") || isStyleName(targetText) || /(?:^|[\s._])styles?$/i.test(targetText);
 
             let isStyleAssignment = isTargetStyle;
             if (!isStyleAssignment && Node.isIdentifier(targetExpr)) {
@@ -2508,11 +2502,7 @@ export class LiteralStringCollector extends RecursiveAstVisitor {
 export function collectLiteralStrings(ast: unknown): string[] {
     const collector = new LiteralStringCollector();
     const actualAst =
-        ast && typeof ast === "object"
-            ? "visit" in ast
-                ? (ast as AST)
-                : ((ast as { ast?: AST }).ast ?? null)
-            : null;
+        ast && typeof ast === "object" ? ("visit" in ast ? (ast as AST) : ((ast as { ast?: AST }).ast ?? null)) : null;
     if (actualAst && typeof actualAst.visit === "function") {
         actualAst.visit(collector);
     }

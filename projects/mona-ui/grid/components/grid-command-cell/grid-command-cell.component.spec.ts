@@ -69,7 +69,9 @@ describe("GridCommandCellComponent", () => {
         fixture.detectChanges();
 
         const editButton = fixture.nativeElement.querySelector("button[aria-label='Edit row 1']") as HTMLButtonElement;
-        const removeButton = fixture.nativeElement.querySelector("button[aria-label='Remove row 1']") as HTMLButtonElement;
+        const removeButton = fixture.nativeElement.querySelector(
+            "button[aria-label='Remove row 1']"
+        ) as HTMLButtonElement;
 
         expect(editButton).not.toBeNull();
         expect(editButton.getAttribute("title")).toBe("Edit");
@@ -95,8 +97,12 @@ describe("GridCommandCellComponent", () => {
         });
         fixture.detectChanges();
 
-        const editButton = fixture.nativeElement.querySelector("button[aria-label='1. satırı düzenle']") as HTMLButtonElement;
-        const removeButton = fixture.nativeElement.querySelector("button[aria-label='1. satırı sil']") as HTMLButtonElement;
+        const editButton = fixture.nativeElement.querySelector(
+            "button[aria-label='1. satırı düzenle']"
+        ) as HTMLButtonElement;
+        const removeButton = fixture.nativeElement.querySelector(
+            "button[aria-label='1. satırı sil']"
+        ) as HTMLButtonElement;
 
         expect(editButton).not.toBeNull();
         expect(editButton.getAttribute("title")).toBe("Düzenle");

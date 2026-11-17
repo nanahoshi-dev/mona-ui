@@ -7,10 +7,7 @@ import { StepperIndicatorTemplateDirective } from "../../directives/stepper-indi
 import { StepperLabelTemplateDirective } from "../../directives/stepper-label-template.directive";
 import { StepperStepTemplateDirective } from "../../directives/stepper-step-template.directive";
 import type { StepOptions } from "../../models/Step";
-import {
-    stepperStepListThemeVariants,
-    stepperTrackLineThemeVariants
-} from "../../styles/stepper.styles";
+import { stepperStepListThemeVariants, stepperTrackLineThemeVariants } from "../../styles/stepper.styles";
 import { StepperComponent } from "./stepper.component";
 
 // =============================================================================
@@ -111,9 +108,7 @@ function getIndicators(fixture: ComponentFixture<unknown>): HTMLElement[] {
 }
 
 function getLabelSpans(fixture: ComponentFixture<unknown>): HTMLElement[] {
-    return fixture.debugElement
-        .queryAll(By.css("li > span"))
-        .map(de => de.nativeElement as HTMLElement);
+    return fixture.debugElement.queryAll(By.css("li > span")).map(de => de.nativeElement as HTMLElement);
 }
 
 /** Keys are the step buttons' own, so this presses the key on the one that can have focus. */

@@ -60,7 +60,11 @@ function builtInLabel(key: DateRangePresetKey, messages: MonaDateRangePickerMess
 }
 
 /** The range of a built-in preset. */
-export function builtInPresetRange(key: DateRangePresetKey, today: Date, firstDay: FirstDayOfWeek): DateRangePresetRange {
+export function builtInPresetRange(
+    key: DateRangePresetKey,
+    today: Date,
+    firstDay: FirstDayOfWeek
+): DateRangePresetRange {
     const year = today.getFullYear();
     const month = today.getMonth();
     const weekStart = addDays(today, -((today.getDay() - DAY_INDEX[firstDay] + 7) % 7));
@@ -89,7 +93,11 @@ export function builtInPresetRange(key: DateRangePresetKey, today: Date, firstDa
 }
 
 /** Puts a range's ends in order, at the start of their days, and keeps the part of it within the limits. */
-function limitRange(range: DateRangePresetRange, min: Date | undefined, max: Date | undefined): DateRangePresetRange | null {
+function limitRange(
+    range: DateRangePresetRange,
+    min: Date | undefined,
+    max: Date | undefined
+): DateRangePresetRange | null {
     let start = startOfDay(range.start);
     let end = startOfDay(range.end);
     if (end < start) {
@@ -112,11 +120,13 @@ export function resolveDateRangePresets(
     const { disabledDates, firstDay, max, messages, min, today, value } = context;
     return presets.map(preset => {
         const label = typeof preset === "string" ? builtInLabel(preset, messages) : preset.label;
-        const fullRange = typeof preset === "string" ? builtInPresetRange(preset, today, firstDay) : preset.range(today);
+        const fullRange =
+            typeof preset === "string" ? builtInPresetRange(preset, today, firstDay) : preset.range(today);
         const range = limitRange(fullRange, min, max);
         const disabled =
             range == null ||
-            (disabledDates != null && (isDateDisabled(range.start, disabledDates) || isDateDisabled(range.end, disabledDates)));
+            (disabledDates != null &&
+                (isDateDisabled(range.start, disabledDates) || isDateDisabled(range.end, disabledDates)));
         const selected =
             range != null &&
             value?.start != null &&

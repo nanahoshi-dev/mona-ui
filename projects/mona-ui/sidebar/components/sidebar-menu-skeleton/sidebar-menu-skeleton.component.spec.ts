@@ -57,7 +57,9 @@ describe("SidebarMenuSkeletonComponent", () => {
         const bars = skeletons();
         expect(bars.length).toBe(2);
         expect(bars[0].style.width).toBe("1rem");
-        expect(fixture.nativeElement.querySelector("mona-sidebar-menu-skeleton").classList).toContain("overflow-hidden");
+        expect(fixture.nativeElement.querySelector("mona-sidebar-menu-skeleton").classList).toContain(
+            "overflow-hidden"
+        );
     });
 
     it("should omit the icon block when asked", () => {

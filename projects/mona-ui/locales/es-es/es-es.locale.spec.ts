@@ -206,9 +206,7 @@ describe("MONA_ES_ES_LOCALE", () => {
             expect(m.calendar?.switchToYearView?.("septiembre de 2026")).toBe(
                 "Cambiar a vista anual, actualmente septiembre de 2026"
             );
-            expect(m.calendar?.switchToDecadeView?.("2026")).toBe(
-                "Cambiar a vista de década, actualmente 2026"
-            );
+            expect(m.calendar?.switchToDecadeView?.("2026")).toBe("Cambiar a vista de década, actualmente 2026");
         });
 
         it("formats Chart functions correctly", () => {

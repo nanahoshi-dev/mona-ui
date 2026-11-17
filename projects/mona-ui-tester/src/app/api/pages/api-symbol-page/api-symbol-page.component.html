@@ -34,8 +34,7 @@
                                 <span class="sr-only">Copy </span>
                                 <span [class]="use.showLabel ? 'text-muted-foreground' : 'sr-only'">{{
                                     use.label
-                                }}</span
-                                >&ngsp;<code class="min-w-0 font-mono font-semibold [overflow-wrap:anywhere]">
+                                }}</span>&ngsp;<code class="min-w-0 font-mono font-semibold [overflow-wrap:anywhere]">
                                     @for (part of use.parts; track $index) {
                                         @if (!$first) {
                                             <wbr />
@@ -212,8 +211,7 @@
     <h1 class="text-2xl font-bold text-foreground">Export not found</h1>
     <p class="mt-3 text-muted-foreground">
         <code class="font-mono text-foreground">{{ packageName }}/{{ notFound.entryPoint }}</code> has no documented
-        export named <code class="font-mono text-foreground">{{ notFound.name }}</code
-        >.
+        export named <code class="font-mono text-foreground">{{ notFound.name }}</code>.
     </p>
     <p class="mt-6">
         <a class="text-primary-subtle-foreground underline underline-offset-2" routerLink="/api"

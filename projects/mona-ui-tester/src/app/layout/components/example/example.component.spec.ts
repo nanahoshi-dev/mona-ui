@@ -7,8 +7,7 @@ import { EXAMPLE_PROJECT_OPENER, ExampleComponent } from "./example.component";
 
 const TS_FILE = "looks-example.component.ts";
 const HTML_FILE = "looks-example.component.html";
-const TS_SOURCE =
-    '@Component({ selector: "app-button-looks-example" })\nexport class ButtonLooksExampleComponent {}';
+const TS_SOURCE = '@Component({ selector: "app-button-looks-example" })\nexport class ButtonLooksExampleComponent {}';
 
 describe("ExampleComponent", () => {
     let fixture: ComponentFixture<ExampleComponent>;
@@ -75,7 +74,9 @@ describe("ExampleComponent", () => {
         await afterRequests();
 
         expect(button("Hide code").getAttribute("aria-expanded")).toBe("true");
-        expect(fixture.nativeElement.querySelector("app-code-viewer").textContent).toContain("ButtonLooksExampleComponent");
+        expect(fixture.nativeElement.querySelector("app-code-viewer").textContent).toContain(
+            "ButtonLooksExampleComponent"
+        );
         expect(button(TS_FILE).getAttribute("aria-pressed")).toBe("true");
 
         button(HTML_FILE).click();

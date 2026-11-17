@@ -215,7 +215,9 @@ describe("MONA_FR_FR_LOCALE", () => {
             expect(m.grid?.rowReorderDisabledEditing).toBe("Terminez la modification avant de réordonner les lignes.");
             expect(m.grid?.rowReorderDisabledFiltered).toBe("Supprimez les filtres avant de réordonner les lignes.");
             expect(m.grid?.rowReorderDisabledGrouped).toBe("Supprimez le regroupement avant de réordonner les lignes.");
-            expect(m.grid?.rowReorderDisabledSingleRow).toBe("Au moins deux lignes sont nécessaires pour les réordonner.");
+            expect(m.grid?.rowReorderDisabledSingleRow).toBe(
+                "Au moins deux lignes sont nécessaires pour les réordonner."
+            );
             expect(m.grid?.rowReorderDisabledSorted).toBe("Supprimez le tri avant de réordonner les lignes.");
             expect(m.grid?.rowReorderDisabledVirtualScroll).toBe(
                 "La réorganisation des lignes n’est pas disponible lorsque le défilement virtuel est activé."
@@ -236,9 +238,7 @@ describe("MONA_FR_FR_LOCALE", () => {
             expect(m.calendar?.switchToYearView?.("septembre 2026")).toBe(
                 "Passer à la vue annuelle, actuellement septembre 2026"
             );
-            expect(m.calendar?.switchToDecadeView?.("2026")).toBe(
-                "Passer à la vue par décennie, actuellement 2026"
-            );
+            expect(m.calendar?.switchToDecadeView?.("2026")).toBe("Passer à la vue par décennie, actuellement 2026");
         });
 
         it("formats Chart functions correctly", () => {
@@ -254,7 +254,9 @@ describe("MONA_FR_FR_LOCALE", () => {
         });
 
         it("formats ColorGradient saturationAndValueText function correctly", () => {
-            expect(m.colorGradient?.saturationAndValueText?.(50, 75)).toBe("Saturation 50\u00A0%, luminosité 75\u00A0%");
+            expect(m.colorGradient?.saturationAndValueText?.(50, 75)).toBe(
+                "Saturation 50\u00A0%, luminosité 75\u00A0%"
+            );
         });
 
         it("formats Dropdowns functions with singular and plural correctly", () => {

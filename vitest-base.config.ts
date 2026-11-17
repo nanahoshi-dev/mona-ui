@@ -7,5 +7,5 @@ export default defineConfig({
     test: {
         pool: "forks",
         ...(maxWorkers === undefined ? {} : { maxWorkers })
-    },
+    }
 });

@@ -7,14 +7,7 @@ import {
     SUNDAY_FIRST_REGIONS
 } from "./locale-week-likely-data";
 
-export type LocaleFirstDayOfWeek =
-    | "monday"
-    | "tuesday"
-    | "wednesday"
-    | "thursday"
-    | "friday"
-    | "saturday"
-    | "sunday";
+export type LocaleFirstDayOfWeek = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
 
 export {
     CLDR_LIKELY_SUBTAGS_VERSION,

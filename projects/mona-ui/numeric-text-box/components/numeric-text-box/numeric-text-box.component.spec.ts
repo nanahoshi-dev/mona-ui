@@ -392,9 +392,8 @@ describe("NumericTextBoxComponent", () => {
             hostFixture.componentInstance.value.set(1);
             await waitForStable(hostFixture);
 
-            const numericComponent = hostFixture.debugElement.query(
-                By.directive(NumericTextBoxComponent)
-            ).componentInstance as NumericTextBoxComponent;
+            const numericComponent = hostFixture.debugElement.query(By.directive(NumericTextBoxComponent))
+                .componentInstance as NumericTextBoxComponent;
 
             numericComponent.increase();
             await waitForStable(hostFixture);
@@ -468,9 +467,8 @@ describe("NumericTextBoxComponent", () => {
             const hostFixture = TestBed.createComponent(ValueBindingNumericTextBoxHostComponent);
             hostFixture.componentInstance.decimals.set(0);
             hostFixture.componentInstance.step.set(0.5);
-            const numericComponent = hostFixture.debugElement.query(
-                By.directive(NumericTextBoxComponent)
-            ).componentInstance as NumericTextBoxComponent;
+            const numericComponent = hostFixture.debugElement.query(By.directive(NumericTextBoxComponent))
+                .componentInstance as NumericTextBoxComponent;
             const i18nService = TestBed.inject(MonaI18nService);
 
             // de-DE

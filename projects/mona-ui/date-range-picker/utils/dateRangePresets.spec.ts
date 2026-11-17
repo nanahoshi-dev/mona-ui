@@ -44,7 +44,10 @@ describe("builtInPresetRange", () => {
         expect(days(builtInPresetRange("thisWeek", today, "sunday"))).toEqual(["2025-3-9", "2025-3-15"]);
         expect(days(builtInPresetRange("lastWeek", today, "saturday"))).toEqual(["2025-3-1", "2025-3-7"]);
         // On the first day of the week, the week starts that day.
-        expect(days(builtInPresetRange("thisWeek", new Date(2025, 2, 10), "monday"))).toEqual(["2025-3-10", "2025-3-16"]);
+        expect(days(builtInPresetRange("thisWeek", new Date(2025, 2, 10), "monday"))).toEqual([
+            "2025-3-10",
+            "2025-3-16"
+        ]);
     });
 
     it("crosses into the year before", () => {
@@ -55,14 +58,22 @@ describe("builtInPresetRange", () => {
     });
 
     it("ends February on its last day in a leap year", () => {
-        expect(days(builtInPresetRange("lastMonth", new Date(2024, 2, 5), "monday"))).toEqual(["2024-2-1", "2024-2-29"]);
+        expect(days(builtInPresetRange("lastMonth", new Date(2024, 2, 5), "monday"))).toEqual([
+            "2024-2-1",
+            "2024-2-29"
+        ]);
     });
 });
 
 describe("resolveDateRangePresets", () => {
     it("names built-in ranges by the messages, and custom ones by their label", () => {
         const items = resolveDateRangePresets(
-            ["today", "last7Days", "last30Days", { label: "Next 14 days", range: day => ({ end: new Date(2025, 2, 25), start: day }) }],
+            [
+                "today",
+                "last7Days",
+                "last30Days",
+                { label: "Next 14 days", range: day => ({ end: new Date(2025, 2, 25), start: day }) }
+            ],
             context()
         );
         expect(items.map(item => item.label)).toEqual(["Today", "Last 7 days", "Last 30 days", "Next 14 days"]);
@@ -100,8 +111,9 @@ describe("resolveDateRangePresets", () => {
             context({ value: { end: new Date(2025, 1, 28, 18), start: new Date(2025, 1, 1) } })
         );
         expect(items.map(item => item.selected)).toEqual([true, false]);
-        expect(resolveDateRangePresets(["lastMonth"], context({ value: { end: null, start: new Date(2025, 1, 1) } }))[0].selected).toBe(
-            false
-        );
+        expect(
+            resolveDateRangePresets(["lastMonth"], context({ value: { end: null, start: new Date(2025, 1, 1) } }))[0]
+                .selected
+        ).toBe(false);
     });
 });

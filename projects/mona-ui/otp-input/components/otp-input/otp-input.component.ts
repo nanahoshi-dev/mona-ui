@@ -1,7 +1,29 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { afterNextRender, booleanAttribute, Component, computed, contentChild, effect, ElementRef, inject, input, model, numberAttribute, output, signal, TemplateRef, viewChild } from "@angular/core";
+import {
+    afterNextRender,
+    booleanAttribute,
+    Component,
+    computed,
+    contentChild,
+    effect,
+    ElementRef,
+    inject,
+    input,
+    model,
+    numberAttribute,
+    output,
+    signal,
+    TemplateRef,
+    viewChild
+} from "@angular/core";
 import { type FormValueControl } from "@angular/forms/signals";
-import { AttributeBinderDirective, AttributeConfig, createElementControlId, injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
+import {
+    AttributeBinderDirective,
+    AttributeConfig,
+    createElementControlId,
+    injectEffectiveDisabled,
+    injectLabelAssociation
+} from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { OtpInputSeparatorTemplateDirective } from "../../directives/otp-input-separator-template.directive";
@@ -211,7 +233,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
                 if (filled) {
                     displayCharacter = inputType === "password" ? "•" : character;
                 } else if (isPlaceholder) {
-                  displayCharacter = placeholderChar;
+                    displayCharacter = placeholderChar;
                 }
 
                 const active = focused && slotIndex === activeIndex;
@@ -299,7 +321,6 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
      * @default {}
      */
     public readonly inputAttributes = input<AttributeConfig>({});
-
 
     /**
      * @description Emitted when the inner input loses focus.

@@ -23,7 +23,6 @@ function createMockSeriesStyle(color: string): ChartSeriesStyle {
     };
 }
 
-
 describe("SVG and Canvas Renderer Switching", () => {
     it("switches back and forth between Canvas and SVG backends seamlessly with identical scene input", () => {
         const canvas = document.createElement("canvas");

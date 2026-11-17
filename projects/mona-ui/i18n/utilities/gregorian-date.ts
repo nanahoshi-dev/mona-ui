@@ -119,11 +119,7 @@ function fromFormatSafe(text: string, format: string, options: DateTimeOptions):
  * Parses a date string using the specified format and locale, forcing Gregorian calendar.
  * Localized digits are normalized first to support locales that use native numbering systems.
  */
-export function parseGregorianDate(
-    text: string,
-    format: string,
-    localeId: string
-): DateTime {
+export function parseGregorianDate(text: string, format: string, localeId: string): DateTime {
     const locale = normalizeGregorianLocale(localeId);
     let dt = fromFormatSafe(text, format, { locale, outputCalendar: "gregory" });
     if (!dt.isValid) {

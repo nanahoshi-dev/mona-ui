@@ -16,13 +16,7 @@ import {
     viewChildren
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import {
-    LucideChevronDown,
-    LucideChevronLeft,
-    LucideChevronRight,
-    LucideChevronUp,
-    LucideX
-} from "@lucide/angular";
+import { LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideChevronUp, LucideX } from "@lucide/angular";
 import { firstOrDefault } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";

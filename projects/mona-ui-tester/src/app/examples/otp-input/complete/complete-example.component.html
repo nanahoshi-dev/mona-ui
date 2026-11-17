@@ -9,10 +9,18 @@
     </mona-label>
     <span aria-live="polite" class="text-sm">
         @switch (status()) {
-            @case ("checking") { Checking… }
-            @case ("verified") { Verified. }
-            @case ("wrong") { That code is wrong. Try 123456. }
-            @default { Enter all six digits to verify. }
+            @case ("checking") {
+                Checking…
+            }
+            @case ("verified") {
+                Verified.
+            }
+            @case ("wrong") {
+                That code is wrong. Try 123456.
+            }
+            @default {
+                Enter all six digits to verify.
+            }
         }
     </span>
 </div>

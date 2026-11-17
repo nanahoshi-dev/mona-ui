@@ -27,14 +27,14 @@ class FormHostComponent {
 
 @Component({
     template: `<mona-date-range-picker
-        aria-label="Trip"
-        aria-describedby="trip-hint"
-        [disabled]="disabled()"
-        [disabledDates]="disabledDates()"
-        [maxDate]="max()"
-        [minDate]="min()"
-        [readonly]="readonly()"
-        [(value)]="value"></mona-date-range-picker>
+            aria-label="Trip"
+            aria-describedby="trip-hint"
+            [disabled]="disabled()"
+            [disabledDates]="disabledDates()"
+            [maxDate]="max()"
+            [minDate]="min()"
+            [readonly]="readonly()"
+            [(value)]="value"></mona-date-range-picker>
         <p id="trip-hint">Up to two weeks.</p>`,
     imports: [DateRangePickerComponent]
 })
@@ -228,7 +228,11 @@ describe("DateRangePickerComponent", () => {
             expect(end.value).toBe("02/30/2025");
             expect(end.getAttribute("aria-invalid")).toBe("true");
             expect(start.hasAttribute("aria-invalid")).toBe(false);
-            expect(field().errors().map(error => error.kind)).toEqual(["parse"]);
+            expect(
+                field()
+                    .errors()
+                    .map(error => error.kind)
+            ).toEqual(["parse"]);
             expect(getHost(fixture).getAttribute("data-invalid")).toBe("true");
 
             await typeAndBlur(fixture, end, "03/12/2025");
@@ -245,7 +249,11 @@ describe("DateRangePickerComponent", () => {
             await typeAndBlur(fixture, end, "03/01/2025");
 
             expect(days(field().value())).toEqual(["2025-3-4", "2025-3-9"]);
-            expect(field().errors().map(error => error.kind)).toEqual(["minDate"]);
+            expect(
+                field()
+                    .errors()
+                    .map(error => error.kind)
+            ).toEqual(["minDate"]);
             expect(end.getAttribute("aria-invalid")).toBe("true");
             expect(start.hasAttribute("aria-invalid")).toBe(false);
         });
@@ -258,7 +266,11 @@ describe("DateRangePickerComponent", () => {
             await typeAndBlur(fixture, start, "03/20/2025");
 
             expect(days(field().value())).toEqual(["2025-3-4", "2025-3-9"]);
-            expect(field().errors().map(error => error.kind)).toEqual(["maxDate"]);
+            expect(
+                field()
+                    .errors()
+                    .map(error => error.kind)
+            ).toEqual(["maxDate"]);
             expect(start.getAttribute("aria-invalid")).toBe("true");
         });
 
@@ -335,7 +347,9 @@ describe("DateRangePickerComponent", () => {
         });
 
         it("ends a range that has only its start with the next day picked", async () => {
-            const fixture = await create(ValueHostComponent, host => host.value.set({ end: null, start: new Date(2025, 4, 1) }));
+            const fixture = await create(ValueHostComponent, host =>
+                host.value.set({ end: null, start: new Date(2025, 4, 1) })
+            );
 
             getToggle(fixture).click();
             await stable(fixture);
@@ -438,7 +452,12 @@ describe("DateRangePickerComponent", () => {
             getToggle(fixture).click();
             await stable(fixture);
 
-            expect(getPresets().map(button => button.getAttribute("aria-pressed"))).toEqual(["false", "false", "false", "true"]);
+            expect(getPresets().map(button => button.getAttribute("aria-pressed"))).toEqual([
+                "false",
+                "false",
+                "false",
+                "true"
+            ]);
         });
 
         it("keeps a range within minDate and maxDate, and disables one with no day in them", async () => {
@@ -570,9 +589,9 @@ describe("DateRangePickerComponent", () => {
             const fixture = await create(WrappedHostComponent);
             const host = getHost(fixture);
             const [start, end] = getInputs(fixture);
-            const caption = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>("[id]")).find(
-                element => element.textContent?.trim() === "Holiday" && !element.contains(host)
-            ) as HTMLElement;
+            const caption = Array.from(
+                (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>("[id]")
+            ).find(element => element.textContent?.trim() === "Holiday" && !element.contains(host)) as HTMLElement;
 
             expect(host.getAttribute("aria-labelledby")).toBe(caption.id);
             expect(start.hasAttribute("aria-labelledby")).toBe(false);
@@ -585,8 +604,9 @@ describe("DateRangePickerComponent", () => {
         it("focuses the start input, and takes focus on the host to pass it there", async () => {
             const fixture = await create(ValueHostComponent);
             const [start] = getInputs(fixture);
-            const picker = fixture.debugElement.query(debug => debug.componentInstance instanceof DateRangePickerComponent)
-                .componentInstance as DateRangePickerComponent;
+            const picker = fixture.debugElement.query(
+                debug => debug.componentInstance instanceof DateRangePickerComponent
+            ).componentInstance as DateRangePickerComponent;
 
             picker.focus();
             expect(document.activeElement).toBe(start);

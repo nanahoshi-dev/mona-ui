@@ -16,14 +16,14 @@
             </div>
             <div class="flex flex-col gap-0.5 text-xs text-muted-foreground">
                 <div>
-                    <span class="font-medium text-foreground">{{ context.point.formattedX }}</span
-                    >,
+                    <span class="font-medium text-foreground">{{ context.point.formattedX }}</span>,
                     <span class="font-medium text-foreground">{{
                         context.point.formattedYCategory || context.point.categoryY
                     }}</span>
                 </div>
                 <div>
-                    {{ messages().value }}{{ messages().labelValueSeparator }} <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
+                    {{ messages().value }}{{ messages().labelValueSeparator }}
+                    <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
                 </div>
             </div>
         } @else if (context.point.seriesType === "pie" || context.point.seriesType === "donut") {
@@ -51,18 +51,20 @@
             </div>
             <div class="flex flex-col gap-0.5 text-xs text-muted-foreground">
                 <div>
-                    {{ messages().value }}{{ messages().labelValueSeparator }} <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
+                    {{ messages().value }}{{ messages().labelValueSeparator }}
+                    <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
                 </div>
                 @if (context.point.formattedRadialMin && context.point.formattedRadialMax) {
                     <div>
                         {{ messages().range }}{{ messages().labelValueSeparator }}
-                        <span class="font-medium text-foreground"
-                            >{{ messages().valueRange(context.point.formattedRadialMin, context.point.formattedRadialMax) }}</span
-                        >
+                        <span class="font-medium text-foreground">{{
+                            messages().valueRange(context.point.formattedRadialMin, context.point.formattedRadialMax)
+                        }}</span>
                     </div>
                 }
                 @if (context.point.isClamped) {
-                    <div class="w-fit rounded bg-warning-subtle px-1 text-[11px] font-medium text-warning-subtle-foreground">
+                    <div
+                        class="w-fit rounded bg-warning-subtle px-1 text-[11px] font-medium text-warning-subtle-foreground">
                         {{ messages().visualIndicatorClamped }}
                     </div>
                 }
@@ -84,7 +86,8 @@
                 }
                 <div class="flex items-center gap-2">
                     <span
-                        >{{ messages().value }}{{ messages().labelValueSeparator }} <span class="font-medium text-foreground">{{ context.point.formattedY }}</span></span
+                        >{{ messages().value }}{{ messages().labelValueSeparator }}
+                        <span class="font-medium text-foreground">{{ context.point.formattedY }}</span></span
                     >
                     @if (
                         context.point.hierarchy?.percentageOfRoot !== undefined &&
@@ -129,7 +132,10 @@
                 }
                 @if (context.point.funnel?.dropOff !== undefined && context.point.funnel!.dropOff > 0) {
                     <div>
-                        {{ messages().dropOff }}{{ messages().labelValueSeparator }} <span class="font-medium text-foreground">{{ formatValue(context.point.funnel!.dropOff) }}</span>
+                        {{ messages().dropOff }}{{ messages().labelValueSeparator }}
+                        <span class="font-medium text-foreground">{{
+                            formatValue(context.point.funnel!.dropOff)
+                        }}</span>
                     </div>
                 }
             </div>
@@ -171,7 +177,8 @@
                     }
                 } @else {
                     <div>
-                        {{ messages().value }}{{ messages().labelValueSeparator }} <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
+                        {{ messages().value }}{{ messages().labelValueSeparator }}
+                        <span class="font-medium text-foreground">{{ context.point.formattedY }}</span>
                     </div>
                 }
             </div>
@@ -241,9 +248,9 @@
                                 <span class="text-muted-foreground">{{ pt.seriesName }}</span>
                             </div>
                             <div class="flex items-center gap-1">
-                                <span class="font-medium text-foreground"
-                                    >{{ messages().valueRange(pt.formattedFrom ?? "", pt.formattedTo ?? "") }}</span
-                                >
+                                <span class="font-medium text-foreground">{{
+                                    messages().valueRange(pt.formattedFrom ?? "", pt.formattedTo ?? "")
+                                }}</span>
                             </div>
                         </div>
                     } @else {
@@ -318,7 +325,9 @@
                     }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-1.5">
-                    <span class="text-muted-foreground">{{ messages().close }}{{ messages().labelValueSeparator }}</span>
+                    <span class="text-muted-foreground"
+                        >{{ messages().close }}{{ messages().labelValueSeparator }}</span
+                    >
                     <span class="font-medium text-foreground">{{
                         context.point.formattedClose || context.point.close
                     }}</span>
@@ -326,7 +335,9 @@
             </div>
             @if (context.point.formattedChange || context.point.change !== undefined) {
                 <div class="mt-1 pt-1 border-t border-border/50 flex items-center justify-between text-xs">
-                    <span class="text-muted-foreground">{{ messages().change }}{{ messages().labelValueSeparator }}</span>
+                    <span class="text-muted-foreground"
+                        >{{ messages().change }}{{ messages().labelValueSeparator }}</span
+                    >
                     <span class="font-medium text-foreground">
                         {{ context.point.formattedChange || context.point.change }}
                         @if (context.point.formattedChangePercentage) {
@@ -349,7 +360,9 @@
                 }
                 @if (context.point.formattedSize) {
                     <span class="ms-1.5"
-                        >({{ messages().size }}{{ messages().labelValueSeparator }} <span class="font-medium text-foreground">{{ context.point.formattedSize }}</span>)</span>
+                        >({{ messages().size }}{{ messages().labelValueSeparator }}
+                        <span class="font-medium text-foreground">{{ context.point.formattedSize }}</span>)</span
+                    >
                 }
             </div>
         }

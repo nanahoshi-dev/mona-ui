@@ -34,9 +34,7 @@ describe("SubTreeComponent", () => {
         treeService.setDataStructure("hierarchical");
         treeService.setChildrenSelector("children");
         treeService.setTextField("text");
-        treeService.setData([
-            { id: "1", text: "Root", children: [{ id: "1.1", text: "Child" }] }
-        ]);
+        treeService.setData([{ id: "1", text: "Root", children: [{ id: "1.1", text: "Child" }] }]);
         treeService.setExpandableOptions({ enabled: true });
         fixture.componentRef.setInput("nodes", treeService.nodeSet());
         fixture.detectChanges();

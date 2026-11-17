@@ -33,12 +33,7 @@ import { MONA_ZH_CN_LOCALE } from "../zh-cn/zh-cn.locale";
 import { MONA_KO_KR_LOCALE } from "./ko-kr.locale";
 
 @Component({
-    template: `
-        <mona-date-picker
-            [(value)]="value"
-            [format]="format()"
-            [firstDay]="firstDay()" />
-    `,
+    template: ` <mona-date-picker [(value)]="value" [format]="format()" [firstDay]="firstDay()" /> `,
     imports: [DatePickerComponent]
 })
 class DatePickerIntegrationHostComponent {
@@ -119,14 +114,8 @@ interface Item {
             [textField]="'text'"
             [selectBy]="'id'"
             [toolbar]="{ actions: ['transferTo', 'transferFrom', 'transferAllTo', 'transferAllFrom'] }"
-            [connectedList]="second"
-        />
-        <mona-list-box
-            #second
-            [items]="secondItems"
-            [textField]="'text'"
-            [selectBy]="'id'"
-        />
+            [connectedList]="second" />
+        <mona-list-box #second [items]="secondItems" [textField]="'text'" [selectBy]="'id'" />
     `,
     imports: [ListBoxComponent]
 })
@@ -154,12 +143,7 @@ class ScrollViewIntegrationHostComponent {
 
 @Component({
     template: `
-        <mona-grid
-            [data]="rows"
-            [rowKey]="'id'"
-            [resizeMethod]="120"
-            [responsivePager]="false"
-            monaGridRowReorderable>
+        <mona-grid [data]="rows" [rowKey]="'id'" [resizeMethod]="120" [responsivePager]="false" monaGridRowReorderable>
             <mona-grid-column field="name" title="이름" [width]="120" />
         </mona-grid>
     `,
@@ -190,14 +174,7 @@ interface TreeItem {
 }
 
 @Component({
-    template: `
-        <mona-tree-view
-            [data]="data"
-            textField="text"
-            [aria-label]="ariaLabel()"
-            monaTreeViewFilterable
-        />
-    `,
+    template: ` <mona-tree-view [data]="data" textField="text" [aria-label]="ariaLabel()" monaTreeViewFilterable /> `,
     imports: [TreeViewComponent, TreeViewFilterableDirective]
 })
 class TreeViewIntegrationHostComponent {

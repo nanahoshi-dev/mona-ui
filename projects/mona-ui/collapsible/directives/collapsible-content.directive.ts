@@ -1,4 +1,15 @@
-import { afterNextRender, computed, DestroyRef, Directive, effect, ElementRef, inject, input, signal, untracked } from "@angular/core";
+import {
+    afterNextRender,
+    computed,
+    DestroyRef,
+    Directive,
+    effect,
+    ElementRef,
+    inject,
+    input,
+    signal,
+    untracked
+} from "@angular/core";
 import { COLLAPSIBLE_CONFIG } from "../models/CollapsibleConfig";
 
 const CONTENT_HEIGHT_VARIABLE = "--mona-collapsible-content-height";

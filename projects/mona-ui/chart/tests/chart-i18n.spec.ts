@@ -8,7 +8,7 @@ import { CHART_DEFAULT_MESSAGES } from "../i18n/chart.default-messages";
 
 @Component({
     imports: [ChartComponent, ChartLegendComponent, ChartTooltipComponent],
-    template: '<mona-chart><mona-chart-legend /><mona-chart-tooltip /></mona-chart>'
+    template: "<mona-chart><mona-chart-legend /><mona-chart-tooltip /></mona-chart>"
 })
 class TestHostComponent {}
 

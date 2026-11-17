@@ -78,7 +78,11 @@
         [attr.aria-label]="messages().dateRangePicker"
         cdkTrapFocus>
         @if (presetItems().length > 0) {
-            <div role="group" [attr.aria-label]="messages().presets" [class]="presetListClass" (keydown)="onPresetKeydown($event)">
+            <div
+                role="group"
+                [attr.aria-label]="messages().presets"
+                [class]="presetListClass"
+                (keydown)="onPresetKeydown($event)">
                 @for (item of presetItems(); track $index) {
                     <button
                         monaButton

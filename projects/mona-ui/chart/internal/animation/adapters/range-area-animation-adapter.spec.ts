@@ -15,7 +15,6 @@ const mockStyle: ChartSeriesStyle = {
     pointRadius: 4
 };
 
-
 describe("RangeAreaSeriesAnimationAdapter", () => {
     const adapter = new RangeAreaSeriesAnimationAdapter();
 

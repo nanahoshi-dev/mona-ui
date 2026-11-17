@@ -224,21 +224,11 @@ describe("MONA_ID_ID_LOCALE", () => {
 
         it("translates Grid row-reorder disabled reasons correctly", () => {
             expect(m.grid?.rowReorderDisabled).toBe("Penyusunan ulang baris dinonaktifkan.");
-            expect(m.grid?.rowReorderDisabledEditing).toBe(
-                "Selesaikan pengeditan sebelum menyusun ulang baris."
-            );
-            expect(m.grid?.rowReorderDisabledFiltered).toBe(
-                "Hapus filter sebelum menyusun ulang baris."
-            );
-            expect(m.grid?.rowReorderDisabledGrouped).toBe(
-                "Hapus pengelompokan sebelum menyusun ulang baris."
-            );
-            expect(m.grid?.rowReorderDisabledSingleRow).toBe(
-                "Diperlukan setidaknya dua baris untuk menyusun ulang."
-            );
-            expect(m.grid?.rowReorderDisabledSorted).toBe(
-                "Hapus pengurutan sebelum menyusun ulang baris."
-            );
+            expect(m.grid?.rowReorderDisabledEditing).toBe("Selesaikan pengeditan sebelum menyusun ulang baris.");
+            expect(m.grid?.rowReorderDisabledFiltered).toBe("Hapus filter sebelum menyusun ulang baris.");
+            expect(m.grid?.rowReorderDisabledGrouped).toBe("Hapus pengelompokan sebelum menyusun ulang baris.");
+            expect(m.grid?.rowReorderDisabledSingleRow).toBe("Diperlukan setidaknya dua baris untuk menyusun ulang.");
+            expect(m.grid?.rowReorderDisabledSorted).toBe("Hapus pengurutan sebelum menyusun ulang baris.");
             expect(m.grid?.rowReorderDisabledVirtualScroll).toBe(
                 "Baris tidak dapat disusun ulang saat pengguliran virtual aktif."
             );
@@ -261,9 +251,7 @@ describe("MONA_ID_ID_LOCALE", () => {
             expect(m.calendar?.switchToYearView?.("September 2026")).toBe(
                 "Beralih ke tampilan tahun, saat ini September 2026"
             );
-            expect(m.calendar?.switchToDecadeView?.("2026")).toBe(
-                "Beralih ke tampilan dekade, saat ini 2026"
-            );
+            expect(m.calendar?.switchToDecadeView?.("2026")).toBe("Beralih ke tampilan dekade, saat ini 2026");
         });
 
         it("formats Chart functions and preserves Indonesian financial terminology", () => {

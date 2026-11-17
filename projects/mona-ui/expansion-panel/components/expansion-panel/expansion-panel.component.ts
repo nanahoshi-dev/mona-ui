@@ -17,7 +17,11 @@ import {
     viewChild
 } from "@angular/core";
 import { LucideMinus, LucidePlus } from "@lucide/angular";
-import { COLLAPSIBLE_CONFIG, type CollapsibleConfig, CollapsibleTriggerDirective } from "@nanahoshi/mona-ui/collapsible";
+import {
+    COLLAPSIBLE_CONFIG,
+    type CollapsibleConfig,
+    CollapsibleTriggerDirective
+} from "@nanahoshi/mona-ui/collapsible";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { ExpansionPanelActionsTemplateDirective } from "../../directives/expansion-panel-actions-template.directive";

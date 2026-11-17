@@ -8,4 +8,3 @@ export interface MonaDialogMessages {
 }
 
 export type DialogMessages = MonaDialogMessages;
-

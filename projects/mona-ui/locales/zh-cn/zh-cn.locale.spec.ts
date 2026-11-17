@@ -281,7 +281,11 @@ describe("MONA_ZH_CN_LOCALE", () => {
             const handleLabel = m.grid.rowReorderHandleAriaLabel("第 1 行", "使用 Alt + 向上键移动。");
             expect(handleLabel).toBe("第 1 行。使用 Alt + 向上键移动。");
 
-            const disabledHandle = m.grid.rowReorderHandleAriaLabel("第 1 行", "使用方向键移动。", "行重新排序已禁用。");
+            const disabledHandle = m.grid.rowReorderHandleAriaLabel(
+                "第 1 行",
+                "使用方向键移动。",
+                "行重新排序已禁用。"
+            );
             expect(disabledHandle).toBe("第 1 行。使用方向键移动。 行重新排序已禁用。");
 
             expect(m.grid.rowReorderMoved(3, 1)).toBe("已将第 3 行移动到位置 1。");

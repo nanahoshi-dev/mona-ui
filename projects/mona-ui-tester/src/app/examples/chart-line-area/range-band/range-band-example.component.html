@@ -7,7 +7,12 @@
         name="Daily range"
         toField="high"
         [valueFormatter]="celsius" />
-    <mona-line-series curve="monotone-x" field="average" name="Average" [showPoints]="true" [valueFormatter]="celsius" />
+    <mona-line-series
+        curve="monotone-x"
+        field="average"
+        name="Average"
+        [showPoints]="true"
+        [valueFormatter]="celsius" />
     <mona-chart-legend />
     <mona-chart-tooltip [shared]="true" />
 </mona-chart>

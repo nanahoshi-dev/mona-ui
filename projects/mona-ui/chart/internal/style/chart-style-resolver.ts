@@ -546,7 +546,9 @@ export class ChartStyleResolver {
         readonly haloColor: string;
         readonly haloWidth: number;
     } {
-        return this.#cachedRegistrationStyle("resolveDataLabelStyle", null, () => this.#resolveDataLabelStyleUncached());
+        return this.#cachedRegistrationStyle("resolveDataLabelStyle", null, () =>
+            this.#resolveDataLabelStyleUncached()
+        );
     }
 
     #resolveDataLabelStyleUncached(): {
@@ -1713,7 +1715,6 @@ export class ChartStyleResolver {
             opacity: 1,
             pointRadius: resolvedPointRadius
         };
-
     }
 
     public resolveSliceColor(

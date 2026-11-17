@@ -35,7 +35,6 @@ function createMockSeriesStyle(color: string): ChartSeriesStyle {
     };
 }
 
-
 function createMockBar(partial: Partial<SceneBar>): SceneBar {
     return {
         datum: {},

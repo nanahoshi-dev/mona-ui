@@ -84,7 +84,9 @@ describe("audit-locales", () => {
             expect(isAllowedLocaleCopyException("fr-FR", "chart.conversion", "Conversion")).toBe(true);
             expect(isAllowedLocaleCopyException("fr-FR", "chart.highAbbreviation", "H")).toBe(true);
             expect(isAllowedLocaleCopyException("fr-FR", "chart.openAbbreviation", "O")).toBe(true);
-            expect(isAllowedLocaleCopyException("fr-FR", "colorGradient.saturationAndValueText", "Saturation")).toBe(true);
+            expect(isAllowedLocaleCopyException("fr-FR", "colorGradient.saturationAndValueText", "Saturation")).toBe(
+                true
+            );
             expect(isAllowedLocaleCopyException("fr-FR", "dateTimePicker.date", "Date")).toBe(true);
             expect(isAllowedLocaleCopyException("fr-FR", "dialog.ok", "OK")).toBe(true);
             expect(isAllowedLocaleCopyException("fr-FR", "editor.format", "Format")).toBe(true);
@@ -251,7 +253,11 @@ describe("audit-locales", () => {
                 };
             `;
             const violations = auditLocaleMessagesFile("test.messages.ts", code);
-            expect(violations.some(v => v.category === "completeness-bypass" && v.detail.includes("satisfies MonaLocaleMessages"))).toBe(true);
+            expect(
+                violations.some(
+                    v => v.category === "completeness-bypass" && v.detail.includes("satisfies MonaLocaleMessages")
+                )
+            ).toBe(true);
         });
 
         it("detects forbidden 'as any' assertion", () => {
@@ -277,7 +283,9 @@ describe("audit-locales", () => {
                 } as MonaLocaleMessages;
             `;
             const violations = auditLocaleMessagesFile("test.messages.ts", code);
-            expect(violations.some(v => v.category === "completeness-bypass" && v.detail.includes("as MonaLocaleMessages"))).toBe(true);
+            expect(
+                violations.some(v => v.category === "completeness-bypass" && v.detail.includes("as MonaLocaleMessages"))
+            ).toBe(true);
         });
 
         it("detects forbidden DeepPartial usage for official catalog", () => {
@@ -290,7 +298,9 @@ describe("audit-locales", () => {
                 } as DeepPartial<MonaLocaleMessages>;
             `;
             const violations = auditLocaleMessagesFile("test.messages.ts", code);
-            expect(violations.some(v => v.category === "completeness-bypass" && v.detail.includes("DeepPartial"))).toBe(true);
+            expect(violations.some(v => v.category === "completeness-bypass" && v.detail.includes("DeepPartial"))).toBe(
+                true
+            );
         });
 
         it("detects forbidden spread assignment from default catalogs", () => {
@@ -305,7 +315,9 @@ describe("audit-locales", () => {
                 } satisfies MonaLocaleMessages;
             `;
             const violations = auditLocaleMessagesFile("test.messages.ts", code);
-            expect(violations.some(v => v.category === "completeness-bypass" && v.detail.includes("spread assignment"))).toBe(true);
+            expect(
+                violations.some(v => v.category === "completeness-bypass" && v.detail.includes("spread assignment"))
+            ).toBe(true);
         });
 
         it("detects accidental copied English default strings", () => {
@@ -349,9 +361,7 @@ describe("audit-locales", () => {
         });
 
         it("flags copied English day period tokens like AM as violations", () => {
-            const englishDefaults = new Map<string, string>([
-                ["am", "AM"]
-            ]);
+            const englishDefaults = new Map<string, string>([["am", "AM"]]);
             const code = `
                 import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
                 export const TEST_MESSAGES = {
@@ -380,13 +390,23 @@ describe("audit-locales", () => {
                 };
             `;
             const violations = auditLocaleMessagesFile("test.messages.ts", code);
-            expect(violations.some(v => v.category === "completeness-bypass" && v.detail.includes("satisfies MonaLocaleMessages"))).toBe(true);
+            expect(
+                violations.some(
+                    v => v.category === "completeness-bypass" && v.detail.includes("satisfies MonaLocaleMessages")
+                )
+            ).toBe(true);
         });
 
         it("detects copied English across namespaces without leaf name collision overwriting", () => {
             const englishDefaults = new Map<string, any>([
-                ["autoComplete.clear", { namespace: "autoComplete", key: "clear", kind: "static", staticFragments: ["Clear"] }],
-                ["comboBox.clear", { namespace: "comboBox", key: "clear", kind: "static", staticFragments: ["Clear combo"] }]
+                [
+                    "autoComplete.clear",
+                    { namespace: "autoComplete", key: "clear", kind: "static", staticFragments: ["Clear"] }
+                ],
+                [
+                    "comboBox.clear",
+                    { namespace: "comboBox", key: "clear", kind: "static", staticFragments: ["Clear combo"] }
+                ]
             ]);
             const code = `
                 import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
@@ -400,17 +420,22 @@ describe("audit-locales", () => {
                 } satisfies MonaLocaleMessages;
             `;
             const violations = auditLocaleMessagesFile("test.messages.ts", code, englishDefaults);
-            expect(violations.some(v => v.category === "copied-english" && v.detail.includes("autoComplete.clear"))).toBe(true);
+            expect(
+                violations.some(v => v.category === "copied-english" && v.detail.includes("autoComplete.clear"))
+            ).toBe(true);
         });
 
         it("detects copied English in function-valued template messages", () => {
             const englishDefaults = new Map<string, any>([
-                ["pager.pageLabel", {
-                    namespace: "pager",
-                    key: "pageLabel",
-                    kind: "function",
-                    staticFragments: ["Page "]
-                }]
+                [
+                    "pager.pageLabel",
+                    {
+                        namespace: "pager",
+                        key: "pageLabel",
+                        kind: "function",
+                        staticFragments: ["Page "]
+                    }
+                ]
             ]);
             const code = `
                 import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
@@ -445,7 +470,9 @@ describe("audit-locales", () => {
                 } satisfies MonaLocaleMessages;
             `;
             const violations = auditLocaleMessagesFile("test.messages.ts", code, englishDefaults);
-            expect(violations.some(v => v.category === "copied-english" && v.detail.includes("rowReorderMoved"))).toBe(true);
+            expect(violations.some(v => v.category === "copied-english" && v.detail.includes("rowReorderMoved"))).toBe(
+                true
+            );
         });
 
         it("rejects file with 'any' type annotation on official messages catalog", () => {
@@ -476,12 +503,15 @@ describe("audit-locales", () => {
 
         it("accepts legitimately translated function-valued messages", () => {
             const englishDefaults = new Map<string, any>([
-                ["pager.pageLabel", {
-                    namespace: "pager",
-                    key: "pageLabel",
-                    kind: "function",
-                    staticFragments: ["Page "]
-                }]
+                [
+                    "pager.pageLabel",
+                    {
+                        namespace: "pager",
+                        key: "pageLabel",
+                        kind: "function",
+                        staticFragments: ["Page "]
+                    }
+                ]
             ]);
             const code = `
                 import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
@@ -497,12 +527,15 @@ describe("audit-locales", () => {
 
         it("detects partially untranslated singular branch copied from English in function message", () => {
             const englishDefaults = new Map<string, any>([
-                ["pager.resultsAvailable", {
-                    namespace: "pager",
-                    key: "resultsAvailable",
-                    kind: "function",
-                    staticFragments: ["1 result available", "results available"]
-                }]
+                [
+                    "pager.resultsAvailable",
+                    {
+                        namespace: "pager",
+                        key: "resultsAvailable",
+                        kind: "function",
+                        staticFragments: ["1 result available", "results available"]
+                    }
+                ]
             ]);
             const code = `
                 import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
@@ -514,17 +547,22 @@ describe("audit-locales", () => {
                 } satisfies MonaLocaleMessages;
             `;
             const violations = auditLocaleMessagesFile("test.messages.ts", code, englishDefaults, "es-ES");
-            expect(violations.some(v => v.category === "copied-english" && v.detail.includes("resultsAvailable"))).toBe(true);
+            expect(violations.some(v => v.category === "copied-english" && v.detail.includes("resultsAvailable"))).toBe(
+                true
+            );
         });
 
         it("detects partially untranslated plural branch copied from English in function message", () => {
             const englishDefaults = new Map<string, any>([
-                ["pager.resultsAvailable", {
-                    namespace: "pager",
-                    key: "resultsAvailable",
-                    kind: "function",
-                    staticFragments: ["1 result available", "results available"]
-                }]
+                [
+                    "pager.resultsAvailable",
+                    {
+                        namespace: "pager",
+                        key: "resultsAvailable",
+                        kind: "function",
+                        staticFragments: ["1 result available", "results available"]
+                    }
+                ]
             ]);
             const code = `
                 import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
@@ -536,29 +574,40 @@ describe("audit-locales", () => {
                 } satisfies MonaLocaleMessages;
             `;
             const violations = auditLocaleMessagesFile("test.messages.ts", code, englishDefaults, "es-ES");
-            expect(violations.some(v => v.category === "copied-english" && v.detail.includes("resultsAvailable"))).toBe(true);
+            expect(violations.some(v => v.category === "copied-english" && v.detail.includes("resultsAvailable"))).toBe(
+                true
+            );
         });
 
         it("allows Spanish-specific unchanged words with scoped exception but rejects for other locales", () => {
             const englishDefaults = new Map<string, any>([
-                ["notification.error", {
-                    namespace: "notification",
-                    key: "error",
-                    kind: "static",
-                    staticFragments: ["Error"]
-                }],
-                ["editor.color", {
-                    namespace: "editor",
-                    key: "color",
-                    kind: "static",
-                    staticFragments: ["Color"]
-                }],
-                ["chart.closeAbbreviation", {
-                    namespace: "chart",
-                    key: "closeAbbreviation",
-                    kind: "static",
-                    staticFragments: ["C"]
-                }]
+                [
+                    "notification.error",
+                    {
+                        namespace: "notification",
+                        key: "error",
+                        kind: "static",
+                        staticFragments: ["Error"]
+                    }
+                ],
+                [
+                    "editor.color",
+                    {
+                        namespace: "editor",
+                        key: "color",
+                        kind: "static",
+                        staticFragments: ["Color"]
+                    }
+                ],
+                [
+                    "chart.closeAbbreviation",
+                    {
+                        namespace: "chart",
+                        key: "closeAbbreviation",
+                        kind: "static",
+                        staticFragments: ["C"]
+                    }
+                ]
             ]);
             const esCode = `
                 import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
@@ -585,12 +634,15 @@ describe("audit-locales", () => {
 
         it("allows approved function-fragment exception for Spanish colorPalette.color", () => {
             const englishDefaults = new Map<string, any>([
-                ["colorPalette.color", {
-                    namespace: "colorPalette",
-                    key: "color",
-                    kind: "function",
-                    staticFragments: ["Color "]
-                }]
+                [
+                    "colorPalette.color",
+                    {
+                        namespace: "colorPalette",
+                        key: "color",
+                        kind: "function",
+                        staticFragments: ["Color "]
+                    }
+                ]
             ]);
             const esCode = `
                 import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
@@ -612,7 +664,9 @@ describe("audit-locales", () => {
                 } satisfies MonaLocaleMessages;
             `;
             const deViolations = auditLocaleMessagesFile("de-de.messages.ts", deCode, englishDefaults, "de-DE");
-            expect(deViolations.some(v => v.category === "copied-english" && v.detail.includes("colorPalette.color"))).toBe(true);
+            expect(
+                deViolations.some(v => v.category === "copied-english" && v.detail.includes("colorPalette.color"))
+            ).toBe(true);
         });
     });
 
@@ -644,7 +698,9 @@ describe("audit-locales", () => {
                 } satisfies MonaLocale;
             `;
             const violations = auditLocaleMetadataFile("test.locale.ts", code);
-            expect(violations.some(v => v.category === "invalid-metadata" && v.detail.includes('must be "ltr" or "rtl"'))).toBe(true);
+            expect(
+                violations.some(v => v.category === "invalid-metadata" && v.detail.includes('must be "ltr" or "rtl"'))
+            ).toBe(true);
         });
 
         it("rejects invalid BCP 47 locale tag", () => {
@@ -693,7 +749,9 @@ describe("audit-locales", () => {
                 } satisfies MonaLocale;
             `;
             const violations = auditLocaleMetadataFile("test.locale.ts", code, "es-ES", "ES_ES_MESSAGES");
-            expect(violations.some(v => v.category === "invalid-metadata" && v.detail.includes("ES_ES_MESSAGES"))).toBe(true);
+            expect(violations.some(v => v.category === "invalid-metadata" && v.detail.includes("ES_ES_MESSAGES"))).toBe(
+                true
+            );
         });
 
         it("rejects multiple official locale exports in a single metadata file", () => {
@@ -714,7 +772,9 @@ describe("audit-locales", () => {
                 } satisfies MonaLocale;
             `;
             const violations = auditLocaleMetadataFile("test.locale.ts", code);
-            expect(violations.some(v => v.category === "invalid-metadata" && v.detail.includes("exactly one"))).toBe(true);
+            expect(violations.some(v => v.category === "invalid-metadata" && v.detail.includes("exactly one"))).toBe(
+                true
+            );
         });
 
         it("rejects wrong locale aliased under the expected messages identifier", () => {
@@ -729,11 +789,7 @@ describe("audit-locales", () => {
                 } satisfies MonaLocale;
             `;
             const violations = auditLocaleMetadataFile("test.locale.ts", code, "es-ES", "ES_ES_MESSAGES");
-            expect(
-                violations.some(
-                    v => v.category === "invalid-metadata" && v.detail.includes("alias")
-                )
-            ).toBe(true);
+            expect(violations.some(v => v.category === "invalid-metadata" && v.detail.includes("alias"))).toBe(true);
         });
 
         it("rejects correct symbol imported from wrong or non-sibling module", () => {
@@ -748,11 +804,9 @@ describe("audit-locales", () => {
                 } satisfies MonaLocale;
             `;
             const violations = auditLocaleMetadataFile("test.locale.ts", code, "es-ES", "ES_ES_MESSAGES");
-            expect(
-                violations.some(
-                    v => v.category === "invalid-metadata" && v.detail.includes("direct sibling")
-                )
-            ).toBe(true);
+            expect(violations.some(v => v.category === "invalid-metadata" && v.detail.includes("direct sibling"))).toBe(
+                true
+            );
         });
 
         it("rejects messages identifier defined via local shadow variable instead of imported sibling", () => {
@@ -767,11 +821,7 @@ describe("audit-locales", () => {
                 } satisfies MonaLocale;
             `;
             const violations = auditLocaleMetadataFile("test.locale.ts", code, "es-ES", "ES_ES_MESSAGES");
-            expect(
-                violations.some(
-                    v => v.category === "invalid-metadata" && v.detail.includes("shadowed")
-                )
-            ).toBe(true);
+            expect(violations.some(v => v.category === "invalid-metadata" && v.detail.includes("shadowed"))).toBe(true);
         });
 
         it("rejects messages import that does not resolve to expected sibling messages file", () => {
@@ -876,7 +926,8 @@ describe("audit-locales", () => {
         it("rejects an entry point without ng-package.json", () => {
             withEsLocale(
                 { barrel: `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`, entry: ES_ENTRY },
-                details => expect(details.some(d => d.includes("needs both ng-package.json and public-api.ts"))).toBe(true)
+                details =>
+                    expect(details.some(d => d.includes("needs both ng-package.json and public-api.ts"))).toBe(true)
             );
         });
 
@@ -937,11 +988,17 @@ describe("audit-locales", () => {
             try {
                 const esFolder = join(tempDir, "es-es");
                 mkdirSync(esFolder, { recursive: true });
-                writeFileSync(join(tempDir, "public-api.ts"), `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`);
-                writeFileSync(join(esFolder, "es-es.messages.ts"), `
+                writeFileSync(
+                    join(tempDir, "public-api.ts"),
+                    `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`
+                );
+                writeFileSync(
+                    join(esFolder, "es-es.messages.ts"),
+                    `
                     import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
                     export const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;
-                `);
+                `
+                );
                 const violations = auditAllLocales(tempDir);
                 expect(violations.some(v => v.detail.includes("Missing *.locale.ts"))).toBe(true);
             } finally {
@@ -979,9 +1036,7 @@ describe("audit-locales", () => {
                 const violations = auditAllLocales(tempDir);
                 expect(
                     violations.some(
-                        v =>
-                            v.category === "invalid-metadata" &&
-                            v.detail.includes('Duplicate locale ID "es-ES"')
+                        v => v.category === "invalid-metadata" && v.detail.includes('Duplicate locale ID "es-ES"')
                     )
                 ).toBe(true);
             } finally {
@@ -994,12 +1049,20 @@ describe("audit-locales", () => {
             try {
                 const deFolder = join(tempDir, "de-de");
                 mkdirSync(deFolder, { recursive: true });
-                writeFileSync(join(tempDir, "public-api.ts"), `export { MONA_ES_ES_LOCALE } from "./de-de/de-de.locale";\n`);
-                writeFileSync(join(deFolder, "de-de.messages.ts"), `
+                writeFileSync(
+                    join(tempDir, "public-api.ts"),
+                    `export { MONA_ES_ES_LOCALE } from "./de-de/de-de.locale";\n`
+                );
+                writeFileSync(
+                    join(deFolder, "de-de.messages.ts"),
+                    `
                     import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
                     export const DE_DE_MESSAGES = {} satisfies MonaLocaleMessages;
-                `);
-                writeFileSync(join(deFolder, "de-de.locale.ts"), `
+                `
+                );
+                writeFileSync(
+                    join(deFolder, "de-de.locale.ts"),
+                    `
                     import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";
                     import { DE_DE_MESSAGES } from "./de-de.messages";
                     export const MONA_ES_ES_LOCALE = {
@@ -1007,9 +1070,17 @@ describe("audit-locales", () => {
                         id: "es-ES",
                         messages: DE_DE_MESSAGES
                     } satisfies MonaLocale;
-                `);
+                `
+                );
                 const violations = auditAllLocales(tempDir);
-                expect(violations.some(v => v.detail.includes("mismatch") || v.detail.includes("does not match") || v.detail.includes("canonical"))).toBe(true);
+                expect(
+                    violations.some(
+                        v =>
+                            v.detail.includes("mismatch") ||
+                            v.detail.includes("does not match") ||
+                            v.detail.includes("canonical")
+                    )
+                ).toBe(true);
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
             }
@@ -1021,11 +1092,16 @@ describe("audit-locales", () => {
                 const esFolder = join(tempDir, "es-es");
                 mkdirSync(esFolder, { recursive: true });
                 writeFileSync(join(tempDir, "public-api.ts"), `// empty\n`);
-                writeFileSync(join(esFolder, "es-es.messages.ts"), `
+                writeFileSync(
+                    join(esFolder, "es-es.messages.ts"),
+                    `
                     import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";
                     export const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;
-                `);
-                writeFileSync(join(esFolder, "es-es.locale.ts"), `
+                `
+                );
+                writeFileSync(
+                    join(esFolder, "es-es.locale.ts"),
+                    `
                     import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";
                     import { ES_ES_MESSAGES } from "./es-es.messages";
                     export const MONA_ES_ES_LOCALE = {
@@ -1033,9 +1109,12 @@ describe("audit-locales", () => {
                         id: "es-ES",
                         messages: ES_ES_MESSAGES
                     } satisfies MonaLocale;
-                `);
+                `
+                );
                 const violations = auditAllLocales(tempDir);
-                expect(violations.some(v => v.detail.includes("public-api.ts") || v.detail.includes("not exported"))).toBe(true);
+                expect(
+                    violations.some(v => v.detail.includes("public-api.ts") || v.detail.includes("not exported"))
+                ).toBe(true);
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
             }
@@ -1067,7 +1146,10 @@ describe("audit-locales", () => {
             try {
                 const esFolder = join(tempDir, "es-es");
                 mkdirSync(esFolder, { recursive: true });
-                writeFileSync(join(tempDir, "public-api.ts"), `import { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`);
+                writeFileSync(
+                    join(tempDir, "public-api.ts"),
+                    `import { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`
+                );
                 writeFileSync(
                     join(esFolder, "es-es.messages.ts"),
                     `import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";\nexport const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;\n`
@@ -1102,9 +1184,7 @@ describe("audit-locales", () => {
                 );
                 const violations = auditAllLocales(tempDir);
                 expect(
-                    violations.some(
-                        v => v.category === "invalid-metadata" && v.detail.includes("expected module")
-                    )
+                    violations.some(v => v.category === "invalid-metadata" && v.detail.includes("expected module"))
                 ).toBe(true);
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
@@ -1131,7 +1211,9 @@ describe("audit-locales", () => {
                 const violations = auditAllLocales(tempDir);
                 expect(
                     violations.some(
-                        v => v.category === "invalid-metadata" && (v.detail.includes("alias") || v.detail.includes("directly re-exported"))
+                        v =>
+                            v.category === "invalid-metadata" &&
+                            (v.detail.includes("alias") || v.detail.includes("directly re-exported"))
                     )
                 ).toBe(true);
             } finally {
@@ -1159,7 +1241,9 @@ describe("audit-locales", () => {
                 const violations = auditAllLocales(tempDir);
                 expect(
                     violations.some(
-                        v => v.category === "invalid-metadata" && (v.detail.includes("alias") || v.detail.includes("directly re-exported"))
+                        v =>
+                            v.category === "invalid-metadata" &&
+                            (v.detail.includes("alias") || v.detail.includes("directly re-exported"))
                     )
                 ).toBe(true);
             } finally {
@@ -1187,7 +1271,11 @@ describe("audit-locales", () => {
                 const violations = auditAllLocales(tempDir);
                 expect(
                     violations.some(
-                        v => v.category === "invalid-metadata" && (v.detail.includes("alias") || v.detail.includes("not exported") || v.detail.includes("renamed"))
+                        v =>
+                            v.category === "invalid-metadata" &&
+                            (v.detail.includes("alias") ||
+                                v.detail.includes("not exported") ||
+                                v.detail.includes("renamed"))
                     )
                 ).toBe(true);
             } finally {
@@ -1241,20 +1329,22 @@ describe("audit-locales", () => {
             try {
                 const esFolder = join(tempDir, "es-es");
                 mkdirSync(esFolder, { recursive: true });
-                writeFileSync(join(tempDir, "public-api.ts"), `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`);
+                writeFileSync(
+                    join(tempDir, "public-api.ts"),
+                    `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`
+                );
                 writeFileSync(
                     join(esFolder, "es-es.messages.ts"),
                     `import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";\nexport const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;\n`
                 );
-                writeFileSync(
-                    join(esFolder, "es-es.locale.ts"),
-                    `export const someOtherVariable = 123;\n`
-                );
+                writeFileSync(join(esFolder, "es-es.locale.ts"), `export const someOtherVariable = 123;\n`);
 
                 const discovery = discoverOfficialLocales(tempDir);
                 expect(
                     discovery.violations.some(
-                        v => v.category === "invalid-metadata" && v.detail.includes("Missing official exported locale constant")
+                        v =>
+                            v.category === "invalid-metadata" &&
+                            v.detail.includes("Missing official exported locale constant")
                     )
                 ).toBe(true);
                 expect(discovery.locales).toHaveLength(0);
@@ -1268,7 +1358,10 @@ describe("audit-locales", () => {
             try {
                 const esFolder = join(tempDir, "es-es");
                 mkdirSync(esFolder, { recursive: true });
-                writeFileSync(join(tempDir, "public-api.ts"), `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`);
+                writeFileSync(
+                    join(tempDir, "public-api.ts"),
+                    `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`
+                );
                 writeFileSync(
                     join(esFolder, "es-es.messages.ts"),
                     `import type { MonaLocaleMessages } from "@nanahoshi/mona-ui/i18n";\nexport const ES_ES_MESSAGES = {} satisfies MonaLocaleMessages;\n`
@@ -1281,7 +1374,9 @@ describe("audit-locales", () => {
                 const discovery = discoverOfficialLocales(tempDir);
                 expect(
                     discovery.violations.some(
-                        v => v.category === "invalid-metadata" && v.detail.includes("Expected exactly one exported official locale constant")
+                        v =>
+                            v.category === "invalid-metadata" &&
+                            v.detail.includes("Expected exactly one exported official locale constant")
                     )
                 ).toBe(true);
                 expect(discovery.locales).toHaveLength(0);
@@ -1295,11 +1390,11 @@ describe("audit-locales", () => {
             try {
                 const esFolder = join(tempDir, "es-es");
                 mkdirSync(esFolder, { recursive: true });
-                writeFileSync(join(tempDir, "public-api.ts"), `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`);
                 writeFileSync(
-                    join(esFolder, "es-es.messages.ts"),
-                    `export const someOtherMessages = {};\n`
+                    join(tempDir, "public-api.ts"),
+                    `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`
                 );
+                writeFileSync(join(esFolder, "es-es.messages.ts"), `export const someOtherMessages = {};\n`);
                 writeFileSync(
                     join(esFolder, "es-es.locale.ts"),
                     `import type { MonaLocale } from "@nanahoshi/mona-ui/i18n";\nexport const MONA_ES_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: {} } satisfies MonaLocale;\n`
@@ -1308,7 +1403,9 @@ describe("audit-locales", () => {
                 const discovery = discoverOfficialLocales(tempDir);
                 expect(
                     discovery.violations.some(
-                        v => v.category === "invalid-metadata" && v.detail.includes("Missing official exported messages catalog")
+                        v =>
+                            v.category === "invalid-metadata" &&
+                            v.detail.includes("Missing official exported messages catalog")
                     )
                 ).toBe(true);
                 expect(discovery.locales).toHaveLength(0);
@@ -1322,7 +1419,10 @@ describe("audit-locales", () => {
             try {
                 const esFolder = join(tempDir, "es-es");
                 mkdirSync(esFolder, { recursive: true });
-                writeFileSync(join(tempDir, "public-api.ts"), `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`);
+                writeFileSync(
+                    join(tempDir, "public-api.ts"),
+                    `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`
+                );
                 writeFileSync(
                     join(esFolder, "es-es.messages.ts"),
                     `export const ES_ES_MESSAGES = {} as any;\nexport const ES_ES_ALT_MESSAGES = {} as any;\n`
@@ -1335,7 +1435,9 @@ describe("audit-locales", () => {
                 const discovery = discoverOfficialLocales(tempDir);
                 expect(
                     discovery.violations.some(
-                        v => v.category === "invalid-metadata" && v.detail.includes("Expected exactly one exported official messages catalog")
+                        v =>
+                            v.category === "invalid-metadata" &&
+                            v.detail.includes("Expected exactly one exported official messages catalog")
                     )
                 ).toBe(true);
                 expect(discovery.locales).toHaveLength(0);
@@ -1348,14 +1450,18 @@ describe("audit-locales", () => {
     describe("loadDefaultEnglishStrings and Schema Parity", () => {
         it("fails closed when English defaults base directory does not exist", () => {
             const result = loadDefaultEnglishStrings("/non/existent/base/dir");
-            expect(result.violations.some(v => v.detail.includes("English default message root does not exist"))).toBe(true);
+            expect(result.violations.some(v => v.detail.includes("English default message root does not exist"))).toBe(
+                true
+            );
         });
 
         it("fails when English base directory contains zero default message catalogs", () => {
             const tempDir = mkdtempSync(join(tmpdir(), "mona-no-defaults-"));
             try {
                 const result = loadDefaultEnglishStrings(tempDir);
-                expect(result.violations.some(v => v.detail.includes("Zero default English message catalogs"))).toBe(true);
+                expect(result.violations.some(v => v.detail.includes("Zero default English message catalogs"))).toBe(
+                    true
+                );
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
             }
@@ -1401,7 +1507,9 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
                 const result = loadDefaultEnglishStrings(tempDir);
                 expect(
                     result.violations.some(
-                        v => v.detail.includes("Duplicate English default message fingerprint") && v.detail.includes("pager.firstPageLabel")
+                        v =>
+                            v.detail.includes("Duplicate English default message fingerprint") &&
+                            v.detail.includes("pager.firstPageLabel")
                     )
                 ).toBe(true);
             } finally {
@@ -1412,7 +1520,9 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
         it("detects drift when canonical schema has namespaces missing from MONA_MESSAGE_NAMESPACES", () => {
             const canonicalNamespaces = new Set(["autoComplete", "newWidgetNamespace"]);
             const violations = checkSchemaDrift(canonicalNamespaces, "test-schema.ts");
-            expect(violations.some(v => v.detail.includes("drifted") && v.detail.includes("newWidgetNamespace"))).toBe(true);
+            expect(violations.some(v => v.detail.includes("drifted") && v.detail.includes("newWidgetNamespace"))).toBe(
+                true
+            );
         });
 
         it("detects drift when MONA_MESSAGE_NAMESPACES has extra namespaces missing from canonical schema", () => {
@@ -1423,7 +1533,9 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
 
         it("fails closed when canonical message schema file does not exist", () => {
             const result = loadCanonicalMessageNamespaces("/non/existent/canonical-schema.ts");
-            expect(result.violations.some(v => v.detail.includes("Canonical message schema file does not exist"))).toBe(true);
+            expect(result.violations.some(v => v.detail.includes("Canonical message schema file does not exist"))).toBe(
+                true
+            );
             expect(result.namespaces.size).toBe(0);
         });
 
@@ -1431,9 +1543,11 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
             const tempDir = mkdtempSync(join(tmpdir(), "mona-no-iface-"));
             try {
                 const fakeSchema = join(tempDir, "fake-schema.ts");
-                writeFileSync(fakeSchema, 'export interface OtherInterface { foo: string; }\n');
+                writeFileSync(fakeSchema, "export interface OtherInterface { foo: string; }\n");
                 const result = loadCanonicalMessageNamespaces(fakeSchema);
-                expect(result.violations.some(v => v.detail.includes('Could not find interface "MonaLocaleMessages"'))).toBe(true);
+                expect(
+                    result.violations.some(v => v.detail.includes('Could not find interface "MonaLocaleMessages"'))
+                ).toBe(true);
                 expect(result.namespaces.size).toBe(0);
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
@@ -1744,4 +1858,3 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
         });
     });
 });
-

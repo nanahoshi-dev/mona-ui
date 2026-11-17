@@ -213,7 +213,9 @@ describe("MONA_DE_DE_LOCALE", () => {
             expect(m.grid?.rowReorderDisabledEditing).toBe("Bearbeitung abschließen, um Zeilen neu anzuordnen.");
             expect(m.grid?.rowReorderDisabledFiltered).toBe("Filter aufheben, um Zeilen neu anzuordnen.");
             expect(m.grid?.rowReorderDisabledGrouped).toBe("Gruppierung aufheben, um Zeilen neu anzuordnen.");
-            expect(m.grid?.rowReorderDisabledSingleRow).toBe("Zum Neuanordnen sind mindestens zwei Zeilen erforderlich.");
+            expect(m.grid?.rowReorderDisabledSingleRow).toBe(
+                "Zum Neuanordnen sind mindestens zwei Zeilen erforderlich."
+            );
             expect(m.grid?.rowReorderDisabledSorted).toBe("Sortierung aufheben, um Zeilen neu anzuordnen.");
             expect(m.grid?.rowReorderDisabledVirtualScroll).toBe(
                 "Bei aktiviertem virtuellem Scrollen können Zeilen nicht neu angeordnet werden."
@@ -234,9 +236,7 @@ describe("MONA_DE_DE_LOCALE", () => {
             expect(m.calendar?.switchToYearView?.("September 2026")).toBe(
                 "Zur Jahresansicht wechseln, aktuell September 2026"
             );
-            expect(m.calendar?.switchToDecadeView?.("2026")).toBe(
-                "Zur Jahrzehntansicht wechseln, aktuell 2026"
-            );
+            expect(m.calendar?.switchToDecadeView?.("2026")).toBe("Zur Jahrzehntansicht wechseln, aktuell 2026");
         });
 
         it("formats Chart functions correctly", () => {

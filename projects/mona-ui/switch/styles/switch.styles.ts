@@ -94,7 +94,6 @@ export const switchHandleThemeVariants = cva(
             }
         }
     }
-
 );
 
 export const switchLabelThemeVariants = cva(

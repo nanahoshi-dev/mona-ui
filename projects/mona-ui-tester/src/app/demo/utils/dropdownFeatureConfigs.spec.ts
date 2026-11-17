@@ -52,7 +52,12 @@ describe("buildGroupableOptions", () => {
                 subFeatures: {
                     headerOrder: { active: false, description: "", name: "Header Order", dropdownValue: "desc" },
                     orderBy: { active: false, description: "", name: "Order By", dropdownValue: "price" },
-                    orderByDirection: { active: false, description: "", name: "Order By Direction", dropdownValue: "asc" }
+                    orderByDirection: {
+                        active: false,
+                        description: "",
+                        name: "Order By Direction",
+                        dropdownValue: "asc"
+                    }
                 }
             }
         } as unknown as ComponentConfigFeatureItem;

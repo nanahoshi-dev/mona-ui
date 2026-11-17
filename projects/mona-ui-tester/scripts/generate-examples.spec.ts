@@ -36,13 +36,14 @@ describe("generate-examples", () => {
     });
 
     it("wants the markup in its own file", () => {
-        const inline = "@Component({ selector: \"app-button-looks-example\", template: `<a></a>` })\nexport class A {}";
+        const inline = '@Component({ selector: "app-button-looks-example", template: `<a></a>` })\nexport class A {}';
 
         expect(checkExampleSource("button/looks", inline)[0]).toContain("template file");
     });
 
     it("finds the blocks that show an example, and only those", () => {
-        const markdown = "Text\n\n```example\nbutton/looks\n```\n\n```html\nnot/this\n```\n\n```example\r\nbutton/icons\r\n```";
+        const markdown =
+            "Text\n\n```example\nbutton/looks\n```\n\n```html\nnot/this\n```\n\n```example\r\nbutton/icons\r\n```";
 
         expect(findExampleReferences(markdown)).toEqual(["button/looks", "button/icons"]);
     });
@@ -68,7 +69,9 @@ describe("generate-examples", () => {
         });
 
         expect(project["src/app/looks-example.component.html"]).toBe("<a></a>");
-        expect(project["src/main.ts"]).toContain('import { ButtonLooksExampleComponent } from "./app/looks-example.component";');
+        expect(project["src/main.ts"]).toContain(
+            'import { ButtonLooksExampleComponent } from "./app/looks-example.component";'
+        );
         expect(project["src/index.html"]).toContain("<app-button-looks-example></app-button-looks-example>");
         expect(JSON.parse(project["package.json"]).dependencies["@nanahoshi/mona-ui"]).toBe("latest");
         expect(project["src/styles.css"]).not.toContain("typography");

@@ -74,6 +74,9 @@ function presetsFor(stages: readonly FunnelStage[]): readonly HiddenStagePreset[
     return [
         { text: "None", value: NO_HIDDEN_STAGES },
         { text: `Hide ${second.stage}`, value: [chartItemKeyId(second.id)] },
-        { text: `Hide ${second.stage} and ${third.stage}`, value: [chartItemKeyId(second.id), chartItemKeyId(third.id)] }
+        {
+            text: `Hide ${second.stage} and ${third.stage}`,
+            value: [chartItemKeyId(second.id), chartItemKeyId(third.id)]
+        }
     ];
 }

@@ -59,7 +59,6 @@ export class SpinnerComponent implements SpinnerVariantInput {
      */
     public readonly ariaLabel = input<string | undefined>(undefined, { alias: "aria-label" });
 
-
     /**
      * @description When `true`, removes the `img` role and hides the spinner from assistive technology with `aria-hidden="true"`.
      * Useful when visible text says the same thing, or a parent element already manages loading semantics (such as
