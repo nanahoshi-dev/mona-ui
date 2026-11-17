@@ -1,4 +1,3 @@
-import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
@@ -39,6 +38,7 @@ import {
     ListService,
     type SelectableOptions
 } from "@nanahoshi/mona-ui/internal/list";
+import { injectLiveAnnouncer } from "@nanahoshi/mona-ui/internal/live-announcer";
 import {
     ListViewComponent,
     ListViewFooterTemplateDirective,
@@ -177,7 +177,7 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
     });
     readonly #labelledByText = injectLabelledByText(() => this.ariaLabelledBy());
     readonly #listService = inject<ListService<T>>(ListService);
-    readonly #liveAnnouncer = inject(LiveAnnouncer);
+    readonly #liveAnnouncer = injectLiveAnnouncer();
     /** The list box's name as text: its `aria-label`, else the text of its `aria-labelledby` elements. */
     readonly #name = computed(() => this.ariaLabel().trim() || this.#labelledByText());
     /** The list box whose `connectedList` is this one, if any: its toolbar transfers items to and from this one. */

@@ -1,7 +1,7 @@
-import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { LucideGripVertical } from "@lucide/angular";
 import { CdkDragHandle } from "@angular/cdk/drag-drop";
 import { afterNextRender, Component, computed, ElementRef, inject, Injector, input } from "@angular/core";
+import { injectLiveAnnouncer } from "@nanahoshi/mona-ui/internal/live-announcer";
 import type { Row } from "../../models/Row";
 import { GridService } from "../../services/grid.service";
 import { gridRowReorderHandleThemeVariants } from "../../styles/grid.styles";
@@ -20,7 +20,7 @@ export class GridRowReorderHandleComponent {
     readonly #gridService = inject(GridService);
     readonly #hostElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
     readonly #injector = inject(Injector);
-    readonly #liveAnnouncer = inject(LiveAnnouncer);
+    readonly #liveAnnouncer = injectLiveAnnouncer();
     protected readonly ariaLabel = computed(() => {
         const absoluteIndex = this.pageIndex() + this.#gridService.paginationState().skip;
         const label = this.#gridService.getRowReorderAriaLabel(this.row(), absoluteIndex);

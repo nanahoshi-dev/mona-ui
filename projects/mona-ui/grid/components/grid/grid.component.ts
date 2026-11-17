@@ -1,4 +1,3 @@
-import { LiveAnnouncer } from "@angular/cdk/a11y";
 import {
     CdkDrag,
     CdkDragDrop,
@@ -47,6 +46,7 @@ import { fromEvent, type Subscription } from "rxjs";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ChipComponent } from "@nanahoshi/mona-ui/chip";
 import { FilterService } from "@nanahoshi/mona-ui/filter";
+import { injectLiveAnnouncer } from "@nanahoshi/mona-ui/internal/live-announcer";
 import { type PageChangeEvent, PagerComponent } from "@nanahoshi/mona-ui/pager";
 import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
 import { PopupComponent } from "@nanahoshi/mona-ui/popup";
@@ -174,7 +174,7 @@ export class GridComponent<T> implements GridVariantInput {
 
     readonly #injector = inject(Injector);
 
-    readonly #liveAnnouncer = inject(LiveAnnouncer);
+    readonly #liveAnnouncer = injectLiveAnnouncer();
 
     readonly #manuallyResized = signal(false);
 

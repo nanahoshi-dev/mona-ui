@@ -1,4 +1,4 @@
-import { FocusMonitor, LiveAnnouncer } from "@angular/cdk/a11y";
+import { FocusMonitor } from "@angular/cdk/a11y";
 import {
     afterNextRender,
     Component,
@@ -18,6 +18,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
+import { injectLiveAnnouncer } from "@nanahoshi/mona-ui/internal/live-announcer";
 import { asapScheduler, filter, fromEvent, merge, Subject, switchMap, takeWhile } from "rxjs";
 import { TreeNodeTemplateDirective } from "../../directives/tree-node-template.directive";
 import { TREE_DEFAULT_MESSAGES } from "../../i18n/tree.default-messages";
@@ -58,7 +59,7 @@ const MOVE_KEY_SHORTCUTS =
     }
 })
 export class TreeComponent<T> {
-    readonly #announcer = inject(LiveAnnouncer);
+    readonly #announcer = injectLiveAnnouncer();
     readonly #destroyRef = inject(DestroyRef);
     readonly #direction = injectComponentDirection();
     readonly #document = inject(DOCUMENT);

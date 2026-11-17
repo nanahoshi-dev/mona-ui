@@ -1,7 +1,7 @@
-import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { Directive, effect, inject, untracked } from "@angular/core";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { ListService } from "@nanahoshi/mona-ui/internal/list";
+import { injectLiveAnnouncer } from "@nanahoshi/mona-ui/internal/live-announcer";
 import { DROPDOWNS_DEFAULT_MESSAGES } from "../i18n/dropdowns.default-messages";
 import { DropdownService } from "../services/dropdown.service";
 
@@ -21,7 +21,7 @@ export class DropdownLiveRegionDirective {
     readonly #dropdownService = inject(DropdownService);
     readonly #i18n = inject(MonaI18nService);
     readonly #listService = inject(ListService);
-    readonly #liveAnnouncer = inject(LiveAnnouncer);
+    readonly #liveAnnouncer = injectLiveAnnouncer();
     readonly #messages = this.#i18n.componentMessages("dropdowns", DROPDOWNS_DEFAULT_MESSAGES);
 
     public constructor() {
