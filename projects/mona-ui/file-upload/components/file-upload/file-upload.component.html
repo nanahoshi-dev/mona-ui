@@ -1,0 +1,113 @@
+<!-- The zone also opens the dialog on a click, as a shortcut for the pointer; the browse button is the way in for the keyboard. -->
+<div
+    [class]="zoneClass"
+    [attr.data-disabled]="effectiveDisabled() || null"
+    [attr.data-dragging]="dragging() || null"
+    [attr.data-invalid]="invalidState() || null"
+    [attr.data-readonly]="readonly() || null"
+    (click)="onZoneClick($event)"
+    (dragenter)="onDragEnter($event)"
+    (dragleave)="onDragLeave($event)"
+    (dragover)="onDragOver($event)"
+    (drop)="onDrop($event)">
+    <svg lucideCloudUpload [class]="zoneIconClass" [size]="24" aria-hidden="true"></svg>
+    <span [class]="zoneTextClass">
+        {{ dragging() ? messages().dropToAdd : multiple() ? messages().dropFiles : messages().dropFile }}
+    </span>
+    @if (restrictions()) {
+        <span [class]="restrictionsClass" [id]="restrictionsId">{{ restrictions() }}</span>
+    }
+    <button
+        #browseButton
+        monaButton
+        size="small"
+        [class]="browseClass"
+        [attr.aria-describedby]="browseDescribedBy()"
+        [disabled]="!interactive()"
+        (click)="browse()">
+        {{ multiple() ? messages().browse : messages().browseFile }}
+    </button>
+</div>
+<input
+    #fileInput
+    type="file"
+    class="sr-only"
+    aria-hidden="true"
+    tabindex="-1"
+    [accept]="accept()"
+    [disabled]="!interactive()"
+    [multiple]="multiple()"
+    (change)="onFileInputChange($event)" />
+
+@if (rows().length > 0) {
+    <ul [class]="listClass" [attr.aria-label]="messages().files">
+        @for (row of rows(); track row.key) {
+            <li [class]="itemClass" [attr.data-file-row]="row.key" [attr.data-status]="row.item.status">
+                @switch (row.icon) {
+                    @case ("error") {
+                        <svg lucideCircleAlert [class]="itemIconClass.error" [size]="18" aria-hidden="true"></svg>
+                    }
+                    @case ("uploaded") {
+                        <svg lucideCircleCheck [class]="itemIconClass.uploaded" [size]="18" aria-hidden="true"></svg>
+                    }
+                    @default {
+                        <svg lucideFile [class]="itemIconClass.file" [size]="18" aria-hidden="true"></svg>
+                    }
+                }
+                <div [class]="itemBodyClass">
+                    <span [class]="itemNameClass" [id]="row.nameId" [attr.title]="row.item.file.name">
+                        {{ row.item.file.name }}
+                    </span>
+                    <span [class]="row.statusError ? itemStatusClass.error : itemStatusClass.muted" [id]="row.statusId">
+                        {{ row.status }}
+                    </span>
+                    @if (row.item.status === "uploading") {
+                        <mona-progress-bar
+                            [class]="itemProgressClass"
+                            [aria-label]="row.progressLabel"
+                            [indeterminate]="row.progressValue === null"
+                            [labelVisible]="false"
+                            [rounded]="'full'"
+                            [value]="row.progressValue ?? 0" />
+                    }
+                </div>
+                @if (row.actionsShown) {
+                    <div [class]="itemActionsClass">
+                        @if (row.item.status === "failed") {
+                            <button
+                                monaButton
+                                look="ghost"
+                                size="small"
+                                [attr.aria-label]="row.retryLabel"
+                                [attr.aria-describedby]="row.statusId"
+                                [disabled]="!interactive()"
+                                [iconOnly]="true"
+                                (click)="onRetryClick(row)">
+                                <svg lucideRotateCw [size]="16" aria-hidden="true"></svg>
+                            </button>
+                        }
+                        <button
+                            monaButton
+                            data-file-action="remove"
+                            look="ghost"
+                            size="small"
+                            [attr.aria-label]="row.removeLabel"
+                            [disabled]="!interactive()"
+                            [iconOnly]="true"
+                            (click)="onRemoveClick(row)">
+                            <svg lucideX [size]="16" aria-hidden="true"></svg>
+                        </button>
+                    </div>
+                }
+            </li>
+        }
+    </ul>
+}
+
+@if (pendingActionsShown()) {
+    <div [class]="actionsClass">
+        <button monaButton look="ghost" size="small" (click)="onClearClick()">{{ messages().clear }}</button>
+        <button monaButton look="primary" size="small" (click)="onUploadClick()">{{ messages().upload }}</button>
+    </div>
+}
+<span class="sr-only" role="status" aria-atomic="true">{{ announcement() }}</span>
