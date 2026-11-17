@@ -281,6 +281,11 @@ export const routes: Routes = [
                     import("./docs/components/fieldset-doc/fieldset-doc.component").then(m => m.FieldsetDocComponent)
             },
             {
+                path: "form-field",
+                loadComponent: () =>
+                    import("./docs/components/form-field-doc/form-field-doc.component").then(m => m.FormFieldDocComponent)
+            },
+            {
                 path: "grid",
                 loadComponent: () =>
                     import("./docs/components/grid-doc/grid-doc.component").then(m => m.GridDocComponent)

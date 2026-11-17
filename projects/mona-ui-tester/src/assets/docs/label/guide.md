@@ -5,8 +5,7 @@
 ### Out of scope
 
 - Floating labels (`FloatingLabel`).
-- Form-field containers, hint/help/validation/error-message components.
-- Automatically reading a control's `required` state or rendering a required asterisk.
+- Hints, validation errors and a required marker. [`mona-form-field`](/components/form-field) adds them around a control, with a label of its own.
 - Automatically generating IDs for controls, or naming custom components that don't support it.
 
 A label that animates into a placeholder position is a separate feature that isn't implemented yet. `LabelComponent` and `LabelDirective` only render static, always-visible captions.
@@ -165,8 +164,8 @@ A string `for` can't work on a component's host element, because a host such as 
 | `mona-check-box`, `mona-radio-button`                                                                      | Don't wrap: they render their own `<label>`       | Named. A click activates.     | Yes, on `inputId`             |
 | `mona-switch`                                                                                              | Named. A click toggles.                           | Named. A click toggles.       | No, warns in development      |
 | `mona-slider`, `mona-range-slider`, `mona-rating`, `mona-segmented`, `mona-radio-group`, `mona-button-group`, `mona-color-palette`, `mona-color-picker`, `mona-color-gradient` | Named. A click focuses. | Named. A click focuses. | No, warns in development |
-| `mona-numeric-text-box`, `mona-decimal-text-box`, `mona-date-picker`                                       | Named by the browser from the inner input. A click focuses. | Focus only, not named | Yes, on `inputId`             |
-| `mona-dropdown-list`                                                                                       | Not connected                                     | Focus only, not named         | No: it has no native input    |
+| `mona-numeric-text-box`, `mona-decimal-text-box`, `mona-date-picker`, `mona-time-picker`, `mona-datetime-picker`, `mona-combo-box`, `mona-auto-complete` | Named. A click focuses. | Focus only, not named | Yes, on `inputId`             |
+| `mona-dropdown-list`, `mona-multi-select`, `mona-editor`                                                   | Named. A click focuses.                           | Focus only, not named         | No: they have no native input |
 | Other controls                                                                                             | Not connected, unless they hold a native input    | Focus only, not named         | Only on a native input's `id` |
 
 A control that is focus only with `[for]` still needs a name. Give it `aria-labelledby` pointing at the label's `id`, as the dropdown list examples do, or use `inputId` where the control has one:
@@ -194,5 +193,5 @@ Do not wrap `CheckBoxComponent` or `RadioButtonComponent` in `<mona-label>`, and
 - Both APIs render a real native `<label>` — no ARIA `role` is added, and none is needed.
 - A wrapped control is named by the `text` input or its own `aria-label` or `aria-labelledby`. Text projected next to it can't name it, and `mona-label` warns in development if nothing else does.
 - A reference in `for` names the control only if the control supports it. Other targets, such as a native element reference, `mona-dropdown-list`, `mona-numeric-text-box` or `mona-date-picker`, only receive focus on click, so give them their own `aria-label` or `aria-labelledby`, or point a string `for` at their `inputId` where they have one.
-- `LabelComponent` never reads a projected control's `required` state and never renders a required asterisk — pair it with your own validation messaging if needed.
+- `LabelComponent` never reads a projected control's `required` state and never renders a required asterisk. Use `mona-form-field` for that, and for hints and errors.
 - Do not wrap `CheckBoxComponent` or `RadioButtonComponent` in `<mona-label>`; both already render their own native `<label>`, and nesting `<label>` elements is invalid HTML. Use their built-in `label` input, or `[for]="ref"` from outside.

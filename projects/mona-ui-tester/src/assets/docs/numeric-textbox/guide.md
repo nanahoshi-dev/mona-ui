@@ -94,7 +94,7 @@ The `invalid` and `touched` inputs are written by `FormField` when the control i
 
 **Consumer responsibilities**
 
-- Name the control. Point a `<label for>` or `<mona-label for>` at `inputId`, wrap it in `<mona-label text="...">` (the browser names the inner input from the label), or set `aria-labelledby` or `aria-label`. The placeholder is not a label. `[for]` bound to a template reference only moves focus to the input on click, and doesn't name it.
+- Name the control. Point a `<label for>` or `<mona-label for>` at `inputId`, wrap it in `<mona-label text="...">` or `<mona-form-field label="...">`, or set `aria-labelledby` or `aria-label`. The placeholder is not a label. `[for]` bound to a template reference only moves focus to the input on click, and doesn't name it.
 
 <!-- verification-checklist
 - [ ] API definitions and defaults verified against source and component metadata

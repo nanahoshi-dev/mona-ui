@@ -218,7 +218,7 @@ The host element is the only Tab stop; DOM focus does not move into the popup's 
 | `aria-invalid`          | `invalid` is `true`, or `required` is `true` and the control is `touched` with no value selected | `"true"`                                          |
 | `aria-busy`             | `loading` is `true`                                                                              | `"true"`                                          |
 
-Name the dropdown list with `aria-labelledby` pointing at a visible label's `id`, or with `aria-label`. The `placeholder` only supplies a fallback name, and it disappears from view once a value is selected. A label can't name it in any other way: the host is a `role="combobox"` element, not a native input, so wrapping it in `<mona-label>` doesn't name it, and a string `for` has nothing to point at. `[for]` bound to its template reference makes a click on the label focus it, but doesn't name it. That's why the examples use both:
+Name the dropdown list by wrapping it in `<mona-label text="...">` or `<mona-form-field label="...">`, with `aria-labelledby` pointing at a visible label's `id`, or with `aria-label`. The `placeholder` only supplies a fallback name, and it disappears from view once a value is selected. The host is a `role="combobox"` element, not a native input, so a string `for` has nothing to point at, and `[for]` bound to its template reference makes a click on the label focus it, but doesn't name it. That's why the examples that keep the label apart use both:
 
 ```html
 <label id="shipping-label" monaLabel [for]="shippingList">Shipping method</label>

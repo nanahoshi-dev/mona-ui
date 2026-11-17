@@ -1,0 +1,20 @@
+<div class="flex max-w-sm flex-col gap-4">
+    <mona-form-field label="Date">
+        <mona-date-picker [formField]="booking.date" />
+    </mona-form-field>
+    <mona-form-field label="Room" hint="Each room seats up to 40 people.">
+        <mona-dropdown-list class="w-full" [data]="rooms" [formField]="booking.room" />
+    </mona-form-field>
+    <mona-form-field label="Seating">
+        <mona-radio-group [formField]="booking.seating">
+            <mona-radio-button label="Tables" radioValue="table" />
+            <mona-radio-button label="Rows" radioValue="rows" />
+        </mona-radio-group>
+    </mona-form-field>
+    <mona-form-field label="Notes" optional>
+        <textarea monaTextArea class="w-full" rows="3" [formField]="booking.notes"></textarea>
+    </mona-form-field>
+    <mona-form-field label="Send me the newsletter" orientation="horizontal">
+        <mona-switch [formField]="booking.newsletter" />
+    </mona-form-field>
+</div>

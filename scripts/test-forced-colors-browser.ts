@@ -51,6 +51,7 @@ const ROUTES = [
     "editor",
     "expansion-panel",
     "fieldset",
+    "form-field",
     "grid",
     "input",
     "list-box",

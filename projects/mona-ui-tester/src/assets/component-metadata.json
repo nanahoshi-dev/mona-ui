@@ -2898,6 +2898,14 @@
         "defaultValue": "true"
       },
       {
+        "description": "Id of an element that describes the button group, such as a hint or an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Accessible name for the host element. Override when multiple button groups appear on the same page\nso screen reader users can distinguish them.",
         "kind": "input",
         "name": "ariaLabel",
@@ -8628,6 +8636,14 @@
         "type": "void"
       },
       {
+        "description": "Id of an element that describes the color gradient, such as a hint or an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Accessible name of the group of controls.",
         "kind": "input",
         "name": "ariaLabel",
@@ -8758,6 +8774,14 @@
     "selector": "\"mona-color-palette\"",
     "inputs": [
       {
+        "description": "Id of an element that describes the color palette, such as a hint or an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Accessible label for the color palette grid.",
         "kind": "input",
         "name": "ariaLabel",
@@ -8875,6 +8899,14 @@
     "name": "ColorPickerComponent",
     "selector": "\"mona-color-picker\"",
     "inputs": [
+      {
+        "description": "Id of an element that describes the color picker, such as a hint or an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
       {
         "description": "Accessible label for the color picker combobox.",
         "kind": "input",
@@ -11213,6 +11245,80 @@
         "kind": "model",
         "name": "value",
         "type": "FilterMenuValue"
+      }
+    ]
+  },
+  "FormFieldComponent": {
+    "name": "FormFieldComponent",
+    "selector": "\"mona-form-field\"",
+    "inputs": [
+      {
+        "description": "Text shown as an error, whether or not the control is touched, such as an error from a server. It\ncomes before the errors of a bound signal form field. Set the control's own `invalid` and `touched` too, so it\ndraws its error state.",
+        "kind": "input",
+        "name": "error",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Help text shown below the control. It describes the control through `aria-describedby`. Ignored\nwhen `monaFormFieldHintTemplate` is provided.",
+        "kind": "input",
+        "name": "hint",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The label shown above or beside the control. It names the control through `aria-labelledby`.\nIgnored when `monaFormFieldLabelTemplate` is provided.",
+        "kind": "input",
+        "name": "label",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Whether to show optional-field text after the label.",
+        "kind": "input",
+        "name": "optional",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Text shown after the label when `optional` is set.",
+        "kind": "input",
+        "name": "optionalText",
+        "type": "string",
+        "defaultValue": "the `formField.optional` message"
+      },
+      {
+        "description": "Where the label goes: above the control, or beside it in a column set by the\n`--mona-form-field-label-width` custom property (10rem by default).",
+        "kind": "input",
+        "name": "orientation",
+        "type": "FormFieldOrientation",
+        "options": [
+          "horizontal",
+          "vertical"
+        ],
+        "defaultValue": "\"vertical\""
+      },
+      {
+        "description": "Shows the required marker after the label. A bound signal form field with a `required` rule shows it\ntoo. The marker is hidden from assistive technology, which reads the control's own required state.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Whether a required field shows its marker. Turn it off for a form that marks optional fields instead.",
+        "kind": "input",
+        "name": "showRequiredMarker",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -15262,6 +15368,14 @@
         "defaultValue": "true"
       },
       {
+        "description": "Id of an element that describes the segmented control, such as a hint or an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Accessible name for the radio group. Provide either `aria-label` or `aria-labelledby`.",
         "kind": "input",
         "name": "ariaLabel",
@@ -16977,6 +17091,14 @@
     "name": "SwitchComponent",
     "selector": "\"mona-switch\"",
     "inputs": [
+      {
+        "description": "Id of an element that describes the switch, such as a hint or an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
       {
         "description": "Accessible name for the host element. Describe what the component represents.\nWhen empty, assistive technology announces the role without a label.",
         "kind": "input",

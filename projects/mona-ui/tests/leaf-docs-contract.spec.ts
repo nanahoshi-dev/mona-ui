@@ -73,6 +73,7 @@ const coveredEntryPoints: readonly (readonly [entry: string, docs: readonly stri
     ["command", ["command"]],
     ["expansion-panel", ["expansion-panel"]],
     ["fieldset", ["fieldset"]],
+    ["form-field", ["form-field"]],
     ["label", ["label"]],
     ["otp-input", ["otp-input"]],
     ["placeholder", ["placeholder"]],
