@@ -194,6 +194,27 @@ export default [
             ]
         }
     },
+    {
+        // CDK's LiveAnnouncer doesn't load the style that hides its live region; injectLiveAnnouncer() does.
+        files: ["projects/mona-ui/**/*.ts"],
+        ignores: ["projects/mona-ui/**/*.spec.ts", "projects/mona-ui/internal/live-announcer/**"],
+        rules: {
+            "@typescript-eslint/no-restricted-imports": [
+                "error",
+                {
+                    paths: [
+                        {
+                            name: "@angular/cdk/a11y",
+                            importNames: ["LiveAnnouncer"],
+                            allowTypeImports: true,
+                            message:
+                                "Use injectLiveAnnouncer() from @nanahoshi/mona-ui/internal/live-announcer, which also loads the style that hides the live region."
+                        }
+                    ]
+                }
+            ]
+        }
+    },
     ...angular.configs.templateRecommended.map(config => ({
         ...config,
         files: ["**/*.html"]

@@ -1,4 +1,3 @@
-import { LiveAnnouncer } from "@angular/cdk/a11y";
 import {
     ApplicationRef,
     ComponentRef,
@@ -14,6 +13,7 @@ import {
     RendererFactory2
 } from "@angular/core";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectLiveAnnouncer } from "@nanahoshi/mona-ui/internal/live-announcer";
 import { defer, finalize, Observable, Subject, takeUntil } from "rxjs";
 import { v4 } from "uuid";
 import { SpinnerOverlayComponent } from "../components/spinner-overlay/spinner-overlay.component";
@@ -71,7 +71,7 @@ export class SpinnerService implements OnDestroy {
     readonly #document = inject(DOCUMENT);
     readonly #i18n = inject(MonaI18nService);
     readonly #injector = inject(Injector);
-    readonly #liveAnnouncer = inject(LiveAnnouncer);
+    readonly #liveAnnouncer = injectLiveAnnouncer();
     readonly #messages = this.#i18n.componentMessages("spinner", SPINNER_DEFAULT_MESSAGES);
     readonly #renderer = inject(RendererFactory2).createRenderer(null, null);
 

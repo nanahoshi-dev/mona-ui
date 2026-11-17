@@ -1,4 +1,3 @@
-import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
@@ -21,6 +20,7 @@ import {
 import { LucideBadgeInfo, LucideCircleCheckBig, LucideOctagonAlert, LucideOctagonX, LucideX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectLiveAnnouncer } from "@nanahoshi/mona-ui/internal/live-announcer";
 import { ProgressBarComponent } from "@nanahoshi/mona-ui/progress-bar";
 import { NOTIFICATION_DEFAULT_MESSAGES } from "../../i18n/notification.default-messages";
 import type { NotificationData } from "../../models/NotificationData";
@@ -79,7 +79,7 @@ const RETURN_FOCUS = new WeakMap<Element, HTMLElement>();
     }
 })
 export class NotificationComponent {
-    readonly #announcer = inject(LiveAnnouncer);
+    readonly #announcer = injectLiveAnnouncer();
     readonly #defaults = inject(NOTIFICATION_DEFAULTS);
     readonly #destroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);

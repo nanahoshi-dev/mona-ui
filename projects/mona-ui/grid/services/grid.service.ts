@@ -1,5 +1,4 @@
 import { GRID_DEFAULT_VIRTUAL_ROW_HEIGHT } from "../constants/grid-virtual-scroll.constants";
-import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { isPlatformBrowser } from "@angular/common";
 import {
     computed,
@@ -25,6 +24,7 @@ import {
 } from "@mirei/ts-collections";
 import { deepEquals, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { injectLiveAnnouncer } from "@nanahoshi/mona-ui/internal/live-announcer";
 import { PopupMenuItem } from "@nanahoshi/mona-ui/popup-menu";
 import {
     compareValues,
@@ -200,7 +200,7 @@ export class GridService {
     readonly #horizontalScrollLeft = signal(0);
     readonly #i18n = inject(MonaI18nService);
     readonly #injector = inject(Injector);
-    readonly #liveAnnouncer = inject(LiveAnnouncer);
+    readonly #liveAnnouncer = injectLiveAnnouncer();
     readonly #platformId = inject(PLATFORM_ID);
     readonly #reorderableOptions = signal<ReorderableOptions>({ enabled: false });
     readonly #resizableOptions = signal<ResizableOptions>({ enabled: false });
