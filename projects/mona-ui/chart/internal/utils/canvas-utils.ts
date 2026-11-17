@@ -3,7 +3,6 @@ import type { ChartRect } from "../../models/chart.models";
 import type { ChartCornerRadii } from "../scene/scene-geometry";
 import { clamp } from "./number-utils";
 
-
 /**
  * Small overflow allowance so marks whose stroke or radius sits exactly at a
  * domain extreme (a peak touching the max, a hovered point marker at the
@@ -349,4 +348,3 @@ export function resolveCanvasStrokeDashArray(lineStyle?: ChartLineStyle | null):
             return [];
     }
 }
-

@@ -48,7 +48,10 @@ describe("generate-search-index", () => {
     });
 
     it("gives headings the ids the site gives them, unique across the page's files", () => {
-        const html = renderSearchDocument(PAGE, "Navigation", ["## Import & Quick Start", "## Overview\n\n## Overview"]);
+        const html = renderSearchDocument(PAGE, "Navigation", [
+            "## Import & Quick Start",
+            "## Overview\n\n## Overview"
+        ]);
 
         expect(html).toContain('<h2 id="import-quick-start">');
         expect(html).toContain('<h2 id="overview">');

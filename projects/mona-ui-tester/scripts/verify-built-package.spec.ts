@@ -165,7 +165,10 @@ describe("verify-built-package", () => {
         it("fails when the package has no stylesheet", () => {
             const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
             try {
-                writeFileSync(join(fakeDist, "package.json"), JSON.stringify({ exports: { "./styles.css": "./styles.css" } }));
+                writeFileSync(
+                    join(fakeDist, "package.json"),
+                    JSON.stringify({ exports: { "./styles.css": "./styles.css" } })
+                );
                 expect(() => verifyPackageStyles(fakeDist)).toThrow("styles.css not found");
             } finally {
                 rmSync(fakeDist, { recursive: true, force: true });
@@ -230,10 +233,7 @@ export declare function getLocaleDateTimeInputFormat(locale: string, options?: {
 export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayOfWeek;
 `;
 
-    const CANONICAL_CLDR_LICENSE = readFileSync(
-        resolve(process.cwd(), "scripts/cldr/LICENSE"),
-        "utf-8"
-    );
+    const CANONICAL_CLDR_LICENSE = readFileSync(resolve(process.cwd(), "scripts/cldr/LICENSE"), "utf-8");
 
     const DEFAULT_THIRD_PARTY_NOTICES = `# Third-Party Notices
 
@@ -298,8 +298,10 @@ ${CANONICAL_CLDR_LICENSE.trim()}
             const fakeDist = mkdtempSync(join(tmpdir(), "fake-dist-"));
             try {
                 populateFakeDist(fakeDist, {
-                    localesMjs: 'export const es_ES = { id: "es-ES", direction: "ltr", messages: { greeting: "hola" } };\n',
-                    localesDts: 'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                    localesMjs:
+                        'export const es_ES = { id: "es-ES", direction: "ltr", messages: { greeting: "hola" } };\n',
+                    localesDts:
+                        "export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n"
                 });
 
                 expect(() =>
@@ -323,7 +325,8 @@ export function getLocaleTimeInputFormat(locale, options) { return "a hh:mm"; }
 export function getLocaleDateTimeInputFormat(locale, options) { return "yyyy. MM. dd. a hh:mm"; }
 export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
 `,
-                    localesDts: 'export declare const ko_KR: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const ko_KR: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const ko_KR = { id: "ko-KR", direction: "ltr", messages: {} };\n'
                 });
 
@@ -348,7 +351,8 @@ export function getLocaleTimeInputFormat() { return "a hh:mm"; }
 export function getLocaleDateTimeInputFormat() { return "yyyy. MM. dd. a hh:mm"; }
 export function getLocaleFirstDayOfWeek() { return "sunday"; }
 `,
-                    localesDts: 'export declare const ko_KR: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const ko_KR: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const ko_KR = { id: "ko-KR", direction: "ltr", messages: {} };\n'
                 });
 
@@ -373,7 +377,8 @@ export function getLocaleTimeInputFormat(locale, options) { return "hh:mm a"; }
 export function getLocaleDateTimeInputFormat(locale, options) { return "dd/MM/yyyy، hh:mm a"; }
 export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
 `,
-                    localesDts: 'export declare const ar_SA: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const ar_SA: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const ar_SA = { id: "ar-SA", direction: "rtl", messages: {} };\n'
                 });
 
@@ -398,7 +403,8 @@ export function getLocaleTimeInputFormat(locale, options) { return "hh:mm a"; }
 export function getLocaleDateTimeInputFormat(locale, options) { return "dd/MM/yyyy، hh:mm a"; }
 export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
 `,
-                    localesDts: 'export declare const ar_SA: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const ar_SA: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const ar_SA = { id: "ar-SA", direction: "rtl", messages: {} };\n'
                 });
 
@@ -423,7 +429,8 @@ export function getLocaleTimeInputFormat(locale, options) { return "HH:mm"; }
 export function getLocaleDateTimeInputFormat(locale, options) { return "dd/MM/yyyy, HH:mm"; }
 export function getLocaleFirstDayOfWeek(locale) { return locale === "it-IT" ? "monday" : "sunday"; }
 `,
-                    localesDts: 'export declare const it_IT: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const it_IT: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const it_IT = { id: "it-IT", direction: "ltr", messages: {} };\n'
                 });
 
@@ -448,7 +455,8 @@ export function getLocaleTimeInputFormat(locale, options) { return "HH:mm"; }
 export function getLocaleDateTimeInputFormat(locale, options) { return "dd/MM/yyyy, HH:mm"; }
 export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
 `,
-                    localesDts: 'export declare const it_IT: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const it_IT: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const it_IT = { id: "it-IT", direction: "ltr", messages: {} };\n'
                 });
 
@@ -473,7 +481,8 @@ export function getLocaleTimeInputFormat(locale, options) { return options?.hour
 export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd.MM.yyyy a hh:mm" : "dd.MM.yyyy HH:mm"; }
 export function getLocaleFirstDayOfWeek(locale) { return locale === "tr-TR" ? "monday" : "sunday"; }
 `,
-                    localesDts: 'export declare const MONA_TR_TR_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const MONA_TR_TR_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const MONA_TR_TR_LOCALE = { id: "tr-TR", direction: "ltr", messages: {} };\n'
                 });
 
@@ -498,7 +507,8 @@ export function getLocaleTimeInputFormat(locale, options) { return options?.hour
 export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd.MM.yyyy a hh:mm" : "dd.MM.yyyy HH:mm"; }
 export function getLocaleFirstDayOfWeek(locale) { return locale === "tr-TR" ? "monday" : "sunday"; }
 `,
-                    localesDts: 'export declare const MONA_TR_TR_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const MONA_TR_TR_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const MONA_TR_TR_LOCALE = { id: "tr-TR", direction: "ltr", messages: {} };\n'
                 });
 
@@ -523,7 +533,8 @@ export function getLocaleTimeInputFormat(locale, options) { return options?.hour
 export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd/MM/yyyy, hh.mm a" : "dd/MM/yyyy, HH.mm"; }
 export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
 `,
-                    localesDts: 'export declare const MONA_ID_ID_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const MONA_ID_ID_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const MONA_ID_ID_LOCALE = { id: "id-ID", direction: "ltr", messages: {} };\n'
                 });
 
@@ -548,7 +559,8 @@ export function getLocaleTimeInputFormat(locale, options) { return options?.hour
 export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd/MM/yyyy, hh.mm a" : "dd/MM/yyyy, HH.mm"; }
 export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
 `,
-                    localesDts: 'export declare const MONA_ID_ID_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const MONA_ID_ID_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const MONA_ID_ID_LOCALE = { id: "id-ID", direction: "ltr", messages: {} };\n'
                 });
 
@@ -573,7 +585,8 @@ export function getLocaleTimeInputFormat(locale, options) { return options?.hour
 export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd/MM/yyyy, hh.mm a" : "dd/MM/yyyy, HH.mm"; }
 export function getLocaleFirstDayOfWeek(locale) { return locale === "id-ID" ? "monday" : "sunday"; }
 `,
-                    localesDts: 'export declare const MONA_ID_ID_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const MONA_ID_ID_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const MONA_ID_ID_LOCALE = { id: "id-ID", direction: "ltr", messages: {} };\n'
                 });
 
@@ -598,7 +611,8 @@ export function getLocaleTimeInputFormat(locale, options) { return options?.hour
 export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd.MM.yyyy, hh:mm a" : "dd.MM.yyyy, HH:mm"; }
 export function getLocaleFirstDayOfWeek(locale) { return locale === "ru-RU" ? "monday" : "sunday"; }
 `,
-                    localesDts: 'export declare const MONA_RU_RU_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const MONA_RU_RU_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const MONA_RU_RU_LOCALE = { id: "ru-RU", direction: "ltr", messages: {} };\n'
                 });
 
@@ -623,7 +637,8 @@ export function getLocaleTimeInputFormat(locale, options) { return options?.hour
 export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd.MM.yyyy, hh:mm a" : "dd.MM.yyyy, HH:mm"; }
 export function getLocaleFirstDayOfWeek(locale) { return locale === "ru-RU" ? "monday" : "sunday"; }
 `,
-                    localesDts: 'export declare const MONA_RU_RU_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const MONA_RU_RU_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const MONA_RU_RU_LOCALE = { id: "ru-RU", direction: "ltr", messages: {} };\n'
                 });
 
@@ -648,7 +663,8 @@ export function getLocaleTimeInputFormat(locale, options) { return options?.hour
 export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd.MM.yyyy, hh:mm a" : "dd.MM.yyyy, HH:mm"; }
 export function getLocaleFirstDayOfWeek(locale) { return "sunday"; }
 `,
-                    localesDts: 'export declare const MONA_RU_RU_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const MONA_RU_RU_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const MONA_RU_RU_LOCALE = { id: "ru-RU", direction: "ltr", messages: {} };\n'
                 });
 
@@ -673,7 +689,8 @@ export function getLocaleTimeInputFormat(locale, options) { return options?.hour
 export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd.MM.yyyy, hh:mm a" : "dd.MM.yyyy, HH:mm"; }
 export function getLocaleFirstDayOfWeek(locale) { return locale === "ru-RU" ? "monday" : "sunday"; }
 `,
-                    localesDts: 'export declare const MONA_RU_RU_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const MONA_RU_RU_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const MONA_RU_RU_LOCALE = { id: "ru-RU", direction: "ltr", messages: {} };\n'
                 });
 
@@ -698,7 +715,8 @@ export function getLocaleTimeInputFormat(locale, options) { return options?.hour
 export function getLocaleDateTimeInputFormat(locale, options) { return options?.hourFormat === "12" ? "dd.MM.yyyy, hh:mm a" : "dd.MM.yyyy HH:mm"; }
 export function getLocaleFirstDayOfWeek(locale) { return locale === "ru-RU" ? "monday" : "sunday"; }
 `,
-                    localesDts: 'export declare const MONA_RU_RU_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const MONA_RU_RU_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     localesMjs: 'export const MONA_RU_RU_LOCALE = { id: "ru-RU", direction: "ltr", messages: {} };\n'
                 });
 
@@ -718,7 +736,8 @@ export function getLocaleFirstDayOfWeek(locale) { return locale === "ru-RU" ? "m
             try {
                 populateFakeDist(fakeDist, {
                     localesMjs: "export const de_DE = { id: 'de-DE', direction: 'ltr', messages: {} };\n",
-                    localesDts: "export declare const de_DE: { id: string; direction: string; messages: Record<string, unknown> };\n"
+                    localesDts:
+                        "export declare const de_DE: { id: string; direction: string; messages: Record<string, unknown> };\n"
                 });
 
                 expect(() =>
@@ -737,7 +756,8 @@ export function getLocaleFirstDayOfWeek(locale) { return locale === "ru-RU" ? "m
             try {
                 populateFakeDist(fakeDist, {
                     localesMjs: 'export const es_ES = { id: "de-DE", direction: "ltr", messages: {} };\n',
-                    localesDts: 'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                    localesDts:
+                        "export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n"
                 });
 
                 expect(() =>
@@ -756,7 +776,8 @@ export function getLocaleFirstDayOfWeek(locale) { return locale === "ru-RU" ? "m
             try {
                 populateFakeDist(fakeDist, {
                     localesMjs: 'export const es_ES = { id: "es-ES", direction: "horizontal", messages: {} };\n',
-                    localesDts: 'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                    localesDts:
+                        "export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n"
                 });
 
                 expect(() =>
@@ -775,7 +796,8 @@ export function getLocaleFirstDayOfWeek(locale) { return locale === "ru-RU" ? "m
             try {
                 populateFakeDist(fakeDist, {
                     localesMjs: 'export const es_ES = { id: "es-ES", direction: "rtl", messages: {} };\n',
-                    localesDts: 'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                    localesDts:
+                        "export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n"
                 });
 
                 expect(() =>
@@ -794,7 +816,8 @@ export function getLocaleFirstDayOfWeek(locale) { return locale === "ru-RU" ? "m
             try {
                 populateFakeDist(fakeDist, {
                     localesMjs: "export const es_ES = { id: 'es-ES', direction: 'ltr' };\n",
-                    localesDts: "export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n"
+                    localesDts:
+                        "export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n"
                 });
 
                 expect(() =>
@@ -813,7 +836,8 @@ export function getLocaleFirstDayOfWeek(locale) { return locale === "ru-RU" ? "m
             try {
                 populateFakeDist(fakeDist, {
                     localesMjs: 'export const es_ES = { id: "es-ES", direction: "ltr", messages: {} };\n',
-                    localesDts: 'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     i18nMjs: "export function getLocaleTimeInputFormat() {};\n"
                 });
 
@@ -822,7 +846,9 @@ export function getLocaleFirstDayOfWeek(locale) { return locale === "ru-RU" ? "m
                         distDir: fakeDist,
                         expectedLocales: [{ symbol: "es_ES", id: "es-ES" }]
                     })
-                ).toThrow(/does not provide an export named 'getLocaleDateInputFormat'|Missing export getLocaleDateInputFormat/);
+                ).toThrow(
+                    /does not provide an export named 'getLocaleDateInputFormat'|Missing export getLocaleDateInputFormat/
+                );
             } finally {
                 rmSync(fakeDist, { recursive: true, force: true });
             }
@@ -852,7 +878,8 @@ export function getLocaleFirstDayOfWeek(locale) { return locale === "ru-RU" ? "m
             try {
                 populateFakeDist(fakeDist, {
                     localesMjs: 'export const es_ES = { id: "es-ES", direction: "ltr", messages: {} };\n',
-                    localesDts: 'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     i18nDts: `
 export type LocaleFirstDayOfWeek = "monday" | "sunday";
 export declare function getLocaleDateInputFormat(locale: string): number;
@@ -878,7 +905,8 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
             try {
                 populateFakeDist(fakeDist, {
                     localesMjs: 'export const es_ES = { id: "es-ES", direction: "ltr", messages: {} };\n',
-                    localesDts: 'export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n',
+                    localesDts:
+                        "export declare const es_ES: { id: string; direction: string; messages: Record<string, unknown> };\n",
                     i18nDts: `
 export type LocaleFirstDayOfWeek = "monday" | "sunday";
 export declare function getLocaleDateInputFormat(locale: string): string;
@@ -1010,7 +1038,8 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
                 // Setup valid built package output
                 populateFakeDist(fakeDist, {
                     localesMjs: 'export const MONA_ES_ES_LOCALE = { id: "es-ES", direction: "ltr", messages: {} };\n',
-                    localesDts: 'export declare const MONA_ES_ES_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                    localesDts:
+                        "export declare const MONA_ES_ES_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n"
                 });
 
                 // Setup source locales: es-es (valid) and de-de (malformed - missing official locale export)
@@ -1093,9 +1122,12 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
                     localesDts: "export {};",
                     i18nMjs: "export {};",
                     i18nDts: "export {};",
-                    thirdPartyNotices: "# Third-Party Notices\n\n## Unicode CLDR\n\nUnicode License v3 placeholder only.\n"
+                    thirdPartyNotices:
+                        "# Third-Party Notices\n\n## Unicode CLDR\n\nUnicode License v3 placeholder only.\n"
                 });
-                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow("does not contain the exact canonical Unicode CLDR license");
+                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow(
+                    "does not contain the exact canonical Unicode CLDR license"
+                );
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
             }
@@ -1104,7 +1136,10 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
         it("fails when license has changed copyright wording", () => {
             const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
             try {
-                const altered = CANONICAL_CLDR_LICENSE.replace("Copyright © 2015-2024 Unicode, Inc.", "Copyright © 1991-2024 Unicode, Inc. All rights reserved.");
+                const altered = CANONICAL_CLDR_LICENSE.replace(
+                    "Copyright © 2015-2024 Unicode, Inc.",
+                    "Copyright © 1991-2024 Unicode, Inc. All rights reserved."
+                );
                 populateFakeDist(tempDir, {
                     localesMjs: "export {};",
                     localesDts: "export {};",
@@ -1112,7 +1147,9 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
                     i18nDts: "export {};",
                     thirdPartyNotices: `# Third-Party Notices\n\n## Unicode CLDR\n\nUnicode License v3\n\n\`\`\`\n${altered}\n\`\`\`\n`
                 });
-                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow("does not contain the exact canonical Unicode CLDR license");
+                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow(
+                    "does not contain the exact canonical Unicode CLDR license"
+                );
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
             }
@@ -1121,7 +1158,10 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
         it("fails when license is missing upstream NOTICE TO USER section", () => {
             const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
             try {
-                const altered = CANONICAL_CLDR_LICENSE.replace(/NOTICE TO USER:[\s\S]*?USE THE DATA FILES OR SOFTWARE\./, "");
+                const altered = CANONICAL_CLDR_LICENSE.replace(
+                    /NOTICE TO USER:[\s\S]*?USE THE DATA FILES OR SOFTWARE\./,
+                    ""
+                );
                 populateFakeDist(tempDir, {
                     localesMjs: "export {};",
                     localesDts: "export {};",
@@ -1129,7 +1169,9 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
                     i18nDts: "export {};",
                     thirdPartyNotices: `# Third-Party Notices\n\n## Unicode CLDR\n\nUnicode License v3\n\n\`\`\`\n${altered}\n\`\`\`\n`
                 });
-                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow("does not contain the exact canonical Unicode CLDR license");
+                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow(
+                    "does not contain the exact canonical Unicode CLDR license"
+                );
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
             }
@@ -1146,7 +1188,9 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
                     i18nDts: "export {};",
                     thirdPartyNotices: `# Third-Party Notices\n\n## Unicode CLDR\n\nUnicode License v3\n\n\`\`\`\n${altered}\n\`\`\`\n`
                 });
-                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow("does not contain the exact canonical Unicode CLDR license");
+                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow(
+                    "does not contain the exact canonical Unicode CLDR license"
+                );
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
             }
@@ -1163,7 +1207,9 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
                     i18nDts: "export {};",
                     thirdPartyNotices: `# Third-Party Notices\n\n## Unicode CLDR\n\nUnicode License v3\n\n\`\`\`\n${truncated}\n\`\`\`\n`
                 });
-                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow("does not contain the exact canonical Unicode CLDR license");
+                expect(() => verifyBuiltPackage({ distDir: tempDir })).toThrow(
+                    "does not contain the exact canonical Unicode CLDR license"
+                );
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
             }
@@ -1181,8 +1227,14 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
         });
 
         it("verifies root THIRD_PARTY_NOTICES.md and projects/mona-ui/THIRD_PARTY_NOTICES.md are identical", () => {
-            const rootNotice = readFileSync(resolve(process.cwd(), "THIRD_PARTY_NOTICES.md"), "utf-8").replace(/\r\n/g, "\n");
-            const libNotice = readFileSync(resolve(process.cwd(), "projects/mona-ui/THIRD_PARTY_NOTICES.md"), "utf-8").replace(/\r\n/g, "\n");
+            const rootNotice = readFileSync(resolve(process.cwd(), "THIRD_PARTY_NOTICES.md"), "utf-8").replace(
+                /\r\n/g,
+                "\n"
+            );
+            const libNotice = readFileSync(
+                resolve(process.cwd(), "projects/mona-ui/THIRD_PARTY_NOTICES.md"),
+                "utf-8"
+            ).replace(/\r\n/g, "\n");
             expect(rootNotice).toBe(libNotice);
         });
 
@@ -1197,17 +1249,27 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
             try {
                 writeFileSync(join(fakeRepo, "scripts/cldr/LICENSE"), CANONICAL_CLDR_LICENSE);
                 writeFileSync(join(fakeRepo, "THIRD_PARTY_NOTICES.md"), DEFAULT_THIRD_PARTY_NOTICES);
-                writeFileSync(join(fakeRepo, "projects/mona-ui/THIRD_PARTY_NOTICES.md"), DEFAULT_THIRD_PARTY_NOTICES + "\n// modified\n");
+                writeFileSync(
+                    join(fakeRepo, "projects/mona-ui/THIRD_PARTY_NOTICES.md"),
+                    DEFAULT_THIRD_PARTY_NOTICES + "\n// modified\n"
+                );
                 populateFakeDist(fakeDist, {
                     localesMjs: 'export const MONA_ES_ES_LOCALE = { id: "es-ES", direction: "ltr", messages: {} };\n',
-                    localesDts: 'export declare const MONA_ES_ES_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n'
+                    localesDts:
+                        "export declare const MONA_ES_ES_LOCALE: { id: string; direction: string; messages: Record<string, unknown> };\n"
                 });
 
                 const esFolder = join(fakeLocales, "es-es");
                 mkdirSync(esFolder, { recursive: true });
-                writeFileSync(join(fakeLocales, "public-api.ts"), 'export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n');
-                writeFileSync(join(esFolder, "es-es.messages.ts"), 'export const ES_ES_MESSAGES = {};\n');
-                writeFileSync(join(esFolder, "es-es.locale.ts"), 'export const MONA_ES_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: {} };\n');
+                writeFileSync(
+                    join(fakeLocales, "public-api.ts"),
+                    'export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n'
+                );
+                writeFileSync(join(esFolder, "es-es.messages.ts"), "export const ES_ES_MESSAGES = {};\n");
+                writeFileSync(
+                    join(esFolder, "es-es.locale.ts"),
+                    'export const MONA_ES_ES_LOCALE = { direction: "ltr", id: "es-ES", messages: {} };\n'
+                );
 
                 expect(() =>
                     verifyBuiltPackage({

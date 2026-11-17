@@ -7,7 +7,8 @@
         [pageable]="true"
         [(index)]="page">
         <ng-template let-step [monaScrollViewSlide]="steps">
-            <div class="flex h-full items-center justify-center bg-secondary px-12 text-center text-secondary-foreground">
+            <div
+                class="flex h-full items-center justify-center bg-secondary px-12 text-center text-secondary-foreground">
                 <p class="text-sm">{{ step }}</p>
             </div>
         </ng-template>

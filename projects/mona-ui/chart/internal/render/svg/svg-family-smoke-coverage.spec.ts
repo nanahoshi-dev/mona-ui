@@ -31,7 +31,6 @@ function createMockSeriesStyle(color: string): ChartSeriesStyle {
     };
 }
 
-
 describe("SVG Chart Family Smoke Coverage", () => {
     // --- 1. Cartesian XY Families ---
     describe("Cartesian XY Families Smoke", () => {

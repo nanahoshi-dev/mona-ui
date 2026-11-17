@@ -1,5 +1,1 @@
-export type TabsPosition =
-    | "top"
-    | "bottom"
-    | "left"
-    | "right";
+export type TabsPosition = "top" | "bottom" | "left" | "right";

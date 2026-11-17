@@ -104,7 +104,9 @@ const CONTROLS: readonly ControlCase[] = [
             <mona-combo-box [data]="fruits" />
         </mona-form-field>
         <mona-form-field label="Search" hint="Hint for Search"><mona-auto-complete [data]="fruits" /></mona-form-field>
-        <mona-form-field label="Toppings" hint="Hint for Toppings"><mona-multi-select [data]="fruits" /></mona-form-field>
+        <mona-form-field label="Toppings" hint="Hint for Toppings"
+            ><mona-multi-select [data]="fruits"
+        /></mona-form-field>
         <mona-form-field label="Code" hint="Hint for Code"><mona-otp-input /></mona-form-field>
         <mona-form-field label="Wi-Fi" hint="Hint for Wi-Fi"><mona-switch /></mona-form-field>
         <mona-form-field label="Volume" hint="Hint for Volume"><mona-slider /></mona-form-field>
@@ -215,18 +217,21 @@ describe("the form field contract", () => {
         }
     });
 
-    it.each(CONTROLS)("keeps $caption's label and hint off the parts inside it", ({ caption, described, named, role }) => {
-        const field = fieldOf(caption);
-        const captionId = field.querySelector("label")!.id;
-        const labelled = Array.from(field.querySelectorAll("[aria-labelledby]")).filter(element =>
-            ids(element, "aria-labelledby").includes(captionId)
-        );
-        expect(labelled).toEqual(Array.from(field.querySelectorAll(named ?? role)));
-        const describedElements = Array.from(field.querySelectorAll("[aria-describedby]")).filter(
-            element => ids(element, "aria-describedby").length > 0 && element.closest("mona-form-field") === field
-        );
-        expect(describedElements.filter(element => !element.matches(described ?? role))).toEqual([]);
-    });
+    it.each(CONTROLS)(
+        "keeps $caption's label and hint off the parts inside it",
+        ({ caption, described, named, role }) => {
+            const field = fieldOf(caption);
+            const captionId = field.querySelector("label")!.id;
+            const labelled = Array.from(field.querySelectorAll("[aria-labelledby]")).filter(element =>
+                ids(element, "aria-labelledby").includes(captionId)
+            );
+            expect(labelled).toEqual(Array.from(field.querySelectorAll(named ?? role)));
+            const describedElements = Array.from(field.querySelectorAll("[aria-describedby]")).filter(
+                element => ids(element, "aria-describedby").length > 0 && element.closest("mona-form-field") === field
+            );
+            expect(describedElements.filter(element => !element.matches(described ?? role))).toEqual([]);
+        }
+    );
 
     it.each(CONTROLS)("moves focus into $caption from its label", async ({ caption }) => {
         const field = fieldOf(caption);

@@ -1,4 +1,22 @@
-import { afterNextRender, booleanAttribute, computed, contentChild, DestroyRef, Directive, DOCUMENT, effect, ElementRef, inject, input, isDevMode, NgZone, output, signal, Signal, TemplateRef } from "@angular/core";
+import {
+    afterNextRender,
+    booleanAttribute,
+    computed,
+    contentChild,
+    DestroyRef,
+    Directive,
+    DOCUMENT,
+    effect,
+    ElementRef,
+    inject,
+    input,
+    isDevMode,
+    NgZone,
+    output,
+    signal,
+    Signal,
+    TemplateRef
+} from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Orientation } from "@nanahoshi/mona-ui/common";
 import { injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
@@ -426,9 +444,7 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         let normalizedHandlePos: number;
 
         if (this.orientation() === "horizontal") {
-            const handlePos = this.isRtl()
-                ? containerRect.right - event.clientX
-                : event.clientX - containerRect.left;
+            const handlePos = this.isRtl() ? containerRect.right - event.clientX : event.clientX - containerRect.left;
             normalizedHandlePos = (handlePos / containerRect.width) * 100;
         } else {
             const handlePos = event.clientY - containerRect.top;

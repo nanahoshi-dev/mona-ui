@@ -422,7 +422,11 @@ describe("ScrollViewComponent", () => {
         it("executes single scroll on primary pointer short click", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 1 });
                 const upEvent = new PointerEvent("pointerup", { isPrimary: true, button: 0, pointerId: 1 });
                 const clickEvent = new MouseEvent("click", { detail: 1, button: 0 });
@@ -442,7 +446,11 @@ describe("ScrollViewComponent", () => {
         it("executes repeated hold scrolling and suppresses trailing pointer click", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 1 });
                 const upEvent = new PointerEvent("pointerup", { isPrimary: true, button: 0, pointerId: 1 });
                 const clickEvent = new MouseEvent("click", { detail: 1, button: 0 });
@@ -464,7 +472,11 @@ describe("ScrollViewComponent", () => {
         it("rejects non-primary mouse button on pointerdown and click", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const rightDown = new PointerEvent("pointerdown", { isPrimary: true, button: 2, pointerId: 1 });
                 const middleDown = new PointerEvent("pointerdown", { isPrimary: true, button: 1, pointerId: 1 });
                 const rightClick = new MouseEvent("click", { detail: 1, button: 2 });
@@ -488,7 +500,11 @@ describe("ScrollViewComponent", () => {
         it("rejects non-primary pointer", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const nonPrimaryDown = new PointerEvent("pointerdown", { isPrimary: false, button: 0, pointerId: 2 });
 
                 component["onPagerPointerDown"](nonPrimaryDown, mockList, "right");
@@ -502,7 +518,11 @@ describe("ScrollViewComponent", () => {
         it("respects pointerId ownership during hold release", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 10 });
                 const wrongUp = new PointerEvent("pointerup", { pointerId: 11 });
                 const matchingUp = new PointerEvent("pointerup", { pointerId: 10 });
@@ -528,7 +548,11 @@ describe("ScrollViewComponent", () => {
         it("stops hold on pointercancel and preserves subsequent keyboard activation", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 10 });
                 const cancelEvent = new PointerEvent("pointercancel", { pointerId: 10 });
                 const keyboardClick = new MouseEvent("click", { detail: 0, button: 0 });
@@ -553,7 +577,11 @@ describe("ScrollViewComponent", () => {
         it("preserves keyboard activation even after pointer release without generated click", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const downEvent = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 10 });
                 const upEvent = new PointerEvent("pointerup", { pointerId: 10 });
                 const keyboardClick = new MouseEvent("click", { detail: 0, button: 0 });
@@ -629,7 +657,11 @@ describe("ScrollViewComponent", () => {
         it("preserves accepted short click when followed immediately by a continuous hold", () => {
             vi.useFakeTimers();
             try {
-                const mockList = { clientWidth: 200, scrollBy: vi.fn(), scrollWidth: 1000 } as unknown as HTMLUListElement;
+                const mockList = {
+                    clientWidth: 200,
+                    scrollBy: vi.fn(),
+                    scrollWidth: 1000
+                } as unknown as HTMLUListElement;
                 const click = new MouseEvent("click", { detail: 1, button: 0 });
                 const holdDown = new PointerEvent("pointerdown", { isPrimary: true, button: 0, pointerId: 5 });
                 const holdUp = new PointerEvent("pointerup", { pointerId: 5 });
@@ -1998,7 +2030,9 @@ describe("ScrollViewComponent", () => {
                 // Step 1: target 100
                 component["onPagerClick"](click, listElement, "right");
                 expect(mockList.scrollTo).toHaveBeenNthCalledWith(1, { behavior: "smooth", left: 100 });
-                expect(mockList.addEventListener).toHaveBeenCalledWith("scrollend", expect.any(Function), { once: true });
+                expect(mockList.addEventListener).toHaveBeenCalledWith("scrollend", expect.any(Function), {
+                    once: true
+                });
 
                 // Advance time far beyond 600 ms (e.g. 2000 ms) without dispatching scrollend
                 vi.advanceTimersByTime(2000);
@@ -2044,7 +2078,9 @@ describe("ScrollViewComponent", () => {
                 // Step 1: target 100
                 component["onPagerClick"](click, listElement, "right");
                 expect(mockList.scrollTo).toHaveBeenNthCalledWith(1, { behavior: "smooth", left: 100 });
-                expect(mockList.addEventListener).toHaveBeenCalledWith("scroll", expect.any(Function), { passive: true });
+                expect(mockList.addEventListener).toHaveBeenCalledWith("scroll", expect.any(Function), {
+                    passive: true
+                });
 
                 // Emit multiple scroll events separated by 100ms (< 150ms debounce) for 800ms total
                 for (let i = 0; i < 8; i++) {
@@ -2227,7 +2263,9 @@ describe("ScrollViewComponent", () => {
         // The slide area has an observer of its own.
         const pagerObservers = (): typeof observerInstances =>
             observerInstances.filter(observer =>
-                (observer.observe as ReturnType<typeof vi.fn>).mock.calls.some(([element]) => element instanceof HTMLUListElement)
+                (observer.observe as ReturnType<typeof vi.fn>).mock.calls.some(
+                    ([element]) => element instanceof HTMLUListElement
+                )
             );
 
         beforeEach(() => {
@@ -2382,9 +2420,7 @@ describe("ScrollViewComponent", () => {
 
             // Transition to many items (overflowing)
             mockScrollWidth = 600;
-            localFixture.componentRef.setInput("data", [
-                "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P10"
-            ]);
+            localFixture.componentRef.setInput("data", ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P10"]);
             render(localFixture);
 
             expect(localComp["pagerArrowVisible"]()).toBe(true);

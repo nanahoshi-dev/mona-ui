@@ -114,7 +114,9 @@ export const routes: Routes = [
             {
                 path: "chart-line-area",
                 loadComponent: () =>
-                    import("./docs/components/chart-line-area-doc/chart-line-area-doc.component").then(m => m.ChartLineAreaDocComponent)
+                    import("./docs/components/chart-line-area-doc/chart-line-area-doc.component").then(
+                        m => m.ChartLineAreaDocComponent
+                    )
             },
             {
                 path: "chart-bar",
@@ -124,17 +126,23 @@ export const routes: Routes = [
             {
                 path: "chart-scatter",
                 loadComponent: () =>
-                    import("./docs/components/chart-scatter-doc/chart-scatter-doc.component").then(m => m.ChartScatterDocComponent)
+                    import("./docs/components/chart-scatter-doc/chart-scatter-doc.component").then(
+                        m => m.ChartScatterDocComponent
+                    )
             },
             {
                 path: "chart-financial",
                 loadComponent: () =>
-                    import("./docs/components/chart-financial-doc/chart-financial-doc.component").then(m => m.ChartFinancialDocComponent)
+                    import("./docs/components/chart-financial-doc/chart-financial-doc.component").then(
+                        m => m.ChartFinancialDocComponent
+                    )
             },
             {
                 path: "chart-heatmap",
                 loadComponent: () =>
-                    import("./docs/components/chart-heatmap-doc/chart-heatmap-doc.component").then(m => m.ChartHeatmapDocComponent)
+                    import("./docs/components/chart-heatmap-doc/chart-heatmap-doc.component").then(
+                        m => m.ChartHeatmapDocComponent
+                    )
             },
             {
                 path: "chart-pie",
@@ -144,22 +152,30 @@ export const routes: Routes = [
             {
                 path: "chart-funnel",
                 loadComponent: () =>
-                    import("./docs/components/chart-funnel-doc/chart-funnel-doc.component").then(m => m.ChartFunnelDocComponent)
+                    import("./docs/components/chart-funnel-doc/chart-funnel-doc.component").then(
+                        m => m.ChartFunnelDocComponent
+                    )
             },
             {
                 path: "chart-treemap",
                 loadComponent: () =>
-                    import("./docs/components/chart-treemap-doc/chart-treemap-doc.component").then(m => m.ChartTreemapDocComponent)
+                    import("./docs/components/chart-treemap-doc/chart-treemap-doc.component").then(
+                        m => m.ChartTreemapDocComponent
+                    )
             },
             {
                 path: "chart-radar",
                 loadComponent: () =>
-                    import("./docs/components/chart-radar-doc/chart-radar-doc.component").then(m => m.ChartRadarDocComponent)
+                    import("./docs/components/chart-radar-doc/chart-radar-doc.component").then(
+                        m => m.ChartRadarDocComponent
+                    )
             },
             {
                 path: "chart-radial",
                 loadComponent: () =>
-                    import("./docs/components/chart-radial-doc/chart-radial-doc.component").then(m => m.ChartRadialDocComponent)
+                    import("./docs/components/chart-radial-doc/chart-radial-doc.component").then(
+                        m => m.ChartRadialDocComponent
+                    )
             },
             {
                 path: "checkbox",
@@ -290,7 +306,9 @@ export const routes: Routes = [
             {
                 path: "form-field",
                 loadComponent: () =>
-                    import("./docs/components/form-field-doc/form-field-doc.component").then(m => m.FormFieldDocComponent)
+                    import("./docs/components/form-field-doc/form-field-doc.component").then(
+                        m => m.FormFieldDocComponent
+                    )
             },
             {
                 path: "grid",
@@ -300,27 +318,37 @@ export const routes: Routes = [
             {
                 path: "grid-sorting-filtering",
                 loadComponent: () =>
-                    import("./docs/components/grid-sorting-filtering-doc/grid-sorting-filtering-doc.component").then(m => m.GridSortingFilteringDocComponent)
+                    import("./docs/components/grid-sorting-filtering-doc/grid-sorting-filtering-doc.component").then(
+                        m => m.GridSortingFilteringDocComponent
+                    )
             },
             {
                 path: "grid-grouping",
                 loadComponent: () =>
-                    import("./docs/components/grid-grouping-doc/grid-grouping-doc.component").then(m => m.GridGroupingDocComponent)
+                    import("./docs/components/grid-grouping-doc/grid-grouping-doc.component").then(
+                        m => m.GridGroupingDocComponent
+                    )
             },
             {
                 path: "grid-selection",
                 loadComponent: () =>
-                    import("./docs/components/grid-selection-doc/grid-selection-doc.component").then(m => m.GridSelectionDocComponent)
+                    import("./docs/components/grid-selection-doc/grid-selection-doc.component").then(
+                        m => m.GridSelectionDocComponent
+                    )
             },
             {
                 path: "grid-editing",
                 loadComponent: () =>
-                    import("./docs/components/grid-editing-doc/grid-editing-doc.component").then(m => m.GridEditingDocComponent)
+                    import("./docs/components/grid-editing-doc/grid-editing-doc.component").then(
+                        m => m.GridEditingDocComponent
+                    )
             },
             {
                 path: "grid-columns",
                 loadComponent: () =>
-                    import("./docs/components/grid-columns-doc/grid-columns-doc.component").then(m => m.GridColumnsDocComponent)
+                    import("./docs/components/grid-columns-doc/grid-columns-doc.component").then(
+                        m => m.GridColumnsDocComponent
+                    )
             },
             {
                 path: "grid-rows",
@@ -330,12 +358,16 @@ export const routes: Routes = [
             {
                 path: "grid-server",
                 loadComponent: () =>
-                    import("./docs/components/grid-server-doc/grid-server-doc.component").then(m => m.GridServerDocComponent)
+                    import("./docs/components/grid-server-doc/grid-server-doc.component").then(
+                        m => m.GridServerDocComponent
+                    )
             },
             {
                 path: "grid-state-export",
                 loadComponent: () =>
-                    import("./docs/components/grid-state-export-doc/grid-state-export-doc.component").then(m => m.GridStateExportDocComponent)
+                    import("./docs/components/grid-state-export-doc/grid-state-export-doc.component").then(
+                        m => m.GridStateExportDocComponent
+                    )
             },
             {
                 path: "input",
@@ -386,9 +418,7 @@ export const routes: Routes = [
             {
                 path: "otp-input",
                 loadComponent: () =>
-                    import("./docs/components/otp-input-doc/otp-input-doc.component").then(
-                        m => m.OtpInputDocComponent
-                    )
+                    import("./docs/components/otp-input-doc/otp-input-doc.component").then(m => m.OtpInputDocComponent)
             },
             {
                 path: "pager",
@@ -460,9 +490,7 @@ export const routes: Routes = [
             {
                 path: "segmented",
                 loadComponent: () =>
-                    import("./docs/components/segmented-doc/segmented-doc.component").then(
-                        m => m.SegmentedDocComponent
-                    )
+                    import("./docs/components/segmented-doc/segmented-doc.component").then(m => m.SegmentedDocComponent)
             },
             {
                 path: "sidebar",
@@ -491,9 +519,7 @@ export const routes: Routes = [
             {
                 path: "skeleton",
                 loadComponent: () =>
-                    import("./docs/components/skeleton-doc/skeleton-doc.component").then(
-                        m => m.SkeletonDocComponent
-                    )
+                    import("./docs/components/skeleton-doc/skeleton-doc.component").then(m => m.SkeletonDocComponent)
             },
             {
                 path: "slider",
@@ -600,13 +626,12 @@ export const routes: Routes = [
     },
     {
         path: "browser-test/grid-geometry",
-        loadComponent: () => import("./browser-test/grid-geometry-fixture.component").then(m => m.GridGeometryFixtureComponent)
+        loadComponent: () =>
+            import("./browser-test/grid-geometry-fixture.component").then(m => m.GridGeometryFixtureComponent)
     },
     {
         path: "browser-test/direction-geometry",
         loadComponent: () =>
-            import("./browser-test/direction-geometry-fixture.component").then(
-                m => m.DirectionGeometryFixtureComponent
-            )
+            import("./browser-test/direction-geometry-fixture.component").then(m => m.DirectionGeometryFixtureComponent)
     }
 ];

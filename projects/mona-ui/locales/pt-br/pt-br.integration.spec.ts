@@ -29,12 +29,7 @@ import {
 import { MONA_PT_BR_LOCALE } from "./pt-br.locale";
 
 @Component({
-    template: `
-        <mona-date-picker
-            [(value)]="value"
-            [format]="format()"
-            [firstDay]="firstDay()" />
-    `,
+    template: ` <mona-date-picker [(value)]="value" [format]="format()" [firstDay]="firstDay()" /> `,
     imports: [DatePickerComponent]
 })
 class DatePickerIntegrationHostComponent {
@@ -114,14 +109,8 @@ interface Item {
             [textField]="'text'"
             [selectBy]="'id'"
             [toolbar]="{ actions: ['transferTo', 'transferFrom', 'transferAllTo', 'transferAllFrom'] }"
-            [connectedList]="second"
-        />
-        <mona-list-box
-            #second
-            [items]="secondItems"
-            [textField]="'text'"
-            [selectBy]="'id'"
-        />
+            [connectedList]="second" />
+        <mona-list-box #second [items]="secondItems" [textField]="'text'" [selectBy]="'id'" />
     `,
     imports: [ListBoxComponent]
 })
@@ -149,12 +138,7 @@ class ScrollViewIntegrationHostComponent {
 
 @Component({
     template: `
-        <mona-grid
-            [data]="rows"
-            [rowKey]="'id'"
-            [resizeMethod]="120"
-            [responsivePager]="false"
-            monaGridRowReorderable>
+        <mona-grid [data]="rows" [rowKey]="'id'" [resizeMethod]="120" [responsivePager]="false" monaGridRowReorderable>
             <mona-grid-column field="name" title="Nome" [width]="120" />
         </mona-grid>
     `,
@@ -411,7 +395,9 @@ describe("MONA_PT_BR_LOCALE Integration with MonaI18nService", () => {
         expect(nextButton).not.toBeNull();
 
         // 2. Locale-formatted Brazilian Portuguese month/year header (e.g. setembro de 2026)
-        const viewButton = hostEl.querySelector('button[aria-label*="Alternar para a visualização de ano"]') as HTMLButtonElement;
+        const viewButton = hostEl.querySelector(
+            'button[aria-label*="Alternar para a visualização de ano"]'
+        ) as HTMLButtonElement;
         expect(viewButton).not.toBeNull();
         expect(viewButton.textContent?.toLowerCase()).toContain("setembro");
         expect(viewButton.textContent).toContain("2026");
@@ -432,9 +418,13 @@ describe("MONA_PT_BR_LOCALE Integration with MonaI18nService", () => {
 
         expect(liveRegion.textContent).toContain("Visualização de ano, 2026");
 
-        const yearViewButton = hostEl.querySelector('button[aria-label*="Alternar para a visualização de década"]') as HTMLButtonElement;
+        const yearViewButton = hostEl.querySelector(
+            'button[aria-label*="Alternar para a visualização de década"]'
+        ) as HTMLButtonElement;
         expect(yearViewButton).not.toBeNull();
-        expect(yearViewButton.getAttribute("aria-label")).toContain("Alternar para a visualização de década, atualmente 2026");
+        expect(yearViewButton.getAttribute("aria-label")).toContain(
+            "Alternar para a visualização de década, atualmente 2026"
+        );
 
         // 6. Decade view navigation and accessibility labels
         yearViewButton.click();
@@ -896,7 +886,9 @@ describe("MONA_PT_BR_LOCALE Integration with MonaI18nService", () => {
         expect(gridMessages().rowReorderDisabledEditing).toBe("Conclua a edição antes de reordenar as linhas.");
         expect(gridMessages().rowReorderDisabledFiltered).toBe("Remova os filtros antes de reordenar as linhas.");
         expect(gridMessages().rowReorderDisabledGrouped).toBe("Remova o agrupamento antes de reordenar as linhas.");
-        expect(gridMessages().rowReorderDisabledSingleRow).toBe("São necessárias pelo menos duas linhas para reordenar.");
+        expect(gridMessages().rowReorderDisabledSingleRow).toBe(
+            "São necessárias pelo menos duas linhas para reordenar."
+        );
         expect(gridMessages().rowReorderDisabledSorted).toBe("Remova a ordenação antes de reordenar as linhas.");
         expect(gridMessages().rowReorderDisabledVirtualScroll).toBe(
             "A reordenação de linhas não está disponível com a rolagem virtual ativada."

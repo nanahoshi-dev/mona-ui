@@ -65,7 +65,9 @@ export const commandItemThemeVariants = cva(
 
 export const commandHighlightMarkThemeVariants = cva("bg-transparent font-semibold text-current underline");
 
-export const commandSeparatorThemeVariants = cva("-mx-1 my-1 block h-px bg-border-subtle forced-colors:bg-[CanvasText]");
+export const commandSeparatorThemeVariants = cva(
+    "-mx-1 my-1 block h-px bg-border-subtle forced-colors:bg-[CanvasText]"
+);
 
 export const commandStatusThemeVariants = cva("px-3 py-6 text-center text-sm text-muted-foreground");
 

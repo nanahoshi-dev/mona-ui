@@ -41,11 +41,7 @@ export function normalizeToStep(value: number, step: number): number {
  * Non-finite values become `0`, out-of-range values are clamped to the
  * valid domain, and the result is snapped to the active precision step.
  */
-export function normalizeRatingValue(
-    value: number,
-    itemsCount: number,
-    precision: RatingPrecision
-): number {
+export function normalizeRatingValue(value: number, itemsCount: number, precision: RatingPrecision): number {
     if (typeof value !== "number" || !Number.isFinite(value)) {
         return 0;
     }

@@ -63,7 +63,9 @@ function getCalendar(fixture: ComponentFixture<unknown>): HTMLElement {
 
 /** A day of September 2023, found by its full-date name (days near the edges also show for the next month). */
 function getDay(fixture: ComponentFixture<unknown>, day: number): HTMLElement {
-    const cell = getCalendar(fixture).querySelector<HTMLElement>(`[monaMonthDay][aria-label*='September ${day}, 2023']`);
+    const cell = getCalendar(fixture).querySelector<HTMLElement>(
+        `[monaMonthDay][aria-label*='September ${day}, 2023']`
+    );
     if (!cell) {
         throw new Error(`Day ${day} was not rendered.`);
     }

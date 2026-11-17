@@ -31,12 +31,7 @@ import { MONA_ZH_TW_LOCALE } from "../zh-tw/zh-tw.locale";
 import { MONA_ZH_CN_LOCALE } from "./zh-cn.locale";
 
 @Component({
-    template: `
-        <mona-date-picker
-            [(value)]="value"
-            [format]="format()"
-            [firstDay]="firstDay()" />
-    `,
+    template: ` <mona-date-picker [(value)]="value" [format]="format()" [firstDay]="firstDay()" /> `,
     imports: [DatePickerComponent]
 })
 class DatePickerIntegrationHostComponent {
@@ -116,14 +111,8 @@ interface Item {
             [textField]="'text'"
             [selectBy]="'id'"
             [toolbar]="{ actions: ['transferTo', 'transferFrom', 'transferAllTo', 'transferAllFrom'] }"
-            [connectedList]="second"
-        />
-        <mona-list-box
-            #second
-            [items]="secondItems"
-            [textField]="'text'"
-            [selectBy]="'id'"
-        />
+            [connectedList]="second" />
+        <mona-list-box #second [items]="secondItems" [textField]="'text'" [selectBy]="'id'" />
     `,
     imports: [ListBoxComponent]
 })
@@ -151,12 +140,7 @@ class ScrollViewIntegrationHostComponent {
 
 @Component({
     template: `
-        <mona-grid
-            [data]="rows"
-            [rowKey]="'id'"
-            [resizeMethod]="120"
-            [responsivePager]="false"
-            monaGridRowReorderable>
+        <mona-grid [data]="rows" [rowKey]="'id'" [resizeMethod]="120" [responsivePager]="false" monaGridRowReorderable>
             <mona-grid-column field="name" title="名称" [width]="120" />
         </mona-grid>
     `,
@@ -187,14 +171,7 @@ interface TreeItem {
 }
 
 @Component({
-    template: `
-        <mona-tree-view
-            [data]="data"
-            textField="text"
-            [aria-label]="ariaLabel()"
-            monaTreeViewFilterable
-        />
-    `,
+    template: ` <mona-tree-view [data]="data" textField="text" [aria-label]="ariaLabel()" monaTreeViewFilterable /> `,
     imports: [TreeViewComponent, TreeViewFilterableDirective]
 })
 class TreeViewIntegrationHostComponent {
@@ -891,9 +868,7 @@ describe("MONA_ZH_CN_LOCALE Integration with MonaI18nService", () => {
 
         const reorderButton = hostEl.querySelector("button[aria-label*='重新排列第 1 行']");
         expect(reorderButton).not.toBeNull();
-        expect(reorderButton?.getAttribute("aria-label")).toContain(
-            "使用 Alt + 向上键或 Alt + 向下键移动。"
-        );
+        expect(reorderButton?.getAttribute("aria-label")).toContain("使用 Alt + 向上键或 Alt + 向下键移动。");
     });
 
     it("provides Chinese messages for Grid row reordering accessibility and live announcements", () => {
@@ -917,9 +892,7 @@ describe("MONA_ZH_CN_LOCALE Integration with MonaI18nService", () => {
         expect(gridMessages().rowReorderDisabledGrouped).toBe("请清除分组后再重新排列行。");
         expect(gridMessages().rowReorderDisabledSingleRow).toBe("至少需要两行才能重新排列。");
         expect(gridMessages().rowReorderDisabledSorted).toBe("请清除排序后再重新排列行。");
-        expect(gridMessages().rowReorderDisabledVirtualScroll).toBe(
-            "启用虚拟滚动时无法重新排列行。"
-        );
+        expect(gridMessages().rowReorderDisabledVirtualScroll).toBe("启用虚拟滚动时无法重新排列行。");
         expect(gridMessages().rowReorderMoved(3, 1)).toBe("已将第 3 行移动到位置 1。");
         expect(
             gridMessages().rowReorderHandleAriaLabel(
@@ -927,9 +900,7 @@ describe("MONA_ZH_CN_LOCALE Integration with MonaI18nService", () => {
                 gridMessages().rowReorderKeyboardHint,
                 gridMessages().rowReorderDisabledSingleRow
             )
-        ).toBe(
-            "重新排列第 1 行。使用 Alt + 向上键或 Alt + 向下键移动。 至少需要两行才能重新排列。"
-        );
+        ).toBe("重新排列第 1 行。使用 Alt + 向上键或 Alt + 向下键移动。 至少需要两行才能重新排列。");
     });
 
     it("renders Chip component with Chinese remove accessibility label", async () => {

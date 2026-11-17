@@ -150,8 +150,12 @@ describe("generate-cldr-week-data", () => {
     });
 });
 
-const validWeekBuffer = Buffer.from('{"supplemental":{"version":{"_unicodeVersion":"16.0.0","_cldrVersion":"46"},"weekData":{"firstDay":{"001":"mon"}}}}');
-const validLikelyBuffer = Buffer.from('{"supplemental":{"version":{"_unicodeVersion":"16.0.0","_cldrVersion":"46"},"likelySubtags":{"en":"en-Latn-US"}}}');
+const validWeekBuffer = Buffer.from(
+    '{"supplemental":{"version":{"_unicodeVersion":"16.0.0","_cldrVersion":"46"},"weekData":{"firstDay":{"001":"mon"}}}}'
+);
+const validLikelyBuffer = Buffer.from(
+    '{"supplemental":{"version":{"_unicodeVersion":"16.0.0","_cldrVersion":"46"},"likelySubtags":{"en":"en-Latn-US"}}}'
+);
 
 const validProvenance: CldrProvenance = {
     cldrVersion: "46",
@@ -170,7 +174,6 @@ const validProvenance: CldrProvenance = {
 };
 
 describe("source integrity and tampering detection", () => {
-
     it("accepts authentic source fixtures with exact matching hashes", () => {
         expect(() => {
             validateCldrProvenance(validProvenance, {
@@ -263,7 +266,9 @@ describe("source integrity and tampering detection", () => {
                 "weekData.json": validWeekBuffer,
                 "likelySubtags.json": validLikelyBuffer
             });
-        }).toThrow(/CLDR provenance Unicode version mismatch: expected Unicode 16\.0, but provenance declares Unicode 17\.0/);
+        }).toThrow(
+            /CLDR provenance Unicode version mismatch: expected Unicode 16\.0, but provenance declares Unicode 17\.0/
+        );
     });
 
     it("fails when provenance likelySubtags.json URL does not match expected URL", () => {
@@ -348,7 +353,9 @@ describe("source integrity and tampering detection", () => {
             validateCldrSourceVersions({
                 "weekData.json": badWeekJson
             });
-        }).toThrow(/CLDR source version mismatch in weekData\.json: expected CLDR 46, but weekData\.json declares CLDR 48/);
+        }).toThrow(
+            /CLDR source version mismatch in weekData\.json: expected CLDR 46, but weekData\.json declares CLDR 48/
+        );
     });
 
     it("fails when fixture _unicodeVersion does not match expected generator constant", () => {
@@ -365,7 +372,9 @@ describe("source integrity and tampering detection", () => {
             validateCldrSourceVersions({
                 "weekData.json": badWeekJson
             });
-        }).toThrow(/CLDR source Unicode version mismatch in weekData\.json: expected Unicode 16\.0, but weekData\.json declares Unicode 15\.0\.0/);
+        }).toThrow(
+            /CLDR source Unicode version mismatch in weekData\.json: expected Unicode 16\.0, but weekData\.json declares Unicode 15\.0\.0/
+        );
     });
 
     it("rejects any source whose embedded CLDR version differs from the pinned baseline", () => {
@@ -391,7 +400,9 @@ describe("source integrity and tampering detection", () => {
                 "weekData.json": weekJson,
                 "likelySubtags.json": likelyJson
             });
-        }).toThrow(/CLDR source version mismatch in likelySubtags\.json: expected CLDR 46, but likelySubtags\.json declares CLDR 47/);
+        }).toThrow(
+            /CLDR source version mismatch in likelySubtags\.json: expected CLDR 46, but likelySubtags\.json declares CLDR 47/
+        );
     });
 
     it("normalizes Unicode versions with minor release digits correctly", () => {
@@ -481,9 +492,7 @@ describe("hermetic local-mode and network control", () => {
             fs.writeFileSync(path.join(tempDir, "weekData.json"), tamperedWeek);
             fs.writeFileSync(path.join(tempDir, "provenance.json"), JSON.stringify(validProvenance));
 
-            await expect(loadCldrSources({ cldrDir: tempDir })).rejects.toThrow(
-                /CLDR source integrity check failed/
-            );
+            await expect(loadCldrSources({ cldrDir: tempDir })).rejects.toThrow(/CLDR source integrity check failed/);
             expect(fetchSpy).not.toHaveBeenCalled();
         } finally {
             fs.rmSync(tempDir, { recursive: true, force: true });
@@ -493,7 +502,9 @@ describe("hermetic local-mode and network control", () => {
     it("fails and does not call fetch when embedded source version mismatches in normal mode", async () => {
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cldr-hermetic-"));
         try {
-            const badVersionWeek = Buffer.from('{"supplemental":{"version":{"_unicodeVersion":"16.0.0","_cldrVersion":"45"},"weekData":{"firstDay":{"001":"mon"}}}}');
+            const badVersionWeek = Buffer.from(
+                '{"supplemental":{"version":{"_unicodeVersion":"16.0.0","_cldrVersion":"45"},"weekData":{"firstDay":{"001":"mon"}}}}'
+            );
             const prov: CldrProvenance = {
                 ...validProvenance,
                 files: {
@@ -508,9 +519,7 @@ describe("hermetic local-mode and network control", () => {
             fs.writeFileSync(path.join(tempDir, "weekData.json"), badVersionWeek);
             fs.writeFileSync(path.join(tempDir, "provenance.json"), JSON.stringify(prov));
 
-            await expect(loadCldrSources({ cldrDir: tempDir })).rejects.toThrow(
-                /CLDR source version mismatch/
-            );
+            await expect(loadCldrSources({ cldrDir: tempDir })).rejects.toThrow(/CLDR source version mismatch/);
             expect(fetchSpy).not.toHaveBeenCalled();
         } finally {
             fs.rmSync(tempDir, { recursive: true, force: true });

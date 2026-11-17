@@ -2,7 +2,10 @@ import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import type { ToolbarAction } from "./ToolbarOptions";
 
 /** The toolbar actions that move items between list boxes. */
-export type ListBoxTransferAction = Extract<ToolbarAction, "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo">;
+export type ListBoxTransferAction = Extract<
+    ToolbarAction,
+    "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo"
+>;
 
 // `any` by default, so an event annotated without a type argument keeps untyped items.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

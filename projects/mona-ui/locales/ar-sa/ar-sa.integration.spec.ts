@@ -34,12 +34,7 @@ import { MONA_AR_SA_LOCALE } from "./ar-sa.locale";
 import { AR_SA_MESSAGES } from "./ar-sa.messages";
 
 @Component({
-    template: `
-        <mona-date-picker
-            [(value)]="value"
-            [format]="format()"
-            [firstDay]="firstDay()" />
-    `,
+    template: ` <mona-date-picker [(value)]="value" [format]="format()" [firstDay]="firstDay()" /> `,
     imports: [DatePickerComponent]
 })
 class DatePickerIntegrationHostComponent {
@@ -120,14 +115,8 @@ interface Item {
             [textField]="'text'"
             [selectBy]="'id'"
             [toolbar]="{ actions: ['transferTo', 'transferFrom', 'transferAllTo', 'transferAllFrom'] }"
-            [connectedList]="second"
-        />
-        <mona-list-box
-            #second
-            [items]="secondItems"
-            [textField]="'text'"
-            [selectBy]="'id'"
-        />
+            [connectedList]="second" />
+        <mona-list-box #second [items]="secondItems" [textField]="'text'" [selectBy]="'id'" />
     `,
     imports: [ListBoxComponent]
 })
@@ -155,12 +144,7 @@ class ScrollViewIntegrationHostComponent {
 
 @Component({
     template: `
-        <mona-grid
-            [data]="rows"
-            [rowKey]="'id'"
-            [resizeMethod]="120"
-            [responsivePager]="false"
-            monaGridRowReorderable>
+        <mona-grid [data]="rows" [rowKey]="'id'" [resizeMethod]="120" [responsivePager]="false" monaGridRowReorderable>
             <mona-grid-column field="name" title="الاسم" [width]="120" />
         </mona-grid>
     `,
@@ -191,14 +175,7 @@ interface TreeItem {
 }
 
 @Component({
-    template: `
-        <mona-tree-view
-            [data]="data"
-            textField="text"
-            [aria-label]="ariaLabel()"
-            monaTreeViewFilterable
-        />
-    `,
+    template: ` <mona-tree-view [data]="data" textField="text" [aria-label]="ariaLabel()" monaTreeViewFilterable /> `,
     imports: [TreeViewComponent, TreeViewFilterableDirective]
 })
 class TreeViewIntegrationHostComponent {
@@ -731,7 +708,15 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
 
         expect(visibleHeaders.map(el => el?.textContent?.trim())).toEqual(["ح", "ن", "ث", "ر", "خ", "ج", "س"]);
         visibleHeaders.forEach(el => expect(el?.getAttribute("aria-hidden")).toBe("true"));
-        expect(accessibleLabels.map(el => el?.textContent?.trim())).toEqual(["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]);
+        expect(accessibleLabels.map(el => el?.textContent?.trim())).toEqual([
+            "الأحد",
+            "الاثنين",
+            "الثلاثاء",
+            "الأربعاء",
+            "الخميس",
+            "الجمعة",
+            "السبت"
+        ]);
         headerDivs.forEach(el => expect(el.getAttribute("aria-label")).toBeNull());
 
         // 1. Click to switch to Year View
@@ -757,7 +742,9 @@ describe("MONA_AR_SA_LOCALE Integration with MonaI18nService", () => {
         expect(root.querySelector("button[aria-label='العقد التالي']")).not.toBeNull();
         expect(root.querySelector("[id$='-heading'] [aria-hidden='true']")?.textContent?.trim()).toBe("٢٠٢٠ - ٢٠٢٩");
 
-        const decadeCells = Array.from(root.querySelectorAll("[monaDecadeYear] span")).map(el => el.textContent?.trim());
+        const decadeCells = Array.from(root.querySelectorAll("[monaDecadeYear] span")).map(el =>
+            el.textContent?.trim()
+        );
         expect(decadeCells).toContain("٢٠٢٠");
         expect(decadeCells).toContain("٢٠٢٩");
     });

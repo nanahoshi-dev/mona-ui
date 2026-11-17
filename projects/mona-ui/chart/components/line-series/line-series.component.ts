@@ -7,7 +7,6 @@ import type { ChartDownsamplingInput } from "../../models/chart-downsampling.mod
 import type { ChartCurve, ChartLineStyle } from "../../models/chart-series.models";
 import type { ChartField, ChartValueFormatter } from "../../models/chart.models";
 
-
 let nextSeriesId = 0;
 
 /**

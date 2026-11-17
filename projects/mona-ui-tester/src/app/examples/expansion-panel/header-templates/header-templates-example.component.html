@@ -13,7 +13,12 @@
             </button>
         </ng-template>
         <ng-template let-expanded monaExpansionPanelIconTemplate>
-            <svg class="mx-2 transition-transform" lucideChevronDown aria-hidden="true" [class.rotate-180]="expanded" [size]="16"></svg>
+            <svg
+                class="mx-2 transition-transform"
+                lucideChevronDown
+                aria-hidden="true"
+                [class.rotate-180]="expanded"
+                [size]="16"></svg>
         </ng-template>
         <p class="p-3 text-sm">Email me when someone mentions me or replies to my comment.</p>
     </mona-expansion-panel>

@@ -115,6 +115,8 @@ export class GridEditableDirective<T extends object = Record<PropertyKey, unknow
         this.#gridService.rowEdit$
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe((event: RowEditEvent) => this.rowEdit.emit(event));
-        this.#gridService.save$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => this.save.emit(event as unknown as GridSaveEvent<T>));
+        this.#gridService.save$
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => this.save.emit(event as unknown as GridSaveEvent<T>));
     }
 }

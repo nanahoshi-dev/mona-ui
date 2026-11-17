@@ -22,12 +22,7 @@ import {
 import { MONA_JA_JP_LOCALE } from "./ja-jp.locale";
 
 @Component({
-    template: `
-        <mona-date-picker
-            [(value)]="value"
-            [format]="format()"
-            [firstDay]="firstDay()" />
-    `,
+    template: ` <mona-date-picker [(value)]="value" [format]="format()" [firstDay]="firstDay()" /> `,
     imports: [DatePickerComponent]
 })
 class DatePickerIntegrationHostComponent {
@@ -107,14 +102,8 @@ interface Item {
             [textField]="'text'"
             [selectBy]="'id'"
             [toolbar]="{ actions: ['transferTo', 'transferFrom', 'transferAllTo', 'transferAllFrom'] }"
-            [connectedList]="second"
-        />
-        <mona-list-box
-            #second
-            [items]="secondItems"
-            [textField]="'text'"
-            [selectBy]="'id'"
-        />
+            [connectedList]="second" />
+        <mona-list-box #second [items]="secondItems" [textField]="'text'" [selectBy]="'id'" />
     `,
     imports: [ListBoxComponent]
 })
@@ -704,7 +693,9 @@ describe("MONA_JA_JP_LOCALE Integration with MonaI18nService", () => {
         amItem?.click();
         fixture.detectChanges();
 
-        const setButton = Array.from(document.querySelectorAll<HTMLButtonElement>("button")).find(b => b.textContent?.trim() === "設定");
+        const setButton = Array.from(document.querySelectorAll<HTMLButtonElement>("button")).find(
+            b => b.textContent?.trim() === "設定"
+        );
         setButton?.click();
         fixture.detectChanges();
         await fixture.whenStable();

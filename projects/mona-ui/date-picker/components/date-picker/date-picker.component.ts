@@ -358,7 +358,12 @@ export class DatePickerComponent
 
     public constructor() {
         this.typedInput = createTypedDateInput({
-            constraints: () => ({ disabledDates: this.disabledDates(), max: this.max(), min: this.min(), unit: "date" }),
+            constraints: () => ({
+                disabledDates: this.disabledDates(),
+                max: this.max(),
+                min: this.min(),
+                unit: "date"
+            }),
             format: () => this.effectiveFormat(),
             localeId: () => this.#i18n.localeId(),
             value: this.value

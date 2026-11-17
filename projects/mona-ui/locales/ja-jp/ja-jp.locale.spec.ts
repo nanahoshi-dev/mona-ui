@@ -246,9 +246,7 @@ describe("MONA_JA_JP_LOCALE", () => {
             expect(m.grid?.rowReorderDisabledVirtualScroll).toBe(
                 "仮想スクロールが有効な場合、行の並べ替えは使用できません。"
             );
-            expect(m.grid?.rowReorderKeyboardHint).toBe(
-                "Alt + 上矢印または Alt + 下矢印で行を移動します。"
-            );
+            expect(m.grid?.rowReorderKeyboardHint).toBe("Alt + 上矢印または Alt + 下矢印で行を移動します。");
         });
     });
 
@@ -262,12 +260,8 @@ describe("MONA_JA_JP_LOCALE", () => {
             expect(m.calendar?.yearCellLabel?.(2026)).toBe("2026年");
             expect(m.calendar?.yearViewLabel?.("2026年")).toBe("年表示、2026年");
             expect(m.calendar?.goToToday?.("2026年9月15日")).toBe("今日（2026年9月15日）に移動");
-            expect(m.calendar?.switchToYearView?.("2026年9月")).toBe(
-                "年表示に切り替える。現在は2026年9月"
-            );
-            expect(m.calendar?.switchToDecadeView?.("2026年")).toBe(
-                "10年表示に切り替える。現在は2026年"
-            );
+            expect(m.calendar?.switchToYearView?.("2026年9月")).toBe("年表示に切り替える。現在は2026年9月");
+            expect(m.calendar?.switchToDecadeView?.("2026年")).toBe("10年表示に切り替える。現在は2026年");
         });
 
         it("formats Chart functions and preserves Japanese financial terminology", () => {

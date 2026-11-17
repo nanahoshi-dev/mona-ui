@@ -262,7 +262,10 @@ async function runTests(): Promise<void> {
             {
                 const slider = section.locator(`[data-testid="${scenario.sliderId}"]`);
                 const sliderBox = await slider.boundingBox();
-                assert(sliderBox !== null && sliderBox.width >= 350, `Slider container has rendered width (got ${sliderBox?.width})`);
+                assert(
+                    sliderBox !== null && sliderBox.width >= 350,
+                    `Slider container has rendered width (got ${sliderBox?.width})`
+                );
 
                 const handle = slider.locator('[role="slider"]');
                 const isRtl = scenario.semanticDir === "rtl";
@@ -326,19 +329,13 @@ async function runTests(): Promise<void> {
                 assert(firstLabelBox !== null && lastLabelBox !== null, "Label boxes available");
 
                 if (!isRtl) {
-                    assert(
-                        firstTickBox.x < lastTickBox.x,
-                        `[${scenario.name}] LTR Slider tick 0 is left of tick 100`
-                    );
+                    assert(firstTickBox.x < lastTickBox.x, `[${scenario.name}] LTR Slider tick 0 is left of tick 100`);
                     assert(
                         firstLabelBox.x < lastLabelBox.x,
                         `[${scenario.name}] LTR Slider label 0 is left of label 100`
                     );
                 } else {
-                    assert(
-                        firstTickBox.x > lastTickBox.x,
-                        `[${scenario.name}] RTL Slider tick 0 is right of tick 100`
-                    );
+                    assert(firstTickBox.x > lastTickBox.x, `[${scenario.name}] RTL Slider tick 0 is right of tick 100`);
                     assert(
                         firstLabelBox.x > lastLabelBox.x,
                         `[${scenario.name}] RTL Slider label 0 is right of label 100`
@@ -432,7 +429,10 @@ async function runTests(): Promise<void> {
                     const hBoxUp = (await handle.boundingBox())!;
                     const hCenterUp = hBoxUp.x + hBoxUp.width / 2;
                     assert(vUp > 50, `[${scenario.name}] LTR ArrowRight increases value (got ${vUp})`);
-                    assert(hCenterUp > hCenterBefore, `[${scenario.name}] LTR ArrowRight physically moves handle to the right`);
+                    assert(
+                        hCenterUp > hCenterBefore,
+                        `[${scenario.name}] LTR ArrowRight physically moves handle to the right`
+                    );
 
                     await page.keyboard.press("ArrowLeft");
                     await page.waitForTimeout(250);
@@ -440,7 +440,10 @@ async function runTests(): Promise<void> {
                     const hBoxDown = (await handle.boundingBox())!;
                     const hCenterDown = hBoxDown.x + hBoxDown.width / 2;
                     assert(vDown <= 50, `[${scenario.name}] LTR ArrowLeft decreases value (got ${vDown})`);
-                    assert(hCenterDown < hCenterUp, `[${scenario.name}] LTR ArrowLeft physically moves handle to the left`);
+                    assert(
+                        hCenterDown < hCenterUp,
+                        `[${scenario.name}] LTR ArrowLeft physically moves handle to the left`
+                    );
                 } else {
                     await page.keyboard.press("ArrowLeft");
                     await page.waitForTimeout(250);
@@ -448,7 +451,10 @@ async function runTests(): Promise<void> {
                     const hBoxUp = (await handle.boundingBox())!;
                     const hCenterUp = hBoxUp.x + hBoxUp.width / 2;
                     assert(vUp > 50, `[${scenario.name}] RTL ArrowLeft increases value (got ${vUp})`);
-                    assert(hCenterUp < hCenterBefore, `[${scenario.name}] RTL ArrowLeft physically moves handle to the left`);
+                    assert(
+                        hCenterUp < hCenterBefore,
+                        `[${scenario.name}] RTL ArrowLeft physically moves handle to the left`
+                    );
 
                     await page.keyboard.press("ArrowRight");
                     await page.waitForTimeout(250);
@@ -456,7 +462,10 @@ async function runTests(): Promise<void> {
                     const hBoxDown = (await handle.boundingBox())!;
                     const hCenterDown = hBoxDown.x + hBoxDown.width / 2;
                     assert(vDown <= 50, `[${scenario.name}] RTL ArrowRight decreases value (got ${vDown})`);
-                    assert(hCenterDown > hCenterUp, `[${scenario.name}] RTL ArrowRight physically moves handle to the right`);
+                    assert(
+                        hCenterDown > hCenterUp,
+                        `[${scenario.name}] RTL ArrowRight physically moves handle to the right`
+                    );
                 }
 
                 console.log(`    [PASS] Slider geometry, values (0-100), ticks/labels, pointer & keyboard verified`);
@@ -490,7 +499,10 @@ async function runTests(): Promise<void> {
                     const h0Box = await h0.boundingBox();
                     const h1Box = await h1.boundingBox();
                     const selBox = await selection.boundingBox();
-                    assert(h0Box !== null && h1Box !== null && selBox !== null, `RangeSlider boxes available for [${interval.min}, ${interval.max}]`);
+                    assert(
+                        h0Box !== null && h1Box !== null && selBox !== null,
+                        `RangeSlider boxes available for [${interval.min}, ${interval.max}]`
+                    );
 
                     const h0Center = h0Box.x + h0Box.width / 2;
                     const h1Center = h1Box.x + h1Box.width / 2;
@@ -564,8 +576,14 @@ async function runTests(): Promise<void> {
                     const h1CenterAfter = h1BoxAfter.x + h1BoxAfter.width / 2;
 
                     assert(h0CenterAfter > h0CenterBefore, `[${scenario.name}] LTR h0 moves right on ArrowRight`);
-                    assert(Math.abs(h1CenterAfter - h1CenterBefore) <= 2, `[${scenario.name}] LTR h1 remains fixed when h0 moves`);
-                    assert(selBoxAfter.x > selBoxBefore.x, `[${scenario.name}] LTR selection band left edge moves right with h0`);
+                    assert(
+                        Math.abs(h1CenterAfter - h1CenterBefore) <= 2,
+                        `[${scenario.name}] LTR h1 remains fixed when h0 moves`
+                    );
+                    assert(
+                        selBoxAfter.x > selBoxBefore.x,
+                        `[${scenario.name}] LTR selection band left edge moves right with h0`
+                    );
                     assert(
                         Math.abs(selBoxAfter.x + selBoxAfter.width - (selBoxBefore.x + selBoxBefore.width)) <= 2,
                         `[${scenario.name}] LTR selection band right edge remains fixed when h0 moves`
@@ -583,7 +601,10 @@ async function runTests(): Promise<void> {
                     const h1CenterAfter = h1BoxAfter.x + h1BoxAfter.width / 2;
 
                     assert(h0CenterAfter < h0CenterBefore, `[${scenario.name}] RTL h0 moves left on ArrowLeft`);
-                    assert(Math.abs(h1CenterAfter - h1CenterBefore) <= 2, `[${scenario.name}] RTL h1 remains fixed when h0 moves`);
+                    assert(
+                        Math.abs(h1CenterAfter - h1CenterBefore) <= 2,
+                        `[${scenario.name}] RTL h1 remains fixed when h0 moves`
+                    );
                     assert(
                         selBoxAfter.x + selBoxAfter.width < selBoxBefore.x + selBoxBefore.width,
                         `[${scenario.name}] RTL selection band right edge moves left with h0`
@@ -615,7 +636,10 @@ async function runTests(): Promise<void> {
                     const h0CenterAfter = h0BoxAfter.x + h0BoxAfter.width / 2;
 
                     assert(h1CenterAfter < h1CenterBeforeH1, `[${scenario.name}] LTR h1 moves left on ArrowLeft`);
-                    assert(Math.abs(h0CenterAfter - h0CenterBeforeH1) <= 2, `[${scenario.name}] LTR h0 remains fixed when h1 moves`);
+                    assert(
+                        Math.abs(h0CenterAfter - h0CenterBeforeH1) <= 2,
+                        `[${scenario.name}] LTR h0 remains fixed when h1 moves`
+                    );
                     assert(
                         selBoxAfter.x + selBoxAfter.width < selBoxBeforeH1.x + selBoxBeforeH1.width,
                         `[${scenario.name}] LTR selection right edge moves left with h1`
@@ -637,7 +661,10 @@ async function runTests(): Promise<void> {
                     const h0CenterAfter = h0BoxAfter.x + h0BoxAfter.width / 2;
 
                     assert(h1CenterAfter > h1CenterBeforeH1, `[${scenario.name}] RTL h1 moves right on ArrowRight`);
-                    assert(Math.abs(h0CenterAfter - h0CenterBeforeH1) <= 2, `[${scenario.name}] RTL h0 remains fixed when h1 moves`);
+                    assert(
+                        Math.abs(h0CenterAfter - h0CenterBeforeH1) <= 2,
+                        `[${scenario.name}] RTL h0 remains fixed when h1 moves`
+                    );
                     assert(
                         selBoxAfter.x > selBoxBeforeH1.x,
                         `[${scenario.name}] RTL selection left edge moves right with h1`
@@ -664,10 +691,19 @@ async function runTests(): Promise<void> {
 
                 if (!isRtl) {
                     assert(rFirstTick.x < rLastTick.x, `[${scenario.name}] LTR RangeSlider tick 0 is left of tick 100`);
-                    assert(rFirstLabel.x < rLastLabel.x, `[${scenario.name}] LTR RangeSlider label 0 is left of label 100`);
+                    assert(
+                        rFirstLabel.x < rLastLabel.x,
+                        `[${scenario.name}] LTR RangeSlider label 0 is left of label 100`
+                    );
                 } else {
-                    assert(rFirstTick.x > rLastTick.x, `[${scenario.name}] RTL RangeSlider tick 0 is right of tick 100`);
-                    assert(rFirstLabel.x > rLastLabel.x, `[${scenario.name}] RTL RangeSlider label 0 is right of label 100`);
+                    assert(
+                        rFirstTick.x > rLastTick.x,
+                        `[${scenario.name}] RTL RangeSlider tick 0 is right of tick 100`
+                    );
+                    assert(
+                        rFirstLabel.x > rLastLabel.x,
+                        `[${scenario.name}] RTL RangeSlider label 0 is right of label 100`
+                    );
                 }
 
                 // Label-to-tick alignment for first, middle, and last
@@ -716,7 +752,10 @@ async function runTests(): Promise<void> {
                 const endBox = await endSidebar.boundingBox();
                 const insetBox = await inset.boundingBox();
                 const railBox = await rail.boundingBox();
-                assert(startBox !== null && endBox !== null && insetBox !== null && railBox !== null, "Docked sidebar boxes available");
+                assert(
+                    startBox !== null && endBox !== null && insetBox !== null && railBox !== null,
+                    "Docked sidebar boxes available"
+                );
 
                 // Start sidebar placement & interior border:
                 // LTR (and split LTR + CSS RTL): start is physically LEFT, interior border is border-r, rail on right-0
@@ -805,11 +844,20 @@ async function runTests(): Promise<void> {
                 await page.waitForTimeout(350);
                 const startIconBox = await startSidebar.boundingBox();
                 assert(startIconBox !== null, "Start icon box available");
-                assert(Math.abs(startIconBox.width - 40) <= 5, `Start sidebar collapsed to icon width (~40px, got ${startIconBox.width})`);
+                assert(
+                    Math.abs(startIconBox.width - 40) <= 5,
+                    `Start sidebar collapsed to icon width (~40px, got ${startIconBox.width})`
+                );
                 if (!isRtl) {
-                    assert(Math.abs(startIconBox.x - layoutBox.x) <= 4, `Start sidebar remains at physical left after icon collapse`);
+                    assert(
+                        Math.abs(startIconBox.x - layoutBox.x) <= 4,
+                        `Start sidebar remains at physical left after icon collapse`
+                    );
                 } else {
-                    assert(Math.abs(startIconBox.x + startIconBox.width - (layoutBox.x + layoutBox.width)) <= 4, `Start sidebar remains at physical right after icon collapse`);
+                    assert(
+                        Math.abs(startIconBox.x + startIconBox.width - (layoutBox.x + layoutBox.width)) <= 4,
+                        `Start sidebar remains at physical right after icon collapse`
+                    );
                 }
                 // Re-expand start
                 await page.click(`[data-testid="toggle-docked-start-${scenario.suffix}"]`);
@@ -994,15 +1042,39 @@ async function runTests(): Promise<void> {
                 const pagerNextRotated = await isSvgRotated180(pagerNextSvg);
 
                 if (!isRtl) {
-                    assert(!prevRotated.rotated, `[${scenario.name}] LTR carousel prev chevron must not be rotated 180deg (${prevRotated.desc})`);
-                    assert(!nextRotated.rotated, `[${scenario.name}] LTR carousel next chevron must not be rotated 180deg (${nextRotated.desc})`);
-                    assert(!pagerPrevRotated.rotated, `[${scenario.name}] LTR pager prev chevron must not be rotated 180deg (${pagerPrevRotated.desc})`);
-                    assert(!pagerNextRotated.rotated, `[${scenario.name}] LTR pager next chevron must not be rotated 180deg (${pagerNextRotated.desc})`);
+                    assert(
+                        !prevRotated.rotated,
+                        `[${scenario.name}] LTR carousel prev chevron must not be rotated 180deg (${prevRotated.desc})`
+                    );
+                    assert(
+                        !nextRotated.rotated,
+                        `[${scenario.name}] LTR carousel next chevron must not be rotated 180deg (${nextRotated.desc})`
+                    );
+                    assert(
+                        !pagerPrevRotated.rotated,
+                        `[${scenario.name}] LTR pager prev chevron must not be rotated 180deg (${pagerPrevRotated.desc})`
+                    );
+                    assert(
+                        !pagerNextRotated.rotated,
+                        `[${scenario.name}] LTR pager next chevron must not be rotated 180deg (${pagerNextRotated.desc})`
+                    );
                 } else {
-                    assert(prevRotated.rotated, `[${scenario.name}] RTL carousel prev chevron must be rotated 180deg (${prevRotated.desc})`);
-                    assert(nextRotated.rotated, `[${scenario.name}] RTL carousel next chevron must be rotated 180deg (${nextRotated.desc})`);
-                    assert(pagerPrevRotated.rotated, `[${scenario.name}] RTL pager prev chevron must be rotated 180deg (${pagerPrevRotated.desc})`);
-                    assert(pagerNextRotated.rotated, `[${scenario.name}] RTL pager next chevron must be rotated 180deg (${pagerNextRotated.desc})`);
+                    assert(
+                        prevRotated.rotated,
+                        `[${scenario.name}] RTL carousel prev chevron must be rotated 180deg (${prevRotated.desc})`
+                    );
+                    assert(
+                        nextRotated.rotated,
+                        `[${scenario.name}] RTL carousel next chevron must be rotated 180deg (${nextRotated.desc})`
+                    );
+                    assert(
+                        pagerPrevRotated.rotated,
+                        `[${scenario.name}] RTL pager prev chevron must be rotated 180deg (${pagerPrevRotated.desc})`
+                    );
+                    assert(
+                        pagerNextRotated.rotated,
+                        `[${scenario.name}] RTL pager next chevron must be rotated 180deg (${pagerNextRotated.desc})`
+                    );
                 }
 
                 // Pager list and overflowing verification
@@ -1021,7 +1093,10 @@ async function runTests(): Promise<void> {
                 const pagerPrevBox = await pagerPrevArrow.boundingBox();
                 const pagerNextBox = await pagerNextArrow.boundingBox();
                 const pagerListBox = await pagerList.boundingBox();
-                assert(pagerPrevBox !== null && pagerNextBox !== null && pagerListBox !== null, "Pager arrow and list boxes available");
+                assert(
+                    pagerPrevBox !== null && pagerNextBox !== null && pagerListBox !== null,
+                    "Pager arrow and list boxes available"
+                );
 
                 if (!isRtl) {
                     assert(
@@ -1071,9 +1146,15 @@ async function runTests(): Promise<void> {
                 const p0AfterNext = await p0.boundingBox();
                 assert(p0AfterNext !== null, "p0 box after next scroll");
                 if (!isRtl) {
-                    assert(p0AfterNext.x < initialP0X, `[${scenario.name}] LTR clicking pager next moves content to the left`);
+                    assert(
+                        p0AfterNext.x < initialP0X,
+                        `[${scenario.name}] LTR clicking pager next moves content to the left`
+                    );
                 } else {
-                    assert(p0AfterNext.x > initialP0X, `[${scenario.name}] RTL clicking pager next moves content to the right`);
+                    assert(
+                        p0AfterNext.x > initialP0X,
+                        `[${scenario.name}] RTL clicking pager next moves content to the right`
+                    );
                 }
 
                 // Click pager Prev arrow
@@ -1082,9 +1163,15 @@ async function runTests(): Promise<void> {
                 const p0AfterPrev = await p0.boundingBox();
                 assert(p0AfterPrev !== null, "p0 box after prev scroll");
                 if (!isRtl) {
-                    assert(p0AfterPrev.x > p0AfterNext.x, `[${scenario.name}] LTR clicking pager prev scrolls back right`);
+                    assert(
+                        p0AfterPrev.x > p0AfterNext.x,
+                        `[${scenario.name}] LTR clicking pager prev scrolls back right`
+                    );
                 } else {
-                    assert(p0AfterPrev.x < p0AfterNext.x, `[${scenario.name}] RTL clicking pager prev scrolls back left`);
+                    assert(
+                        p0AfterPrev.x < p0AfterNext.x,
+                        `[${scenario.name}] RTL clicking pager prev scrolls back left`
+                    );
                 }
 
                 // Instrument pagerList.scrollBy and scrollTo to record all scroll calls deterministically
@@ -1135,9 +1222,15 @@ async function runTests(): Promise<void> {
 
                 const p0AfterContinuous = (await p0.boundingBox())!.x;
                 if (!isRtl) {
-                    assert(p0AfterContinuous < p0BeforeContinuous, `[${scenario.name}] LTR continuous scroll moved content further left`);
+                    assert(
+                        p0AfterContinuous < p0BeforeContinuous,
+                        `[${scenario.name}] LTR continuous scroll moved content further left`
+                    );
                 } else {
-                    assert(p0AfterContinuous > p0BeforeContinuous, `[${scenario.name}] RTL continuous scroll moved content further right`);
+                    assert(
+                        p0AfterContinuous > p0BeforeContinuous,
+                        `[${scenario.name}] RTL continuous scroll moved content further right`
+                    );
                 }
 
                 const callsDuringHold = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
@@ -1264,7 +1357,9 @@ async function runTests(): Promise<void> {
                 );
                 await page.waitForTimeout(500); // allow cumulative smooth scroll to settle
                 const p0AfterKeyboard = (await p0.boundingBox())!.x;
-                const displacementKeyboard = !isRtl ? p0BeforeKeyboard - p0AfterKeyboard : p0AfterKeyboard - p0BeforeKeyboard;
+                const displacementKeyboard = !isRtl
+                    ? p0BeforeKeyboard - p0AfterKeyboard
+                    : p0AfterKeyboard - p0BeforeKeyboard;
                 assert(
                     displacementKeyboard >= 180 && displacementKeyboard <= 220,
                     `[${scenario.name}] Two rapid keyboard activations produced cumulative physical displacement (expected ~200px, got ${displacementKeyboard.toFixed(1)}px)`
@@ -1272,10 +1367,14 @@ async function runTests(): Promise<void> {
 
                 // Test rapid alternating Next then Previous clicks: must return to starting position
                 const p0BeforeAlternating = (await p0.boundingBox())!.x;
-                const callsBeforeAlternating = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
+                const callsBeforeAlternating = await pagerList.evaluate(
+                    el => ((el as any).__scrollByCalls || []).length
+                );
                 await pagerNextArrow.click();
                 await pagerPrevArrow.click();
-                const callsAfterAlternating = await pagerList.evaluate(el => ((el as any).__scrollByCalls || []).length);
+                const callsAfterAlternating = await pagerList.evaluate(
+                    el => ((el as any).__scrollByCalls || []).length
+                );
                 assert(
                     callsAfterAlternating === callsBeforeAlternating + 2,
                     `[${scenario.name}] Rapid alternating Next then Previous performed exactly two scroll calls (expected ${callsBeforeAlternating + 2}, got ${callsAfterAlternating})`
@@ -1300,7 +1399,8 @@ async function runTests(): Promise<void> {
                 const containerBox = await listContainer.boundingBox();
                 assert(activeBox !== null && containerBox !== null, "Active item & container boxes available");
                 assert(
-                    activeBox.x >= containerBox.x - 2 && activeBox.x + activeBox.width <= containerBox.x + containerBox.width + 2,
+                    activeBox.x >= containerBox.x - 2 &&
+                        activeBox.x + activeBox.width <= containerBox.x + containerBox.width + 2,
                     `[${scenario.name}] Active page 15 is visibly within pager container viewport`
                 );
                 const activeCenter = activeBox.x + activeBox.width / 2;
@@ -1312,7 +1412,7 @@ async function runTests(): Promise<void> {
 
                 // Main carousel forward/backward slide navigation with in-flight enter/leave animation verification
                 await page.waitForTimeout(400); // ensure previous animations fully settled
-                const activeSlideInitial = scrollView.locator('[data-scroll-view-slide]');
+                const activeSlideInitial = scrollView.locator("[data-scroll-view-slide]");
                 const initialSlideText = (await activeSlideInitial.first().textContent())?.trim();
 
                 // Expected animation classes and @keyframes for logical Next:
@@ -1369,7 +1469,7 @@ async function runTests(): Promise<void> {
                 // Await completion of the 500ms animation and subsequent DOM detachment
                 await nextLeaving.waitFor({ state: "detached", timeout: 2000 });
 
-                const activeSlideNext = scrollView.locator('[data-scroll-view-slide]');
+                const activeSlideNext = scrollView.locator("[data-scroll-view-slide]");
                 const nextSlideText = (await activeSlideNext.first().textContent())?.trim();
                 assert(
                     nextSlideText !== initialSlideText,
@@ -1430,14 +1530,16 @@ async function runTests(): Promise<void> {
                 // Await completion of the 500ms animation and subsequent DOM detachment
                 await prevLeaving.waitFor({ state: "detached", timeout: 2000 });
 
-                const activeSlideBack = scrollView.locator('[data-scroll-view-slide]');
+                const activeSlideBack = scrollView.locator("[data-scroll-view-slide]");
                 const backSlideText = (await activeSlideBack.first().textContent())?.trim();
                 assert(
                     backSlideText === initialSlideText,
                     `[${scenario.name}] Clicking Prev returns to initial slide ('${backSlideText}' vs '${initialSlideText}')`
                 );
 
-                console.log(`    [PASS] ScrollView navigation arrows, overflowing pager, continuous scroll, keyframe direction & slide transitions verified\n`);
+                console.log(
+                    `    [PASS] ScrollView navigation arrows, overflowing pager, continuous scroll, keyframe direction & slide transitions verified\n`
+                );
             }
         }
 
@@ -1458,7 +1560,10 @@ async function runTests(): Promise<void> {
         let dEndBox = await dynEnd.boundingBox();
         assert(dStartBox !== null && dEndBox !== null, "Dynamic start/end boxes");
         assert(Math.abs(dStartBox.x - dynLayoutBox.x) <= 4, "Initial dynamic LTR: start sidebar is on physical LEFT");
-        assert(Math.abs(dEndBox.x + dEndBox.width - (dynLayoutBox.x + dynLayoutBox.width)) <= 4, "Initial dynamic LTR: end sidebar is on physical RIGHT");
+        assert(
+            Math.abs(dEndBox.x + dEndBox.width - (dynLayoutBox.x + dynLayoutBox.width)) <= 4,
+            "Initial dynamic LTR: end sidebar is on physical RIGHT"
+        );
 
         // Mutate dir to RTL
         await page.click('[data-testid="set-dynamic-rtl"]');
@@ -1467,9 +1572,18 @@ async function runTests(): Promise<void> {
         let dynCurrentLayoutBox = await dynLayout.boundingBox();
         dStartBox = await dynStart.boundingBox();
         dEndBox = await dynEnd.boundingBox();
-        assert(dynCurrentLayoutBox !== null && dStartBox !== null && dEndBox !== null, "Dynamic boxes after RTL mutation");
-        assert(Math.abs(dStartBox.x + dStartBox.width - (dynCurrentLayoutBox.x + dynCurrentLayoutBox.width)) <= 4, "After dynamic RTL mutation: start sidebar moved to physical RIGHT");
-        assert(Math.abs(dEndBox.x - dynCurrentLayoutBox.x) <= 4, "After dynamic RTL mutation: end sidebar moved to physical LEFT");
+        assert(
+            dynCurrentLayoutBox !== null && dStartBox !== null && dEndBox !== null,
+            "Dynamic boxes after RTL mutation"
+        );
+        assert(
+            Math.abs(dStartBox.x + dStartBox.width - (dynCurrentLayoutBox.x + dynCurrentLayoutBox.width)) <= 4,
+            "After dynamic RTL mutation: start sidebar moved to physical RIGHT"
+        );
+        assert(
+            Math.abs(dEndBox.x - dynCurrentLayoutBox.x) <= 4,
+            "After dynamic RTL mutation: end sidebar moved to physical LEFT"
+        );
 
         // Mutate dir back to LTR
         await page.click('[data-testid="set-dynamic-ltr"]');
@@ -1478,9 +1592,18 @@ async function runTests(): Promise<void> {
         dynCurrentLayoutBox = await dynLayout.boundingBox();
         dStartBox = await dynStart.boundingBox();
         dEndBox = await dynEnd.boundingBox();
-        assert(dynCurrentLayoutBox !== null && dStartBox !== null && dEndBox !== null, "Dynamic boxes after LTR return");
-        assert(Math.abs(dStartBox.x - dynCurrentLayoutBox.x) <= 4, "After returning to LTR: start sidebar returned to physical LEFT");
-        assert(Math.abs(dEndBox.x + dEndBox.width - (dynCurrentLayoutBox.x + dynCurrentLayoutBox.width)) <= 4, "After returning to LTR: end sidebar returned to physical RIGHT");
+        assert(
+            dynCurrentLayoutBox !== null && dStartBox !== null && dEndBox !== null,
+            "Dynamic boxes after LTR return"
+        );
+        assert(
+            Math.abs(dStartBox.x - dynCurrentLayoutBox.x) <= 4,
+            "After returning to LTR: start sidebar returned to physical LEFT"
+        );
+        assert(
+            Math.abs(dEndBox.x + dEndBox.width - (dynCurrentLayoutBox.x + dynCurrentLayoutBox.width)) <= 4,
+            "After returning to LTR: end sidebar returned to physical RIGHT"
+        );
 
         // Dynamic ScrollView direction mutation and cumulative pager target resynchronization
         console.log("    Testing Dynamic ScrollView pager target resynchronization across direction mutations");
@@ -1502,7 +1625,9 @@ async function runTests(): Promise<void> {
 
         // Instrument dynamic pager list with scrollend tracking to verify scroll remains in-flight across direction switch
         await page.evaluate(() => {
-            const list = document.querySelector('[data-testid="scroll-view-dynamic"] li[data-page-item="true"]')?.parentElement;
+            const list = document.querySelector(
+                '[data-testid="scroll-view-dynamic"] li[data-page-item="true"]'
+            )?.parentElement;
             if (list) {
                 const win = window as unknown as { __dynScrollEndCount: number };
                 win.__dynScrollEndCount = 0;
@@ -1527,7 +1652,9 @@ async function runTests(): Promise<void> {
         });
 
         // Assert the old pager scroll has NOT already reported completion before direction mutation
-        const scrollEndCountLtr = await page.evaluate(() => (window as unknown as { __dynScrollEndCount: number }).__dynScrollEndCount);
+        const scrollEndCountLtr = await page.evaluate(
+            () => (window as unknown as { __dynScrollEndCount: number }).__dynScrollEndCount
+        );
         assert(
             scrollEndCountLtr === 0,
             `Dynamic ScrollView LTR in-flight target was still actively scrolling when direction switched (scrollend count: ${scrollEndCountLtr})`
@@ -1557,7 +1684,9 @@ async function runTests(): Promise<void> {
         // Step 3: Repeat with RTL -> LTR symmetry
         // Reset to known RTL position (0) so rapid Next steps have full headroom towards -maxScroll
         await page.evaluate(() => {
-            const list = document.querySelector('[data-testid="scroll-view-dynamic"] li[data-page-item="true"]')?.parentElement;
+            const list = document.querySelector(
+                '[data-testid="scroll-view-dynamic"] li[data-page-item="true"]'
+            )?.parentElement;
             if (list) {
                 list.scrollLeft = 0;
             }
@@ -1584,7 +1713,9 @@ async function runTests(): Promise<void> {
             return el && getComputedStyle(el).direction === "ltr";
         });
 
-        const scrollEndCountRtl = await page.evaluate(() => (window as unknown as { __dynScrollEndCount: number }).__dynScrollEndCount);
+        const scrollEndCountRtl = await page.evaluate(
+            () => (window as unknown as { __dynScrollEndCount: number }).__dynScrollEndCount
+        );
         assert(
             scrollEndCountRtl === 0,
             `Dynamic ScrollView RTL in-flight target was still actively scrolling when direction switched back to LTR (scrollend count: ${scrollEndCountRtl})`
@@ -1605,7 +1736,9 @@ async function runTests(): Promise<void> {
             `Dynamic ScrollView LTR: clicking pager next displaces content leftward from actual LTR position (before: ${p0BeforeLtrStep2}, after: ${p0AfterLtrStep2})`
         );
 
-        console.log("    [PASS] Dynamic ScrollView pager target resynchronization across direction mutations verified\n");
+        console.log(
+            "    [PASS] Dynamic ScrollView pager target resynchronization across direction mutations verified\n"
+        );
 
         // Pager arrow overflow hysteresis: verify arrows disappear when page count shrinks
         // to a size that exceeds arrow-reduced list width but fits in arrow-free pager width
@@ -1670,7 +1803,9 @@ async function runTests(): Promise<void> {
         console.log("    [PASS] Dynamic ScrollView pager arrow hysteresis elimination verified\n");
 
         // Non-infinite active-index normalization on data shrink & expansion in LTR and RTL
-        console.log("    Testing Dynamic ScrollView non-infinite active-index normalization on data shrink & expansion");
+        console.log(
+            "    Testing Dynamic ScrollView non-infinite active-index normalization on data shrink & expansion"
+        );
 
         const runNonInfiniteShrinkSequence = async (dirName: "LTR" | "RTL") => {
             // 1. Switch to finite (non-infinite) mode
@@ -1680,7 +1815,9 @@ async function runTests(): Promise<void> {
             // 2. Set active index to 30 (out of 40 pages: 0-39)
             await page.click('[data-testid="set-dynamic-index-30"]');
             await page.waitForFunction(() => {
-                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] [data-scroll-view-slide]');
+                const slides = document.querySelectorAll(
+                    '[data-testid="scroll-view-dynamic"] [data-scroll-view-slide]'
+                );
                 return slides.length === 1;
             });
 
@@ -1688,31 +1825,54 @@ async function runTests(): Promise<void> {
             let activeSlide = dynScrollView.locator("[data-scroll-view-slide]");
             assert((await activeSlide.count()) > 0, `[${dirName}] Non-infinite active slide exists at index 30`);
             let slideText = (await activeSlide.innerText()).trim();
-            assert(slideText === "Page 31", `[${dirName}] Non-infinite active slide text is 'Page 31' (got '${slideText}')`);
+            assert(
+                slideText === "Page 31",
+                `[${dirName}] Non-infinite active slide text is 'Page 31' (got '${slideText}')`
+            );
             let slideAriaLabel = await activeSlide.getAttribute("aria-label");
-            assert(slideAriaLabel === "Page 31 of 40", `[${dirName}] Non-infinite slide aria-label is 'Page 31 of 40' (got '${slideAriaLabel}')`);
+            assert(
+                slideAriaLabel === "Page 31 of 40",
+                `[${dirName}] Non-infinite slide aria-label is 'Page 31 of 40' (got '${slideAriaLabel}')`
+            );
 
             // 3. Shrink data to 8 items (indices 0-7)
             await page.click('[data-testid="set-dynamic-pages-8"]');
             await page.waitForFunction(() => {
-                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] [data-scroll-view-slide]');
+                const slides = document.querySelectorAll(
+                    '[data-testid="scroll-view-dynamic"] [data-scroll-view-slide]'
+                );
                 return slides.length === 1;
             });
 
             // Verify carousel is NOT blank: normalized to index 7 (Page 8)
             activeSlide = dynScrollView.locator("[data-scroll-view-slide]");
-            assert((await activeSlide.count()) > 0, `[${dirName}] Active slide exists after non-infinite data shrink (not blank)`);
+            assert(
+                (await activeSlide.count()) > 0,
+                `[${dirName}] Active slide exists after non-infinite data shrink (not blank)`
+            );
             slideText = (await activeSlide.innerText()).trim();
-            assert(slideText === "Page 8", `[${dirName}] Active slide normalized to 'Page 8' after shrink to 8 items (got '${slideText}')`);
+            assert(
+                slideText === "Page 8",
+                `[${dirName}] Active slide normalized to 'Page 8' after shrink to 8 items (got '${slideText}')`
+            );
             slideAriaLabel = await activeSlide.getAttribute("aria-label");
-            assert(slideAriaLabel === "Page 8 of 8", `[${dirName}] Slide aria-label normalized to 'Page 8 of 8' (got '${slideAriaLabel}')`);
+            assert(
+                slideAriaLabel === "Page 8 of 8",
+                `[${dirName}] Slide aria-label normalized to 'Page 8 of 8' (got '${slideAriaLabel}')`
+            );
 
             // Verify navigation arrow boundaries at last page (index 7 of 8):
             // Next arrow must be hidden, Prev arrow must be visible
             const nextArrow = dynScrollView.locator("button[data-navigate-next]");
             const prevArrow = dynScrollView.locator("button[data-navigate-prev]");
-            assert(await nextArrow.evaluate(el => el.classList.contains("hidden")), `[${dirName}] Main Next arrow is hidden at last page`);
-            assert(!(await prevArrow.evaluate(el => el.classList.contains("hidden"))), `[${dirName}] Main Prev arrow is visible at last page`);
+            assert(
+                await nextArrow.evaluate(el => el.classList.contains("hidden")),
+                `[${dirName}] Main Next arrow is hidden at last page`
+            );
+            assert(
+                !(await prevArrow.evaluate(el => el.classList.contains("hidden"))),
+                `[${dirName}] Main Prev arrow is visible at last page`
+            );
 
             // Verify pager dot active state: exactly one dot has aria-current='true'
             const currentDots = dynScrollView.locator("button[aria-current='true']");
@@ -1723,18 +1883,28 @@ async function runTests(): Promise<void> {
             // 4. Expand back to 40 items and verify stable behavior
             await page.click('[data-testid="set-dynamic-pages-40"]');
             await page.waitForFunction(() => {
-                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] [data-scroll-view-slide]');
+                const slides = document.querySelectorAll(
+                    '[data-testid="scroll-view-dynamic"] [data-scroll-view-slide]'
+                );
                 return slides.length === 1;
             });
             activeSlide = dynScrollView.locator("[data-scroll-view-slide]");
-            assert((await activeSlide.count()) > 0, `[${dirName}] Active slide remains rendered after re-expansion to 40`);
+            assert(
+                (await activeSlide.count()) > 0,
+                `[${dirName}] Active slide remains rendered after re-expansion to 40`
+            );
             slideAriaLabel = await activeSlide.getAttribute("aria-label");
-            assert(slideAriaLabel === "Page 8 of 40", `[${dirName}] Slide aria-label after expansion is 'Page 8 of 40' (got '${slideAriaLabel}')`);
+            assert(
+                slideAriaLabel === "Page 8 of 40",
+                `[${dirName}] Slide aria-label after expansion is 'Page 8 of 40' (got '${slideAriaLabel}')`
+            );
 
             // Reset index to 0 before next test
             await page.click('[data-testid="set-dynamic-index-0"]');
             await page.waitForFunction(() => {
-                const slides = document.querySelectorAll('[data-testid="scroll-view-dynamic"] [data-scroll-view-slide]');
+                const slides = document.querySelectorAll(
+                    '[data-testid="scroll-view-dynamic"] [data-scroll-view-slide]'
+                );
                 return slides.length === 1;
             });
         };
@@ -1755,7 +1925,9 @@ async function runTests(): Promise<void> {
         await page.click('[data-testid="set-dynamic-ltr"]');
         await page.waitForTimeout(200);
 
-        console.log("    [PASS] Dynamic ScrollView non-infinite active-index normalization on data shrink & expansion verified in LTR & RTL\n");
+        console.log(
+            "    [PASS] Dynamic ScrollView non-infinite active-index normalization on data shrink & expansion verified in LTR & RTL\n"
+        );
         console.log("    [PASS] Dynamic dir mutation reactive layout updates verified\n");
 
         // 8. Dynamic CSS-only Ancestor Class Toggle (#fixture-dynamic-css)
@@ -1774,10 +1946,19 @@ async function runTests(): Promise<void> {
         let cssStartBox = await cssStart.boundingBox();
         let cssEndBox = await cssEnd.boundingBox();
         assert(cssStartBox !== null && cssEndBox !== null, "CSS Dynamic start/end boxes");
-        assert(Math.abs(cssStartBox.x - cssLayoutBox.x) <= 4, "Initial dynamic CSS LTR: start sidebar on physical LEFT");
-        assert(Math.abs(cssEndBox.x + cssEndBox.width - (cssLayoutBox.x + cssLayoutBox.width)) <= 4, "Initial dynamic CSS LTR: end sidebar on physical RIGHT");
+        assert(
+            Math.abs(cssStartBox.x - cssLayoutBox.x) <= 4,
+            "Initial dynamic CSS LTR: start sidebar on physical LEFT"
+        );
+        assert(
+            Math.abs(cssEndBox.x + cssEndBox.width - (cssLayoutBox.x + cssLayoutBox.width)) <= 4,
+            "Initial dynamic CSS LTR: end sidebar on physical RIGHT"
+        );
         const initialCssClasses = (await cssLayout.getAttribute("class")) || "";
-        assert(!initialCssClasses.includes("flex-row-reverse"), "Initial dynamic CSS LTR: layout does not have flex-row-reverse");
+        assert(
+            !initialCssClasses.includes("flex-row-reverse"),
+            "Initial dynamic CSS LTR: layout does not have flex-row-reverse"
+        );
 
         // Toggle ancestor class to .direction-rtl
         await page.click('[data-testid="set-css-rtl"]');
@@ -1786,12 +1967,24 @@ async function runTests(): Promise<void> {
         let cssCurrentLayoutBox = await cssLayout.boundingBox();
         cssStartBox = await cssStart.boundingBox();
         cssEndBox = await cssEnd.boundingBox();
-        assert(cssCurrentLayoutBox !== null && cssStartBox !== null && cssEndBox !== null, "Boxes after CSS RTL class toggle");
+        assert(
+            cssCurrentLayoutBox !== null && cssStartBox !== null && cssEndBox !== null,
+            "Boxes after CSS RTL class toggle"
+        );
         const rtlCssClasses = (await cssLayout.getAttribute("class")) || "";
-        assert(rtlCssClasses.includes("flex-row-reverse"), "After CSS RTL class toggle: layout compensated with flex-row-reverse");
+        assert(
+            rtlCssClasses.includes("flex-row-reverse"),
+            "After CSS RTL class toggle: layout compensated with flex-row-reverse"
+        );
         // Start sidebar remains physically anchored on the LEFT edge because semantic direction is LTR
-        assert(Math.abs(cssStartBox.x - cssCurrentLayoutBox.x) <= 4, "After CSS RTL class toggle: start sidebar remains on physical LEFT");
-        assert(Math.abs(cssEndBox.x + cssEndBox.width - (cssCurrentLayoutBox.x + cssCurrentLayoutBox.width)) <= 4, "After CSS RTL class toggle: end sidebar remains on physical RIGHT");
+        assert(
+            Math.abs(cssStartBox.x - cssCurrentLayoutBox.x) <= 4,
+            "After CSS RTL class toggle: start sidebar remains on physical LEFT"
+        );
+        assert(
+            Math.abs(cssEndBox.x + cssEndBox.width - (cssCurrentLayoutBox.x + cssCurrentLayoutBox.width)) <= 4,
+            "After CSS RTL class toggle: end sidebar remains on physical RIGHT"
+        );
 
         // Toggle ancestor class back to LTR
         await page.click('[data-testid="set-css-ltr"]');
@@ -1800,10 +1993,16 @@ async function runTests(): Promise<void> {
         cssCurrentLayoutBox = await cssLayout.boundingBox();
         cssStartBox = await cssStart.boundingBox();
         cssEndBox = await cssEnd.boundingBox();
-        assert(cssCurrentLayoutBox !== null && cssStartBox !== null && cssEndBox !== null, "Boxes after CSS LTR class return");
+        assert(
+            cssCurrentLayoutBox !== null && cssStartBox !== null && cssEndBox !== null,
+            "Boxes after CSS LTR class return"
+        );
         const backCssClasses = (await cssLayout.getAttribute("class")) || "";
         assert(!backCssClasses.includes("flex-row-reverse"), "After returning to CSS LTR: layout returned to flex-row");
-        assert(Math.abs(cssStartBox.x - cssCurrentLayoutBox.x) <= 4, "After returning to CSS LTR: start sidebar remains on physical LEFT");
+        assert(
+            Math.abs(cssStartBox.x - cssCurrentLayoutBox.x) <= 4,
+            "After returning to CSS LTR: start sidebar remains on physical LEFT"
+        );
         console.log("    [PASS] Dynamic CSS ancestor class toggle reactive compensation verified\n");
 
         // 9. Dynamic Viewport Responsive Media Query Direction (#fixture-responsive-css)
@@ -1823,7 +2022,10 @@ async function runTests(): Promise<void> {
         let rEndBox = await respEnd.boundingBox();
         assert(rStartBox !== null && rEndBox !== null, "Responsive start/end boxes");
         assert(Math.abs(rStartBox.x - respLayoutBox.x) <= 4, "Wide viewport: start sidebar on physical LEFT");
-        assert(Math.abs(rEndBox.x + rEndBox.width - (respLayoutBox.x + respLayoutBox.width)) <= 4, "Wide viewport: end sidebar on physical RIGHT");
+        assert(
+            Math.abs(rEndBox.x + rEndBox.width - (respLayoutBox.x + respLayoutBox.width)) <= 4,
+            "Wide viewport: end sidebar on physical RIGHT"
+        );
         const wideClasses = (await respLayout.getAttribute("class")) || "";
         assert(!wideClasses.includes("flex-row-reverse"), "Wide viewport: layout does not have flex-row-reverse");
 
@@ -1836,9 +2038,18 @@ async function runTests(): Promise<void> {
         rEndBox = await respEnd.boundingBox();
         assert(currentRespLayoutBox !== null && rStartBox !== null && rEndBox !== null, "Boxes after narrow resize");
         const narrowClasses = (await respLayout.getAttribute("class")) || "";
-        assert(narrowClasses.includes("flex-row-reverse"), "Narrow viewport (<900px): layout compensated with flex-row-reverse");
-        assert(Math.abs(rStartBox.x - currentRespLayoutBox.x) <= 4, "Narrow viewport: start sidebar remains on physical LEFT");
-        assert(Math.abs(rEndBox.x + rEndBox.width - (currentRespLayoutBox.x + currentRespLayoutBox.width)) <= 4, "Narrow viewport: end sidebar remains on physical RIGHT");
+        assert(
+            narrowClasses.includes("flex-row-reverse"),
+            "Narrow viewport (<900px): layout compensated with flex-row-reverse"
+        );
+        assert(
+            Math.abs(rStartBox.x - currentRespLayoutBox.x) <= 4,
+            "Narrow viewport: start sidebar remains on physical LEFT"
+        );
+        assert(
+            Math.abs(rEndBox.x + rEndBox.width - (currentRespLayoutBox.x + currentRespLayoutBox.width)) <= 4,
+            "Narrow viewport: end sidebar remains on physical RIGHT"
+        );
 
         // Restore viewport to 1280px
         await page.setViewportSize({ width: 1280, height: 800 });
@@ -1850,7 +2061,10 @@ async function runTests(): Promise<void> {
         assert(currentRespLayoutBox !== null && rStartBox !== null && rEndBox !== null, "Boxes after wide restore");
         const restoredClasses = (await respLayout.getAttribute("class")) || "";
         assert(!restoredClasses.includes("flex-row-reverse"), "Restored wide viewport: layout returned to flex-row");
-        assert(Math.abs(rStartBox.x - currentRespLayoutBox.x) <= 4, "Restored wide viewport: start sidebar on physical LEFT");
+        assert(
+            Math.abs(rStartBox.x - currentRespLayoutBox.x) <= 4,
+            "Restored wide viewport: start sidebar on physical LEFT"
+        );
         console.log("    [PASS] Dynamic viewport responsive media query direction verified\n");
 
         // 10. Dynamic CSS-only Shadow DOM Ancestor Direction (#fixture-shadow-dom)
@@ -1870,9 +2084,15 @@ async function runTests(): Promise<void> {
         let sEndBox = await shadowEnd.boundingBox();
         assert(sStartBox !== null && sEndBox !== null, "Shadow start/end boxes");
         assert(Math.abs(sStartBox.x - shadowLayoutBox.x) <= 4, "Initial shadow LTR: start sidebar on physical LEFT");
-        assert(Math.abs(sEndBox.x + sEndBox.width - (shadowLayoutBox.x + shadowLayoutBox.width)) <= 4, "Initial shadow LTR: end sidebar on physical RIGHT");
+        assert(
+            Math.abs(sEndBox.x + sEndBox.width - (shadowLayoutBox.x + shadowLayoutBox.width)) <= 4,
+            "Initial shadow LTR: end sidebar on physical RIGHT"
+        );
         const initialShadowClasses = (await shadowLayout.getAttribute("class")) || "";
-        assert(!initialShadowClasses.includes("flex-row-reverse"), "Initial shadow LTR: layout does not have flex-row-reverse");
+        assert(
+            !initialShadowClasses.includes("flex-row-reverse"),
+            "Initial shadow LTR: layout does not have flex-row-reverse"
+        );
 
         // Mutate shadow ancestor direction to RTL
         await page.click('[data-testid="set-shadow-rtl"]');
@@ -1881,11 +2101,23 @@ async function runTests(): Promise<void> {
         let currentShadowLayoutBox = await shadowLayout.boundingBox();
         sStartBox = await shadowStart.boundingBox();
         sEndBox = await shadowEnd.boundingBox();
-        assert(currentShadowLayoutBox !== null && sStartBox !== null && sEndBox !== null, "Boxes after shadow RTL mutation");
+        assert(
+            currentShadowLayoutBox !== null && sStartBox !== null && sEndBox !== null,
+            "Boxes after shadow RTL mutation"
+        );
         const rtlShadowClasses = (await shadowLayout.getAttribute("class")) || "";
-        assert(rtlShadowClasses.includes("flex-row-reverse"), "After shadow RTL mutation: shadow layout compensated with flex-row-reverse");
-        assert(Math.abs(sStartBox.x - currentShadowLayoutBox.x) <= 4, "After shadow RTL mutation: start sidebar inside ShadowRoot remains on physical LEFT");
-        assert(Math.abs(sEndBox.x + sEndBox.width - (currentShadowLayoutBox.x + currentShadowLayoutBox.width)) <= 4, "After shadow RTL mutation: end sidebar inside ShadowRoot remains on physical RIGHT");
+        assert(
+            rtlShadowClasses.includes("flex-row-reverse"),
+            "After shadow RTL mutation: shadow layout compensated with flex-row-reverse"
+        );
+        assert(
+            Math.abs(sStartBox.x - currentShadowLayoutBox.x) <= 4,
+            "After shadow RTL mutation: start sidebar inside ShadowRoot remains on physical LEFT"
+        );
+        assert(
+            Math.abs(sEndBox.x + sEndBox.width - (currentShadowLayoutBox.x + currentShadowLayoutBox.width)) <= 4,
+            "After shadow RTL mutation: end sidebar inside ShadowRoot remains on physical RIGHT"
+        );
 
         // Mutate shadow ancestor direction back to LTR
         await page.click('[data-testid="set-shadow-ltr"]');
@@ -1894,14 +2126,25 @@ async function runTests(): Promise<void> {
         currentShadowLayoutBox = await shadowLayout.boundingBox();
         sStartBox = await shadowStart.boundingBox();
         sEndBox = await shadowEnd.boundingBox();
-        assert(currentShadowLayoutBox !== null && sStartBox !== null && sEndBox !== null, "Boxes after shadow LTR return");
+        assert(
+            currentShadowLayoutBox !== null && sStartBox !== null && sEndBox !== null,
+            "Boxes after shadow LTR return"
+        );
         const backShadowClasses = (await shadowLayout.getAttribute("class")) || "";
-        assert(!backShadowClasses.includes("flex-row-reverse"), "After returning to shadow LTR: shadow layout returned to flex-row");
-        assert(Math.abs(sStartBox.x - currentShadowLayoutBox.x) <= 4, "After returning to shadow LTR: start sidebar remains on physical LEFT");
+        assert(
+            !backShadowClasses.includes("flex-row-reverse"),
+            "After returning to shadow LTR: shadow layout returned to flex-row"
+        );
+        assert(
+            Math.abs(sStartBox.x - currentShadowLayoutBox.x) <= 4,
+            "After returning to shadow LTR: start sidebar remains on physical LEFT"
+        );
         console.log("    [PASS] Dynamic CSS-only Shadow DOM ancestor direction verified\n");
 
         // 11. ScrollView Animation Duration & prefers-reduced-motion Verification (#fixture-scroll-view-reduced-motion)
-        console.log("--> Testing ScrollView Animation Duration & prefers-reduced-motion (#fixture-scroll-view-reduced-motion)");
+        console.log(
+            "--> Testing ScrollView Animation Duration & prefers-reduced-motion (#fixture-scroll-view-reduced-motion)"
+        );
         const reducedSection = page.locator("section#fixture-scroll-view-reduced-motion");
         await reducedSection.scrollIntoViewIfNeeded();
 
@@ -2042,7 +2285,9 @@ async function runTests(): Promise<void> {
             `[Control: no-preference] Pager scrollBy requests behavior='smooth' (got '${noPrefScrollBy[noPrefScrollBy.length - 1]?.behavior}')`
         );
 
-        await stdPagerList.evaluate(el => { (el as any).__scrollCalls = []; });
+        await stdPagerList.evaluate(el => {
+            (el as any).__scrollCalls = [];
+        });
         const dot5 = stdScrollView.locator('li[data-page-index="5"] button');
         await dot5.click();
         await page.waitForTimeout(200);
@@ -2100,7 +2345,9 @@ async function runTests(): Promise<void> {
             (el as any).__scrollCalls = [];
             el.style.scrollBehavior = "smooth";
         });
-        await page.evaluate(() => { (window as any).__scrollIntoViewCalls = []; });
+        await page.evaluate(() => {
+            (window as any).__scrollIntoViewCalls = [];
+        });
 
         await stdPagerNext.click();
         await page.waitForTimeout(150);
@@ -2110,7 +2357,9 @@ async function runTests(): Promise<void> {
             `[Reduced Motion] Pager scroll requests behavior='instant' under conflicting CSS scroll-behavior: smooth (got '${reduceScrollBy[reduceScrollBy.length - 1]?.behavior}')`
         );
 
-        await stdPagerList.evaluate(el => { (el as any).__scrollCalls = []; });
+        await stdPagerList.evaluate(el => {
+            (el as any).__scrollCalls = [];
+        });
         const dot12 = stdScrollView.locator('li[data-page-index="12"] button');
         await dot12.click();
         await page.waitForTimeout(200);
@@ -2136,7 +2385,9 @@ async function runTests(): Promise<void> {
         );
         await page.waitForTimeout(1300);
 
-        console.log("    [PASS] ScrollView prefers-reduced-motion override, animationDuration contract & programmatic scrollBehavior verified\n");
+        console.log(
+            "    [PASS] ScrollView prefers-reduced-motion override, animationDuration contract & programmatic scrollBehavior verified\n"
+        );
 
         // 12. ScrollView Real-Browser Touch Pager Hold & Capture-Safe Release-Away Verification
         console.log("--> Testing Real-Browser Touch Pager Hold & Capture-Safe Release-Away Verification");
@@ -2154,7 +2405,12 @@ async function runTests(): Promise<void> {
         const touchPagerList = touchScrollView.locator('ul[class*="overflow-hidden"]');
 
         await touchPagerList.evaluate(el => {
-            const list = el as { __scrollByCalls?: unknown[]; __scrollToCalls?: unknown[]; scrollBy: (...args: unknown[]) => void; scrollTo: (...args: unknown[]) => void };
+            const list = el as {
+                __scrollByCalls?: unknown[];
+                __scrollToCalls?: unknown[];
+                scrollBy: (...args: unknown[]) => void;
+                scrollTo: (...args: unknown[]) => void;
+            };
             list.__scrollByCalls = [];
             list.__scrollToCalls = [];
             const origScrollBy = list.scrollBy.bind(list);
@@ -2187,13 +2443,11 @@ async function runTests(): Promise<void> {
         await touchPage.waitForTimeout(180); // produce repeat ticks (60ms interval)
 
         const callsDuringTouchHold = await touchPagerList.evaluate(
-            el => ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollToCalls || []).length +
-                  ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
+            el =>
+                ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollToCalls || []).length +
+                ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
         );
-        assert(
-            callsDuringTouchHold >= 2,
-            `Real touch hold produced repeat scroll ticks (got ${callsDuringTouchHold})`
-        );
+        assert(callsDuringTouchHold >= 2, `Real touch hold produced repeat scroll ticks (got ${callsDuringTouchHold})`);
 
         // Touch move outside Next button
         await cdp.send("Input.dispatchTouchEvent", {
@@ -2210,8 +2464,9 @@ async function runTests(): Promise<void> {
         await touchPage.waitForTimeout(100);
 
         const callsAfterTouchReleaseAway = await touchPagerList.evaluate(
-            el => ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollToCalls || []).length +
-                  ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
+            el =>
+                ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollToCalls || []).length +
+                ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
         );
 
         // Normal subsequent tap/click on Next button must NOT be suppressed by stale suppression
@@ -2219,8 +2474,9 @@ async function runTests(): Promise<void> {
         await touchPage.waitForTimeout(200);
 
         const callsAfterSubsequentTap = await touchPagerList.evaluate(
-            el => ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollToCalls || []).length +
-                  ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
+            el =>
+                ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollToCalls || []).length +
+                ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
         );
         assert(
             callsAfterSubsequentTap === callsAfterTouchReleaseAway + 1,
@@ -2239,8 +2495,9 @@ async function runTests(): Promise<void> {
         await touchPage.waitForTimeout(180);
 
         const callsDuringOnControlHold = await touchPagerList.evaluate(
-            el => ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollToCalls || []).length +
-                  ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
+            el =>
+                ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollToCalls || []).length +
+                ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
         );
         assert(
             callsDuringOnControlHold >= callsBeforeOnControlHold + 2,
@@ -2254,8 +2511,9 @@ async function runTests(): Promise<void> {
         await touchPage.waitForTimeout(250); // wait longer than single-scroll timer (60ms)
 
         const callsAfterOnControlEnd = await touchPagerList.evaluate(
-            el => ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollToCalls || []).length +
-                  ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
+            el =>
+                ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollToCalls || []).length +
+                ((el as { __scrollToCalls?: unknown[]; __scrollByCalls?: unknown[] }).__scrollByCalls || []).length
         );
         assert(
             callsAfterOnControlEnd === callsDuringOnControlHold,
@@ -2282,7 +2540,15 @@ async function runTests(): Promise<void> {
             const cellCount = await cells.count();
             assert(cellCount === 7, `Expected 7 weekday cells in Arabic Calendar (${dir}), got ${cellCount}`);
 
-            const labelBoxes: { left: number; right: number; top: number; bottom: number; width: number; height: number; text: string }[] = [];
+            const labelBoxes: {
+                left: number;
+                right: number;
+                top: number;
+                bottom: number;
+                width: number;
+                height: number;
+                text: string;
+            }[] = [];
 
             for (let i = 0; i < cellCount; i++) {
                 const cell = cells.nth(i);

@@ -4,10 +4,7 @@ import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { SidebarComponent } from "../sidebar/sidebar.component";
 import { SidebarInsetDirective } from "../../directives/sidebar-inset.directive";
 import { SidebarTriggerDirective } from "../../directives/sidebar-trigger.directive";
-import {
-    resolveSidebarLayoutBaseClass,
-    resolveSidebarLayoutReverse
-} from "../../internal/sidebar-layout-direction";
+import { resolveSidebarLayoutBaseClass, resolveSidebarLayoutReverse } from "../../internal/sidebar-layout-direction";
 import * as SidebarPublicApi from "../../public-api";
 import { SidebarService } from "../../services/sidebar.service";
 import { SidebarLayoutComponent } from "./sidebar-layout.component";
@@ -312,8 +309,12 @@ describe("SidebarLayoutComponent", () => {
             shadowFixture.detectChanges();
 
             const layout = shadowFixture.componentInstance.layout();
-            const shadowContainer = shadowFixture.nativeElement.shadowRoot?.querySelector(".shadow-container") as HTMLElement;
-            const layoutEl = shadowFixture.nativeElement.shadowRoot?.querySelector("mona-sidebar-layout") as HTMLElement;
+            const shadowContainer = shadowFixture.nativeElement.shadowRoot?.querySelector(
+                ".shadow-container"
+            ) as HTMLElement;
+            const layoutEl = shadowFixture.nativeElement.shadowRoot?.querySelector(
+                "mona-sidebar-layout"
+            ) as HTMLElement;
             const computedStyleSpy = vi.spyOn(window, "getComputedStyle");
 
             try {
@@ -327,7 +328,9 @@ describe("SidebarLayoutComponent", () => {
                 shadowContainer.style.direction = "rtl";
                 await new Promise(resolve => setTimeout(resolve, 50));
 
-                const afterContainerCalls = computedStyleSpy.mock.calls.filter(([target]) => target === layoutEl).length;
+                const afterContainerCalls = computedStyleSpy.mock.calls.filter(
+                    ([target]) => target === layoutEl
+                ).length;
                 expect(afterContainerCalls).toBeGreaterThan(initialCalls);
 
                 // Mutate style on outer shadow host element (traversed out of ShadowRoot)

@@ -5,12 +5,7 @@ import { describe, expect, it } from "vitest";
 import { TimePickerComponent } from "./time-picker.component";
 
 @Component({
-    template: `
-        <mona-time-picker
-            [(value)]="value"
-            [format]="format()">
-        </mona-time-picker>
-    `,
+    template: ` <mona-time-picker [(value)]="value" [format]="format()"> </mona-time-picker> `,
     imports: [TimePickerComponent]
 })
 class TimePickerI18nTestHostComponent {
@@ -33,8 +28,9 @@ describe("TimePickerComponent i18n", () => {
         TestBed.configureTestingModule({
             imports: [TimePickerI18nTestHostComponent]
         });
-        const fixture: ComponentFixture<TimePickerI18nTestHostComponent> =
-            TestBed.createComponent(TimePickerI18nTestHostComponent);
+        const fixture: ComponentFixture<TimePickerI18nTestHostComponent> = TestBed.createComponent(
+            TimePickerI18nTestHostComponent
+        );
         const i18n = TestBed.inject(MonaI18nService);
         fixture.detectChanges();
         await fixture.whenStable();
@@ -65,10 +61,7 @@ describe("TimePickerComponent i18n", () => {
     it("derives default format based on locale, hourFormat, and showSeconds", async () => {
         @Component({
             template: `
-                <mona-time-picker
-                    [(value)]="value"
-                    [hourFormat]="hourFormat()"
-                    [showSeconds]="showSeconds()" />
+                <mona-time-picker [(value)]="value" [hourFormat]="hourFormat()" [showSeconds]="showSeconds()" />
             `,
             imports: [TimePickerComponent]
         })
@@ -127,11 +120,7 @@ describe("TimePickerComponent i18n", () => {
     it("preserves explicit format override even if hourFormat or showSeconds differ", async () => {
         @Component({
             template: `
-                <mona-time-picker
-                    [(value)]="value"
-                    [format]="'HH:mm'"
-                    [hourFormat]="'12'"
-                    [showSeconds]="true" />
+                <mona-time-picker [(value)]="value" [format]="'HH:mm'" [hourFormat]="'12'" [showSeconds]="true" />
             `,
             imports: [TimePickerComponent]
         })

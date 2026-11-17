@@ -19,7 +19,6 @@ const roundedBottomVariants = {
     none: "rounded-none"
 };
 
-
 const roundedAllVariants = {
     small: "rounded-sm",
     medium: "rounded-md",

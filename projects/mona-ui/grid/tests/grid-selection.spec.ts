@@ -116,9 +116,7 @@ describe("grid selection integration", () => {
         await settleFixture(fixture);
 
         expect(fixture.nativeElement.querySelector("thead mona-grid-select-all-checkbox")).toBeNull();
-        expect(
-            fixture.nativeElement.querySelectorAll("tbody mona-grid-selection-checkbox").length
-        ).toBe(0);
+        expect(fixture.nativeElement.querySelectorAll("tbody mona-grid-selection-checkbox").length).toBe(0);
     });
 
     it("renders the selection column when showCheckboxes is enabled", () => {
@@ -246,9 +244,7 @@ describe("grid selection integration", () => {
         );
         expect(bodyCheckboxes.length).toBe(dataRows.length);
 
-        const totalCheckboxes = fixture.nativeElement.querySelectorAll(
-            "tbody mona-grid-selection-checkbox"
-        ).length;
+        const totalCheckboxes = fixture.nativeElement.querySelectorAll("tbody mona-grid-selection-checkbox").length;
         expect(totalCheckboxes).toBe(dataRows.length);
     });
 

@@ -63,7 +63,12 @@ type NavigationButtonType = "first" | "last" | "next" | "previous";
 
 type PagerItem =
     | { readonly key: string; readonly kind: "page"; readonly page: number }
-    | { readonly direction: "backward" | "forward"; readonly key: string; readonly kind: "jump"; readonly page: number };
+    | {
+          readonly direction: "backward" | "forward";
+          readonly key: string;
+          readonly kind: "jump";
+          readonly page: number;
+      };
 
 /** Below this width (in CSS pixels) a responsive pager replaces its page buttons with a page dropdown. */
 const COMPACT_WIDTH = 480;
@@ -172,7 +177,9 @@ export class PagerComponent implements PagerVariantInputs {
     protected readonly pageInputLabelledBy = `${this.#id}-page-prefix ${this.#id}-page ${this.#id}-page-suffix`;
     protected readonly pageInputPrefixId = `${this.#id}-page-prefix`;
     protected readonly pageInputSuffixId = `${this.#id}-page-suffix`;
-    protected readonly pageItems = computed(() => this.buildPageItems(this.page(), this.visiblePages(), this.pageCount()));
+    protected readonly pageItems = computed(() =>
+        this.buildPageItems(this.page(), this.visiblePages(), this.pageCount())
+    );
     protected readonly pageList = computed(() => Array.from({ length: this.pageCount() }, (_, index) => index + 1));
     protected readonly pageSizeContext = computed<PageSizeTemplateContext>(() => ({
         ...this.pagerContext(),

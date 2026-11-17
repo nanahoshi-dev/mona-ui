@@ -37,7 +37,6 @@ describe("SvgLineSeriesRenderer", () => {
             xAxisId: "default-x",
             yAxisId: "default-y"
         };
-
     };
 
     it("should not set stroke-dasharray for solid line (SVG-LIN-001)", () => {

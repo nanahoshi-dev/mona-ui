@@ -96,7 +96,8 @@ function getInput(fixture: ComponentFixture<unknown>): HTMLInputElement {
 }
 
 function getNumericTextBox(fixture: ComponentFixture<unknown>): NumericTextBoxComponent {
-    return fixture.debugElement.query(By.directive(NumericTextBoxComponent)).componentInstance as NumericTextBoxComponent;
+    return fixture.debugElement.query(By.directive(NumericTextBoxComponent))
+        .componentInstance as NumericTextBoxComponent;
 }
 
 function keydown(target: HTMLElement, key: string, init: KeyboardEventInit = {}): KeyboardEvent {

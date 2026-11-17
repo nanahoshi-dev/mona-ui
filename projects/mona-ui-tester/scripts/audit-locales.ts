@@ -2,11 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { Node, Project, SyntaxKind } from "ts-morph";
 
-export type LocaleAuditCategory =
-    | "completeness-bypass"
-    | "copied-english"
-    | "invalid-metadata"
-    | "forbidden-syntax";
+export type LocaleAuditCategory = "completeness-bypass" | "copied-english" | "invalid-metadata" | "forbidden-syntax";
 
 export interface LocaleAuditViolation {
     category: LocaleAuditCategory;
@@ -40,19 +36,7 @@ export interface LocaleDiscoveryResult {
     readonly violations: readonly LocaleAuditViolation[];
 }
 
-export const TECHNICAL_ALLOWLIST = new Set([
-    "URL",
-    "RGB",
-    "HEX",
-    "HSL",
-    "HTML",
-    "px",
-    ":",
-    ",",
-    "/",
-    "-",
-    "+"
-]);
+export const TECHNICAL_ALLOWLIST = new Set(["URL", "RGB", "HEX", "HSL", "HTML", "px", ":", ",", "/", "-", "+"]);
 
 export interface LocaleCopyException {
     readonly localeId: string;
@@ -225,9 +209,7 @@ export function typeNameToNamespace(typeName: string): MonaMessageNamespace | nu
     }
     const pascal = match[1];
     const camel = pascal[0].toLowerCase() + pascal.slice(1);
-    return MONA_MESSAGE_NAMESPACES.includes(camel as MonaMessageNamespace)
-        ? (camel as MonaMessageNamespace)
-        : null;
+    return MONA_MESSAGE_NAMESPACES.includes(camel as MonaMessageNamespace) ? (camel as MonaMessageNamespace) : null;
 }
 
 export function extractMeaningfulFragments(fnNode: Node): string[] {
@@ -389,10 +371,7 @@ export function loadCanonicalMessageNamespaces(
     return { namespaces, violations };
 }
 
-export function checkSchemaDrift(
-    canonicalNamespaces: Set<string>,
-    schemaPath: string
-): LocaleAuditViolation[] {
+export function checkSchemaDrift(canonicalNamespaces: Set<string>, schemaPath: string): LocaleAuditViolation[] {
     const violations: LocaleAuditViolation[] = [];
     const hardcodedSet = new Set<string>(MONA_MESSAGE_NAMESPACES);
 
@@ -486,7 +465,10 @@ export function loadDefaultEnglishStrings(
                 if (match) {
                     const pascal = match[1];
                     const camel = pascal[0].toLowerCase() + pascal.slice(1);
-                    if (canonicalNamespaces.has(camel) || MONA_MESSAGE_NAMESPACES.includes(camel as MonaMessageNamespace)) {
+                    if (
+                        canonicalNamespaces.has(camel) ||
+                        MONA_MESSAGE_NAMESPACES.includes(camel as MonaMessageNamespace)
+                    ) {
                         detectedNamespace = camel;
                         break;
                     }
@@ -759,13 +741,19 @@ export function discoverOfficialLocales(
                 localeExport = exportedLocDecls[0].getName();
                 const init = exportedLocDecls[0].getInitializer();
                 const obj =
-                    init?.asKind(SyntaxKind.SatisfiesExpression)?.getExpression()?.asKind(SyntaxKind.ObjectLiteralExpression) ??
+                    init
+                        ?.asKind(SyntaxKind.SatisfiesExpression)
+                        ?.getExpression()
+                        ?.asKind(SyntaxKind.ObjectLiteralExpression) ??
                     init?.asKind(SyntaxKind.ObjectLiteralExpression);
                 if (obj) {
                     const dirProp = obj.getProperty("direction");
                     if (dirProp && Node.isPropertyAssignment(dirProp)) {
                         const dirInit = dirProp.getInitializer();
-                        if (dirInit && (Node.isStringLiteral(dirInit) || Node.isNoSubstitutionTemplateLiteral(dirInit))) {
+                        if (
+                            dirInit &&
+                            (Node.isStringLiteral(dirInit) || Node.isNoSubstitutionTemplateLiteral(dirInit))
+                        ) {
                             const val = dirInit.getLiteralText().trim();
                             if (val === "ltr" || val === "rtl") {
                                 direction = val;
@@ -851,11 +839,9 @@ export function discoverOfficialLocales(
 
     if (publicApiContent) {
         try {
-            const pubSf = project.createSourceFile(
-                `disc-pub-${Date.now()}-${Math.random()}.ts`,
-                publicApiContent,
-                { overwrite: true }
-            );
+            const pubSf = project.createSourceFile(`disc-pub-${Date.now()}-${Math.random()}.ts`, publicApiContent, {
+                overwrite: true
+            });
 
             interface ExportedSymbolInfo {
                 exportedName: string;
@@ -1299,7 +1285,7 @@ export function auditLocaleMessagesFile(
     if (officialMsgDecls.length === 0) {
         violations.push({
             category: "completeness-bypass",
-            detail: 'Official locale catalog must export an official messages catalog named /^[A-Z0-9_]+_MESSAGES$/',
+            detail: "Official locale catalog must export an official messages catalog named /^[A-Z0-9_]+_MESSAGES$/",
             file: filePath,
             line: 1
         });
@@ -1336,7 +1322,7 @@ export function auditLocaleMessagesFile(
         if (!init) {
             violations.push({
                 category: "completeness-bypass",
-                detail: 'Official locale catalog variable must have an initializer',
+                detail: "Official locale catalog variable must have an initializer",
                 file: filePath,
                 line: decl.getStartLineNumber()
             });
@@ -1404,7 +1390,7 @@ export function auditLocaleMetadataFile(
     if (localeDecls.length === 0) {
         violations.push({
             category: "invalid-metadata",
-            detail: 'Could not find exported MonaLocale constant matching /^MONA_[A-Z0-9_]+_LOCALE$/',
+            detail: "Could not find exported MonaLocale constant matching /^MONA_[A-Z0-9_]+_LOCALE$/",
             file: filePath,
             line: 1
         });
@@ -1446,7 +1432,7 @@ export function auditLocaleMetadataFile(
     if (!Node.isObjectLiteralExpression(obj)) {
         violations.push({
             category: "invalid-metadata",
-            detail: 'Official locale metadata must be an object literal',
+            detail: "Official locale metadata must be an object literal",
             file: filePath,
             line: init.getStartLineNumber()
         });
@@ -1567,9 +1553,7 @@ export function auditLocaleMetadataFile(
             }
 
             // Reject local variable shadowing (e.g. const ES_ES_MESSAGES = ...)
-            const localShadows = sf.getVariableDeclarations().filter(
-                d => d.getName() === msgIdentifier && d !== decl
-            );
+            const localShadows = sf.getVariableDeclarations().filter(d => d.getName() === msgIdentifier && d !== decl);
             if (localShadows.length > 0) {
                 violations.push({
                     category: "invalid-metadata",
@@ -1683,12 +1667,7 @@ export function auditAllLocales(
 
     for (const descriptor of discovery.locales) {
         violations.push(
-            ...auditLocaleMessagesFile(
-                descriptor.messagesFile,
-                undefined,
-                englishDefaults,
-                descriptor.canonicalId
-            )
+            ...auditLocaleMessagesFile(descriptor.messagesFile, undefined, englishDefaults, descriptor.canonicalId)
         );
         violations.push(
             ...auditLocaleMetadataFile(

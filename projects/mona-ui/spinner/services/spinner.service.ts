@@ -460,11 +460,7 @@ export class SpinnerService implements OnDestroy {
         // Restore target positioning safely
         if (targetState.changedPosition) {
             if (targetState.target.style.position === "relative") {
-                this.#renderer.setStyle(
-                    targetState.target,
-                    "position",
-                    targetState.originalInlinePosition || null
-                );
+                this.#renderer.setStyle(targetState.target, "position", targetState.originalInlinePosition || null);
             }
             targetState.changedPosition = false;
         }
@@ -531,7 +527,9 @@ export class SpinnerService implements OnDestroy {
             // Need containing block for absolute local positioning
             if (!targetState.isFullPage) {
                 const defaultView = this.#document.defaultView;
-                const computedPosition = defaultView ? defaultView.getComputedStyle(targetState.target).position : "static";
+                const computedPosition = defaultView
+                    ? defaultView.getComputedStyle(targetState.target).position
+                    : "static";
 
                 if (computedPosition === "static") {
                     this.#renderer.setStyle(targetState.target, "position", "relative");

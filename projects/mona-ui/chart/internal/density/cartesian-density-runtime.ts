@@ -199,8 +199,7 @@ export function buildDensityRuntime(
                 extractNaturalKey: (_, i) => retainedRange.x[i],
                 keyField,
                 naturalKeysUnique:
-                    !keyField &&
-                    (range.monotonicity === "ascending" || range.monotonicity === "descending"),
+                    !keyField && (range.monotonicity === "ascending" || range.monotonicity === "descending"),
                 seriesKey: typeof spec.seriesKey === "function" ? spec.seriesKey() : spec.seriesKey
             });
             seriesById.set(spec.id, { capability, identity, range: retainedRange, scalar: null });
@@ -234,8 +233,7 @@ export function buildDensityRuntime(
             extractNaturalKey: (_, i) => scalar.x[i],
             keyField,
             naturalKeysUnique:
-                !keyField &&
-                (scalar.monotonicity === "ascending" || scalar.monotonicity === "descending"),
+                !keyField && (scalar.monotonicity === "ascending" || scalar.monotonicity === "descending"),
             seriesKey: typeof spec.seriesKey === "function" ? spec.seriesKey() : spec.seriesKey
         });
 

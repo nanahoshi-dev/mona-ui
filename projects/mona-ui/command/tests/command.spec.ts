@@ -433,7 +433,9 @@ describe("mona-command", () => {
 
             expect(input.getAttribute("role")).toBe("combobox");
             expect(input.getAttribute("aria-expanded")).toBe("true");
-            expect(input.getAttribute("aria-controls")).toBe(fixture.nativeElement.querySelector("[role='listbox']").id);
+            expect(input.getAttribute("aria-controls")).toBe(
+                fixture.nativeElement.querySelector("[role='listbox']").id
+            );
             expect(input.getAttribute("aria-activedescendant")).toBe(active.id);
             expect(active.getAttribute("aria-selected")).toBe("true");
         });
@@ -491,9 +493,9 @@ describe("mona-command", () => {
             fixture.componentInstance.open.set(true);
             await settle(fixture);
 
-            dialog()?.querySelector("input")?.dispatchEvent(
-                new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "Escape" })
-            );
+            dialog()
+                ?.querySelector("input")
+                ?.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "Escape" }));
             await settle(fixture);
 
             expect(fixture.componentInstance.open()).toBe(false);
@@ -568,7 +570,8 @@ describe("mona-command", () => {
         });
 
         it("matches mod to the platform's key, and exact modifiers only", () => {
-            const event = (init: KeyboardEventInit): KeyboardEvent => new KeyboardEvent("keydown", { key: "k", ...init });
+            const event = (init: KeyboardEventInit): KeyboardEvent =>
+                new KeyboardEvent("keydown", { key: "k", ...init });
 
             expect(matchesShortcut(event({ ctrlKey: true }), "mod+k", false)).toBe(true);
             expect(matchesShortcut(event({ metaKey: true }), "mod+k", true)).toBe(true);

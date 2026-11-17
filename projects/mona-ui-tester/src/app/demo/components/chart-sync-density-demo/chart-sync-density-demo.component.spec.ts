@@ -76,34 +76,48 @@ describe("ChartSyncDensityDemoComponent", () => {
         });
     };
 
-    it("renders all seven dense charts without runtime errors", () => {
-        const charts = flushCharts();
+    it(
+        "renders all seven dense charts without runtime errors",
+        () => {
+            const charts = flushCharts();
 
-        expect(charts.length).toBe(7);
+            expect(charts.length).toBe(7);
 
-        for (const { index, scene } of charts) {
-            expect(scene, `chart ${index} scene`).toBeDefined();
-            expect(scene?.hasRenderableData, `chart ${index} renderable`).toBe(true);
-            expect(scene?.series.length ?? 0, `chart ${index} series count`).toBeGreaterThan(0);
-            expect(scene?.axes.length ?? 0, `chart ${index} axes`).toBeGreaterThanOrEqual(2);
-        }
-    }, renderTimeout);
+            for (const { index, scene } of charts) {
+                expect(scene, `chart ${index} scene`).toBeDefined();
+                expect(scene?.hasRenderableData, `chart ${index} renderable`).toBe(true);
+                expect(scene?.series.length ?? 0, `chart ${index} series count`).toBeGreaterThan(0);
+                expect(scene?.axes.length ?? 0, `chart ${index} axes`).toBeGreaterThanOrEqual(2);
+            }
+        },
+        renderTimeout
+    );
 
-    it("builds density runtimes for the synchronized dashboard charts", () => {
-        const charts = flushCharts();
+    it(
+        "builds density runtimes for the synchronized dashboard charts",
+        () => {
+            const charts = flushCharts();
 
-        for (const { index, scene } of charts.slice(0, 3)) {
-            expect(scene?.densityRuntime?.seriesById.size ?? 0, `chart ${index} density entries`).toBeGreaterThan(0);
-        }
-    }, renderTimeout);
+            for (const { index, scene } of charts.slice(0, 3)) {
+                expect(scene?.densityRuntime?.seriesById.size ?? 0, `chart ${index} density entries`).toBeGreaterThan(
+                    0
+                );
+            }
+        },
+        renderTimeout
+    );
 
-    it("does not override the chart host flex layout", () => {
-        fixture.detectChanges();
-        const hosts = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>("mona-chart");
-        for (const [index, host] of Array.from(hosts).entries()) {
-            // The mona-chart host relies on its own `flex flex-col` layout classes; an inline
-            // display override collapses the plot surface to zero height and blanks the chart.
-            expect(host.style.display, `chart ${index} inline display`).not.toBe("block");
-        }
-    }, renderTimeout);
+    it(
+        "does not override the chart host flex layout",
+        () => {
+            fixture.detectChanges();
+            const hosts = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>("mona-chart");
+            for (const [index, host] of Array.from(hosts).entries()) {
+                // The mona-chart host relies on its own `flex flex-col` layout classes; an inline
+                // display override collapses the plot surface to zero height and blanks the chart.
+                expect(host.style.display, `chart ${index} inline display`).not.toBe("block");
+            }
+        },
+        renderTimeout
+    );
 });

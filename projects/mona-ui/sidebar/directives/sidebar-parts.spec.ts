@@ -288,9 +288,12 @@ describe("Sidebar parts", () => {
             // Counts the borders on the inline axis straight off each variant's classes, so changing a
             // border without changing the allowance fails here rather than silently clipping an avatar.
             const inlineBorders = (variant: SidebarVariant): number => {
-                const classes = sidebarThemeVariants({ variant, physicalSide: "left", flush: false, drawer: false }).split(
-                    /\s+/
-                );
+                const classes = sidebarThemeVariants({
+                    variant,
+                    physicalSide: "left",
+                    flush: false,
+                    drawer: false
+                }).split(/\s+/);
                 return classes.includes("border") ? 2 : classes.filter(name => name === "border-r").length;
             };
 

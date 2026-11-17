@@ -29,12 +29,7 @@ import {
 import { MONA_IT_IT_LOCALE } from "./it-it.locale";
 
 @Component({
-    template: `
-        <mona-date-picker
-            [(value)]="value"
-            [format]="format()"
-            [firstDay]="firstDay()" />
-    `,
+    template: ` <mona-date-picker [(value)]="value" [format]="format()" [firstDay]="firstDay()" /> `,
     imports: [DatePickerComponent]
 })
 class DatePickerIntegrationHostComponent {
@@ -114,14 +109,8 @@ interface Item {
             [textField]="'text'"
             [selectBy]="'id'"
             [toolbar]="{ actions: ['transferTo', 'transferFrom', 'transferAllTo', 'transferAllFrom'] }"
-            [connectedList]="second"
-        />
-        <mona-list-box
-            #second
-            [items]="secondItems"
-            [textField]="'text'"
-            [selectBy]="'id'"
-        />
+            [connectedList]="second" />
+        <mona-list-box #second [items]="secondItems" [textField]="'text'" [selectBy]="'id'" />
     `,
     imports: [ListBoxComponent]
 })
@@ -149,12 +138,7 @@ class ScrollViewIntegrationHostComponent {
 
 @Component({
     template: `
-        <mona-grid
-            [data]="rows"
-            [rowKey]="'id'"
-            [resizeMethod]="120"
-            [responsivePager]="false"
-            monaGridRowReorderable>
+        <mona-grid [data]="rows" [rowKey]="'id'" [resizeMethod]="120" [responsivePager]="false" monaGridRowReorderable>
             <mona-grid-column field="name" title="Nome" [width]="120" />
         </mona-grid>
     `,
@@ -434,7 +418,9 @@ describe("MONA_IT_IT_LOCALE Integration with MonaI18nService", () => {
 
         expect(liveRegion.textContent).toContain("Vista dell'anno, 2026");
 
-        const yearViewButton = hostEl.querySelector('button[aria-label*="Passa alla vista del decennio"]') as HTMLButtonElement;
+        const yearViewButton = hostEl.querySelector(
+            'button[aria-label*="Passa alla vista del decennio"]'
+        ) as HTMLButtonElement;
         expect(yearViewButton).not.toBeNull();
         expect(yearViewButton.getAttribute("aria-label")).toContain("Passa alla vista del decennio, attualmente 2026");
 
@@ -484,10 +470,10 @@ describe("MONA_IT_IT_LOCALE Integration with MonaI18nService", () => {
         fixture.detectChanges();
 
         const hostEl = fixture.nativeElement as HTMLElement;
-        expect(hostEl.querySelector("button[aria-label=\"Sposta nell'altro elenco\"]")).not.toBeNull();
-        expect(hostEl.querySelector("button[aria-label=\"Sposta dall'altro elenco\"]")).not.toBeNull();
-        expect(hostEl.querySelector("button[aria-label=\"Sposta tutto nell'altro elenco\"]")).not.toBeNull();
-        expect(hostEl.querySelector("button[aria-label=\"Sposta tutto dall'altro elenco\"]")).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Sposta nell\'altro elenco"]')).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Sposta dall\'altro elenco"]')).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Sposta tutto nell\'altro elenco"]')).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Sposta tutto dall\'altro elenco"]')).not.toBeNull();
     });
 
     it("renders Pager component with singular and plural count-aware status in Italian", () => {
@@ -898,7 +884,9 @@ describe("MONA_IT_IT_LOCALE Integration with MonaI18nService", () => {
         expect(gridMessages().rowReorderDisabled).toBe("Il riordinamento delle righe è disabilitato.");
         expect(gridMessages().rowReorderDisabledEditing).toBe("Completa la modifica prima di riordinare le righe.");
         expect(gridMessages().rowReorderDisabledFiltered).toBe("Rimuovi i filtri prima di riordinare le righe.");
-        expect(gridMessages().rowReorderDisabledGrouped).toBe("Rimuovi il raggruppamento prima di riordinare le righe.");
+        expect(gridMessages().rowReorderDisabledGrouped).toBe(
+            "Rimuovi il raggruppamento prima di riordinare le righe."
+        );
         expect(gridMessages().rowReorderDisabledSingleRow).toBe("Sono necessarie almeno due righe per riordinarle.");
         expect(gridMessages().rowReorderDisabledSorted).toBe("Rimuovi l'ordinamento prima di riordinare le righe.");
         expect(gridMessages().rowReorderDisabledVirtualScroll).toBe(

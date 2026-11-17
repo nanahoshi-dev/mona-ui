@@ -41,8 +41,8 @@ export class CollapsibleDemoComponent extends AbstractDemoComponent<CollapsibleD
             </button>
             <div monaCollapsibleContent class="border-t border-border px-4 py-3 text-sm text-muted-foreground">
                 <p>
-                    Collapsible content can be applied directly to any container. The directive keeps this
-                    region inert while it is closed and animates its measured height when motion is enabled.
+                    Collapsible content can be applied directly to any container. The directive keeps this region inert
+                    while it is closed and animates its measured height when motion is enabled.
                 </p>
             </div>
         </section>

@@ -285,7 +285,11 @@ describe("MONA_ZH_TW_LOCALE", () => {
             const handleLabel = m.grid.rowReorderHandleAriaLabel("第 1 個資料列", "使用 Alt + 向上鍵移動。");
             expect(handleLabel).toBe("第 1 個資料列。使用 Alt + 向上鍵移動。");
 
-            const disabledHandle = m.grid.rowReorderHandleAriaLabel("第 1 個資料列", "使用方向鍵移動。", "資料列重新排序已停用。");
+            const disabledHandle = m.grid.rowReorderHandleAriaLabel(
+                "第 1 個資料列",
+                "使用方向鍵移動。",
+                "資料列重新排序已停用。"
+            );
             expect(disabledHandle).toBe("第 1 個資料列。使用方向鍵移動。 資料列重新排序已停用。");
 
             expect(m.grid.rowReorderMoved(3, 1)).toBe("已將第 3 個資料列移至位置 1。");

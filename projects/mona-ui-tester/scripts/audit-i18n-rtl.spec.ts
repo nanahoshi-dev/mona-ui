@@ -252,7 +252,9 @@ describe("audit-i18n-rtl", () => {
             expect(violations).toHaveLength(1);
             expect(violations[0]).toMatchObject({
                 category: "i18n-aria",
-                detail: expect.stringMatching(/(?:Static|Literal string in) host binding \[attr\.aria-roledescription\]: "carousel"/)
+                detail: expect.stringMatching(
+                    /(?:Static|Literal string in) host binding \[attr\.aria-roledescription\]: "carousel"/
+                )
             });
         });
 
@@ -447,7 +449,9 @@ describe("audit-i18n-rtl", () => {
             expect(violations).toHaveLength(1);
             expect(violations[0]).toMatchObject({
                 category: "i18n-aria",
-                detail: expect.stringContaining('Hard-coded text in accessibility property "legendAriaLabel": "Chart legend"')
+                detail: expect.stringContaining(
+                    'Hard-coded text in accessibility property "legendAriaLabel": "Chart legend"'
+                )
             });
         });
 
@@ -464,10 +468,26 @@ describe("audit-i18n-rtl", () => {
             scanTypeScriptAst("demo.component.ts", code, violations);
 
             expect(violations).toHaveLength(4);
-            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes('property "title": "Delete item"'))).toBe(true);
-            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes('property "tooltip": "Retry request"'))).toBe(true);
-            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes('property "message": "Loading items"'))).toBe(true);
-            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes('property "customPlaceholder": "Search records..."'))).toBe(true);
+            expect(
+                violations.some(v => v.category === "i18n-text" && v.detail.includes('property "title": "Delete item"'))
+            ).toBe(true);
+            expect(
+                violations.some(
+                    v => v.category === "i18n-text" && v.detail.includes('property "tooltip": "Retry request"')
+                )
+            ).toBe(true);
+            expect(
+                violations.some(
+                    v => v.category === "i18n-text" && v.detail.includes('property "message": "Loading items"')
+                )
+            ).toBe(true);
+            expect(
+                violations.some(
+                    v =>
+                        v.category === "i18n-text" &&
+                        v.detail.includes('property "customPlaceholder": "Search records..."')
+                )
+            ).toBe(true);
         });
 
         it("ignores semantic class properties using localized messages or dynamic signals", () => {
@@ -1085,8 +1105,12 @@ describe("audit-i18n-rtl", () => {
             scanTypeScriptAst("test-inline.component.ts", code, violations);
 
             expect(violations).toHaveLength(2);
-            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Unlocalized inline label"))).toBe(true);
-            expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Inline close button"))).toBe(true);
+            expect(
+                violations.some(v => v.category === "i18n-text" && v.detail.includes("Unlocalized inline label"))
+            ).toBe(true);
+            expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Inline close button"))).toBe(
+                true
+            );
         });
 
         it("fails closed with an audit violation when inline template has syntax errors", () => {
@@ -1118,7 +1142,9 @@ describe("audit-i18n-rtl", () => {
             expect(violations).toHaveLength(1);
             expect(violations[0]).toMatchObject({
                 category: "i18n-text",
-                detail: expect.stringContaining('Hard-coded text returned from semantic helper "getDefaultTitle": "Info"')
+                detail: expect.stringContaining(
+                    'Hard-coded text returned from semantic helper "getDefaultTitle": "Info"'
+                )
             });
         });
 
@@ -1137,8 +1163,12 @@ describe("audit-i18n-rtl", () => {
             scanTypeScriptAst("test-helper.ts", code, violations);
 
             expect(violations).toHaveLength(2);
-            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Close notification"))).toBe(true);
-            expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("New notification arrived"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Close notification"))).toBe(
+                true
+            );
+            expect(
+                violations.some(v => v.category === "i18n-aria" && v.detail.includes("New notification arrived"))
+            ).toBe(true);
         });
 
         it("ignores predicate methods and technical return values", () => {
@@ -1240,7 +1270,9 @@ describe("audit-i18n-rtl", () => {
             expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Element label"))).toBe(true);
             expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Event message"))).toBe(true);
             expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Type title"))).toBe(true);
-            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Node description"))).toBe(true);
+            expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("Node description"))).toBe(
+                true
+            );
         });
     });
 
@@ -1602,7 +1634,8 @@ describe("audit-i18n-rtl", () => {
                     {
                         category: "rtl-physical-style" as const,
                         filePattern: "projects/mona-ui/slider/components/slider/slider.component.html",
-                        lineSnippet: '[style.right.%]="orientation() === \'horizontal\' && isRtl() ? handlePosition() : undefined"',
+                        lineSnippet:
+                            "[style.right.%]=\"orientation() === 'horizontal' && isRtl() ? handlePosition() : undefined\"",
                         reason: "test"
                     }
                 ];
@@ -1612,7 +1645,8 @@ describe("audit-i18n-rtl", () => {
                     {
                         category: "rtl-physical-style" as const,
                         filePattern: "projects/mona-ui/slider/components/slider/slider.component.html",
-                        lineSnippet: '[style.left.%]="orientation() === \'horizontal\' && !isRtl() ? handlePosition() : undefined"',
+                        lineSnippet:
+                            "[style.left.%]=\"orientation() === 'horizontal' && !isRtl() ? handlePosition() : undefined\"",
                         reason: "test"
                     }
                 ];
@@ -1639,7 +1673,8 @@ describe("audit-i18n-rtl", () => {
                     {
                         category: "rtl-physical-style" as const,
                         filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
-                        lineSnippet: '[style.right.%]="orientation() === \'horizontal\' && isRtl() ? primaryHandlePosition() : undefined"',
+                        lineSnippet:
+                            "[style.right.%]=\"orientation() === 'horizontal' && isRtl() ? primaryHandlePosition() : undefined\"",
                         reason: "test"
                     }
                 ];
@@ -1666,7 +1701,8 @@ describe("audit-i18n-rtl", () => {
                     {
                         category: "rtl-physical-style" as const,
                         filePattern: "projects/mona-ui/slider/components/range-slider/range-slider.component.html",
-                        lineSnippet: '[style.left.%]="orientation() === \'horizontal\' && !isRtl() ? secondaryHandlePosition() : undefined"',
+                        lineSnippet:
+                            "[style.left.%]=\"orientation() === 'horizontal' && !isRtl() ? secondaryHandlePosition() : undefined\"",
                         reason: "test"
                     }
                 ];
@@ -1723,11 +1759,21 @@ describe("audit-i18n-rtl", () => {
                 scanTypeScriptAst("test.ts", code, violations);
 
                 expect(violations).toHaveLength(5);
-                expect(violations.some(v => v.detail.includes('"borderLeftStyle"') && v.detail.includes("style object"))).toBe(true);
-                expect(violations.some(v => v.detail.includes('"borderRightStyle"') && v.detail.includes("style object"))).toBe(true);
-                expect(violations.some(v => v.detail.includes('"borderLeftStyle"') && v.detail.includes("assignment"))).toBe(true);
-                expect(violations.some(v => v.detail.includes('"border-right-style"') && v.detail.includes("assignment"))).toBe(true);
-                expect(violations.some(v => v.detail.includes('"border-left-style"') && v.detail.includes("setProperty"))).toBe(true);
+                expect(
+                    violations.some(v => v.detail.includes('"borderLeftStyle"') && v.detail.includes("style object"))
+                ).toBe(true);
+                expect(
+                    violations.some(v => v.detail.includes('"borderRightStyle"') && v.detail.includes("style object"))
+                ).toBe(true);
+                expect(
+                    violations.some(v => v.detail.includes('"borderLeftStyle"') && v.detail.includes("assignment"))
+                ).toBe(true);
+                expect(
+                    violations.some(v => v.detail.includes('"border-right-style"') && v.detail.includes("assignment"))
+                ).toBe(true);
+                expect(
+                    violations.some(v => v.detail.includes('"border-left-style"') && v.detail.includes("setProperty"))
+                ).toBe(true);
             });
 
             it("AST ignores logical properties and non-style context assignments", () => {
@@ -1796,7 +1842,9 @@ describe("audit-i18n-rtl", () => {
                 expect(violations).toHaveLength(1);
                 expect(violations[0]).toMatchObject({
                     category: "i18n-aria",
-                    detail: expect.stringContaining('Hard-coded accessibility live-announcement text in announce: "Operation complete."')
+                    detail: expect.stringContaining(
+                        'Hard-coded accessibility live-announcement text in announce: "Operation complete."'
+                    )
                 });
             });
 
@@ -1845,8 +1893,12 @@ describe("audit-i18n-rtl", () => {
                 scanTypeScriptAst("example.ts", code, violations);
 
                 expect(violations.length).toBeGreaterThanOrEqual(2);
-                expect(violations.some(v => v.category === "i18n-text" && v.detail.includes("This control is disabled."))).toBe(true);
-                expect(violations.some(v => v.category === "i18n-aria" && v.detail.includes("Go to previous step"))).toBe(true);
+                expect(
+                    violations.some(v => v.category === "i18n-text" && v.detail.includes("This control is disabled."))
+                ).toBe(true);
+                expect(
+                    violations.some(v => v.category === "i18n-aria" && v.detail.includes("Go to previous step"))
+                ).toBe(true);
             });
 
             it("detects lowercase visible labels in _LABELS semantic text maps", () => {
@@ -2005,14 +2057,10 @@ describe("audit-i18n-rtl", () => {
 
                 expect(violations).toHaveLength(2);
                 expect(
-                    violations.some(
-                        v => v.category === "i18n-text" && v.detail.includes("Control is disabled.")
-                    )
+                    violations.some(v => v.category === "i18n-text" && v.detail.includes("Control is disabled."))
                 ).toBe(true);
                 expect(
-                    violations.some(
-                        v => v.category === "i18n-aria" && v.detail.includes("Operation complete.")
-                    )
+                    violations.some(v => v.category === "i18n-aria" && v.detail.includes("Operation complete."))
                 ).toBe(true);
             });
 
@@ -2543,7 +2591,9 @@ describe("audit-i18n-rtl", () => {
                 expect(violations).toHaveLength(1);
                 expect(violations[0]).toMatchObject({
                     category: "i18n-aria",
-                    detail: expect.stringContaining('semantic text-map property "checked" in "STATUS_ANNOUNCEMENTS": "mixed"')
+                    detail: expect.stringContaining(
+                        'semantic text-map property "checked" in "STATUS_ANNOUNCEMENTS": "mixed"'
+                    )
                 });
             });
 
@@ -2823,7 +2873,9 @@ describe("audit-i18n-rtl", () => {
                 `const load = () => import("./pl-pl").then(() => "pl-4");`,
                 violations
             );
-            expect(violations.map(v => v.detail)).toEqual(['Physical padding utility (pl-*/pr-* -> ps-*/pe-*): "pl-4"']);
+            expect(violations.map(v => v.detail)).toEqual([
+                'Physical padding utility (pl-*/pr-* -> ps-*/pe-*): "pl-4"'
+            ]);
         });
 
         it("empties only the module specifiers of a line", () => {

@@ -9,7 +9,13 @@ import {
 
 @Component({
     selector: "app-textbox-slots-example",
-    imports: [LabelComponent, LucideSearch, TextBoxComponent, TextBoxPrefixTemplateDirective, TextBoxSuffixTemplateDirective],
+    imports: [
+        LabelComponent,
+        LucideSearch,
+        TextBoxComponent,
+        TextBoxPrefixTemplateDirective,
+        TextBoxSuffixTemplateDirective
+    ],
     templateUrl: "./slots-example.component.html"
 })
 export class TextboxSlotsExampleComponent {

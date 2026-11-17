@@ -97,7 +97,3 @@ export interface MonaLocaleMessages {
 }
 
 export type MonaMessageNamespace = keyof MonaLocaleMessages;
-
-
-
-

@@ -135,7 +135,7 @@ describe("readEntryPoint", () => {
             "     * @description Use {@link other}",
             "     * there.",
             "     */",
-            "    public readonly id = \"a\";",
+            '    public readonly id = "a";',
             "}"
         ];
         for (const newline of ["\n", "\r\n"]) {
@@ -575,9 +575,7 @@ describe("selectPageEntries", () => {
         const overview = page({});
         const family = page({ apiExports: ["B"], path: "family" });
 
-        expect(selectPageEntries(overview, symbols, [overview, family]).map(entry => entry.symbol.name)).toEqual([
-            "A"
-        ]);
+        expect(selectPageEntries(overview, symbols, [overview, family]).map(entry => entry.symbol.name)).toEqual(["A"]);
     });
 
     it("adds another entry point without repeating a name", () => {

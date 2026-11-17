@@ -31,12 +31,7 @@ import {
 import { MONA_RU_RU_LOCALE } from "./ru-ru.locale";
 
 @Component({
-    template: `
-        <mona-date-picker
-            [(value)]="value"
-            [format]="format()"
-            [firstDay]="firstDay()" />
-    `,
+    template: ` <mona-date-picker [(value)]="value" [format]="format()" [firstDay]="firstDay()" /> `,
     imports: [DatePickerComponent]
 })
 class DatePickerIntegrationHostComponent {
@@ -132,14 +127,8 @@ interface Item {
             [textField]="'text'"
             [selectBy]="'id'"
             [toolbar]="{ actions: ['transferTo', 'transferFrom', 'transferAllTo', 'transferAllFrom'] }"
-            [connectedList]="second"
-        />
-        <mona-list-box
-            #second
-            [items]="secondItems"
-            [textField]="'text'"
-            [selectBy]="'id'"
-        />
+            [connectedList]="second" />
+        <mona-list-box #second [items]="secondItems" [textField]="'text'" [selectBy]="'id'" />
     `,
     imports: [ListBoxComponent]
 })
@@ -167,12 +156,7 @@ class ScrollViewIntegrationHostComponent {
 
 @Component({
     template: `
-        <mona-grid
-            [data]="rows"
-            [rowKey]="'id'"
-            [resizeMethod]="120"
-            [responsivePager]="false"
-            monaGridRowReorderable>
+        <mona-grid [data]="rows" [rowKey]="'id'" [resizeMethod]="120" [responsivePager]="false" monaGridRowReorderable>
             <mona-grid-column field="name" title="Имя" [width]="120" />
         </mona-grid>
     `,
@@ -460,9 +444,7 @@ describe("MONA_RU_RU_LOCALE Integration with MonaI18nService", () => {
         expect(nextButton).not.toBeNull();
 
         // 2. Locale-formatted Russian month/year header (сентябрь 2026 г.)
-        const viewButton = hostEl.querySelector(
-            'button[aria-label*="Перейти к просмотру года"]'
-        ) as HTMLButtonElement;
+        const viewButton = hostEl.querySelector('button[aria-label*="Перейти к просмотру года"]') as HTMLButtonElement;
         expect(viewButton).not.toBeNull();
         expect(viewButton.textContent).toContain("сентябрь");
         expect(viewButton.textContent).toContain("2026");
@@ -483,9 +465,13 @@ describe("MONA_RU_RU_LOCALE Integration with MonaI18nService", () => {
 
         expect(liveRegion.textContent).toContain("Просмотр года, 2026");
 
-        const yearViewButton = hostEl.querySelector('button[aria-label*="Перейти к просмотру десятилетия"]') as HTMLButtonElement;
+        const yearViewButton = hostEl.querySelector(
+            'button[aria-label*="Перейти к просмотру десятилетия"]'
+        ) as HTMLButtonElement;
         expect(yearViewButton).not.toBeNull();
-        expect(yearViewButton.getAttribute("aria-label")).toContain("Перейти к просмотру десятилетия, текущий год: 2026");
+        expect(yearViewButton.getAttribute("aria-label")).toContain(
+            "Перейти к просмотру десятилетия, текущий год: 2026"
+        );
 
         // 6. Decade view navigation and accessibility labels
         yearViewButton.click();
@@ -583,10 +569,10 @@ describe("MONA_RU_RU_LOCALE Integration with MonaI18nService", () => {
         fixture.detectChanges();
 
         const hostEl = fixture.nativeElement as HTMLElement;
-        expect(hostEl.querySelector("button[aria-label=\"Перенести в другой список\"]")).not.toBeNull();
-        expect(hostEl.querySelector("button[aria-label=\"Перенести из другого списка\"]")).not.toBeNull();
-        expect(hostEl.querySelector("button[aria-label=\"Перенести всё в другой список\"]")).not.toBeNull();
-        expect(hostEl.querySelector("button[aria-label=\"Перенести всё из другого списка\"]")).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Перенести в другой список"]')).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Перенести из другого списка"]')).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Перенести всё в другой список"]')).not.toBeNull();
+        expect(hostEl.querySelector('button[aria-label="Перенести всё из другого списка"]')).not.toBeNull();
     });
 
     it("renders Pager component with status and navigation buttons in Russian", () => {
@@ -771,7 +757,9 @@ describe("MONA_RU_RU_LOCALE Integration with MonaI18nService", () => {
 
         expect(hostEl.textContent).toContain("9:30 PM");
 
-        const setButton = Array.from(hostEl.querySelectorAll("button")).find(b => b.textContent?.trim() === "Установить");
+        const setButton = Array.from(hostEl.querySelectorAll("button")).find(
+            b => b.textContent?.trim() === "Установить"
+        );
         setButton?.click();
         fixture.detectChanges();
         expect(fixture.componentInstance.testTime()?.getHours()).toBe(21);

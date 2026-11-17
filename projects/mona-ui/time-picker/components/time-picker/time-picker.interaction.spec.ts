@@ -148,7 +148,11 @@ describe("TimePickerComponent interaction", () => {
             input.dispatchEvent(new FocusEvent("blur"));
             await stable(fixture);
 
-            expect(field().errors().map(error => error.kind)).toEqual(["parse"]);
+            expect(
+                field()
+                    .errors()
+                    .map(error => error.kind)
+            ).toEqual(["parse"]);
             expect(field().value()?.getMinutes()).toBe(30);
         });
 
@@ -161,7 +165,9 @@ describe("TimePickerComponent interaction", () => {
             expect(input.getAttribute("aria-expanded")).toBe("false");
             expect(input.value).toBe("06:30:15 PM");
 
-            const results = await axe.run(fixture.nativeElement as HTMLElement, { rules: { region: { enabled: false } } });
+            const results = await axe.run(fixture.nativeElement as HTMLElement, {
+                rules: { region: { enabled: false } }
+            });
             expect(results.violations.map(violation => violation.id)).toEqual([]);
         });
     });

@@ -131,4 +131,3 @@ describe("SpinnerComponent", () => {
         expect(host.getAttribute("aria-label")).toBe("Yükleniyor");
     });
 });
-

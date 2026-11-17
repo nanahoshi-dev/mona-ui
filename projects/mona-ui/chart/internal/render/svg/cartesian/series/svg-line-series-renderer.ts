@@ -56,7 +56,6 @@ export class SvgLineSeriesRenderer {
         setSvgAttribute(this.#pathElement, "stroke-dasharray", resolveStrokeDashArray(style.lineStyle));
         setSvgAttribute(this.#pathElement, "opacity", seriesOpacity);
 
-
         if (showPoints) {
             if (!this.#markersGroup) {
                 this.#markersGroup = createSvgElement("g");

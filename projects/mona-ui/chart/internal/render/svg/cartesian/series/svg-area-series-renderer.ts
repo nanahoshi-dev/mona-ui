@@ -99,7 +99,6 @@ export class SvgAreaSeriesRenderer {
         setSvgAttribute(this.#strokePathElement, "stroke-dasharray", resolveStrokeDashArray(style.lineStyle));
         setSvgAttribute(this.#strokePathElement, "opacity", seriesOpacity);
 
-
         // 3. Markers
         if (showPoints) {
             if (!this.#markersGroup) {

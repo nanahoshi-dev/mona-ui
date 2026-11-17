@@ -22,7 +22,6 @@ const mockStyle: ChartSeriesStyle = {
     pointRadius: 4
 };
 
-
 describe("Series Animation Adapters", () => {
     describe("BarSeriesAnimationAdapter", () => {
         it("should animate initial entry from signed baseline", () => {

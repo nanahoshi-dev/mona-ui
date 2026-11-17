@@ -100,9 +100,7 @@ interface FormTestModel {
 @Component({
     selector: "mona-signal-form-host",
     imports: [OtpInputComponent, FormField],
-    template: `
-        <mona-otp-input [formField]="form.code" [length]="6" (complete)="onComplete($event)"></mona-otp-input>
-    `
+    template: ` <mona-otp-input [formField]="form.code" [length]="6" (complete)="onComplete($event)"></mona-otp-input> `
 })
 class SignalFormHostComponent {
     public readonly completeEvents: string[] = [];
@@ -128,9 +126,7 @@ class SignalFormHostComponent {
 @Component({
     selector: "mona-signal-form-with-pattern-host",
     imports: [OtpInputComponent, FormField],
-    template: `
-        <mona-otp-input [formField]="form.code" [length]="6" (complete)="onComplete($event)"></mona-otp-input>
-    `
+    template: ` <mona-otp-input [formField]="form.code" [length]="6" (complete)="onComplete($event)"></mona-otp-input> `
 })
 class SignalFormWithPatternHostComponent {
     public readonly completeEvents: string[] = [];
@@ -201,9 +197,7 @@ describe("OtpInputComponent", () => {
     };
 
     const getSlots = (): HTMLElement[] => {
-        return fixture.debugElement
-            .queryAll(By.css(".otp-slot"))
-            .map(de => de.nativeElement as HTMLElement);
+        return fixture.debugElement.queryAll(By.css(".otp-slot")).map(de => de.nativeElement as HTMLElement);
     };
 
     /** The input lies above the slots, so a press reaches it and is matched to a slot by where it lands. */
@@ -1850,4 +1844,3 @@ describe("OtpInputComponent i18n and localization", () => {
         expect(input.getAttribute("aria-label")).toBe("Doğrulama kodu");
     });
 });
-

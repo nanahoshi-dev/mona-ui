@@ -8,10 +8,7 @@ import { FilterMenuComponent } from "./filter-menu.component";
 
 @Component({
     template: `
-        <mona-filter-menu
-            [type]="type()"
-            [field]="field()"
-            (apply)="appliedFilter.set($event)"></mona-filter-menu>
+        <mona-filter-menu [type]="type()" [field]="field()" (apply)="appliedFilter.set($event)"></mona-filter-menu>
     `,
     imports: [FilterMenuComponent],
     providers: [FilterService]

@@ -1,6 +1,11 @@
 import { computed, linkedSignal, type ModelSignal, type Signal, untracked } from "@angular/core";
 import { maxDateError, minDateError, transformedValue, type ValidationError } from "@angular/forms/signals";
-import { checkTypedDate, type DateDisabledType, parseTypedDate, typedDateParseError } from "@nanahoshi/mona-ui/date-input";
+import {
+    checkTypedDate,
+    type DateDisabledType,
+    parseTypedDate,
+    typedDateParseError
+} from "@nanahoshi/mona-ui/date-input";
 import { gregorianDateTime } from "@nanahoshi/mona-ui/i18n";
 import type { DateRange } from "../models/DateRange";
 

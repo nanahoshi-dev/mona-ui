@@ -40,12 +40,7 @@ export interface MonaChartMessages {
     /** Announced for a waterfall step that lowers the running total. */
     readonly decreaseAnnouncement: (delta: string, from: string, to: string) => string;
     /** The accessible name of a diverging heatmap color legend, with its minimum, midpoint and maximum. */
-    readonly divergingRangeDescription: (
-        title: string,
-        minimum: string,
-        midpoint: string,
-        maximum: string
-    ) => string;
+    readonly divergingRangeDescription: (title: string, minimum: string, midpoint: string, maximum: string) => string;
     /** The tooltip label for a funnel stage's drop-off from the previous stage. */
     readonly dropOff: string;
     /** A funnel stage's drop-off from the previous stage, in an announcement. */
@@ -112,11 +107,7 @@ export interface MonaChartMessages {
      * Describes a range with its title, minimum and maximum: a range point in an announcement, or a heatmap color
      * legend in its accessible name.
      */
-    readonly rangeDescription: (
-        title: string,
-        minimum: string,
-        maximum: string
-    ) => string;
+    readonly rangeDescription: (title: string, minimum: string, maximum: string) => string;
     /** A range value, in an announcement. */
     readonly rangeValue: (from: string, to: string) => string;
     /** Names a rising candlestick or OHLC point, in the tooltip and in announcements. */

@@ -325,10 +325,10 @@ export const sidebarThemeVariants = cva(
                 false: ""
             },
             /**
-              * The compact presentation. The panel leaves the flex flow and becomes an overlay pinned to
-              * one edge, sliding in on `translate` rather than `width` — a drawer that animated its width
-              * would reflow its own contents for the whole transition.
-              */
+             * The compact presentation. The panel leaves the flex flow and becomes an overlay pinned to
+             * one edge, sliding in on `translate` rather than `width` — a drawer that animated its width
+             * would reflow its own contents for the whole transition.
+             */
             drawer: {
                 true: `
                     absolute inset-y-0 z-50 h-full m-0
@@ -345,8 +345,18 @@ export const sidebarThemeVariants = cva(
             }
         },
         compoundVariants: [
-            { drawer: false, variant: "sidebar", physicalSide: "left", class: "border-r border-(--color-sidebar-border)" },
-            { drawer: false, variant: "sidebar", physicalSide: "right", class: "border-l border-(--color-sidebar-border)" },
+            {
+                drawer: false,
+                variant: "sidebar",
+                physicalSide: "left",
+                class: "border-r border-(--color-sidebar-border)"
+            },
+            {
+                drawer: false,
+                variant: "sidebar",
+                physicalSide: "right",
+                class: "border-l border-(--color-sidebar-border)"
+            },
             { drawer: false, variant: "floating", flush: true, class: "h-full" },
             { drawer: false, variant: "inset", flush: true, class: "h-full" },
             // A drawer is a surface in its own right whatever the docked variant looks like, so the

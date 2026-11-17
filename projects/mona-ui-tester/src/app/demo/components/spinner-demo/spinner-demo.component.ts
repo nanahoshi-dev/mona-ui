@@ -2,10 +2,7 @@ import { NgComponentOutlet } from "@angular/common";
 import { booleanAttribute, Component, computed, ElementRef, inject, input, viewChild } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
-import {
-    SpinnerComponent,
-    SpinnerService
-} from "@nanahoshi/mona-ui/spinner";
+import { SpinnerComponent, SpinnerService } from "@nanahoshi/mona-ui/spinner";
 import { timer } from "rxjs";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
@@ -57,7 +54,9 @@ export class SpinnerDemoComponent extends AbstractDemoComponent<SpinnerComponent
         <div class="flex flex-col gap-6 w-full max-w-lg items-center">
             <!-- Inline Component Preview -->
             <div class="flex flex-col items-center gap-3 p-6 rounded-lg border border-border bg-card w-full">
-                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Inline Component Preview</span>
+                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                    >Inline Component Preview</span
+                >
                 <div class="flex items-center gap-3 p-4">
                     <mona-spinner
                         [aria-label]="ariaLabel()"
@@ -71,15 +70,21 @@ export class SpinnerDemoComponent extends AbstractDemoComponent<SpinnerComponent
             </div>
 
             <!-- Imperative Service Showcase -->
-            <div #panel class="relative flex flex-col gap-3 p-6 rounded-lg border border-border bg-card w-full min-h-48 justify-center items-center">
-                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Target Element Container</span>
+            <div
+                #panel
+                class="relative flex flex-col gap-3 p-6 rounded-lg border border-border bg-card w-full min-h-48 justify-center items-center">
+                <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                    >Target Element Container</span
+                >
                 <p class="text-sm text-center text-muted-foreground">
                     Click buttons below to trigger SpinnerService loading overlays over this container or full-page.
                 </p>
 
                 <div class="flex flex-wrap gap-2 justify-center mt-2">
                     <button monaButton size="small" (click)="showLocalSpinner()">Element Overlay (3s)</button>
-                    <button monaButton size="small" look="secondary" (click)="showCancellableSpinner()">Cancellable Overlay</button>
+                    <button monaButton size="small" look="secondary" (click)="showCancellableSpinner()">
+                        Cancellable Overlay
+                    </button>
                     <button monaButton size="small" look="outline" (click)="testConcurrency()">Concurrency Test</button>
                     <button monaButton size="small" look="ghost" (click)="showFullPageSpinner()">Full Page (2s)</button>
                     <button monaButton size="small" look="outline" (click)="trackRxJs()">RxJS track()</button>

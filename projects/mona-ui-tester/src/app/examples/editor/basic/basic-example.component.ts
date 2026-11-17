@@ -7,5 +7,7 @@ import { EditorComponent } from "@nanahoshi/mona-ui/editor";
     templateUrl: "./basic-example.component.html"
 })
 export class EditorBasicExampleComponent {
-    protected readonly notes = signal("<h2>Release notes</h2><p>The editor now keeps <strong>bold</strong> and <em>italic</em> text.</p>");
+    protected readonly notes = signal(
+        "<h2>Release notes</h2><p>The editor now keeps <strong>bold</strong> and <em>italic</em> text.</p>"
+    );
 }

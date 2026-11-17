@@ -100,7 +100,9 @@ describe("DateTimePickerComponent interaction", () => {
             expect(input.getAttribute("aria-label")).toBe("Meeting start");
             expect(input.getAttribute("aria-expanded")).toBe("false");
 
-            const results = await axe.run(fixture.nativeElement as HTMLElement, { rules: { region: { enabled: false } } });
+            const results = await axe.run(fixture.nativeElement as HTMLElement, {
+                rules: { region: { enabled: false } }
+            });
             expect(results.violations.map(violation => violation.id)).toEqual([]);
         });
 

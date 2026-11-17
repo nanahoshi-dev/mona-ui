@@ -413,7 +413,8 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
             typeof window.matchMedia === "function"
         ) {
             const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-            const onPreferenceChange = (event: MediaQueryListEvent): void => this.#prefersReducedMotion.set(event.matches);
+            const onPreferenceChange = (event: MediaQueryListEvent): void =>
+                this.#prefersReducedMotion.set(event.matches);
             this.#prefersReducedMotion.set(mediaQuery.matches);
             mediaQuery.addEventListener("change", onPreferenceChange);
             this.#destroyRef.onDestroy(() => mediaQuery.removeEventListener("change", onPreferenceChange));
@@ -578,7 +579,11 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         this.index.set(index);
     }
 
-    protected onPagerClick(event: MouseEvent | PointerEvent, element: HTMLUListElement, direction: ScrollDirection): void {
+    protected onPagerClick(
+        event: MouseEvent | PointerEvent,
+        element: HTMLUListElement,
+        direction: ScrollDirection
+    ): void {
         if (event.button !== 0) {
             return;
         }
@@ -829,7 +834,9 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         }
         const current = this.#viewIndex();
         const step = direction === "left" ? -1 : 1;
-        const next = this.infinite() ? (current + step + count) % count : Math.max(0, Math.min(count - 1, current + step));
+        const next = this.infinite()
+            ? (current + step + count) % count
+            : Math.max(0, Math.min(count - 1, current + step));
         if (next !== current) {
             this.#navigationIntent = direction;
             this.index.set(next);

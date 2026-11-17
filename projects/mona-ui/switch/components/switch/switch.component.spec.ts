@@ -23,7 +23,9 @@ describe("SwitchComponent", () => {
         const hostElement = fixture.nativeElement as HTMLElement;
         const handleElement = fixture.nativeElement.querySelector("div") as HTMLDivElement;
 
-        expect(hostElement.classList.contains("data-[active='true']:bg-[var(--mona-indicator-color,var(--color-primary))]")).toBe(true);
+        expect(
+            hostElement.classList.contains("data-[active='true']:bg-[var(--mona-indicator-color,var(--color-primary))]")
+        ).toBe(true);
         expect(hostElement.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
         expect(hostElement.classList.contains("data-[invalid='true']:focus-visible:ring-error/35")).toBe(true);
         expect(hostElement.classList.contains("data-[disabled='true']:bg-disabled-background")).toBe(true);
@@ -50,4 +52,3 @@ describe("SwitchComponent", () => {
         expect(hostElement.classList.contains("custom-switch-class")).toBe(true);
     });
 });
-

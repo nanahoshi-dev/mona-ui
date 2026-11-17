@@ -429,7 +429,10 @@ describe("SpinnerService", () => {
         });
 
         it("should close spinner on error", () => {
-            const tracked$ = service.track(throwError(() => new Error("Failed")), { target: targetElement });
+            const tracked$ = service.track(
+                throwError(() => new Error("Failed")),
+                { target: targetElement }
+            );
 
             tracked$.subscribe({
                 error: () => {}

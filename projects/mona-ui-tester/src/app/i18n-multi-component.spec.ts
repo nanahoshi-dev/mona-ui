@@ -35,13 +35,7 @@ import { ScrollViewComponent } from "@nanahoshi/mona-ui/scroll-view";
             <mona-scroll-view [data]="items" [width]="300" [height]="200" />
         </div>
     `,
-    imports: [
-        PagerComponent,
-        CalendarComponent,
-        NumericTextBoxComponent,
-        ProgressBarComponent,
-        ScrollViewComponent
-    ]
+    imports: [PagerComponent, CalendarComponent, NumericTextBoxComponent, ProgressBarComponent, ScrollViewComponent]
 })
 class TestMultiComponentHost {
     public readonly direction = signal<"ltr" | "rtl">("ltr");
@@ -1136,4 +1130,3 @@ describe("Multi-Component i18n & RTL Integration Suite", () => {
         expect(calendar?.querySelector("button:first-child")?.textContent?.trim()).toBe("Hoy");
     });
 });
-

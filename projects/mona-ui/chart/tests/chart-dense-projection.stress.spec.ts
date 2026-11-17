@@ -41,12 +41,7 @@ import type { ChartCurve } from "../models/chart-series.models";
                     <mona-range-area-series fromField="low" toField="high" name="R" [curve]="curve()" />
                 }
                 @case ("scatter") {
-                    <mona-scatter-series
-                        xAxisId="x-main"
-                        yAxisId="y-main"
-                        xField="x"
-                        field="y"
-                        name="S" />
+                    <mona-scatter-series xAxisId="x-main" yAxisId="y-main" xField="x" field="y" name="S" />
                 }
                 @case ("bubble") {
                     <mona-bubble-series xField="x" field="y" sizeField="size" name="B" />
@@ -87,20 +82,24 @@ describe("dense projection stress", () => {
     };
 
     const readMemoryUsage = (): Record<string, number> | undefined => {
-        const processLike = (globalThis as typeof globalThis & {
-            process?: {
-                readonly memoryUsage?: () => Record<string, number>;
-            };
-        }).process;
+        const processLike = (
+            globalThis as typeof globalThis & {
+                process?: {
+                    readonly memoryUsage?: () => Record<string, number>;
+                };
+            }
+        ).process;
         return processLike?.memoryUsage?.();
     };
 
     const writeStressDiagnostic = (payload: Record<string, unknown>): void => {
-        const processLike = (globalThis as typeof globalThis & {
-            process?: {
-                readonly stdout?: { write(value: string): void };
-            };
-        }).process;
+        const processLike = (
+            globalThis as typeof globalThis & {
+                process?: {
+                    readonly stdout?: { write(value: string): void };
+                };
+            }
+        ).process;
         const line = `[chart-density-stress] ${JSON.stringify(payload)}\n`;
         if (processLike?.stdout) {
             processLike.stdout.write(line);
@@ -254,8 +253,7 @@ describe("dense projection stress", () => {
         const scene = host.chart()["cartesianXYScene"]();
         const entry = scene?.densityRuntime?.seriesById.values().next().value as
             { spatial?: { index: { pointCount: number } } } | undefined;
-        const bubbleScene = scene?.series.find(s => s.type === "bubble") as
-            { markers: readonly unknown[] } | undefined;
+        const bubbleScene = scene?.series.find(s => s.type === "bubble") as { markers: readonly unknown[] } | undefined;
         expect(entry?.spatial?.index.pointCount).toBe(0);
         expect(bubbleScene?.markers).toHaveLength(0);
         expect(instrumentation.snapshot.rawStageCSourceRowsVisited).toBe(0);

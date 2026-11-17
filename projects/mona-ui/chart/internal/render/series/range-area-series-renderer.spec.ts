@@ -33,7 +33,6 @@ describe("RangeAreaSeriesRenderer", () => {
         pointRadius: 4
     };
 
-
     it("should render fill band and two boundary lines using semantic fromPoint and toPoint (RNG-001)", () => {
         const ctx = createMockContext();
         const scene: ChartRangeAreaSeriesScene = {

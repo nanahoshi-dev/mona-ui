@@ -122,7 +122,9 @@ describe("MONA_AR_SA_LOCALE", () => {
             expect(m.grid.rowReorderDisabledGrouped).toBe("ألغِ التجميع قبل إعادة ترتيب الصفوف.");
             expect(m.grid.rowReorderDisabledSingleRow).toBe("يلزم صفّان على الأقل لإعادة ترتيب الصفوف.");
             expect(m.grid.rowReorderDisabledSorted).toBe("ألغِ الفرز قبل إعادة ترتيب الصفوف.");
-            expect(m.grid.rowReorderDisabledVirtualScroll).toBe("لا يمكن إعادة ترتيب الصفوف أثناء استخدام التمرير الافتراضي.");
+            expect(m.grid.rowReorderDisabledVirtualScroll).toBe(
+                "لا يمكن إعادة ترتيب الصفوف أثناء استخدام التمرير الافتراضي."
+            );
             expect(m.grid.rowReorderKeyboardHint).toBe("استخدم Alt + سهم لأعلى أو Alt + سهم لأسفل للتحريك.");
             expect(m.grid.rowValidationError).toBe("توجد أخطاء تحقق في هذا الصف.");
             expect(m.grid.save).toBe("حفظ");
@@ -315,10 +317,17 @@ describe("MONA_AR_SA_LOCALE", () => {
         });
 
         it("evaluates Grid row reorder accessibility announcements", () => {
-            const handleLabel = m.grid.rowReorderHandleAriaLabel("الصف ١", "استخدم Alt + سهم لأعلى أو Alt + سهم لأسفل للتحريك.");
+            const handleLabel = m.grid.rowReorderHandleAriaLabel(
+                "الصف ١",
+                "استخدم Alt + سهم لأعلى أو Alt + سهم لأسفل للتحريك."
+            );
             expect(handleLabel).toBe("الصف ١. استخدم Alt + سهم لأعلى أو Alt + سهم لأسفل للتحريك.");
 
-            const disabledHandle = m.grid.rowReorderHandleAriaLabel("الصف ١", "استخدم مفاتيح الأسهم للتحريك.", "إعادة ترتيب الصفوف غير متاح.");
+            const disabledHandle = m.grid.rowReorderHandleAriaLabel(
+                "الصف ١",
+                "استخدم مفاتيح الأسهم للتحريك.",
+                "إعادة ترتيب الصفوف غير متاح."
+            );
             expect(disabledHandle).toBe("الصف ١. استخدم مفاتيح الأسهم للتحريك. إعادة ترتيب الصفوف غير متاح.");
 
             expect(m.grid.rowReorderMoved(3, 1)).toBe("تم نقل الصف ٣ إلى الموضع ١.");
@@ -368,14 +377,7 @@ describe("MONA_AR_SA_LOCALE", () => {
     describe("arbitrary-label safety tests across diverse scripts and shapes", () => {
         const m = MONA_AR_SA_LOCALE.messages;
 
-        const testLabels = [
-            "المشروع",
-            "البريد",
-            "Angular",
-            "2026",
-            "A/B",
-            "ملف 1"
-        ];
+        const testLabels = ["المشروع", "البريد", "Angular", "2026", "A/B", "ملف 1"];
 
         it("chip removeLabel is safe for diverse labels without gender guessing", () => {
             for (const label of testLabels) {

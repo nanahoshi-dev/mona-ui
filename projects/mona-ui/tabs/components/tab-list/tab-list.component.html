@@ -12,7 +12,7 @@
         (pointercancel)="stopScrolling()"
         [attr.aria-hidden]="true"
         tabindex="-1">
-        @if (orientation() === 'vertical') {
+        @if (orientation() === "vertical") {
             <svg lucideChevronUp [size]="16"></svg>
         } @else {
             <svg lucideChevronLeft [size]="16" class="rtl:rotate-180"></svg>
@@ -111,7 +111,7 @@
         (pointercancel)="stopScrolling()"
         [attr.aria-hidden]="true"
         tabindex="-1">
-        @if (orientation() === 'vertical') {
+        @if (orientation() === "vertical") {
             <svg lucideChevronDown [size]="16"></svg>
         } @else {
             <svg lucideChevronRight [size]="16" class="rtl:rotate-180"></svg>

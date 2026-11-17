@@ -8,4 +8,3 @@ export interface TickStyleArgs {
     orientation: Orientation;
     smallTickStep: number;
 }
-

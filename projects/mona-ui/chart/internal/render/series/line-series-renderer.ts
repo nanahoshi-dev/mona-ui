@@ -35,7 +35,6 @@ export class LineSeriesRenderer {
         context.stroke();
         context.setLineDash([]);
 
-
         if (showPoints) {
             for (const p of validPoints) {
                 if (p.defined) {

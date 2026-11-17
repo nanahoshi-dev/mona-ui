@@ -33,7 +33,6 @@ function createMockSeriesStyle(color: string): ChartSeriesStyle {
     };
 }
 
-
 describe("SVG Lifecycle and Memory Leak Prevention", () => {
     it("clear() and destroy() are idempotent and do not leave orphan nodes in root or defs", () => {
         const svg = createSvgElement("svg");

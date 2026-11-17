@@ -4,7 +4,12 @@
             <mona-breadcrumb-item (itemClick)="openFolder($index)">{{ folder }}</mona-breadcrumb-item>
         }
     </mona-breadcrumb>
-    <button monaButton class="self-start" type="button" [disabled]="path().length === fullPath.length" (click)="path.set(fullPath)">
+    <button
+        monaButton
+        class="self-start"
+        type="button"
+        [disabled]="path().length === fullPath.length"
+        (click)="path.set(fullPath)">
         Back to the full path
     </button>
 </div>

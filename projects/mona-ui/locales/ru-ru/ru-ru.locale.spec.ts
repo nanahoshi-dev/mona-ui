@@ -182,8 +182,8 @@ describe("MONA_RU_RU_LOCALE", () => {
 
         it("translates Dialog & Window messages correctly", () => {
             expect(m.dialog?.ok).toBe("ОК");
-            expect(m.dialog?.ok.charCodeAt(0)).toBe(0x041E); // Cyrillic О
-            expect(m.dialog?.ok.charCodeAt(1)).toBe(0x041A); // Cyrillic К
+            expect(m.dialog?.ok.charCodeAt(0)).toBe(0x041e); // Cyrillic О
+            expect(m.dialog?.ok.charCodeAt(1)).toBe(0x041a); // Cyrillic К
             expect(m.dialog?.cancel).toBe("Отмена");
             expect(m.dialog?.closeDialog).toBe("Закрыть диалоговое окно");
             expect(m.window?.close).toBe("Закрыть");
@@ -192,14 +192,30 @@ describe("MONA_RU_RU_LOCALE", () => {
             expect(m.window?.minimize).toBe("Свернуть");
             expect(m.window?.restore).toBe("Восстановить");
             expect(m.window?.moveWindow).toBe("Переместить окно. Используйте клавиши со стрелками для перемещения.");
-            expect(m.window?.resizeTop).toBe("Изменить размер окна сверху. Используйте клавиши со стрелками для изменения размера.");
-            expect(m.window?.resizeBottom).toBe("Изменить размер окна снизу. Используйте клавиши со стрелками для изменения размера.");
-            expect(m.window?.resizeLeft).toBe("Изменить размер окна слева. Используйте клавиши со стрелками для изменения размера.");
-            expect(m.window?.resizeRight).toBe("Изменить размер окна справа. Используйте клавиши со стрелками для изменения размера.");
-            expect(m.window?.resizeTopLeft).toBe("Изменить размер окна из левого верхнего угла. Используйте клавиши со стрелками для изменения размера.");
-            expect(m.window?.resizeTopRight).toBe("Изменить размер окна из правого верхнего угла. Используйте клавиши со стрелками для изменения размера.");
-            expect(m.window?.resizeBottomLeft).toBe("Изменить размер окна из левого нижнего угла. Используйте клавиши со стрелками для изменения размера.");
-            expect(m.window?.resizeBottomRight).toBe("Изменить размер окна из правого нижнего угла. Используйте клавиши со стрелками для изменения размера.");
+            expect(m.window?.resizeTop).toBe(
+                "Изменить размер окна сверху. Используйте клавиши со стрелками для изменения размера."
+            );
+            expect(m.window?.resizeBottom).toBe(
+                "Изменить размер окна снизу. Используйте клавиши со стрелками для изменения размера."
+            );
+            expect(m.window?.resizeLeft).toBe(
+                "Изменить размер окна слева. Используйте клавиши со стрелками для изменения размера."
+            );
+            expect(m.window?.resizeRight).toBe(
+                "Изменить размер окна справа. Используйте клавиши со стрелками для изменения размера."
+            );
+            expect(m.window?.resizeTopLeft).toBe(
+                "Изменить размер окна из левого верхнего угла. Используйте клавиши со стрелками для изменения размера."
+            );
+            expect(m.window?.resizeTopRight).toBe(
+                "Изменить размер окна из правого верхнего угла. Используйте клавиши со стрелками для изменения размера."
+            );
+            expect(m.window?.resizeBottomLeft).toBe(
+                "Изменить размер окна из левого нижнего угла. Используйте клавиши со стрелками для изменения размера."
+            );
+            expect(m.window?.resizeBottomRight).toBe(
+                "Изменить размер окна из правого нижнего угла. Используйте клавиши со стрелками для изменения размера."
+            );
         });
 
         it("translates Splitter, Stepper, and Tabs messages correctly", () => {
@@ -256,9 +272,7 @@ describe("MONA_RU_RU_LOCALE", () => {
             expect(m.calendar?.switchToYearView?.("сентябрь 2026 г.")).toBe(
                 "Перейти к просмотру года, текущий месяц: сентябрь 2026 г."
             );
-            expect(m.calendar?.switchToDecadeView?.("2026")).toBe(
-                "Перейти к просмотру десятилетия, текущий год: 2026"
-            );
+            expect(m.calendar?.switchToDecadeView?.("2026")).toBe("Перейти к просмотру десятилетия, текущий год: 2026");
         });
 
         it("formats Chart functions and preserves Russian financial terminology", () => {

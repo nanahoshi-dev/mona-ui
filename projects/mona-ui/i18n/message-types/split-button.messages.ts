@@ -6,4 +6,3 @@ export interface MonaSplitButtonMessages {
     /** @deprecated No longer rendered; the main button is named by its content or by `aria-label`. */
     readonly splitButton: (text: string) => string;
 }
-

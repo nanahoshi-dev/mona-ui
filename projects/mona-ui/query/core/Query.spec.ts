@@ -14,17 +14,23 @@ describe("Query.sort", () => {
     it("puts empty values first ascending and last descending, keeping the others in order", () => {
         const rows: Row[] = [3, null, -5, undefined, 0, Number.NaN, 7].map(n => ({ n }));
 
-        const asc = Query.from(rows).sort([{ dir: "asc", field: "n" }]).run();
+        const asc = Query.from(rows)
+            .sort([{ dir: "asc", field: "n" }])
+            .run();
         expect(field(asc, "n")).toEqual([null, undefined, Number.NaN, -5, 0, 3, 7]);
 
-        const desc = Query.from(rows).sort([{ dir: "desc", field: "n" }]).run();
+        const desc = Query.from(rows)
+            .sort([{ dir: "desc", field: "n" }])
+            .run();
         expect(field(desc, "n")).toEqual([7, 3, 0, -5, null, undefined, Number.NaN]);
     });
 
     it("sorts strings by the locale, with nulls first", () => {
         const rows: Row[] = ["b", null, "a", "B", "é", "z", "A"].map(s => ({ s }));
 
-        const sorted = Query.from(rows, { locale: "en-US" }).sort([{ dir: "asc", field: "s" }]).run();
+        const sorted = Query.from(rows, { locale: "en-US" })
+            .sort([{ dir: "asc", field: "s" }])
+            .run();
 
         expect(field(sorted, "s")).toEqual([null, "a", "A", "b", "B", "é", "z"]);
     });
@@ -32,22 +38,30 @@ describe("Query.sort", () => {
     it("follows the locale's alphabet", () => {
         const rows: Row[] = ["ä", "a", "z"].map(s => ({ s }));
 
-        expect(field(Query.from(rows, { locale: "sv-SE" }).sort([{ dir: "asc", field: "s" }]).run(), "s")).toEqual([
-            "a",
-            "z",
-            "ä"
-        ]);
-        expect(field(Query.from(rows, { locale: "de-DE" }).sort([{ dir: "asc", field: "s" }]).run(), "s")).toEqual([
-            "a",
-            "ä",
-            "z"
-        ]);
+        expect(
+            field(
+                Query.from(rows, { locale: "sv-SE" })
+                    .sort([{ dir: "asc", field: "s" }])
+                    .run(),
+                "s"
+            )
+        ).toEqual(["a", "z", "ä"]);
+        expect(
+            field(
+                Query.from(rows, { locale: "de-DE" })
+                    .sort([{ dir: "asc", field: "s" }])
+                    .run(),
+                "s"
+            )
+        ).toEqual(["a", "ä", "z"]);
     });
 
     it("orders digits inside strings by their value", () => {
         const rows: Row[] = ["item 10", "item 2", "item 1"].map(s => ({ s }));
 
-        const sorted = Query.from(rows).sort([{ dir: "asc", field: "s" }]).run();
+        const sorted = Query.from(rows)
+            .sort([{ dir: "asc", field: "s" }])
+            .run();
 
         expect(field(sorted, "s")).toEqual(["item 1", "item 2", "item 10"]);
     });
@@ -78,28 +92,38 @@ describe("Query.sort", () => {
         ];
 
         expect(field(Query.from(rows).sort([]).run(), "s")).toEqual(["first", "second", "third"]);
-        expect(field(Query.from(rows).sort([{ dir: "desc", field: "n" }]).run(), "s")).toEqual([
-            "first",
-            "third",
-            "second"
-        ]);
+        expect(
+            field(
+                Query.from(rows)
+                    .sort([{ dir: "desc", field: "n" }])
+                    .run(),
+                "s"
+            )
+        ).toEqual(["first", "third", "second"]);
     });
 
     it("passes field values to a custom comparator and reverses it for descending", () => {
         const order = ["low", "medium", "high"];
         const rows: Row[] = ["high", "low", "medium"].map(s => ({ s }));
-        const sort = (left: unknown, right: unknown): number => order.indexOf(String(left)) - order.indexOf(String(right));
+        const sort = (left: unknown, right: unknown): number =>
+            order.indexOf(String(left)) - order.indexOf(String(right));
 
-        expect(field(Query.from(rows).sort([{ dir: "asc", field: "s", sort }]).run(), "s")).toEqual([
-            "low",
-            "medium",
-            "high"
-        ]);
-        expect(field(Query.from(rows).sort([{ dir: "desc", field: "s", sort }]).run(), "s")).toEqual([
-            "high",
-            "medium",
-            "low"
-        ]);
+        expect(
+            field(
+                Query.from(rows)
+                    .sort([{ dir: "asc", field: "s", sort }])
+                    .run(),
+                "s"
+            )
+        ).toEqual(["low", "medium", "high"]);
+        expect(
+            field(
+                Query.from(rows)
+                    .sort([{ dir: "desc", field: "s", sort }])
+                    .run(),
+                "s"
+            )
+        ).toEqual(["high", "medium", "low"]);
     });
 
     it("reads fields through the field selector", () => {

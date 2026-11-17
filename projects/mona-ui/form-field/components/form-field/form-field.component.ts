@@ -45,7 +45,9 @@ import { formFieldErrorMessage } from "../../utils/form-field-error-message";
 type NativeFormControl = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
 const isNativeFormControl = (element: Element | null | undefined): element is NativeFormControl =>
-    element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement;
+    element instanceof HTMLInputElement ||
+    element instanceof HTMLSelectElement ||
+    element instanceof HTMLTextAreaElement;
 
 /**
  * Puts a label, a hint and validation errors around one form control, and connects them to it.

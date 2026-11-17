@@ -200,13 +200,21 @@ describe("locale-date-formats", () => {
         });
 
         it("derives combined Chinese date and time format in 24h for zh-CN and zh-TW", () => {
-            expect(getLocaleDateTimeInputFormat("zh-CN", { hourFormat: "24", showSeconds: false })).toBe("yyyy/MM/dd HH:mm");
-            expect(getLocaleDateTimeInputFormat("zh-TW", { hourFormat: "24", showSeconds: false })).toBe("yyyy/MM/dd HH:mm");
+            expect(getLocaleDateTimeInputFormat("zh-CN", { hourFormat: "24", showSeconds: false })).toBe(
+                "yyyy/MM/dd HH:mm"
+            );
+            expect(getLocaleDateTimeInputFormat("zh-TW", { hourFormat: "24", showSeconds: false })).toBe(
+                "yyyy/MM/dd HH:mm"
+            );
         });
 
         it("derives combined Chinese date and time format in 12h with day period in native position", () => {
-            expect(getLocaleDateTimeInputFormat("zh-CN", { hourFormat: "12", showSeconds: false })).toBe("yyyy/MM/dd ahh:mm");
-            expect(getLocaleDateTimeInputFormat("zh-TW", { hourFormat: "12", showSeconds: false })).toBe("yyyy/MM/dd ahh:mm");
+            expect(getLocaleDateTimeInputFormat("zh-CN", { hourFormat: "12", showSeconds: false })).toBe(
+                "yyyy/MM/dd ahh:mm"
+            );
+            expect(getLocaleDateTimeInputFormat("zh-TW", { hourFormat: "12", showSeconds: false })).toBe(
+                "yyyy/MM/dd ahh:mm"
+            );
         });
 
         it("derives combined Korean date and time format in 24h and 12h for ko-KR", () => {
@@ -284,13 +292,21 @@ describe("locale-date-formats", () => {
         });
 
         it("derives combined Indonesian date and time format in 24h", () => {
-            expect(getLocaleDateTimeInputFormat("id-ID", { hourFormat: "24", showSeconds: false })).toBe("dd/MM/yyyy, HH.mm");
-            expect(getLocaleDateTimeInputFormat("id-ID", { hourFormat: "24", showSeconds: true })).toBe("dd/MM/yyyy, HH.mm.ss");
+            expect(getLocaleDateTimeInputFormat("id-ID", { hourFormat: "24", showSeconds: false })).toBe(
+                "dd/MM/yyyy, HH.mm"
+            );
+            expect(getLocaleDateTimeInputFormat("id-ID", { hourFormat: "24", showSeconds: true })).toBe(
+                "dd/MM/yyyy, HH.mm.ss"
+            );
         });
 
         it("derives combined Indonesian date and time format in 12h", () => {
-            expect(getLocaleDateTimeInputFormat("id-ID", { hourFormat: "12", showSeconds: false })).toBe("dd/MM/yyyy, hh.mm a");
-            expect(getLocaleDateTimeInputFormat("id-ID", { hourFormat: "12", showSeconds: true })).toBe("dd/MM/yyyy, hh.mm.ss a");
+            expect(getLocaleDateTimeInputFormat("id-ID", { hourFormat: "12", showSeconds: false })).toBe(
+                "dd/MM/yyyy, hh.mm a"
+            );
+            expect(getLocaleDateTimeInputFormat("id-ID", { hourFormat: "12", showSeconds: true })).toBe(
+                "dd/MM/yyyy, hh.mm.ss a"
+            );
         });
 
         it("derives combined Russian date and time format in 24h", () => {
@@ -425,7 +441,11 @@ describe("locale-date-formats", () => {
                     Object.defineProperty(Intl, "Locale", { value: MockLocale, configurable: true, writable: true });
                     expect(getLocaleFirstDayOfWeek("en-AA")).toBe("sunday");
                 } finally {
-                    Object.defineProperty(Intl, "Locale", { value: originalLocale, configurable: true, writable: true });
+                    Object.defineProperty(Intl, "Locale", {
+                        value: originalLocale,
+                        configurable: true,
+                        writable: true
+                    });
                 }
             });
 
@@ -441,7 +461,11 @@ describe("locale-date-formats", () => {
                     Object.defineProperty(Intl, "Locale", { value: MockLocale, configurable: true, writable: true });
                     expect(getLocaleFirstDayOfWeek("en-AB")).toBe("sunday");
                 } finally {
-                    Object.defineProperty(Intl, "Locale", { value: originalLocale, configurable: true, writable: true });
+                    Object.defineProperty(Intl, "Locale", {
+                        value: originalLocale,
+                        configurable: true,
+                        writable: true
+                    });
                 }
             });
         });
@@ -456,10 +480,18 @@ describe("locale-date-formats", () => {
                         }
                     }
                     (MockDisabledLocale.prototype as unknown as { getWeekInfo: unknown }).getWeekInfo = undefined;
-                    Object.defineProperty(Intl, "Locale", { value: MockDisabledLocale, configurable: true, writable: true });
+                    Object.defineProperty(Intl, "Locale", {
+                        value: MockDisabledLocale,
+                        configurable: true,
+                        writable: true
+                    });
                     fn();
                 } finally {
-                    Object.defineProperty(Intl, "Locale", { value: originalLocale, configurable: true, writable: true });
+                    Object.defineProperty(Intl, "Locale", {
+                        value: originalLocale,
+                        configurable: true,
+                        writable: true
+                    });
                 }
             }
 
@@ -564,7 +596,11 @@ describe("locale-date-formats", () => {
                     // Simulate primitive environment without Intl.Locale
                     const mockedIntl = { ...originalIntl };
                     Reflect.deleteProperty(mockedIntl, "Locale");
-                    Object.defineProperty(globalThis, "Intl", { value: mockedIntl, configurable: true, writable: true });
+                    Object.defineProperty(globalThis, "Intl", {
+                        value: mockedIntl,
+                        configurable: true,
+                        writable: true
+                    });
 
                     expect(resolveLikelyRegion("en-US")).toBe("US");
                     expect(resolveLikelyRegion("de-u-ca-gregory")).toBeNull();
@@ -612,7 +648,11 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("und-EG")).toBe("saturday");
                     expect(resolveFallbackFirstDayOfWeek("und-MV")).toBe("friday");
                 } finally {
-                    Object.defineProperty(globalThis, "Intl", { value: originalIntl, configurable: true, writable: true });
+                    Object.defineProperty(globalThis, "Intl", {
+                        value: originalIntl,
+                        configurable: true,
+                        writable: true
+                    });
                 }
             });
 
@@ -621,7 +661,11 @@ describe("locale-date-formats", () => {
                 try {
                     const mockedIntl = Object.create(originalIntl);
                     Object.defineProperty(mockedIntl, "Locale", { value: undefined, configurable: true });
-                    Object.defineProperty(globalThis, "Intl", { value: mockedIntl, configurable: true, writable: true });
+                    Object.defineProperty(globalThis, "Intl", {
+                        value: mockedIntl,
+                        configurable: true,
+                        writable: true
+                    });
 
                     expect(resolveLikelyRegion("en-840")).toBe("US");
                     expect(resolveLikelyRegion("dv-462")).toBe("MV");
@@ -633,7 +677,11 @@ describe("locale-date-formats", () => {
                     expect(resolveFallbackFirstDayOfWeek("ar-818")).toBe("saturday");
                     expect(resolveFallbackFirstDayOfWeek("ja-392")).toBe("sunday");
                 } finally {
-                    Object.defineProperty(globalThis, "Intl", { value: originalIntl, configurable: true, writable: true });
+                    Object.defineProperty(globalThis, "Intl", {
+                        value: originalIntl,
+                        configurable: true,
+                        writable: true
+                    });
                 }
             });
 
@@ -646,13 +694,21 @@ describe("locale-date-formats", () => {
                 try {
                     const mockedIntl = Object.create(originalIntl);
                     Object.defineProperty(mockedIntl, "Locale", { value: undefined, configurable: true });
-                    Object.defineProperty(globalThis, "Intl", { value: mockedIntl, configurable: true, writable: true });
+                    Object.defineProperty(globalThis, "Intl", {
+                        value: mockedIntl,
+                        configurable: true,
+                        writable: true
+                    });
 
                     expect(resolveLikelyRegion("x-US")).toBeNull();
                     expect(resolveFallbackFirstDayOfWeek("x-US")).toBe("monday");
                     expect(resolveLocaleFirstDayOfWeek("x-US")).toBe("monday");
                 } finally {
-                    Object.defineProperty(globalThis, "Intl", { value: originalIntl, configurable: true, writable: true });
+                    Object.defineProperty(globalThis, "Intl", {
+                        value: originalIntl,
+                        configurable: true,
+                        writable: true
+                    });
                 }
             });
 
@@ -662,7 +718,11 @@ describe("locale-date-formats", () => {
                     const mockedIntl = Object.create(originalIntl);
                     Object.defineProperty(mockedIntl, "Locale", { value: undefined, configurable: true });
                     Object.defineProperty(mockedIntl, "getCanonicalLocales", { value: undefined, configurable: true });
-                    Object.defineProperty(globalThis, "Intl", { value: mockedIntl, configurable: true, writable: true });
+                    Object.defineProperty(globalThis, "Intl", {
+                        value: mockedIntl,
+                        configurable: true,
+                        writable: true
+                    });
 
                     // Standard alpha-2 regions are parsed directly
                     expect(resolveLikelyRegion("en-US")).toBe("US");
@@ -706,7 +766,11 @@ describe("locale-date-formats", () => {
                     expect(resolveLikelyRegion("x-US")).toBeNull();
                     expect(resolveFallbackFirstDayOfWeek("x-US")).toBe("monday");
                 } finally {
-                    Object.defineProperty(globalThis, "Intl", { value: originalIntl, configurable: true, writable: true });
+                    Object.defineProperty(globalThis, "Intl", {
+                        value: originalIntl,
+                        configurable: true,
+                        writable: true
+                    });
                 }
             });
 
@@ -1027,7 +1091,20 @@ describe("locale-date-formats", () => {
 
     describe("whitespace normalization and portability", () => {
         it("ensures generated editable formats do not contain typographic whitespace (U+00A0, U+202F, U+2009)", () => {
-            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "ko-KR", "pt-BR", "it-IT", "zh-CN", "zh-TW", "ar-SA", "tr-TR"];
+            const locales = [
+                "en-US",
+                "de-DE",
+                "fr-FR",
+                "es-ES",
+                "ja-JP",
+                "ko-KR",
+                "pt-BR",
+                "it-IT",
+                "zh-CN",
+                "zh-TW",
+                "ar-SA",
+                "tr-TR"
+            ];
             for (const loc of locales) {
                 const time12 = getLocaleTimeInputFormat(loc, { hourFormat: "12" });
                 expect(time12).not.toMatch(/[\u00A0\u2009\u202F]/);
@@ -1047,7 +1124,20 @@ describe("locale-date-formats", () => {
         });
 
         it("ensures generated editable formats do not contain bidi-control characters (U+061C, U+200E, U+200F, U+202A-U+202E, U+2066-U+2069)", () => {
-            const locales = ["en-US", "de-DE", "fr-FR", "es-ES", "ja-JP", "ko-KR", "pt-BR", "it-IT", "zh-CN", "zh-TW", "ar-SA", "tr-TR"];
+            const locales = [
+                "en-US",
+                "de-DE",
+                "fr-FR",
+                "es-ES",
+                "ja-JP",
+                "ko-KR",
+                "pt-BR",
+                "it-IT",
+                "zh-CN",
+                "zh-TW",
+                "ar-SA",
+                "tr-TR"
+            ];
             const bidiRegex = /[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/;
             for (const loc of locales) {
                 expect(getLocaleDateInputFormat(loc)).not.toMatch(bidiRegex);
@@ -1056,9 +1146,13 @@ describe("locale-date-formats", () => {
                 expect(getLocaleTimeInputFormat(loc, { hourFormat: "12" })).not.toMatch(bidiRegex);
                 expect(getLocaleTimeInputFormat(loc, { hourFormat: "12", showSeconds: true })).not.toMatch(bidiRegex);
                 expect(getLocaleDateTimeInputFormat(loc, { hourFormat: "24" })).not.toMatch(bidiRegex);
-                expect(getLocaleDateTimeInputFormat(loc, { hourFormat: "24", showSeconds: true })).not.toMatch(bidiRegex);
+                expect(getLocaleDateTimeInputFormat(loc, { hourFormat: "24", showSeconds: true })).not.toMatch(
+                    bidiRegex
+                );
                 expect(getLocaleDateTimeInputFormat(loc, { hourFormat: "12" })).not.toMatch(bidiRegex);
-                expect(getLocaleDateTimeInputFormat(loc, { hourFormat: "12", showSeconds: true })).not.toMatch(bidiRegex);
+                expect(getLocaleDateTimeInputFormat(loc, { hourFormat: "12", showSeconds: true })).not.toMatch(
+                    bidiRegex
+                );
             }
         });
 
@@ -1071,7 +1165,6 @@ describe("locale-date-formats", () => {
             expect(dtFormat12).toContain("،");
             expect(dtFormat12).not.toContain(",");
         });
-
 
         it("preserves Japanese day period in prefix position", () => {
             const format12 = getLocaleTimeInputFormat("ja-JP", { hourFormat: "12" });
@@ -1199,7 +1292,11 @@ describe("locale-date-formats", () => {
             expect(dtKoDateTime24MultiSpace.minute).toBe(30);
 
             // Korean 12h datetime with dot and multiple spaces before time
-            const dtKoDateTime12MultiSpace = parseGregorianDate("2026. 09. 15.  오후 09:30", "yyyy. MM. dd. a hh:mm", "ko-KR");
+            const dtKoDateTime12MultiSpace = parseGregorianDate(
+                "2026. 09. 15.  오후 09:30",
+                "yyyy. MM. dd. a hh:mm",
+                "ko-KR"
+            );
             expect(dtKoDateTime12MultiSpace.isValid).toBe(true);
             expect(dtKoDateTime12MultiSpace.year).toBe(2026);
             expect(dtKoDateTime12MultiSpace.month).toBe(9);
@@ -1220,5 +1317,3 @@ describe("locale-date-formats", () => {
         });
     });
 });
-
-

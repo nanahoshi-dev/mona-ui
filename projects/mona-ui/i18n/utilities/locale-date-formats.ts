@@ -4,7 +4,6 @@ import { type LocaleFirstDayOfWeek, resolveLocaleFirstDayOfWeek } from "./locale
 
 export type { LocaleFirstDayOfWeek };
 
-
 export interface LocaleTimeFormatOptions {
     readonly hourFormat?: "12" | "24";
     readonly showSeconds?: boolean;
@@ -99,9 +98,7 @@ export function getLocaleTimeInputFormat(localeId: string, options?: LocaleTimeF
                     derived += normalizeEditableLiteral(part.value);
                 }
             }
-            format =
-                derived ||
-                (is12 ? (showSeconds ? "hh:mm:ss a" : "hh:mm a") : showSeconds ? "HH:mm:ss" : "HH:mm");
+            format = derived || (is12 ? (showSeconds ? "hh:mm:ss a" : "hh:mm a") : showSeconds ? "HH:mm:ss" : "HH:mm");
         } catch {
             format = is12 ? (showSeconds ? "hh:mm:ss a" : "hh:mm a") : showSeconds ? "HH:mm:ss" : "HH:mm";
         }

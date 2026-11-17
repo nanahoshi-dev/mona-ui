@@ -147,7 +147,9 @@
 
 @if (showInfo()) {
     @if (pagerInfoTemplateRef) {
-        <ng-container [ngTemplateOutlet]="pagerInfoTemplateRef" [ngTemplateOutletContext]="infoContext()"></ng-container>
+        <ng-container
+            [ngTemplateOutlet]="pagerInfoTemplateRef"
+            [ngTemplateOutletContext]="infoContext()"></ng-container>
     } @else {
         <span [class]="infoClasses">{{ pagerInfo() }}</span>
     }

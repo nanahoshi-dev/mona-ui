@@ -43,7 +43,6 @@ export class SpinnerOverlayComponent implements SpinnerOverlayVariantInput {
     });
     protected readonly messages = this.#i18n.componentMessages("spinner", SPINNER_DEFAULT_MESSAGES);
 
-
     /**
      * @description Visual appearance of the nested spinner animation.
      * @default "default"

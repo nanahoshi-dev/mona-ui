@@ -33,11 +33,7 @@ export class LabelDemoComponent extends AbstractDemoComponent<LabelComponent> {
 @Component({
     imports: [LabelComponent, TextBoxComponent],
     template: `
-        <mona-label
-            [text]="text()"
-            [optional]="optional()"
-            [optionalText]="optionalText()"
-            [class]="userClass()">
+        <mona-label [text]="text()" [optional]="optional()" [optionalText]="optionalText()" [class]="userClass()">
             <mona-text-box placeholder="Enter an email address"></mona-text-box>
         </mona-label>
     `,

@@ -1,4 +1,4 @@
-import { afterAll, vi } from 'vitest';
+import { afterAll, vi } from "vitest";
 
 /**
  * Mocking ResizeObserver to prevent ReferenceErrors in jsdom. Assigned rather than stubbed: to vi.unstubAllGlobals(),
@@ -42,12 +42,12 @@ window.scrollBy = vi.fn();
  */
 afterAll(() => {
     const missing = [
-        ['ResizeObserver', globalThis.ResizeObserver],
-        ['Element.prototype.scrollIntoView', Element.prototype.scrollIntoView],
-        ['Element.prototype.scrollTo', Element.prototype.scrollTo]
-    ].filter(([, value]) => typeof value !== 'function');
+        ["ResizeObserver", globalThis.ResizeObserver],
+        ["Element.prototype.scrollIntoView", Element.prototype.scrollIntoView],
+        ["Element.prototype.scrollTo", Element.prototype.scrollTo]
+    ].filter(([, value]) => typeof value !== "function");
     if (missing.length > 0) {
-        const names = missing.map(([name]) => name).join(', ');
+        const names = missing.map(([name]) => name).join(", ");
         throw new Error(`This spec file removed ${names}, which other spec files rely on. Restore what you replace.`);
     }
 });
@@ -83,14 +83,14 @@ function createMockCanvasRenderingContext2D(): CanvasRenderingContext2D {
         ellipse: vi.fn(),
         fill: vi.fn(),
         fillRect: vi.fn(),
-        fillStyle: '',
+        fillStyle: "",
         fillText: vi.fn(),
-        font: '',
+        font: "",
         getImageData: vi.fn().mockReturnValue({ data: new Uint8ClampedArray(4), height: 1, width: 1 }),
         globalAlpha: 1,
         imageSmoothingEnabled: true,
-        imageSmoothingQuality: 'low',
-        lineJoin: 'miter',
+        imageSmoothingQuality: "low",
+        lineJoin: "miter",
         lineTo: vi.fn(),
         lineWidth: 1,
         measureText: vi.fn().mockReturnValue({ width: 0 }),
@@ -106,20 +106,20 @@ function createMockCanvasRenderingContext2D(): CanvasRenderingContext2D {
         setTransform: vi.fn(),
         stroke: vi.fn(),
         strokeRect: vi.fn(),
-        strokeStyle: '',
+        strokeStyle: "",
         strokeText: vi.fn(),
-        textAlign: 'start',
-        textBaseline: 'alphabetic',
+        textAlign: "start",
+        textBaseline: "alphabetic",
         translate: vi.fn()
     } as unknown as CanvasRenderingContext2D;
 }
 
 const originalGetContext = HTMLCanvasElement.prototype.getContext;
 HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, contextId: string, ...args: unknown[]) {
-    if (contextId === '2d') {
+    if (contextId === "2d") {
         return createMockCanvasRenderingContext2D();
     }
     return (originalGetContext as (...a: unknown[]) => unknown).call(this, contextId, ...args);
 } as typeof HTMLCanvasElement.prototype.getContext;
 
-HTMLCanvasElement.prototype.toDataURL = vi.fn().mockReturnValue('data:image/png;base64,');
+HTMLCanvasElement.prototype.toDataURL = vi.fn().mockReturnValue("data:image/png;base64,");

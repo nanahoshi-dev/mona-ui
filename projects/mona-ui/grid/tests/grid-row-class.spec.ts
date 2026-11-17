@@ -90,7 +90,9 @@ describe("Grid rowClass", () => {
 
     it("runs again when an item is rebound", async () => {
         fixture.componentInstance.rows.set(
-            ROWS.map(row => (row.id === 1 ? { ...row, status: "pending" } : row.id === 2 ? { ...row, status: "ok" } : row))
+            ROWS.map(row =>
+                row.id === 1 ? { ...row, status: "pending" } : row.id === 2 ? { ...row, status: "ok" } : row
+            )
         );
         await settleFixture(fixture);
 

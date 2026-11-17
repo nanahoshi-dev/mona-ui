@@ -5,12 +5,7 @@ import { describe, expect, it } from "vitest";
 import { DatePickerComponent } from "./date-picker.component";
 
 @Component({
-    template: `
-        <mona-date-picker
-            [(value)]="value"
-            [format]="format()">
-        </mona-date-picker>
-    `,
+    template: ` <mona-date-picker [(value)]="value" [format]="format()"> </mona-date-picker> `,
     imports: [DatePickerComponent]
 })
 class DatePickerI18nTestHostComponent {
@@ -45,8 +40,9 @@ describe("DatePickerComponent i18n", () => {
         TestBed.configureTestingModule({
             imports: [DatePickerI18nTestHostComponent]
         });
-        const fixture: ComponentFixture<DatePickerI18nTestHostComponent> =
-            TestBed.createComponent(DatePickerI18nTestHostComponent);
+        const fixture: ComponentFixture<DatePickerI18nTestHostComponent> = TestBed.createComponent(
+            DatePickerI18nTestHostComponent
+        );
         const i18n = TestBed.inject(MonaI18nService);
         fixture.detectChanges();
         await fixture.whenStable();

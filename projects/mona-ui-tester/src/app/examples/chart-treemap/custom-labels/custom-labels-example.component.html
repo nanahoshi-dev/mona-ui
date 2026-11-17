@@ -12,7 +12,7 @@
             <span class="truncate font-semibold">{{ node.formattedLabel }}</span>
             @if (node.isLeaf) {
                 <span class="truncate text-xs opacity-80">
-                    {{ node.formattedValue }} · {{ (node.percentageOfParent ?? 0) | percent }}
+                    {{ node.formattedValue }} · {{ node.percentageOfParent ?? 0 | percent }}
                 </span>
             }
         </ng-template>

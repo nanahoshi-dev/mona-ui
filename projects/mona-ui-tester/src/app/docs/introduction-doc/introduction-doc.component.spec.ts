@@ -14,12 +14,7 @@ describe("IntroductionDocComponent", () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [IntroductionDocComponent],
-            providers: [
-                PageService,
-                provideHttpClient(withXhr()),
-                provideMarkdown(),
-                provideRouter([])
-            ]
+            providers: [PageService, provideHttpClient(withXhr()), provideMarkdown(), provideRouter([])]
         }).compileComponents();
 
         fixture = TestBed.createComponent(IntroductionDocComponent);

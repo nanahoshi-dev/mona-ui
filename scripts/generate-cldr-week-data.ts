@@ -112,18 +112,18 @@ export function validateCldrProvenance(
         if (expectedUrl && fileMeta.url !== expectedUrl) {
             throw new Error(
                 `CLDR provenance source URL mismatch for ${filename}:\n` +
-                `Expected: ${expectedUrl}\n` +
-                `Actual:   ${fileMeta.url}`
+                    `Expected: ${expectedUrl}\n` +
+                    `Actual:   ${fileMeta.url}`
             );
         }
         const actualHash = computeSha256(content);
         if (actualHash !== fileMeta.sha256) {
             throw new Error(
                 `CLDR source integrity check failed:\n` +
-                `${filename} SHA-256 does not match provenance.json.\n` +
-                `Expected: ${fileMeta.sha256}\n` +
-                `Actual:   ${actualHash}\n` +
-                `Run the documented CLDR source-update workflow.`
+                    `${filename} SHA-256 does not match provenance.json.\n` +
+                    `Expected: ${fileMeta.sha256}\n` +
+                    `Actual:   ${actualHash}\n` +
+                    `Run the documented CLDR source-update workflow.`
             );
         }
     }
@@ -174,9 +174,7 @@ export async function loadCldrSources(
     optionsOrForceFetch: boolean | { readonly forceFetch?: boolean; readonly cldrDir?: string } = false
 ): Promise<CldrSources> {
     const forceFetch =
-        typeof optionsOrForceFetch === "boolean"
-            ? optionsOrForceFetch
-            : (optionsOrForceFetch?.forceFetch ?? false);
+        typeof optionsOrForceFetch === "boolean" ? optionsOrForceFetch : (optionsOrForceFetch?.forceFetch ?? false);
     const cldrDir =
         typeof optionsOrForceFetch === "object" && optionsOrForceFetch.cldrDir
             ? optionsOrForceFetch.cldrDir
@@ -190,22 +188,22 @@ export async function loadCldrSources(
         if (!fs.existsSync(likelyFile)) {
             throw new Error(
                 `Pinned CLDR source file is missing:\n${likelyFile}\n\n` +
-                `Normal generation/check mode is hermetic and will not fetch missing inputs.\n` +
-                `Run "npm run update:cldr-week-sources" to restore or update the pinned source set.`
+                    `Normal generation/check mode is hermetic and will not fetch missing inputs.\n` +
+                    `Run "npm run update:cldr-week-sources" to restore or update the pinned source set.`
             );
         }
         if (!fs.existsSync(weekFile)) {
             throw new Error(
                 `Pinned CLDR source file is missing:\n${weekFile}\n\n` +
-                `Normal generation/check mode is hermetic and will not fetch missing inputs.\n` +
-                `Run "npm run update:cldr-week-sources" to restore or update the pinned source set.`
+                    `Normal generation/check mode is hermetic and will not fetch missing inputs.\n` +
+                    `Run "npm run update:cldr-week-sources" to restore or update the pinned source set.`
             );
         }
         if (!fs.existsSync(provFile)) {
             throw new Error(
                 `Pinned CLDR provenance file is missing:\n${provFile}\n\n` +
-                `Normal generation/check mode is hermetic and will not fetch missing inputs.\n` +
-                `Run "npm run update:cldr-week-sources" to restore or update the pinned source set.`
+                    `Normal generation/check mode is hermetic and will not fetch missing inputs.\n` +
+                    `Run "npm run update:cldr-week-sources" to restore or update the pinned source set.`
             );
         }
 
@@ -235,10 +233,7 @@ export async function loadCldrSources(
     }
 
     console.log(`Fetching CLDR ${CLDR_VERSION} sources from GitHub...`);
-    const [likelyRes, weekRes] = await Promise.all([
-        fetch(LIKELY_SUBTAGS_URL),
-        fetch(WEEK_DATA_URL)
-    ]);
+    const [likelyRes, weekRes] = await Promise.all([fetch(LIKELY_SUBTAGS_URL), fetch(WEEK_DATA_URL)]);
 
     if (!likelyRes.ok) {
         throw new Error(`Failed to fetch likelySubtags: ${likelyRes.status} ${likelyRes.statusText}`);
@@ -327,11 +322,13 @@ export function generateWeekDataModuleContent(sources: CldrSources): string {
         }
         const firstDay = getFirstDayForRegion(region);
 
-        const normalizedKey = keySubtags.map((s, idx) => {
-            if (idx === 0) return s.toLowerCase();
-            if (s.length === 4) return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-            return s;
-        }).join("-");
+        const normalizedKey = keySubtags
+            .map((s, idx) => {
+                if (idx === 0) return s.toLowerCase();
+                if (s.length === 4) return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+                return s;
+            })
+            .join("-");
 
         if (keySubtags.length === 1) {
             baseLangFirstDay.set(normalizedKey, firstDay);
@@ -457,20 +454,21 @@ function normalizeNewlines(str: string): string {
     return str.replace(/\r\n/g, "\n").trim();
 }
 
-export async function updateCldrSources(options?: { readonly cldrDir?: string; readonly targetFile?: string }): Promise<void> {
+export async function updateCldrSources(options?: {
+    readonly cldrDir?: string;
+    readonly targetFile?: string;
+}): Promise<void> {
     const cldrDir = options?.cldrDir ?? path.resolve(__dirname, "cldr");
     const likelyFile = path.join(cldrDir, "likelySubtags.json");
     const weekFile = path.join(cldrDir, "weekData.json");
     const provFile = path.join(cldrDir, "provenance.json");
     const targetFile =
-        options?.targetFile ??
-        path.resolve(__dirname, "../projects/mona-ui/i18n/utilities/locale-week-likely-data.ts");
+        options?.targetFile ?? path.resolve(__dirname, "../projects/mona-ui/i18n/utilities/locale-week-likely-data.ts");
 
-    console.log(`Updating CLDR sources to CLDR ${CLDR_VERSION} (tag: ${CLDR_JSON_TAG}, Unicode: ${UNICODE_VERSION})...`);
-    const [likelyRes, weekRes] = await Promise.all([
-        fetch(LIKELY_SUBTAGS_URL),
-        fetch(WEEK_DATA_URL)
-    ]);
+    console.log(
+        `Updating CLDR sources to CLDR ${CLDR_VERSION} (tag: ${CLDR_JSON_TAG}, Unicode: ${UNICODE_VERSION})...`
+    );
+    const [likelyRes, weekRes] = await Promise.all([fetch(LIKELY_SUBTAGS_URL), fetch(WEEK_DATA_URL)]);
 
     if (!likelyRes.ok) {
         throw new Error(`Failed to fetch likelySubtags: ${likelyRes.status} ${likelyRes.statusText}`);

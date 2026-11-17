@@ -74,7 +74,10 @@ export function renderRegistry(examples: readonly ExampleDescription[]): string 
     ].join("\n");
 }
 
-function readExamples(examplesRoot: string, pages: ReadonlySet<string>): { examples: ExampleDescription[]; problems: string[] } {
+function readExamples(
+    examplesRoot: string,
+    pages: ReadonlySet<string>
+): { examples: ExampleDescription[]; problems: string[] } {
     const examples: ExampleDescription[] = [];
     const problems: string[] = [];
     for (const page of readdirSync(examplesRoot, { withFileTypes: true }).filter(entry => entry.isDirectory())) {
@@ -95,7 +98,9 @@ function readExamples(examplesRoot: string, pages: ReadonlySet<string>): { examp
                 className: readExampleComponent(source).className,
                 files: [
                     mainFile,
-                    ...readdirSync(join(examplesRoot, page.name, name)).filter(file => file !== mainFile).sort()
+                    ...readdirSync(join(examplesRoot, page.name, name))
+                        .filter(file => file !== mainFile)
+                        .sort()
                 ],
                 id,
                 mainFile

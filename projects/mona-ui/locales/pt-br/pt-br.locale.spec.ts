@@ -262,21 +262,11 @@ describe("MONA_PT_BR_LOCALE", () => {
 
         it("translates Grid row-reorder disabled reasons correctly", () => {
             expect(m.grid?.rowReorderDisabled).toBe("A reordenação de linhas está desabilitada.");
-            expect(m.grid?.rowReorderDisabledEditing).toBe(
-                "Conclua a edição antes de reordenar as linhas."
-            );
-            expect(m.grid?.rowReorderDisabledFiltered).toBe(
-                "Remova os filtros antes de reordenar as linhas."
-            );
-            expect(m.grid?.rowReorderDisabledGrouped).toBe(
-                "Remova o agrupamento antes de reordenar as linhas."
-            );
-            expect(m.grid?.rowReorderDisabledSingleRow).toBe(
-                "São necessárias pelo menos duas linhas para reordenar."
-            );
-            expect(m.grid?.rowReorderDisabledSorted).toBe(
-                "Remova a ordenação antes de reordenar as linhas."
-            );
+            expect(m.grid?.rowReorderDisabledEditing).toBe("Conclua a edição antes de reordenar as linhas.");
+            expect(m.grid?.rowReorderDisabledFiltered).toBe("Remova os filtros antes de reordenar as linhas.");
+            expect(m.grid?.rowReorderDisabledGrouped).toBe("Remova o agrupamento antes de reordenar as linhas.");
+            expect(m.grid?.rowReorderDisabledSingleRow).toBe("São necessárias pelo menos duas linhas para reordenar.");
+            expect(m.grid?.rowReorderDisabledSorted).toBe("Remova a ordenação antes de reordenar as linhas.");
             expect(m.grid?.rowReorderDisabledVirtualScroll).toBe(
                 "A reordenação de linhas não está disponível com a rolagem virtual ativada."
             );

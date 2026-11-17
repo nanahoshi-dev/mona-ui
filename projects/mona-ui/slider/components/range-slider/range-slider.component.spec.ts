@@ -111,7 +111,8 @@ describe("RangeSliderComponent", () => {
 
         it("should use a rounded muted track with primary range fill", () => {
             const track = fixture.debugElement.query(By.css(".bg-surface-muted")).nativeElement as HTMLElement;
-            const selection = fixture.debugElement.query(By.css("[class*='mona-indicator-color']")).nativeElement as HTMLElement;
+            const selection = fixture.debugElement.query(By.css("[class*='mona-indicator-color']"))
+                .nativeElement as HTMLElement;
 
             expect(track.classList.contains("rounded-full")).toBe(true);
             expect(selection).toBeTruthy();
@@ -352,7 +353,9 @@ describe("RangeSliderComponent", () => {
             expect(secondaryHandle.matches(":dir(rtl)")).toBe(false);
 
             // Initial positions for value [2, 8] with min 0, max 10
-            const selection = fixture.nativeElement.querySelector("mona-range-slider [class*='mona-indicator-color']") as HTMLElement;
+            const selection = fixture.nativeElement.querySelector(
+                "mona-range-slider [class*='mona-indicator-color']"
+            ) as HTMLElement;
             expect(primaryHandle.style.left).toBe("20%");
             expect(primaryHandle.style.right).toBe("");
             expect(secondaryHandle.style.left).toBe("80%");
@@ -403,7 +406,9 @@ describe("RangeSliderComponent", () => {
 
             const primaryHandle = getPrimaryHandle(fixture);
             const secondaryHandle = getSecondaryHandle(fixture);
-            const selection = fixture.nativeElement.querySelector("mona-range-slider [class*='mona-indicator-color']") as HTMLElement;
+            const selection = fixture.nativeElement.querySelector(
+                "mona-range-slider [class*='mona-indicator-color']"
+            ) as HTMLElement;
 
             expect(primaryHandle.matches(":dir(rtl)")).toBe(true);
             expect(primaryHandle.matches(":dir(ltr)")).toBe(false);
@@ -496,7 +501,9 @@ describe("RangeSliderComponent", () => {
         fixture.detectChanges();
         await fixture.whenStable();
         const host = fixture.nativeElement.querySelector("mona-range-slider") as HTMLElement;
-        const names = Array.from(host.querySelectorAll("[role='slider']")).map(handle => handle.getAttribute("aria-label"));
+        const names = Array.from(host.querySelectorAll("[role='slider']")).map(handle =>
+            handle.getAttribute("aria-label")
+        );
 
         expect(host.hasAttribute("aria-label-start")).toBe(false);
         expect(host.hasAttribute("aria-label-end")).toBe(false);

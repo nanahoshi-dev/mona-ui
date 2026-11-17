@@ -55,7 +55,11 @@ export const SECTIONS: readonly SectionDefinition[] = [
     },
     { aliases: ["Import & Basic Usage"], heading: "Import & Quick Start", id: "quick-start", required: true },
     {
-        aliases: ["Anatomy & Public Structural Templates", "Anatomy & Structural Templates", "Anatomy & Options Resolution"],
+        aliases: [
+            "Anatomy & Public Structural Templates",
+            "Anatomy & Structural Templates",
+            "Anatomy & Options Resolution"
+        ],
         heading: "Anatomy",
         id: "anatomy",
         required: false
@@ -147,7 +151,10 @@ export function checkComponentPage(headings: readonly string[], hasPlayground: b
             }
             seen.add(id);
             if (orderOf(id) < previous) {
-                findings.push({ detail: `"${heading}" appears after a section it should precede.`, kind: "out-of-order" });
+                findings.push({
+                    detail: `"${heading}" appears after a section it should precede.`,
+                    kind: "out-of-order"
+                });
             }
             previous = Math.max(previous, orderOf(id));
         }
@@ -196,7 +203,9 @@ export function checkManifest(
         }
         for (const child of page.children ?? []) {
             if (!new RegExp(`^${page.path}/[a-z0-9-]+$`).test(child.path)) {
-                problems.push(`Page "${child.path}" is nested under "${page.path}", so its path should be "${page.path}/<name>".`);
+                problems.push(
+                    `Page "${child.path}" is nested under "${page.path}", so its path should be "${page.path}/<name>".`
+                );
             }
         }
     }

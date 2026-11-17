@@ -349,16 +349,14 @@ export function buildApiPage(entries: readonly ApiEntry[], index: ApiIndex): Pag
     const symbols = entries.map(entry => entry.symbol);
     const entryOf = new Map(entries.map(entry => [entry.symbol.name, entry.entryPoint]));
     const { related, unexported } = resolveRelated(symbols, index);
-    const exports = sortSymbols(symbols).map(
-        (symbol): ApiPageExport => ({
-            entryPoint: entryOf.get(symbol.name) ?? "",
-            kind: symbol.kind,
-            name: symbol.name,
-            ...(symbol.pipeName ? { pipeName: symbol.pipeName } : {}),
-            ...(symbol.selector ? { selector: symbol.selector } : {}),
-            summary: summarize(symbol.description)
-        })
-    );
+    const exports = sortSymbols(symbols).map((symbol): ApiPageExport => ({
+        entryPoint: entryOf.get(symbol.name) ?? "",
+        kind: symbol.kind,
+        name: symbol.name,
+        ...(symbol.pipeName ? { pipeName: symbol.pipeName } : {}),
+        ...(symbol.selector ? { selector: symbol.selector } : {}),
+        summary: summarize(symbol.description)
+    }));
     const links: Record<string, string> = {};
     for (const { summary } of exports) {
         for (const [, name] of summary.matchAll(/`([A-Z]\w*)`/g)) {
@@ -433,9 +431,7 @@ export function selectPageEntries(
             .flatMap(other => other.apiExports ?? [])
     );
     const own = (symbolsByEntry.get(page.entryPoint) ?? [])
-        .filter(symbol =>
-            page.apiExports ? page.apiExports.includes(symbol.name) : !namedElsewhere.has(symbol.name)
-        )
+        .filter(symbol => (page.apiExports ? page.apiExports.includes(symbol.name) : !namedElsewhere.has(symbol.name)))
         .map((symbol): ApiEntry => ({ entryPoint: page.entryPoint ?? "", symbol }));
     const taken = new Set(own.map(entry => entry.symbol.name));
     const also = (page.apiAlsoFrom ?? []).flatMap(entryPoint =>
@@ -701,7 +697,10 @@ function main(): void {
     if (process.argv.includes("--data")) {
         const reference = buildApiReference(symbolsByEntry, index, pages);
         const pageApis = new Map(
-            pages.map(page => [docsPageSlug(page), buildApiPage(selectPageEntries(page, symbolsByEntry, pages), index).page])
+            pages.map(page => [
+                docsPageSlug(page),
+                buildApiPage(selectPageEntries(page, symbolsByEntry, pages), index).page
+            ])
         );
         writeApiData(resolve(scriptDirectory, "../../../dist/docs-api"), reference, pageApis);
         const symbolCount = reference.entryPoints.reduce((total, entry) => total + entry.symbols.length, 0);

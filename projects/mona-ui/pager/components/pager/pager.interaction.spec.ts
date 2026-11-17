@@ -69,7 +69,11 @@ class TwoWayPageSizeHostComponent {
     ],
     template: `
         <mona-pager [total]="100" [pageSize]="10" [responsive]="false" (pageChange)="events.push($event)">
-            <ng-template monaPagerNumericButtonsTemplate let-pages="pages" let-goToPage="goToPage" let-currentPage="currentPage">
+            <ng-template
+                monaPagerNumericButtonsTemplate
+                let-pages="pages"
+                let-goToPage="goToPage"
+                let-currentPage="currentPage">
                 @for (page of pages; track page) {
                     <li>
                         <button class="custom-page" [class.current]="page === currentPage" (click)="goToPage(page)">
@@ -186,7 +190,16 @@ describe("PagerComponent interactions", () => {
         it("shows a single skipped page instead of a jump button", () => {
             setup({ pageSize: 10, skip: 40, total: 200 });
 
-            expect(pageLabels()).toEqual(["Page 1", "Page 2", "Page 3", "Page 4", "Page 5", "Page 6", "Page 7", "Page 20"]);
+            expect(pageLabels()).toEqual([
+                "Page 1",
+                "Page 2",
+                "Page 3",
+                "Page 4",
+                "Page 5",
+                "Page 6",
+                "Page 7",
+                "Page 20"
+            ]);
             expect(labels()).toContain("Jump forward 5 pages");
             expect(labels()).not.toContain("Jump back 5 pages");
         });
@@ -483,7 +496,9 @@ describe("PagerComponent template contexts", () => {
     }
 
     it("lets a numeric template change the page", () => {
-        const pages = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(".custom-page"));
+        const pages = Array.from(
+            (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(".custom-page")
+        );
         pages[2].click();
         fixture.detectChanges();
 

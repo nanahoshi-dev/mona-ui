@@ -189,7 +189,9 @@ describe("TabListComponent", () => {
         fixture.componentRef.setInput("selectedTabId", "tab1");
         fixture.detectChanges();
 
-        const tabElement: HTMLElement = fixture.debugElement.query(By.css("li[data-tab-id='tab1'] [role='tab']")).nativeElement;
+        const tabElement: HTMLElement = fixture.debugElement.query(
+            By.css("li[data-tab-id='tab1'] [role='tab']")
+        ).nativeElement;
         expect(tabElement.id).toBe("tab1-tab");
         expect(tabElement.getAttribute("aria-controls")).toBe("tab1-panel");
     });
@@ -290,7 +292,9 @@ describe("TabListComponent", () => {
         fixture.detectChanges();
         expect(emitSpy).not.toHaveBeenCalled();
 
-        const tabElement: HTMLElement = fixture.debugElement.query(By.css("li[data-tab-id='tab1'] [role='tab']")).nativeElement;
+        const tabElement: HTMLElement = fixture.debugElement.query(
+            By.css("li[data-tab-id='tab1'] [role='tab']")
+        ).nativeElement;
         expect(tabElement.getAttribute("aria-disabled")).toBe("true");
     });
 
@@ -332,7 +336,10 @@ describe("TabListComponent", () => {
             fixture.detectChanges();
             const emitSpy = vi.spyOn(component.tabSelect, "emit");
             const preventDefaultSpy = vi.fn();
-            fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowDown", preventDefault: preventDefaultSpy });
+            fixture.debugElement.triggerEventHandler("keydown", {
+                key: "ArrowDown",
+                preventDefault: preventDefaultSpy
+            });
             fixture.detectChanges();
             expect(preventDefaultSpy).toHaveBeenCalled();
             expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 1 }));
@@ -367,7 +374,10 @@ describe("TabListComponent", () => {
             fixture.detectChanges();
             const emitSpy = vi.spyOn(component.tabSelect, "emit");
             const preventDefaultSpy = vi.fn();
-            fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowRight", preventDefault: preventDefaultSpy });
+            fixture.debugElement.triggerEventHandler("keydown", {
+                key: "ArrowRight",
+                preventDefault: preventDefaultSpy
+            });
             fixture.detectChanges();
             expect(preventDefaultSpy).not.toHaveBeenCalled();
             expect(emitSpy).not.toHaveBeenCalled();
@@ -386,7 +396,8 @@ describe("TabListComponent", () => {
             }
         };
 
-        const overflowButtons = () => fixture.debugElement.queryAll(By.css("button[aria-hidden='true']:not([data-tab-close])"));
+        const overflowButtons = () =>
+            fixture.debugElement.queryAll(By.css("button[aria-hidden='true']:not([data-tab-close])"));
 
         it("should not render overflow controls when content fits", async () => {
             fixture.detectChanges();

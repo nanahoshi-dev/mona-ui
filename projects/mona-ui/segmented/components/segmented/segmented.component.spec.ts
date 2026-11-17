@@ -55,9 +55,7 @@ class HostComponent {
 }
 
 @Component({
-    template: `
-        <mona-segmented [formField]="form.section" [options]="options"></mona-segmented>
-    `,
+    template: ` <mona-segmented [formField]="form.section" [options]="options"></mona-segmented> `,
     imports: [SegmentedComponent, FormField]
 })
 class SignalFormHostComponent {
@@ -93,9 +91,7 @@ function getRadios(fixture: ComponentFixture<unknown>): HTMLInputElement[] {
 }
 
 function getLabels(fixture: ComponentFixture<unknown>): HTMLLabelElement[] {
-    return fixture.debugElement
-        .queryAll(By.css("label"))
-        .map(element => element.nativeElement as HTMLLabelElement);
+    return fixture.debugElement.queryAll(By.css("label")).map(element => element.nativeElement as HTMLLabelElement);
 }
 
 function selectRadio(fixture: ComponentFixture<unknown>, index: number): void {
@@ -277,8 +273,7 @@ describe("SegmentedComponent", () => {
         });
 
         it("defaults animate to true", () => {
-            const componentInstance = fixture.debugElement
-                .query(By.directive(SegmentedComponent))
+            const componentInstance = fixture.debugElement.query(By.directive(SegmentedComponent))
                 .componentInstance as SegmentedComponent;
             expect(componentInstance.animate()).toBe(true);
         });
@@ -348,8 +343,7 @@ describe("SegmentedComponent", () => {
         });
 
         it("defaults to the medium roundness preset", () => {
-            const componentInstance = fixture.debugElement
-                .query(By.directive(SegmentedComponent))
+            const componentInstance = fixture.debugElement.query(By.directive(SegmentedComponent))
                 .componentInstance as SegmentedComponent;
             expect(componentInstance.rounded()).toBe("medium");
 
@@ -385,8 +379,7 @@ describe("SegmentedComponent", () => {
         });
 
         it("defaults alignment to stretch", () => {
-            const componentInstance = fixture.debugElement
-                .query(By.directive(SegmentedComponent))
+            const componentInstance = fixture.debugElement.query(By.directive(SegmentedComponent))
                 .componentInstance as SegmentedComponent;
             expect(componentInstance.alignment()).toBe("stretch");
 
@@ -717,8 +710,7 @@ describe("SegmentedComponent", () => {
         });
 
         it("emits valueChange through the model", () => {
-            const componentInstance = fixture.debugElement
-                .query(By.directive(SegmentedComponent))
+            const componentInstance = fixture.debugElement.query(By.directive(SegmentedComponent))
                 .componentInstance as SegmentedComponent;
             let emitted: unknown;
             const subscription = componentInstance.value.subscribe(value => {
@@ -804,8 +796,7 @@ describe("SegmentedComponent", () => {
         });
 
         it("emits touch when the selection changes", () => {
-            const componentInstance = fixture.debugElement
-                .query(By.directive(SegmentedComponent))
+            const componentInstance = fixture.debugElement.query(By.directive(SegmentedComponent))
                 .componentInstance as SegmentedComponent;
             let touches = 0;
             componentInstance.touch.subscribe(() => {
@@ -817,8 +808,7 @@ describe("SegmentedComponent", () => {
         });
 
         it("emits touch when focus leaves the group", () => {
-            const componentInstance = fixture.debugElement
-                .query(By.directive(SegmentedComponent))
+            const componentInstance = fixture.debugElement.query(By.directive(SegmentedComponent))
                 .componentInstance as SegmentedComponent;
             let touches = 0;
             componentInstance.touch.subscribe(() => {

@@ -12,12 +12,7 @@ import { describe, expect, it } from "vitest";
 import { NumericTextBoxComponent } from "./numeric-text-box.component";
 
 @Component({
-    template: `
-        <mona-numeric-text-box
-            [(value)]="value"
-            [decimals]="decimals()">
-        </mona-numeric-text-box>
-    `,
+    template: ` <mona-numeric-text-box [(value)]="value" [decimals]="decimals()"> </mona-numeric-text-box> `,
     imports: [NumericTextBoxComponent]
 })
 class NumericTextBoxI18nTestHostComponent {
@@ -437,7 +432,8 @@ describe("NumericTextBoxComponent i18n integration", () => {
         const host = fixture.componentInstance;
         await waitForStable(fixture);
 
-        const comp = fixture.debugElement.query(By.directive(NumericTextBoxComponent)).componentInstance as NumericTextBoxComponent;
+        const comp = fixture.debugElement.query(By.directive(NumericTextBoxComponent))
+            .componentInstance as NumericTextBoxComponent;
 
         host.decimals.set(Infinity);
         await waitForStable(fixture);
@@ -674,7 +670,9 @@ describe("NumericTextBoxComponent i18n integration", () => {
         // 2. beforeinput event with data: null and inputType: "insertFromPaste"
         // 3. input change event
         function simulateBrowserPaste(clipboardText: string): boolean {
-            const pasteEvent = new Event("paste", { bubbles: true, cancelable: true }) as Event & { clipboardData?: unknown };
+            const pasteEvent = new Event("paste", { bubbles: true, cancelable: true }) as Event & {
+                clipboardData?: unknown;
+            };
             pasteEvent.clipboardData = {
                 getData: (format: string) => (format === "text/plain" ? clipboardText : "")
             };
@@ -793,7 +791,9 @@ describe("NumericTextBoxComponent i18n integration", () => {
         await waitForStable(fixture);
 
         function simulateBrowserPaste(clipboardText: string | null): boolean {
-            const pasteEvent = new Event("paste", { bubbles: true, cancelable: true }) as Event & { clipboardData?: unknown };
+            const pasteEvent = new Event("paste", { bubbles: true, cancelable: true }) as Event & {
+                clipboardData?: unknown;
+            };
             if (clipboardText !== null) {
                 pasteEvent.clipboardData = {
                     getData: (format: string) => (format === "text/plain" ? clipboardText : "")

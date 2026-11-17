@@ -13,7 +13,6 @@ import type { ChartField } from "../../models/chart.models";
 import { ChartComponent } from "../chart/chart.component";
 import { LineSeriesComponent } from "./line-series.component";
 
-
 @Component({
     imports: [ChartComponent, LineSeriesComponent],
     template: `
@@ -56,11 +55,7 @@ class TestHostComponent {
 
 @Component({
     imports: [LineSeriesComponent],
-    template: `
-        <mona-line-series
-            [field]="field()"
-            [lineStyle]="lineStyle()" />
-    `
+    template: ` <mona-line-series [field]="field()" [lineStyle]="lineStyle()" /> `
 })
 class IsolatedLineSeriesHostComponent {
     public readonly field = signal<ChartField>("value");
@@ -135,7 +130,7 @@ describe("LineSeriesComponent", () => {
 
             const fakeContext: Partial<ChartRegistrationContext> = {
                 invalidate: invalidateSpy,
-                registerSeries: (reg) => {
+                registerSeries: reg => {
                     registeredSeries = reg as ChartLineSeriesRegistration;
                     return () => {};
                 }
@@ -168,4 +163,3 @@ describe("LineSeriesComponent", () => {
         });
     });
 });
-

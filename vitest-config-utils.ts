@@ -12,8 +12,10 @@ export function parsePositiveIntegerEnvValue(raw: string | undefined, name: stri
 }
 
 export function readPositiveIntegerEnv(name: string): number | undefined {
-    const processLike = (globalThis as typeof globalThis & {
-        process?: { readonly env?: Record<string, string | undefined> };
-    }).process;
+    const processLike = (
+        globalThis as typeof globalThis & {
+            process?: { readonly env?: Record<string, string | undefined> };
+        }
+    ).process;
     return parsePositiveIntegerEnvValue(processLike?.env?.[name], name);
 }
