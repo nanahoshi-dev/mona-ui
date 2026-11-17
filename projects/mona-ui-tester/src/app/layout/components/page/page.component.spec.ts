@@ -1,3 +1,5 @@
+import { provideHttpClient } from "@angular/common/http";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Title } from "@angular/platform-browser";
@@ -6,6 +8,7 @@ import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import axe from "axe-core";
 import { vi } from "vitest";
 import { THEME_OPTIONS } from "../../../theme-options";
+import { GITHUB_STARS_FIELD, GITHUB_STARS_STORAGE_KEY } from "../../services/github-repository.service";
 
 import { PageComponent } from "./page.component";
 
@@ -16,16 +19,31 @@ describe("PageComponent", () => {
     let component: PageComponent;
     let fixture: ComponentFixture<PageComponent>;
 
+    /** Answers the header's request for the repository's star count. */
+    function answerStars(count: number): void {
+        TestBed.inject(HttpTestingController)
+            .expectOne("https://api.github.com/repos/nanahoshi-dev/mona-ui")
+            .flush({ [GITHUB_STARS_FIELD]: count });
+        fixture.detectChanges();
+    }
+
     beforeEach(async () => {
+        localStorage.removeItem(GITHUB_STARS_STORAGE_KEY);
         await TestBed.configureTestingModule({
             imports: [PageComponent],
-            providers: [provideRouter([{ path: "components/:page", component: EmptyComponent }])]
+            providers: [
+                provideHttpClient(),
+                provideHttpClientTesting(),
+                provideRouter([{ path: "components/:page", component: EmptyComponent }])
+            ]
         }).compileComponents();
 
         fixture = TestBed.createComponent(PageComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
+
+    afterEach(() => localStorage.removeItem(GITHUB_STARS_STORAGE_KEY));
 
     it("should create", () => {
         expect(component).toBeTruthy();
@@ -127,10 +145,27 @@ describe("PageComponent", () => {
         expect(themeService.themeVariant()).toBe("dark");
     });
 
+    it("links to the public repository, and shows its star count once GitHub gives one", () => {
+        const link = (fixture.nativeElement as HTMLElement).querySelector<HTMLAnchorElement>(
+            "a[href='https://github.com/nanahoshi-dev/mona-ui']"
+        );
+        expect(link?.target).toBe("_blank");
+        expect(link?.rel).toBe("noopener noreferrer");
+        expect(link?.textContent?.trim()).toBe("GitHub repository (opens in a new tab)");
+
+        answerStars(1234);
+
+        // The name contains what the link shows, as WCAG 2.5.3 asks.
+        expect(link?.querySelector(".tabular-nums")?.textContent?.trim()).toBe("1.2K");
+        expect(link?.textContent?.replace(/\s+/g, " ").trim()).toBe(
+            "GitHub repository, 1.2K stars (opens in a new tab)"
+        );
+    });
+
     it("has no AXE violations with Anna Dark active", async () => {
         const themeService = TestBed.inject(ThemeService);
         themeService.setTheme({ name: "anna", variant: "dark" });
-        fixture.detectChanges();
+        answerStars(1);
 
         // jsdom has no canvas implementation; theme specs verify Anna contrast pairs numerically.
         const results = await axe.run(fixture.nativeElement as HTMLElement, {

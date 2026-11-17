@@ -19,6 +19,11 @@ import { BreadcrumbComponent, BreadcrumbItemComponent } from "@nanahoshi/mona-ui
 import { PACKAGE_NAME } from "../../../api/api-text";
 import { THEME_OPTIONS, type ThemeOption } from "../../../theme-options";
 import { DocsNavigationService } from "../../services/docs-navigation.service";
+import {
+    GITHUB_REPOSITORY_URL,
+    GitHubRepositoryService,
+    describeStarCount
+} from "../../services/github-repository.service";
 import { PageService } from "../../services/page.service";
 import { SidebarService } from "../../services/sidebar.service";
 import { DocsPagerComponent } from "../docs-pager/docs-pager.component";
@@ -45,6 +50,7 @@ import { SidebarComponent } from "../sidebar/sidebar.component";
     providers: [PageService]
 })
 export class PageComponent {
+    readonly #github = inject(GitHubRepositoryService);
     readonly #navigation = inject(DocsNavigationService);
     readonly #themeService = inject(ThemeService);
     protected readonly activeBreadcrumbs = computed(() => {
@@ -65,6 +71,7 @@ export class PageComponent {
         if (url.includes("button")) return LucidePlay;
         return LucideTerminal;
     });
+    protected readonly repositoryUrl = GITHUB_REPOSITORY_URL;
     protected readonly scrollContainer = viewChild<ElementRef<HTMLElement>>("scrollContainer");
     protected readonly selectedTheme = computed(() =>
         this.themeOptions.find(
@@ -73,6 +80,11 @@ export class PageComponent {
         )
     );
     protected readonly sidebarService = inject(SidebarService);
+    /** The repository's star count, once GitHub has given one. */
+    protected readonly stars = computed(() => {
+        const count = this.#github.stars();
+        return count === null ? null : describeStarCount(count);
+    });
     protected readonly themeOptions = THEME_OPTIONS;
 
     public constructor() {
