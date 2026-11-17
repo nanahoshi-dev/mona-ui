@@ -221,7 +221,7 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("MenubarComponent");
-    protected readonly MenubarWrapperComponent = MenubarWrapperComponent;
+    protected readonly wrapperComponent = MenubarWrapperComponent;
 }
 
 @Component({
@@ -443,15 +443,15 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
 })
 class MenubarWrapperComponent implements ComponentInputsAsSignal<MenubarComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
-    protected readonly showGrid = signal(true);
-    protected readonly snapToGrid = signal(false);
     protected readonly selectedFontSize = signal("md");
     protected readonly selectedTheme = signal("system");
+    protected readonly showGrid = signal(true);
+    protected readonly snapToGrid = signal(false);
     public readonly ariaLabel = input("");
     public readonly ariaLabelledBy = input("");
     public readonly disabled = input(false);
-    public readonly size = input<ReturnType<MenubarComponent["size"]>>("medium");
     public readonly rounded = input<ReturnType<MenubarComponent["rounded"]>>("medium");
+    public readonly size = input<ReturnType<MenubarComponent["size"]>>("medium");
     public readonly userClasses = input("");
 
     protected onMenuItemClick(event: MenuItemClickEvent): void {

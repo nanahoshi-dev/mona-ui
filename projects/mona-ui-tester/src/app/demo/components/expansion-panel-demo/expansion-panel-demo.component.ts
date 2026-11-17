@@ -109,7 +109,7 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ExpansionPanelComponent");
-    protected readonly ExpansionPanelWrapperComponent = ExpansionPanelWrapperComponent;
+    protected readonly wrapperComponent = ExpansionPanelWrapperComponent;
 }
 
 @Component({

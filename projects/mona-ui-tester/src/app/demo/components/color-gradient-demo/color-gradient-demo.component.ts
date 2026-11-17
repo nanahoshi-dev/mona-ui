@@ -13,7 +13,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     templateUrl: "./color-gradient-demo.component.html"
 })
 export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradientComponent> {
-    protected readonly ColorGradientWrapperComponent = ColorGradientWrapperComponent;
     protected readonly config = computed<ComponentConfig<ColorGradientComponent>>(() => ({
         inputs: deriveInputConfig<ColorGradientComponent>(this.metadata(), {
             format: {
@@ -38,6 +37,7 @@ export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradi
         })
     }));
     protected readonly metadata = this.getMetadata("ColorGradientComponent");
+    protected readonly wrapperComponent = ColorGradientWrapperComponent;
 }
 
 @Component({
@@ -76,8 +76,8 @@ export class ColorGradientWrapperComponent implements ComponentInputsAsSignal<Co
     public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<ColorGradientComponent["rounded"]>>("medium");
     public readonly showButtons = input(true, { transform: booleanAttribute });
-    public readonly showHexInput = input(true, { transform: booleanAttribute });
     public readonly showColorInputs = input(true, { transform: booleanAttribute });
+    public readonly showHexInput = input(true, { transform: booleanAttribute });
 }
 
 interface ColorGradientFormModel {

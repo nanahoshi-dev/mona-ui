@@ -137,7 +137,7 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
             },
             preventClose: {
                 type: "function",
-                value: (event: any) => {
+                value: () => {
                     return false;
                 }
             },
@@ -170,7 +170,7 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
         }
     });
     protected readonly metadata = this.getMetadata("PopupComponent");
-    protected readonly PopupWrapperComponent = PopupWrapperComponent;
+    protected readonly wrapperComponent = PopupWrapperComponent;
 }
 
 @Component({
@@ -244,7 +244,7 @@ export class PopupWrapperComponent implements ComponentInputsAsSignal<PopupCompo
     public readonly popupWrapperClass = input<ReturnType<PopupComponent["popupWrapperClass"]>>("");
     public readonly positionStrategy = input<ReturnType<PopupComponent["positionStrategy"]>>("connected");
     public readonly positions = input<ReturnType<PopupComponent["positions"]>>([]);
-    public readonly preventClose = input<ReturnType<PopupComponent["preventClose"]>>((event: any) => {
+    public readonly preventClose = input<ReturnType<PopupComponent["preventClose"]>>(() => {
         return false;
     });
     public readonly providers = input<ReturnType<PopupComponent["providers"]>>([]);

@@ -37,8 +37,8 @@ export class FormFieldDemoComponent extends AbstractDemoComponent<FormFieldCompo
             }
         })
     }));
-    protected readonly FormFieldWrapperComponent = FormFieldWrapperComponent;
     protected readonly metadata = this.getMetadata("FormFieldComponent");
+    protected readonly wrapperComponent = FormFieldWrapperComponent;
 }
 
 @Component({

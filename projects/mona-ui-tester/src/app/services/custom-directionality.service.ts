@@ -3,8 +3,8 @@ import { DestroyRef, DOCUMENT, EventEmitter, inject, Injectable, NgZone } from "
 
 @Injectable()
 export class CustomDirectionalityService extends Directionality {
-    readonly #document = inject(DOCUMENT);
     readonly #change = new EventEmitter<Direction>();
+    readonly #document = inject(DOCUMENT);
     readonly #zone = inject(NgZone);
     #value = (this.#document.documentElement.getAttribute("dir") as Direction) || "ltr";
     private readonly mutationObserver = new MutationObserver(() => {

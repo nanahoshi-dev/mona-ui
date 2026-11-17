@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { booleanAttribute, ChangeDetectionStrategy, Component, computed, input, model } from "@angular/core";
+import { booleanAttribute, Component, computed, input, model } from "@angular/core";
 import { CheckBoxComponent, CheckboxDirective } from "@nanahoshi/mona-ui/check-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
@@ -38,7 +38,7 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
         })
     }));
     protected readonly metadata = this.getMetadata("CheckBoxComponent");
-    protected readonly CheckBoxWrapperComponent = CheckBoxWrapperComponent;
+    protected readonly wrapperComponent = CheckBoxWrapperComponent;
 }
 
 @Component({

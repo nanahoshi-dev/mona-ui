@@ -48,7 +48,7 @@ export class SheetDemoComponent extends AbstractDemoComponent<SheetComponent> {
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SheetComponent");
-    protected readonly SheetWrapperComponent = SheetWrapperComponent;
+    protected readonly wrapperComponent = SheetWrapperComponent;
 }
 
 @Component({
@@ -101,8 +101,8 @@ class SheetWrapperComponent implements ComponentInputsAsSignal<SheetComponent> {
         "Country",
         "Postal code"
     ];
-    protected readonly resolvedWidth = computed(() => this.width() || undefined);
     protected readonly resolvedHeight = computed(() => this.height() || undefined);
+    protected readonly resolvedWidth = computed(() => this.width() || undefined);
     protected readonly visible = signal(false);
     public readonly ariaLabel = input<string | undefined>("");
     public readonly closable = input<ReturnType<SheetComponent["closable"]>>(true);

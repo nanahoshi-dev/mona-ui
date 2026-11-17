@@ -15,11 +15,13 @@ import { MenuItemClickEvent } from "@nanahoshi/mona-ui/menubar";
 import {
     type MenuItem,
     PopupMenuCheckboxItemComponent,
+    type PopupMenuCloseEvent,
     PopupMenuComponent,
     PopupMenuGroupComponent,
     PopupMenuGroupTemplateDirective,
     PopupMenuIconTemplateDirective,
     PopupMenuItemComponent,
+    type PopupMenuNavigationEvent,
     PopupMenuRadioGroupComponent,
     PopupMenuRadioItemComponent,
     PopupMenuSeparatorComponent,
@@ -240,7 +242,7 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("PopupMenuComponent");
-    protected readonly PopupMenuWrapperComponent = PopupMenuWrapperComponent;
+    protected readonly wrapperComponent = PopupMenuWrapperComponent;
 }
 
 @Component({
@@ -436,6 +438,7 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
 })
 export class PopupMenuWrapperComponent implements ComponentInputsAsSignal<PopupMenuComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly popupAnchor = viewChild<ElementRef>("popupAnchorElement");
     protected menuItems: MenuItem[] = [
         {
             label: "test",
@@ -449,12 +452,11 @@ export class PopupMenuWrapperComponent implements ComponentInputsAsSignal<PopupM
         { group: "x", label: "test 4" },
         { label: "test 5", checkable: true, checked: true }
     ];
-    protected readonly popupAnchor = viewChild<ElementRef>("popupAnchorElement");
     public readonly anchor = input<ReturnType<PopupMenuComponent["anchor"]>>();
     public readonly anchorConnectionPoint = input<ReturnType<PopupMenuComponent["anchorConnectionPoint"]>>(null);
     public readonly ariaLabel = input<ReturnType<PopupMenuComponent["ariaLabel"]>>("");
     public readonly ariaLabelledBy = input<ReturnType<PopupMenuComponent["ariaLabelledBy"]>>("");
-    public readonly items = input<any>([]);
+    public readonly items = input<ReturnType<PopupMenuComponent["items"]>>([]);
     public readonly menuId = input("");
     public readonly minWidth = input<ReturnType<PopupMenuComponent["minWidth"]>>();
     public readonly offset = input<ReturnType<PopupMenuComponent["offset"]>>({ horizontal: 0, vertical: 0 });
@@ -469,7 +471,7 @@ export class PopupMenuWrapperComponent implements ComponentInputsAsSignal<PopupM
     });
     public readonly width = input<ReturnType<PopupMenuComponent["width"]>>();
 
-    public onClose(event: any): void {
+    public onClose(event: PopupMenuCloseEvent): void {
         // event.preventDefault();
         console.log("Popup menu closed:", event);
     }
@@ -483,7 +485,7 @@ export class PopupMenuWrapperComponent implements ComponentInputsAsSignal<PopupM
         }
     }
 
-    protected onNavigate(event: any): void {
+    protected onNavigate(event: PopupMenuNavigationEvent): void {
         console.log("Navigate event:", event.item?.label ?? null, event);
     }
 }

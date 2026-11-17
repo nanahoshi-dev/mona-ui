@@ -67,7 +67,7 @@ export class QrCodeDemoComponent extends AbstractDemoComponent<QrCodeComponent> 
         })
     }));
     protected readonly metadata = this.getMetadata("QrCodeComponent");
-    protected readonly QrCodeWrapperComponent = QrCodeWrapperComponent;
+    protected readonly wrapperComponent = QrCodeWrapperComponent;
 }
 
 @Component({

@@ -23,6 +23,7 @@
         "preserve:tester": "npm run build:api-data && npm run build:search-index && npm run generate:ai-docs",
         "serve:tester": "ng serve mona-ui-tester",
         "watch": "ng build mona-ui --watch --configuration development",
+        "lint": "eslint projects",
         "pretest:lib": "npm run build:api-data",
         "test:lib": "ng test mona-ui --watch=false --coverage",
         "test:lib:density-bench": "tsx scripts/chart-density-memory-benchmark.ts",

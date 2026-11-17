@@ -56,7 +56,7 @@ export class ProgressBarDemoComponent extends AbstractDemoComponent<ProgressBarC
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ProgressBarComponent");
-    protected readonly ProgressBarWrapperComponent = ProgressBarWrapperComponent;
+    protected readonly wrapperComponent = ProgressBarWrapperComponent;
 }
 
 @Component({

@@ -17,9 +17,6 @@ interface ColorRolePreview {
 })
 export class ThemeColorsDocComponent {
     readonly #themeService = inject(ThemeService);
-    protected readonly themeLabel = computed(
-        () => `${this.#themeService.themeName()}-${this.#themeService.themeVariant()}`
-    );
     protected readonly colors = computed(() => this.#themeService.profile().colors);
     protected readonly roles: readonly ColorRolePreview[] = [
         { label: "Primary", token: "primary" },
@@ -29,6 +26,9 @@ export class ThemeColorsDocComponent {
         { label: "Warning", token: "warning" },
         { label: "Info", token: "info" }
     ];
+    protected readonly themeLabel = computed(
+        () => `${this.#themeService.themeName()}-${this.#themeService.themeVariant()}`
+    );
 
     protected contrast(foreground: ThemeColorVariable, background: ThemeColorVariable): string {
         return wcagContrast(this.#resolve(foreground), this.#resolve(background)).toFixed(2);

@@ -140,9 +140,9 @@ export class DecimalTextboxWrapperComponent implements ComponentInputsAsSignal<D
     public readonly decimals = input(0);
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly formatter = input<ReturnType<DecimalTextBoxComponent["formatter"]>>(this.formatterFn());
+    public readonly inputId = input("decimal-text-box-demo-input");
     public readonly maxValue = input<string | null, string | number | null>(null, { transform: toOptionalString });
     public readonly minValue = input<string | null, string | number | null>(null, { transform: toOptionalString });
-    public readonly inputId = input("decimal-text-box-demo-input");
     public readonly nullable = input(false, { transform: booleanAttribute });
     public readonly placeholder = input("");
     public readonly readonly = input(false, { transform: booleanAttribute });

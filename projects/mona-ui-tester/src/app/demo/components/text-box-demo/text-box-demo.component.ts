@@ -48,7 +48,6 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
             name: "Suffix Template"
         }
     });
-    protected readonly TextBoxWrapperComponent = TextBoxWrapperComponent;
     protected readonly config = computed<ComponentConfig<TextBoxComponent>>(() => ({
         inputs: deriveInputConfig<TextBoxComponent>(this.metadata(), {
             inputClass: {
@@ -96,6 +95,7 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("TextBoxComponent");
+    protected readonly wrapperComponent = TextBoxWrapperComponent;
 }
 
 @Component({

@@ -74,7 +74,6 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
         },
         yearCellTemplate: { ...calendarYearCellTemplateFeatureConfig(), code: YEAR_CELL_TEMPLATE_CODE }
     });
-    protected readonly DateTimePickerWrapperComponent = DateTimePickerWrapperComponent;
     protected readonly config = computed<ComponentConfig<DateTimePickerComponent>>(() => ({
         inputs: deriveInputConfig<DateTimePickerComponent>(this.metadata(), {
             // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
@@ -170,6 +169,7 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("DateTimePickerComponent");
+    protected readonly wrapperComponent = DateTimePickerWrapperComponent;
 }
 
 @Component({

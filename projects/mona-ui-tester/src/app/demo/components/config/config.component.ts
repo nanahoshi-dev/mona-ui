@@ -98,6 +98,10 @@ export class ConfigComponent<C> {
         this.outputObject.update(o => ({ ...o, [key]: value }));
     }
 
+    protected featureEntries(features: ComponentConfigFeatureItem): Array<[string, ComponentConfigFeatureItem[string]]> {
+        return Object.entries(features);
+    }
+
     protected resolveFeatureCode(key: string, item: ComponentConfigFeatureItem[string]): string {
         if (item.directiveBinding) {
             const allFeatures = this.templateHandler()?.data();
@@ -113,6 +117,4 @@ export class ConfigComponent<C> {
         }
         return generateFeatureCodeSample(this.metadata().selector ?? "", key, item);
     }
-
-    protected readonly Object = Object;
 }

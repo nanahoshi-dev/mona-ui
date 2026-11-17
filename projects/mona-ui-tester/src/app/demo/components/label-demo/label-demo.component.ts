@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { booleanAttribute, ChangeDetectionStrategy, Component, computed, input } from "@angular/core";
+import { booleanAttribute, Component, computed, input } from "@angular/core";
 import { LabelComponent } from "@nanahoshi/mona-ui/label";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -26,8 +26,8 @@ export class LabelDemoComponent extends AbstractDemoComponent<LabelComponent> {
             }
         })
     }));
-    protected readonly LabelWrapperComponent = LabelWrapperComponent;
     protected readonly metadata = this.getMetadata("LabelComponent");
+    protected readonly wrapperComponent = LabelWrapperComponent;
 }
 
 @Component({

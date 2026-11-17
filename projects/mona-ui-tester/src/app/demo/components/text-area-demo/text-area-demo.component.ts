@@ -32,7 +32,7 @@ export class TextAreaDemoComponent extends AbstractDemoComponent<TextAreaDirecti
         })
     }));
     protected readonly metadata = this.getMetadata("TextAreaDirective");
-    protected readonly TextAreaWrapperComponent = TextAreaWrapperComponent;
+    protected readonly wrapperComponent = TextAreaWrapperComponent;
 }
 
 @Component({

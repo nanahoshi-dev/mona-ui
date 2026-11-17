@@ -20,7 +20,7 @@ export class CollapsibleDemoComponent extends AbstractDemoComponent<CollapsibleD
         inputs: deriveInputConfig<CollapsibleDirective>(this.metadata(), {})
     }));
     protected readonly metadata = this.getMetadata("CollapsibleDirective");
-    protected readonly CollapsibleWrapperComponent = CollapsibleWrapperComponent;
+    protected readonly wrapperComponent = CollapsibleWrapperComponent;
 }
 
 @Component({

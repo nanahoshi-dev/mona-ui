@@ -55,7 +55,7 @@ export class CardDemoComponent extends AbstractDemoComponent<CardComponent> {
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("CardComponent");
-    protected readonly CardWrapperComponent = CardWrapperComponent;
+    protected readonly wrapperComponent = CardWrapperComponent;
 }
 
 @Component({

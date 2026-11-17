@@ -76,7 +76,7 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SegmentedComponent");
-    protected readonly SegmentedWrapperComponent = SegmentedWrapperComponent;
+    protected readonly wrapperComponent = SegmentedWrapperComponent;
 }
 
 @Component({

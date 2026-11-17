@@ -18,7 +18,7 @@ import {
     DropdownVirtualScrollDirective
 } from "@nanahoshi/mona-ui/dropdowns";
 import { range } from "@mirei/ts-collections";
-import { dropdownFoodData } from "../../../../assets/dropdown.data";
+import { type DropdownFoodItem, dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import {
@@ -83,7 +83,7 @@ function buildGroupingFeatureConfig() {
     templateUrl: "./auto-complete-demo.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoCompleteComponent<any>> {
+export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoCompleteComponent<DropdownFoodItem>> {
     readonly #injector = createFeatureInjector({
         dataSet: dropdownDataSetFeatureConfig("autocomplete"),
         filtering: dropdownFilteringFeatureConfig("autocomplete"),
@@ -108,8 +108,8 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
         suffixTemplate: { ...dropdownSuffixTemplateFeatureConfig("autocomplete"), code: SUFFIX_TEMPLATE_CODE },
         virtualization: dropdownVirtualizationFeatureConfig("autocomplete")
     });
-    protected readonly config = computed<ComponentConfig<AutoCompleteComponent<any>>>(() => ({
-        inputs: deriveInputConfig<AutoCompleteComponent<any>>(this.metadata(), {
+    protected readonly config = computed<ComponentConfig<AutoCompleteComponent<DropdownFoodItem>>>(() => ({
+        inputs: deriveInputConfig<AutoCompleteComponent<DropdownFoodItem>>(this.metadata(), {
             // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
             ariaDescribedBy: undefined,
             ariaLabel: undefined,
@@ -124,7 +124,11 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
             invalid: undefined,
             itemDisabled: {
                 type: "dropdown",
-                value: ["active", (item: any) => item.price > 5, (item: any) => item.price < 5],
+                value: [
+                    "active",
+                    (item: DropdownFoodItem) => item.price > 5,
+                    (item: DropdownFoodItem) => item.price < 5
+                ],
                 defaultValue: null,
                 clearable: true,
                 placeholder: "Select a condition..."
@@ -175,7 +179,7 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("AutoCompleteComponent");
-    protected readonly AutoCompleteWrapperComponent = AutoCompleteWrapperComponent;
+    protected readonly wrapperComponent = AutoCompleteWrapperComponent;
 }
 
 @Component({
@@ -307,12 +311,12 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
             .toArray();
     });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly filtering = computed(() => buildFilterableOptions(this.features()));
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.value, { when: () => this.disabled() });
         readonly(schema.value, { when: () => this.readonly() });
         required(schema.value, { when: () => this.required() });
     });
-    protected readonly filtering = computed(() => buildFilterableOptions(this.features()));
     protected readonly groupBy = computed(() => {
         const features = this.features();
         const subFeatures = features["grouping"]?.subFeatures || {};

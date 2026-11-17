@@ -16,23 +16,23 @@ export interface LocaleAuditViolation {
 }
 
 export interface DefaultMessageFingerprint {
-    readonly namespace: string;
     readonly key: string;
     readonly kind: "static" | "function";
+    readonly namespace: string;
     readonly staticFragments: readonly string[];
 }
 
 export interface OfficialLocaleDescriptor {
-    readonly folder: string;
-    readonly folderPath: string;
     readonly canonicalId: string;
-    readonly messagesFile: string;
-    readonly localeFile: string;
-    readonly messagesExport: string;
-    readonly localeExport: string;
     readonly direction?: "ltr" | "rtl";
     /** Whether the folder is its own entry point (`@nanahoshi/mona-ui/locales/<folder>`). */
     readonly entryPoint?: boolean;
+    readonly folder: string;
+    readonly folderPath: string;
+    readonly localeExport: string;
+    readonly localeFile: string;
+    readonly messagesExport: string;
+    readonly messagesFile: string;
 }
 
 export interface LocaleDiscoveryResult {
@@ -309,6 +309,10 @@ export function areFunctionFragmentsCopied(
     return findCopiedFunctionFragments(localeFragments, enFragments, localeId, messagePath).length > 0;
 }
 
+function describeError(err: unknown): string {
+    return err instanceof Error ? err.message : String(err);
+}
+
 function findDefaultMessageFiles(dir: string): string[] {
     let results: string[] = [];
     if (!existsSync(dir)) {
@@ -330,13 +334,13 @@ function findDefaultMessageFiles(dir: string): string[] {
 }
 
 export interface EnglishDefaultDiscoveryResult {
+    [Symbol.iterator](): IterableIterator<[string, DefaultMessageFingerprint]>;
     readonly fingerprints: Map<string, DefaultMessageFingerprint>;
-    readonly violations: readonly LocaleAuditViolation[];
+    get(key: string): DefaultMessageFingerprint | undefined;
+    has(key: string): boolean;
     readonly namespaces: Set<string>;
     readonly size: number;
-    has(key: string): boolean;
-    get(key: string): DefaultMessageFingerprint | undefined;
-    [Symbol.iterator](): IterableIterator<[string, DefaultMessageFingerprint]>;
+    readonly violations: readonly LocaleAuditViolation[];
 }
 
 export function loadCanonicalMessageNamespaces(
@@ -373,10 +377,10 @@ export function loadCanonicalMessageNamespaces(
         for (const prop of iface.getProperties()) {
             namespaces.add(prop.getName().trim());
         }
-    } catch (err: any) {
+    } catch (err) {
         violations.push({
             category: "invalid-metadata",
-            detail: `Failed to parse canonical message schema in ${schemaPath}: ${err.message}`,
+            detail: `Failed to parse canonical message schema in ${schemaPath}: ${describeError(err)}`,
             file: schemaPath,
             line: 1
         });
@@ -731,10 +735,10 @@ export function discoverOfficialLocales(
                     line: 1
                 });
             }
-        } catch (err: any) {
+        } catch (err) {
             violations.push({
                 category: "invalid-metadata",
-                detail: `Failed to parse locale messages file "${messagesFile}": ${err.message}`,
+                detail: `Failed to parse locale messages file "${messagesFile}": ${describeError(err)}`,
                 file: messagesFile,
                 line: 1
             });
@@ -784,10 +788,10 @@ export function discoverOfficialLocales(
                     line: 1
                 });
             }
-        } catch (err: any) {
+        } catch (err) {
             violations.push({
                 category: "invalid-metadata",
-                detail: `Failed to parse locale metadata file "${localeFile}": ${err.message}`,
+                detail: `Failed to parse locale metadata file "${localeFile}": ${describeError(err)}`,
                 file: localeFile,
                 line: 1
             });
@@ -854,11 +858,11 @@ export function discoverOfficialLocales(
             );
 
             interface ExportedSymbolInfo {
-                sourceName: string;
                 exportedName: string;
                 hasAlias: boolean;
-                moduleSpecifier: string;
                 line: number;
+                moduleSpecifier: string;
+                sourceName: string;
             }
             const exportsList: ExportedSymbolInfo[] = [];
 
@@ -970,10 +974,10 @@ export function discoverOfficialLocales(
                     });
                 }
             }
-        } catch (err: any) {
+        } catch (err) {
             violations.push({
                 category: "invalid-metadata",
-                detail: `Failed to parse public-api.ts: ${err.message}`,
+                detail: `Failed to parse public-api.ts: ${describeError(err)}`,
                 file: publicApiPath,
                 line: 1
             });
@@ -1109,7 +1113,7 @@ function checkLocaleLoader(
 
 function checkCopiedEnglish(
     catalogObj: Node,
-    englishDefaults: Map<string, any> | EnglishDefaultDiscoveryResult,
+    englishDefaults: ReadonlyMap<string, string | DefaultMessageFingerprint> | EnglishDefaultDiscoveryResult,
     filePath: string,
     violations: LocaleAuditViolation[],
     localeId?: string
@@ -1121,7 +1125,7 @@ function checkCopiedEnglish(
     const defaultsMap =
         "fingerprints" in englishDefaults && englishDefaults.fingerprints instanceof Map
             ? englishDefaults.fingerprints
-            : (englishDefaults as Map<string, any>);
+            : (englishDefaults as ReadonlyMap<string, string | DefaultMessageFingerprint>);
 
     for (const nsProp of catalogObj.getProperties()) {
         if (!Node.isPropertyAssignment(nsProp)) {
@@ -1200,7 +1204,7 @@ function checkCopiedEnglish(
 export function auditLocaleMessagesFile(
     filePath: string,
     content?: string,
-    englishDefaults?: Map<string, any> | EnglishDefaultDiscoveryResult,
+    englishDefaults?: ReadonlyMap<string, string | DefaultMessageFingerprint> | EnglishDefaultDiscoveryResult,
     localeIdOrProject?: string | Project,
     maybeProject?: Project
 ): LocaleAuditViolation[] {

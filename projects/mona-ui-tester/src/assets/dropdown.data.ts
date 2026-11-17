@@ -166,3 +166,6 @@ export const dropdownFoodData = [
     { text: "Yakizakana", value: 30, category: "Food", active: true, price: 11.0, origin: "Imported" },
     { text: "Pink-flowered native raspberry", value: 31, category: "Fruit", active: true, price: 4.2, origin: "Local" }
 ];
+
+/** One item of the dropdown demos' food list. */
+export type DropdownFoodItem = (typeof dropdownFoodData)[number];

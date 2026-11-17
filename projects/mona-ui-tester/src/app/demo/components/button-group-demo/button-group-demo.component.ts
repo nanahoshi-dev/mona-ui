@@ -15,7 +15,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     templateUrl: "./button-group-demo.component.html"
 })
 export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupComponent> {
-    protected readonly ButtonGroupWrapperComponent = ButtonGroupWrapperComponent;
     protected readonly config = computed<ComponentConfig<ButtonGroupComponent>>(() => ({
         inputs: deriveInputConfig<ButtonGroupComponent>(this.metadata(), {
             ariaLabel: {
@@ -59,6 +58,7 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
         })
     }));
     protected readonly metadata = this.getMetadata("ButtonGroupComponent");
+    protected readonly wrapperComponent = ButtonGroupWrapperComponent;
 }
 
 @Component({
@@ -122,8 +122,8 @@ export class ButtonGroupWrapperComponent implements ComponentInputsAsSignal<Butt
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly invalid = input(false, { transform: booleanAttribute });
     public readonly look = input<ReturnType<ButtonGroupComponent["look"]>>("default");
-    public readonly rounded = input<ReturnType<ButtonGroupComponent["rounded"]>>("medium");
     public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly rounded = input<ReturnType<ButtonGroupComponent["rounded"]>>("medium");
     public readonly selection = input<ReturnType<ButtonGroupComponent["selection"]>>("single");
     public readonly size = input<ReturnType<ButtonGroupComponent["size"]>>("medium");
     public readonly touched = input(false, { transform: booleanAttribute });

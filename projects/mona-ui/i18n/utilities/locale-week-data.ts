@@ -46,10 +46,10 @@ const ISO_DAY_MAP: Record<number, LocaleFirstDayOfWeek> = {
 };
 
 interface LocaleWeekInfoCompat {
-    readonly weekInfo?: {
+    getWeekInfo?: () => {
         readonly firstDay?: number;
     };
-    getWeekInfo?: () => {
+    readonly weekInfo?: {
         readonly firstDay?: number;
     };
 }

@@ -22,7 +22,7 @@ import {
 } from "@nanahoshi/mona-ui/list-view";
 import { range } from "@mirei/ts-collections";
 import { twMerge } from "tailwind-merge";
-import { dropdownFoodData } from "../../../../assets/dropdown.data";
+import { type DropdownFoodItem, dropdownFoodData } from "../../../../assets/dropdown.data";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -89,7 +89,7 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
                     description: "Sets the field to group items by",
                     name: "Group By",
                     type: "dropdown",
-                    dropdownDataSource: ["category", "origin", (item: any) => item.text.charAt(0)],
+                    dropdownDataSource: ["category", "origin", (item: DropdownFoodItem) => item.text.charAt(0)],
                     dropdownValue: "category"
                 },
                 groupHeaderTemplate: {
@@ -388,7 +388,7 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ListViewComponent");
-    protected readonly ListViewWrapperComponent = ListViewWrapperComponent;
+    protected readonly wrapperComponent = ListViewWrapperComponent;
 }
 
 @Component({
@@ -592,6 +592,11 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
         return options;
     });
     protected readonly scrollBottomItemCount = signal(20);
+    protected readonly selectBy = computed(() => {
+        const features = this.features();
+        const subFeatures = features["selection"].subFeatures || {};
+        return subFeatures["selectBy"].dropdownValue;
+    });
     protected readonly selectedKeys = signal<number[]>([]);
     protected readonly selection = computed<SelectableOptions>(() => {
         const features = this.features();
@@ -612,11 +617,6 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
             checkboxes
         };
     });
-    protected readonly selectBy = computed(() => {
-        const features = this.features();
-        const subFeatures = features["selection"].subFeatures || {};
-        return subFeatures["selectBy"].dropdownValue;
-    });
     protected readonly virtualization = computed(() => {
         const features = this.features();
         const subFeatures = features["virtualization"]?.subFeatures || {};
@@ -629,12 +629,12 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
     public readonly ariaLabel = input("Foods");
     public readonly ariaLabelledBy = input("");
     public readonly height = input<ReturnType<ListViewComponent["height"]>>("100%");
+    public readonly items = input<ReturnType<ListViewComponent["items"]>>([]);
     public readonly listClass = input<ReturnType<ListViewComponent["listClass"]>>("");
     public readonly listItemClass = input<ReturnType<ListViewComponent["listItemClass"]>>("");
     public readonly listItemStyle = input<ReturnType<ListViewComponent["listItemStyle"]>>({});
     public readonly listStyle = input<ReturnType<ListViewComponent["listStyle"]>>({});
     public readonly loading = input(false, { transform: booleanAttribute });
-    public readonly items = input<ReturnType<ListViewComponent["items"]>>([]);
     public readonly maxHeight = input<ReturnType<ListViewComponent["maxHeight"]>>("");
     public readonly maxWidth = input<ReturnType<ListViewComponent["maxWidth"]>>("");
     public readonly pagerAriaLabel = input("");

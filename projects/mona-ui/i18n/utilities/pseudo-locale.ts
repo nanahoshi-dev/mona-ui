@@ -4,15 +4,15 @@ import type { MonaLocale } from "../models/mona-locale";
 import type { MonaLocaleMessages } from "../models/mona-locale-messages";
 
 export interface PseudoLocalizationOptions {
-    readonly prefix?: string;
-    readonly suffix?: string;
     readonly expand?: boolean;
     readonly expansionFactor?: number;
+    readonly prefix?: string;
+    readonly suffix?: string;
 }
 
 export interface GeneratePseudoLocaleOptions {
-    readonly id?: string;
     readonly direction?: MonaTextDirection;
+    readonly id?: string;
     readonly pseudoOptions?: PseudoLocalizationOptions;
 }
 

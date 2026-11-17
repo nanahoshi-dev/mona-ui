@@ -48,7 +48,7 @@ export class FieldsetDemoComponent extends AbstractDemoComponent<FieldsetCompone
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("FieldsetComponent");
-    protected readonly FieldsetWrapperComponent = FieldsetWrapperComponent;
+    protected readonly wrapperComponent = FieldsetWrapperComponent;
 }
 
 @Component({

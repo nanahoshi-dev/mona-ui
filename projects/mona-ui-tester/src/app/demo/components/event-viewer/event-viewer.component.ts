@@ -4,8 +4,8 @@ import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { ImmutableList } from "@mirei/ts-collections";
 
 interface OutputEventItem {
+    readonly emitter: OutputEmitterRef<unknown>;
     readonly name: string;
-    readonly emitter: OutputEmitterRef<any>;
     readonly source: string;
 }
 
@@ -48,7 +48,7 @@ export class EventViewerComponent<T> {
             while (currentObj && currentObj !== Object.prototype) {
                 const keys = Object.getOwnPropertyNames(currentObj);
                 for (const key of keys) {
-                    const value = (instance as any)[key];
+                    const value = (instance as Readonly<Record<string, unknown>>)[key];
                     if (value instanceof OutputEmitterRef) {
                         allOutputs.push({
                             name: key,
@@ -79,7 +79,7 @@ export class EventViewerComponent<T> {
 function getSafeReplacer() {
     const seen = new WeakSet();
 
-    return function (this: any, key: string, value: any) {
+    return function (key: string, value: unknown): unknown {
         // 1. Pass through primitives
         if (value === null || typeof value !== "object") {
             return value;
@@ -118,10 +118,11 @@ function getSafeReplacer() {
         }
 
         // 6. Handle the ROOT Class: Extract own properties + getters safely
-        const serialized: Record<string, any> = {};
+        const source = value as Readonly<Record<string, unknown>>;
+        const serialized: Record<string, unknown> = {};
 
-        for (const k of Object.keys(value)) {
-            serialized[k] = value[k];
+        for (const k of Object.keys(source)) {
+            serialized[k] = source[k];
         }
 
         let currentProto = proto;
@@ -131,8 +132,8 @@ function getSafeReplacer() {
             for (const propName of Object.keys(descriptors)) {
                 if (descriptors[propName].get) {
                     try {
-                        serialized[propName] = value[propName];
-                    } catch (e) {
+                        serialized[propName] = source[propName];
+                    } catch {
                         serialized[propName] = "[Error reading getter]";
                     }
                 }

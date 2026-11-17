@@ -158,7 +158,7 @@ export class WindowDemoComponent extends AbstractDemoComponent<WindowComponent> 
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("WindowComponent");
-    protected readonly WindowWrapperComponent = WindowWrapperComponent;
+    protected readonly wrapperComponent = WindowWrapperComponent;
 }
 
 @Component({
@@ -302,7 +302,7 @@ class WindowWrapperComponent implements ComponentInputsAsSignal<WindowComponent>
     public readonly top = model<ReturnType<WindowComponent["top"]>>();
     public readonly width = model<ReturnType<WindowComponent["width"]>>();
 
-    protected onWindowClose(event: PopupCloseEvent): void {
+    protected onWindowClose(_event: PopupCloseEvent): void {
         // if (event.via === PopupCloseSource.Escape) {
         //     event.preventDefault();
         //     return;

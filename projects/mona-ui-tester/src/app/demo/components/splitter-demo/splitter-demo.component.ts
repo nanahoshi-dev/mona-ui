@@ -115,7 +115,7 @@ export class SplitterDemoComponent extends AbstractDemoComponent<SplitterCompone
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SplitterComponent");
-    protected readonly SplitterWrapperComponent = SplitterWrapperComponent;
+    protected readonly wrapperComponent = SplitterWrapperComponent;
 }
 
 @Component({

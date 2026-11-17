@@ -80,7 +80,7 @@ export class OtpInputDemoComponent extends AbstractDemoComponent<OtpInputCompone
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("OtpInputComponent");
-    protected readonly otpInputWrapperComponent = OtpInputWrapperComponent;
+    protected readonly wrapperComponent = OtpInputWrapperComponent;
 }
 
 @Component({
@@ -149,10 +149,10 @@ export class OtpInputWrapperComponent implements ComponentInputsAsSignal<OtpInpu
     public readonly readonly = input(false, { transform: booleanAttribute });
     public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<OtpInputComponent["rounded"]>>("medium");
-    public readonly tabindex = input<number, number | string>(0, { transform: Number });
     public readonly separator = input("-");
     public readonly size = input<ReturnType<OtpInputComponent["size"]>>("medium");
     public readonly spacing = input(true, { transform: booleanAttribute });
+    public readonly tabindex = input<number, number | string>(0, { transform: Number });
     public readonly type = input<ReturnType<OtpInputComponent["type"]>>("number");
     public readonly userClass = input<ReturnType<OtpInputComponent["userClass"]>>("");
     public readonly value = model("");

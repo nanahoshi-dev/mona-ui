@@ -89,7 +89,7 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("NumericTextBoxComponent");
-    protected readonly NumericTextboxWrapperComponent = NumericTextboxWrapperComponent;
+    protected readonly wrapperComponent = NumericTextboxWrapperComponent;
 }
 
 @Component({
@@ -126,16 +126,16 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
 export class NumericTextboxWrapperComponent implements ComponentInputsAsSignal<NumericTextBoxComponent> {
     readonly #formModel = signal<FormModel>({ amount: null });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly form = form(this.#formModel, schema => {
+        disabled(schema.amount, { when: () => this.disabled() });
+        readonly(schema.amount, { when: () => this.readonly() });
+        required(schema.amount, { when: () => this.required() });
+    });
     protected readonly formatterFn = computed(() => {
         const featureData = this.features();
         return featureData && featureData["formatter"].active
             ? (value: number | null) => (value == null ? "" : `$ ${value}`)
             : null;
-    });
-    protected readonly form = form(this.#formModel, schema => {
-        disabled(schema.amount, { when: () => this.disabled() });
-        readonly(schema.amount, { when: () => this.readonly() });
-        required(schema.amount, { when: () => this.required() });
     });
     public readonly decimals = input(0);
     public readonly disabled = input(false, { transform: booleanAttribute });
