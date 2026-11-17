@@ -29,6 +29,7 @@ import type { ColorOutputFormat, ColorPaletteItem, PaletteType } from "@nanahosh
 import {
     colorKey,
     createElementControlId,
+    FIELD_ASSOCIATION_BOUNDARY,
     injectEffectiveDisabled,
     injectLabelAssociation,
     themeOverlaySurfaceClasses
@@ -63,6 +64,7 @@ const TABBABLE_SELECTOR =
         LucideCircleX,
         IndicatorIconComponent
     ],
+    viewProviders: [...FIELD_ASSOCIATION_BOUNDARY],
     host: {
         "[class]": "baseClasses()",
         "[attr.tabindex]": "effectiveDisabled() ? -1 : 0",
@@ -75,6 +77,7 @@ const TABBABLE_SELECTOR =
         "[attr.aria-controls]": "expanded() ? popupId : null",
         "[attr.aria-expanded]": "expanded() ? 'true' : 'false'",
         "[attr.aria-haspopup]": "'dialog'",
+        "[attr.aria-describedby]": "describedBy()",
         "[attr.aria-label]": "labelledBy() ? null : ariaLabel() || messages().colorPicker",
         "[attr.aria-labelledby]": "labelledBy()",
         "[attr.aria-disabled]": "effectiveDisabled()",
@@ -90,8 +93,10 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     readonly #i18n = inject(MonaI18nService);
     readonly #label = injectLabelAssociation({
         activate: () => this.focus(),
+        ariaDescribedBy: () => this.ariaDescribedBy(),
         ariaLabel: () => this.ariaLabel(),
-        ariaLabelledBy: () => this.ariaLabelledBy()
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
     });
     /** Read once, so a generator can be used as the palette. */
     readonly #paletteItems = computed<ReadonlyArray<string | ColorPaletteItem>>(() => {
@@ -112,6 +117,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
         const size = this.size();
         return colorPickerColorThemeVariants({ rounded, size });
     });
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly expanded = computed(() => this.#popupRef() !== null);
     protected readonly gradientPopupClasses = `${themeOverlaySurfaceClasses} border border-border shadow-(--shadow-overlay) outline-none focus-visible:outline-hidden`;
@@ -142,6 +148,12 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
         }
         return value;
     });
+
+    /**
+     * @description Id of an element that describes the color picker, such as a hint or an error message.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
 
     /**
      * @description Accessible label for the color picker combobox.

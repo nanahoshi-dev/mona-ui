@@ -18,7 +18,7 @@
         [attr.aria-invalid]="inputInvalid() ? 'true' : null"
         [attr.aria-label]="ariaLabel() || null"
         [attr.aria-labelledby]="labelledBy()"
-        [attr.aria-describedby]="ariaDescribedBy() || null"
+        [attr.aria-describedby]="describedBy()"
         (blur)="onBlur($event)"
         (click)="onInputClick($event)"
         (focus)="inputFocus.emit($event)"

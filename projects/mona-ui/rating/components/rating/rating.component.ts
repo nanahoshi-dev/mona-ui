@@ -88,8 +88,10 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
     readonly #i18n = inject(MonaI18nService);
     readonly #label = injectLabelAssociation({
         activate: () => this.focus(),
+        ariaDescribedBy: () => this.ariaDescribedBy(),
         ariaLabel: () => this.ariaLabel(),
-        ariaLabelledBy: () => this.ariaLabelledBy()
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
     });
     readonly #zone = inject(NgZone);
 
@@ -99,6 +101,7 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
     protected readonly containerClasses = computed(() => twMerge(ratingContainerThemeVariants(), this.userClass()));
     protected readonly controlClasses = computed(() => ratingControlThemeVariants({ size: this.size() }));
     protected readonly controlElement = viewChild.required<ElementRef<HTMLElement>>("ratingControl");
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly displayValue = computed(() => this.previewValue() ?? this.normalizedValue());
     protected readonly effectiveAriaLabelledBy = computed(() => {
         const labelledBy = this.#label.labelledBy();

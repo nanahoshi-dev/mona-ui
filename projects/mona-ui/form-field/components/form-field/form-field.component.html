@@ -1,0 +1,38 @@
+@if (labelShown()) {
+    <label [id]="captionId" [class]="labelClasses()" (click)="onLabelClick($event)">
+        @if (labelTemplate(); as template) {
+            <ng-container [ngTemplateOutlet]="template"></ng-container>
+        } @else {
+            <span>{{ label() }}</span>
+        }
+        @if (optional()) {
+            <span [class]="optionalClasses">{{ optionalText() || messages().optional }}</span>
+        }
+        @if (requiredShown()) {
+            <span aria-hidden="true" [class]="requiredClasses">*</span>
+        }
+    </label>
+}
+<div #control [class]="controlClasses()">
+    <ng-content></ng-content>
+</div>
+@if (hintShown()) {
+    <div [id]="hintId" [class]="hintClasses()">
+        @if (hintTemplate(); as template) {
+            <ng-container [ngTemplateOutlet]="template"></ng-container>
+        } @else {
+            {{ hint() }}
+        }
+    </div>
+}
+<div [id]="errorId" [class]="errorClasses()" aria-live="polite">
+    @for (item of errors(); track $index) {
+        <div [class]="errorItemClasses">
+            @if (errorTemplate(); as template) {
+                <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="item"></ng-container>
+            } @else {
+                {{ item.message }}
+            }
+        </div>
+    }
+</div>

@@ -12,7 +12,12 @@ import {
     signal
 } from "@angular/core";
 import type { FormValueControl } from "@angular/forms/signals";
-import { createElementControlId, injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
+import {
+    createElementControlId,
+    FIELD_ASSOCIATION_BOUNDARY,
+    injectEffectiveDisabled,
+    injectLabelAssociation
+} from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { MONA_RADIO_GROUP } from "../../models/RadioGroupContext";
 import type { RadioGroupContext } from "../../models/RadioGroupContext";
@@ -22,10 +27,14 @@ import type { RadioGroupVariantProps } from "../../styles/radio.styles";
 @Component({
     selector: "mona-radio-group",
     template: `<ng-content />`,
-    providers: [{ provide: MONA_RADIO_GROUP, useFactory: () => inject(RadioGroupComponent).context }],
+    // The radios are content with labels of their own; the group carries the form field's description.
+    providers: [
+        { provide: MONA_RADIO_GROUP, useFactory: () => inject(RadioGroupComponent).context },
+        ...FIELD_ASSOCIATION_BOUNDARY
+    ],
     host: {
         role: "radiogroup",
-        "[attr.aria-describedby]": "ariaDescribedBy() || null",
+        "[attr.aria-describedby]": "describedBy()",
         "[attr.aria-disabled]": "effectiveDisabled() || null",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
         "[attr.aria-label]": "ariaLabel() || null",
@@ -44,13 +53,16 @@ export class RadioGroupComponent<T = unknown> implements FormValueControl<T> {
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #label = injectLabelAssociation({
         activate: () => this.focus(),
+        ariaDescribedBy: () => this.ariaDescribedBy(),
         ariaLabel: () => this.ariaLabel(),
-        ariaLabelledBy: () => this.ariaLabelledBy()
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
     });
     readonly #selectionVersion = signal(0);
     protected readonly classes = computed(() =>
         twMerge(radioGroupThemeVariants({ orientation: this.orientation() }), this.userClass())
     );
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly invalidState = computed(() => this.touched() && this.invalid());
     protected readonly labelledBy = this.#label.labelledBy;

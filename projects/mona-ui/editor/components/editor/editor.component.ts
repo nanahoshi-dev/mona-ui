@@ -18,7 +18,12 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { injectEffectiveDisabled, RovingToolbar } from "@nanahoshi/mona-ui/internal";
+import {
+    FIELD_ASSOCIATION_BOUNDARY,
+    injectEffectiveDisabled,
+    injectLabelAssociation,
+    RovingToolbar
+} from "@nanahoshi/mona-ui/internal";
 import type { JSONContent } from "@tiptap/core";
 import { twMerge } from "tailwind-merge";
 import { EDITOR_DEFAULT_MESSAGES } from "../../i18n/editor.default-messages";
@@ -74,6 +79,7 @@ const EMPTY_DOCUMENT: JSONContent = { type: "doc", content: [] };
     ],
     templateUrl: "./editor.component.html",
     providers: [EditorService],
+    viewProviders: [...FIELD_ASSOCIATION_BOUNDARY],
     host: {
         "[class]": "baseClass()",
         "[attr.aria-describedby]": "null",
@@ -93,14 +99,15 @@ export class EditorComponent implements FormValueControl<string> {
             dir: this.#direction(),
             role: "textbox"
         };
-        const ariaLabelledBy = this.ariaLabelledBy();
+        const ariaLabelledBy = this.#label.labelledBy();
         if (ariaLabelledBy) {
             attributes["aria-labelledby"] = ariaLabelledBy;
         } else {
             attributes["aria-label"] = this.ariaLabel() || this.messages().contentLabel;
         }
-        if (this.ariaDescribedBy()) {
-            attributes["aria-describedby"] = this.ariaDescribedBy();
+        const ariaDescribedBy = this.#label.describedBy();
+        if (ariaDescribedBy) {
+            attributes["aria-describedby"] = ariaDescribedBy;
         }
         if (this.placeholder()) {
             attributes["aria-placeholder"] = this.placeholder();
@@ -123,6 +130,13 @@ export class EditorComponent implements FormValueControl<string> {
     readonly #direction = injectComponentDirection();
     readonly #editable = computed(() => !this.effectiveDisabled() && !this.readonly());
     readonly #i18n = inject(MonaI18nService);
+    readonly #label = injectLabelAssociation({
+        activate: () => this.focus(),
+        ariaDescribedBy: () => this.ariaDescribedBy(),
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
+    });
     readonly #rendered = signal(false);
     readonly #toolbar = new RovingToolbar(() => this.toolbarElement()?.nativeElement);
 

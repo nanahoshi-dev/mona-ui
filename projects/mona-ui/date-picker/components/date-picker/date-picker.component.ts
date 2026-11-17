@@ -46,7 +46,13 @@ import {
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
 import { getLocaleDateInputFormat, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { type AttributeConfig, createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
+import {
+    type AttributeConfig,
+    createElementControlId,
+    FIELD_ASSOCIATION_BOUNDARY,
+    injectEffectiveDisabled,
+    injectLabelAssociation
+} from "@nanahoshi/mona-ui/internal";
 import type { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import {
@@ -88,6 +94,7 @@ import {
         CdkTrapFocus
     ],
     hostDirectives: [DropdownPopupHandlerDirective],
+    viewProviders: [...FIELD_ASSOCIATION_BOUNDARY],
     host: {
         // The ARIA inputs below are applied to the inner input, so the host must not keep the static attributes.
         "[attr.aria-describedby]": "null",
@@ -113,6 +120,12 @@ export class DatePickerComponent
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    readonly #label = injectLabelAssociation({
+        ariaDescribedBy: () => this.ariaDescribedBy(),
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
+    });
     protected readonly baseClass = computed(() => {
         const focused = this.#dropdownService.popupRef() != null;
         const rounded = this.rounded();
@@ -122,6 +135,7 @@ export class DatePickerComponent
         return twMerge(variantClass, userClass);
     });
     protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective);
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly effectiveFormat = computed(() => {
         return this.format() ?? getLocaleDateInputFormat(this.#i18n.localeId());
@@ -144,6 +158,7 @@ export class DatePickerComponent
             this.typedInput.errors().length > 0 ||
             (this.touched() && (this.invalid() || (this.required() && !this.value())))
     );
+    protected readonly labelledBy = this.#label.labelledBy;
     protected readonly messages = this.#i18n.componentMessages("datePicker", DATE_PICKER_DEFAULT_MESSAGES);
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly pickerPopupClass = computed(() => {

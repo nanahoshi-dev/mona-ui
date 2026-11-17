@@ -50,7 +50,13 @@ import {
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
 import { getLocaleDateTimeInputFormat, injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { type AttributeConfig, createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
+import {
+    type AttributeConfig,
+    createElementControlId,
+    FIELD_ASSOCIATION_BOUNDARY,
+    injectEffectiveDisabled,
+    injectLabelAssociation
+} from "@nanahoshi/mona-ui/internal";
 import type { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import {
@@ -99,6 +105,7 @@ import {
         TextBoxPrefixTemplateDirective
     ],
     hostDirectives: [DropdownPopupHandlerDirective],
+    viewProviders: [...FIELD_ASSOCIATION_BOUNDARY],
     host: {
         // The ARIA inputs below are applied to the inner input, so the host must not keep the static attributes.
         "[attr.aria-describedby]": "null",
@@ -123,6 +130,12 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    readonly #label = injectLabelAssociation({
+        ariaDescribedBy: () => this.ariaDescribedBy(),
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
+    });
     readonly #timeSelectorService = inject(TimeSelectorService);
 
     protected readonly activeView = signal<ActiveView>("date");
@@ -136,6 +149,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     });
     protected readonly dateTabId = createElementControlId();
     protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective);
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly effectiveFormat = computed(() => {
         return (
@@ -176,6 +190,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
             (this.touched() && (this.invalid() || (this.required() && !this.value())))
     );
     protected readonly isRtl = computed(() => this.#direction() === "rtl");
+    protected readonly labelledBy = this.#label.labelledBy;
     protected readonly messages = this.#i18n.componentMessages("dateTimePicker", DATETIME_PICKER_DEFAULT_MESSAGES);
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly navigatedDate = linkedSignal(() => this.value() ?? new Date());

@@ -1,9 +1,9 @@
 <mona-text-box
     (inputBlur)="onInputBlur()"
     (valueChange)="typedInput.edit($event)"
-    [aria-describedby]="ariaDescribedBy()"
+    [aria-describedby]="describedBy() ?? ''"
     [aria-label]="ariaLabel()"
-    [aria-labelledby]="ariaLabelledBy()"
+    [aria-labelledby]="labelledBy() ?? ''"
     [disabled]="effectiveDisabled()"
     [inputId]="inputId()"
     [value]="typedInput.text()"

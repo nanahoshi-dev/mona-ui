@@ -1,7 +1,7 @@
 <mona-text-box
-    [aria-describedby]="ariaDescribedBy()"
+    [aria-describedby]="describedBy() ?? ''"
     [aria-label]="ariaLabel()"
-    [aria-labelledby]="ariaLabelledBy()"
+    [aria-labelledby]="labelledBy() ?? ''"
     [disabled]="effectiveDisabled()"
     [inputId]="inputId()"
     [readonly]="readonly()"

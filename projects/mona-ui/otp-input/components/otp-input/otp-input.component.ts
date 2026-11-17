@@ -65,8 +65,10 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #i18n = inject(MonaI18nService);
     readonly #label = injectLabelAssociation({
+        ariaDescribedBy: () => this.computedAriaDescribedby(),
         ariaLabel: () => this.ariaLabel(),
-        ariaLabelledBy: () => this.ariaLabelledBy()
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
     });
     #touchPress = false;
 
@@ -138,6 +140,7 @@ export class OtpInputComponent implements OtpInputVariantInput, FormValueControl
         const attribute = findUsableAttribute(this.inputAttributes(), "name");
         return attribute != null ? String(attribute) : null;
     });
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly hasFocus = signal(false);
     protected readonly inputClass = computed(() => otpInputFieldThemeVariants());

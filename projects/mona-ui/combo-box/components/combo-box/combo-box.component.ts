@@ -42,7 +42,12 @@ import {
     DropdownPrefixTemplateDirective,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
-import { createElementControlId, injectEffectiveDisabled } from "@nanahoshi/mona-ui/internal";
+import {
+    createElementControlId,
+    FIELD_ASSOCIATION_BOUNDARY,
+    injectEffectiveDisabled,
+    injectLabelAssociation
+} from "@nanahoshi/mona-ui/internal";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import {
     ListComponent,
@@ -102,6 +107,7 @@ import {
         IndicatorIconComponent
     ],
     hostDirectives: [DropdownDataHandlerDirective, DropdownListPopupHandlerDirective, DropdownLiveRegionDirective],
+    viewProviders: [...FIELD_ASSOCIATION_BOUNDARY],
     host: {
         // The host has no role: the inner input is the combobox and carries the name, description and state. A static
         // aria-* attribute written on <mona-combo-box> would otherwise stay on the host as well.
@@ -130,6 +136,12 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    readonly #label = injectLabelAssociation({
+        ariaDescribedBy: () => this.ariaDescribedBy(),
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
+    });
     readonly #listService = inject(ListService);
     readonly #popupRef = this.#dropdownService.popupRef;
     readonly #userNavigatedViaArrows = signal(false);
@@ -161,6 +173,7 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     );
     protected readonly comboBoxValue = signal("");
     protected readonly comboBoxValue$ = new Subject<string | null>();
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly expanded = computed(() => this.#popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropdownFooterTemplateDirective, { read: TemplateRef });
@@ -174,6 +187,7 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         () => this.touched() && (this.invalid() || (this.required() && this.value() == null))
     );
     protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
+    protected readonly labelledBy = this.#label.labelledBy;
     protected readonly listId = createElementControlId();
     protected readonly listPopupClass = computed(() => {
         const rounded = this.rounded();

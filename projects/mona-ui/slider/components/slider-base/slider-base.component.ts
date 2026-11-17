@@ -31,11 +31,14 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
     readonly #document = inject(DOCUMENT);
     readonly #label = injectLabelAssociation({
         activate: () => this.focus(),
+        ariaDescribedBy: () => this.ariaDescribedBy(),
         ariaLabel: () => this.ariaLabel(),
-        ariaLabelledBy: () => this.ariaLabelledBy()
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
     });
     readonly #stepPlaces = computed(() => Math.max(decimalPlaces(this.step()), decimalPlaces(this.effectiveMin())));
     protected readonly baseClasses = computed(() => sliderBaseThemeVariants());
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly destroyRef = inject(DestroyRef);
     protected readonly direction = injectComponentDirection();
     protected readonly dragging = signal(false);

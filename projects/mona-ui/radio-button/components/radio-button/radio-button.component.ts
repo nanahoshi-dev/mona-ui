@@ -42,8 +42,10 @@ import { MONA_RADIO_GROUP } from "../../models/RadioGroupContext";
 export class RadioButtonComponent<T = unknown> implements RadioButtonVariantInput, FormValueControl<T> {
     readonly #group = inject(MONA_RADIO_GROUP, { optional: true });
     readonly #label = injectLabelAssociation({
+        ariaDescribedBy: () => this.ariaDescribedBy(),
         ariaLabel: () => this.ariaLabel(),
         ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus(),
         wrapped: false
     });
     protected readonly containerLabelClasses = computed(() => {
@@ -52,6 +54,7 @@ export class RadioButtonComponent<T = unknown> implements RadioButtonVariantInpu
         const variantClasses = radioButtonContainerLabelThemeVariants({ labelSize });
         return twMerge(variantClasses, userClasses);
     });
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(
         () => this.disabled() || (this.#group?.disabled() ?? false)
     );
