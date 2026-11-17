@@ -2,7 +2,7 @@
 
 Use `DatePickerComponent` for a single date in a form field, where users may type the date or pick it from a calendar. The calendar stays hidden until the user opens it.
 
-Use `CalendarComponent` instead when the calendar should always be visible, or when users select several dates or a range. Use `DateTimePickerComponent` when the value also needs a time of day, and `TimePickerComponent` when it is only a time.
+Use `DateRangePickerComponent` when users pick a range of days, and `CalendarComponent` when the calendar should always be visible, or when users select several dates. Use `DateTimePickerComponent` when the value also needs a time of day, and `TimePickerComponent` when it is only a time.
 
 ## Import & Quick Start
 

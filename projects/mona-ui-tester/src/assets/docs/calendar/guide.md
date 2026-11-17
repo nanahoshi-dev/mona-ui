@@ -99,10 +99,20 @@ All selected dates are emitted as a flat `Date[]`.
 
 ### Range selection
 
-Click the start date, then click the end date. The emitted `value` is always `[startDate, endDate]` — a `Date[]` with exactly two elements. Clicking a new date while a range is pending resets the selection.
+Click the start date, then click the end date. The emitted `value` is always `[startDate, endDate]` — a `Date[]` with exactly two elements, in order whichever end was clicked first. The next click starts a new range.
+
+The first and last days are drawn in the primary color, and the days between them in the selected tint. Each selected day has `data-range` set to `start`, `middle` or `end` for styling.
 
 ```example
 calendar/range
+```
+
+### Several months
+
+`months` shows that many months side by side, here three for a quarter. They wrap onto new rows when the calendar is narrow. Each month has a caption, the days of the months around it are left blank so no date shows twice, and the previous and next buttons move the view by one month. The arrow keys move across the months, and the view moves on only past the last one.
+
+```example
+calendar/months
 ```
 
 ### Date constraints
@@ -143,7 +153,9 @@ It has no `ControlValueAccessor`, but `[(ngModel)]`, `[formControl]` and `formCo
 
 **View navigation:** The calendar starts in the month view. Clicking the month/year header button cycles upward: month → year → decade. Clicking a cell in the year or decade view drills down.
 
-**Range selection pending state:** After the first click in `selection="range"` mode, the calendar previews that date as the start. The range is committed only after the second click.
+**Range selection pending state:** After the first click in `selection="range"` mode, the calendar previews that date as the start. The range is committed only after the second click. A value with one date, such as `[start]`, is a range's start in the same way: the next day picked ends it.
+
+**Several months:** With `months` above 1, the calendar opens on the month of the last selected date, moved back to show the first one too when they fit. Picking a month in the year view puts it first.
 
 **Disabled dates and navigation:** When `minDate` or `maxDate` changes so that the currently focused date falls outside the allowed range, the calendar automatically moves focus to the nearest bound.
 
@@ -169,7 +181,7 @@ The `touch` output fires each time the user completes a date selection. `FormFie
 
 ## Accessibility
 
-Each view renders a `role="grid"` with rows of `role="gridcell"` cells, labelled by the heading above it. Day cells are named by their full date, and the month grid's column headers carry the full weekday name for screen readers. A polite live region announces the current view and position when it changes, such as "Calendar, June 2025" or "Year view, 2025".
+Each view renders a `role="grid"` with rows of `role="gridcell"` cells, labelled by the heading above it. With several months, each month is a grid labelled by its own caption, and a blank cell stands in for each day of the months around it. Day cells are named by their full date, and the month grid's column headers carry the full weekday name for screen readers. A polite live region announces the current view and position when it changes, such as "Calendar, June 2025" or "Year view, 2025".
 
 | Attribute       | Where                                          | Value                                    |
 |-----------------|------------------------------------------------|------------------------------------------|

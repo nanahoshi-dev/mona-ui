@@ -1,0 +1,12 @@
+<div class="flex max-w-sm flex-col gap-2">
+    <mona-form-field label="Stay" hint="Pick the night you arrive, then the morning you leave.">
+        <mona-date-range-picker [(value)]="stay" />
+    </mona-form-field>
+    <span aria-live="polite" class="text-sm">
+        @if (nights(); as count) {
+            {{ count }} {{ count === 1 ? "night" : "nights" }}
+        } @else {
+            No dates yet.
+        }
+    </span>
+</div>

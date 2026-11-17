@@ -95,6 +95,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./calendar/forms/forms-example.component").then(module => module.CalendarFormsExampleComponent),
         mainFile: "forms-example.component.ts"
     },
+    "calendar/months": {
+        files: ["months-example.component.ts", "months-example.component.html"],
+        load: () => import("./calendar/months/months-example.component").then(module => module.CalendarMonthsExampleComponent),
+        mainFile: "months-example.component.ts"
+    },
     "calendar/multiple": {
         files: ["multiple-example.component.ts", "multiple-example.component.html"],
         load: () => import("./calendar/multiple/multiple-example.component").then(module => module.CalendarMultipleExampleComponent),
@@ -454,6 +459,26 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         files: ["icons-example.component.ts", "icons-example.component.html"],
         load: () => import("./contextmenu/icons/icons-example.component").then(module => module.ContextMenuIconsExampleComponent),
         mainFile: "icons-example.component.ts"
+    },
+    "date-range-picker/basic": {
+        files: ["basic-example.component.ts", "basic-example.component.html"],
+        load: () => import("./date-range-picker/basic/basic-example.component").then(module => module.DateRangePickerBasicExampleComponent),
+        mainFile: "basic-example.component.ts"
+    },
+    "date-range-picker/limits": {
+        files: ["limits-example.component.ts", "limits-example.component.html"],
+        load: () => import("./date-range-picker/limits/limits-example.component").then(module => module.DateRangePickerLimitsExampleComponent),
+        mainFile: "limits-example.component.ts"
+    },
+    "date-range-picker/presets": {
+        files: ["presets-example.component.ts", "presets-example.component.html"],
+        load: () => import("./date-range-picker/presets/presets-example.component").then(module => module.DateRangePickerPresetsExampleComponent),
+        mainFile: "presets-example.component.ts"
+    },
+    "date-range-picker/signal-forms": {
+        files: ["signal-forms-example.component.ts", "signal-forms-example.component.html"],
+        load: () => import("./date-range-picker/signal-forms/signal-forms-example.component").then(module => module.DateRangePickerSignalFormsExampleComponent),
+        mainFile: "signal-forms-example.component.ts"
     },
     "decimal-textbox/bounds": {
         files: ["bounds-example.component.ts", "bounds-example.component.html"],

@@ -99,6 +99,7 @@ If more than one applies, an explicit `aria-labelledby` wins, and then `aria-lab
 | `mona-color-gradient`                            | Yes                       | Yes           | Yes                             | No        | No              |
 | `mona-numeric-text-box`, `mona-decimal-text-box` | Yes                       | Focus only    | Yes                             | Yes       | No              |
 | `mona-date-picker`                               | Yes                       | Focus only    | Yes                             | Yes       | No              |
+| `mona-date-range-picker`                         | Yes, as a group           | Focus only    | Yes, on the group               | No        | No              |
 | `mona-dropdown-list`                             | Yes                       | Focus only    | Yes                             | No        | No              |
 
 A check box and a radio button render their own `<label>`, and its text has to stay their name, so a wrapping `mona-label` doesn't name them. Use their `label` input, or `[for]` from outside.

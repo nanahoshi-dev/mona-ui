@@ -166,6 +166,7 @@ A string `for` can't work on a component's host element, because a host such as 
 | `mona-slider`, `mona-range-slider`, `mona-rating`, `mona-segmented`, `mona-radio-group`, `mona-button-group`, `mona-color-palette`, `mona-color-picker`, `mona-color-gradient` | Named. A click focuses. | Named. A click focuses. | No, warns in development |
 | `mona-numeric-text-box`, `mona-decimal-text-box`, `mona-date-picker`, `mona-time-picker`, `mona-datetime-picker`, `mona-combo-box`, `mona-auto-complete` | Named. A click focuses. | Focus only, not named | Yes, on `inputId`             |
 | `mona-dropdown-list`, `mona-multi-select`, `mona-editor`                                                   | Named. A click focuses.                           | Focus only, not named         | No: they have no native input |
+| `mona-date-range-picker`                                                                                   | Its group is named. A click focuses the start.    | Focus only, not named         | No: it has two inputs         |
 | Other controls                                                                                             | Not connected, unless they hold a native input    | Focus only, not named         | Only on a native input's `id` |
 
 A control that is focus only with `[for]` still needs a name. Give it `aria-labelledby` pointing at the label's `id`, as the dropdown list examples do, or use `inputId` where the control has one:

@@ -467,7 +467,7 @@
         "description": "",
         "kind": "input",
         "name": "entry",
-        "type": "KeyValuePair<Date, number>",
+        "type": "MonthDayEntry",
         "required": true
       },
       {
@@ -490,6 +490,13 @@
         "name": "navigatedDate",
         "type": "Date",
         "required": true
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "rangeEnds",
+        "type": "MonthDayRangeEnds | null",
+        "defaultValue": "null"
       },
       {
         "description": "",
@@ -3086,6 +3093,13 @@
         "type": "Date | null"
       },
       {
+        "description": "How many months the month view shows side by side, from 1 to 12. They wrap onto new rows when the\ncalendar is narrow. With more than one, each month has a caption, the days of the months around it are left\nblank, and the previous and next buttons move the view by one month.",
+        "kind": "input",
+        "name": "months",
+        "type": "number",
+        "defaultValue": "1"
+      },
+      {
         "description": "Sets the readonly state of the calendar.",
         "kind": "input",
         "name": "readonly",
@@ -3147,7 +3161,7 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "The current value of the calendar: a `Date` in single selection, the selected dates in multiple\nselection, and `[start, end]` in range selection. A range is written once both ends are picked.",
+        "description": "The current value of the calendar: a `Date` in single selection, the selected dates in multiple\nselection, and `[start, end]` in range selection. A range is written once both ends are picked. In range\nselection, a value with one date is a range's start: the next day picked ends the range.",
         "kind": "model",
         "name": "value",
         "type": "Date | Date[] | null",
@@ -9934,6 +9948,253 @@
         "kind": "model",
         "name": "value",
         "type": "Date | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Enables the display of week numbers in the calendar.",
+        "kind": "input",
+        "name": "weekNumber",
+        "type": "boolean",
+        "defaultValue": "false"
+      }
+    ]
+  },
+  "DateRangePickerComponent": {
+    "name": "DateRangePickerComponent",
+    "selector": "\"mona-date-range-picker\"",
+    "inputs": [
+      {
+        "description": "Id of an element that describes the range, such as a hint or an error message. It describes both\ninputs.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name of the range, on the group that holds its two inputs. Prefer a visible label from a\n`mona-label` or a `mona-form-field`. Each input is named for its end, as in \"Start date\".",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that labels the range, on the group that holds its two inputs.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Emits when the popup is about to close. This event is preventable.",
+        "kind": "output",
+        "name": "close",
+        "type": "PopupCloseEvent"
+      },
+      {
+        "description": "Emits after the popup is closed.",
+        "kind": "output",
+        "name": "closed",
+        "type": "void"
+      },
+      {
+        "description": "Sets the disabled state of the date range picker.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Days that can't be picked, as an iterable of dates or a predicate. Typing one is reported as a\n`disabledDate` error. A range may still span a disabled day.",
+        "kind": "input",
+        "name": "disabledDates",
+        "type": "DateDisabledType"
+      },
+      {
+        "description": "Placeholder of the end input.",
+        "kind": "input",
+        "name": "endPlaceholder",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Sets the first day of the week. If not specified, derives from the active locale.",
+        "kind": "input",
+        "name": "firstDay",
+        "type": "FirstDayOfWeek | null",
+        "options": [
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+          "sunday"
+        ],
+        "defaultValue": "null"
+      },
+      {
+        "description": "The date format of both inputs. If not specified, derives from the active locale. Typed text is\nalso accepted with one-digit days and months and a two-digit year.",
+        "kind": "input",
+        "name": "format",
+        "type": "string | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Marks the range as invalid. When bound to a signal form field via `[formField]`, this is written\nby the `FormField` directive.",
+        "kind": "input",
+        "name": "invalid",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "The last day either end can be. A later typed date is reported as a `maxDate` error.",
+        "kind": "input",
+        "name": "maxDate",
+        "type": "Date | undefined"
+      },
+      {
+        "description": "The first day either end can be. An earlier typed date is reported as a `minDate` error.",
+        "kind": "input",
+        "name": "minDate",
+        "type": "Date | undefined"
+      },
+      {
+        "description": "How many months the calendar shows side by side. They wrap onto new rows on a narrow screen.",
+        "kind": "input",
+        "name": "months",
+        "type": "number",
+        "defaultValue": "2"
+      },
+      {
+        "description": "Emits when the popup is about to open. This event is preventable.",
+        "kind": "output",
+        "name": "open",
+        "type": "PreventableEvent"
+      },
+      {
+        "description": "Emits after the popup is opened.",
+        "kind": "output",
+        "name": "opened",
+        "type": "void"
+      },
+      {
+        "description": "Sets the class of the popup element.",
+        "kind": "input",
+        "name": "popupClass",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Sets the height of the popup element. When empty, the popup fits the calendar.",
+        "kind": "input",
+        "name": "popupHeight",
+        "type": "ListSizeInputType",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Sets the width of the popup element. When empty, the popup fits the calendar.",
+        "kind": "input",
+        "name": "popupWidth",
+        "type": "ListSizeInputType",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Quick ranges shown beside the calendar, such as \"Last 7 days\". Give the key of a built-in range,\nnamed by the locale's messages, or a `DateRangePreset` with a label of its own. Picking one writes its range and\ncloses the popup. A range is kept within `minDate` and `maxDate`; one with no day left in them, or with an end\non a disabled date, is disabled.",
+        "kind": "input",
+        "name": "presets",
+        "type": "readonly (DateRangePreset | DateRangePresetKey)[]",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "Sets the readonly state of the date range picker.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "When true, the inputs are read-only but the calendar button stays enabled.",
+        "kind": "input",
+        "name": "readonlyInput",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Marks the range as required, which an empty value doesn't meet. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Sets the border radius of the date range picker.",
+        "kind": "input",
+        "name": "rounded",
+        "type": "DateRangePickerVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Shows a clear button in each input, which empties that end at once.",
+        "kind": "input",
+        "name": "showClearButton",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Sets the size of the date range picker.",
+        "kind": "input",
+        "name": "size",
+        "type": "DateRangePickerVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Placeholder of the start input.",
+        "kind": "input",
+        "name": "startPlaceholder",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Emitted when focus leaves the date range picker and its popup.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output",
+        "name": "touch",
+        "type": "void"
+      },
+      {
+        "description": "Sets the touched state of the date range picker. When bound to a signal form field via\n`[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Extra classes for the control's container.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Two-way bindable range. Typed text is written on Enter and when an input loses focus; text that\nisn't a valid date, or an end before the start, keeps the previous range and marks the field invalid. A range\npicked in the calendar is written once both ends are picked.",
+        "kind": "model",
+        "name": "value",
+        "type": "DateRange | null",
         "defaultValue": "null"
       },
       {
