@@ -1,0 +1,9 @@
+<form class="flex max-w-md flex-col gap-4" novalidate (submit)="onSubmit($event)">
+    <mona-form-field label="Attachments" hint="They're sent with the message.">
+        <mona-file-upload [(value)]="attachments" />
+    </mona-form-field>
+    <div class="flex items-center gap-3">
+        <button monaButton look="primary" type="submit" [disabled]="attachments().length === 0">Send</button>
+        <span class="text-sm" role="status">{{ sent() }}</span>
+    </div>
+</form>

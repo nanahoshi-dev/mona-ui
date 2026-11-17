@@ -593,6 +593,31 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./fieldset/legend-template/legend-template-example.component").then(module => module.FieldsetLegendTemplateExampleComponent),
         mainFile: "legend-template-example.component.ts"
     },
+    "file-upload/basic": {
+        files: ["basic-example.component.ts", "basic-example.component.html"],
+        load: () => import("./file-upload/basic/basic-example.component").then(module => module.FileUploadBasicExampleComponent),
+        mainFile: "basic-example.component.ts"
+    },
+    "file-upload/manual-upload": {
+        files: ["manual-upload-example.component.ts", "manual-upload-example.component.html"],
+        load: () => import("./file-upload/manual-upload/manual-upload-example.component").then(module => module.FileUploadManualUploadExampleComponent),
+        mainFile: "manual-upload-example.component.ts"
+    },
+    "file-upload/restrictions": {
+        files: ["restrictions-example.component.ts", "restrictions-example.component.html"],
+        load: () => import("./file-upload/restrictions/restrictions-example.component").then(module => module.FileUploadRestrictionsExampleComponent),
+        mainFile: "restrictions-example.component.ts"
+    },
+    "file-upload/signal-forms": {
+        files: ["signal-forms-example.component.ts", "signal-forms-example.component.html"],
+        load: () => import("./file-upload/signal-forms/signal-forms-example.component").then(module => module.FileUploadSignalFormsExampleComponent),
+        mainFile: "signal-forms-example.component.ts"
+    },
+    "file-upload/upload": {
+        files: ["upload-example.component.ts", "upload-example.component.html"],
+        load: () => import("./file-upload/upload/upload-example.component").then(module => module.FileUploadUploadExampleComponent),
+        mainFile: "upload-example.component.ts"
+    },
     "form-field/custom-errors": {
         files: ["custom-errors-example.component.ts", "custom-errors-example.component.html"],
         load: () => import("./form-field/custom-errors/custom-errors-example.component").then(module => module.FormFieldCustomErrorsExampleComponent),

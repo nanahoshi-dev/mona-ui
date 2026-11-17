@@ -145,6 +145,12 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
             ),
             component("fieldset", "Fieldset", "fieldset", "Groups related form controls under a labelled border."),
             component(
+                "file-upload",
+                "File Upload",
+                "file-upload",
+                "Picks files from a drop zone or the file dialog, checks them, and uploads them with progress."
+            ),
+            component(
                 "form-field",
                 "Form Field",
                 "form-field",

@@ -101,6 +101,7 @@ If more than one applies, an explicit `aria-labelledby` wins, and then `aria-lab
 | `mona-date-picker`                               | Yes                       | Focus only    | Yes                             | Yes       | No              |
 | `mona-date-range-picker`                         | Yes, as a group           | Focus only    | Yes, on the group               | No        | No              |
 | `mona-dropdown-list`                             | Yes                       | Focus only    | Yes                             | No        | No              |
+| `mona-file-upload`                               | Yes, as a group           | Yes           | Yes, on the group               | No        | No              |
 
 A check box and a radio button render their own `<label>`, and its text has to stay their name, so a wrapping `mona-label` doesn't name them. Use their `label` input, or `[for]` from outside.
 
@@ -130,6 +131,7 @@ Some controls can't offer everything:
 - **Switch, rating, sliders, color picker and color gradient:** no `name`, since they have no native input to give it to.
 - **Check box and radio button directives:** `input[monaCheckbox]` and `input[monaRadioButton]` have no `readonly`, because native check boxes and radios ignore it.
 - **Rating:** `required` shows the error state at `0` once touched, but the signal forms `required` rule doesn't treat `0` as empty. To fail the form, use `min(path, 1)`.
+- **File upload:** no `name`, since its files reach the form through the value. `required` shows the error state with no files once touched, but the signal forms `required` rule doesn't treat an empty list as empty. To fail the form, add a `validate` that returns `requiredError()` for an empty list.
 
 ---
 

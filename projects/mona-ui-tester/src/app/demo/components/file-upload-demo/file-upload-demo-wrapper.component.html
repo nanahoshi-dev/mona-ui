@@ -1,0 +1,11 @@
+<mona-form-field label="Attachments" [hint]="hint()">
+    <mona-file-upload
+        [accept]="accept()"
+        [autoUpload]="autoUpload()"
+        [class]="userClass()"
+        [formField]="attachment.files"
+        [maxFileSize]="maxFileSize()"
+        [maxFiles]="maxFiles()"
+        [multiple]="multiple()"
+        [upload]="upload()" />
+</mona-form-field>

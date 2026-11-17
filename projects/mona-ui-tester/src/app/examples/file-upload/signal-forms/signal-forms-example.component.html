@@ -1,0 +1,15 @@
+<form class="flex max-w-md flex-col gap-4" novalidate (submit)="onSubmit($event)">
+    <mona-form-field label="Receipts" hint="A photo or a PDF of each receipt.">
+        <mona-file-upload
+            #receipts="monaFileUpload"
+            accept="image/*,.pdf"
+            [formField]="claim.receipts"
+            [upload]="upload" />
+    </mona-form-field>
+    <div class="flex items-center gap-3">
+        <button monaButton look="primary" type="submit" [disabled]="receipts.uploading()">Submit claim</button>
+        @if (sent()) {
+            <span class="text-sm" role="status">Claim submitted.</span>
+        }
+    </div>
+</form>
