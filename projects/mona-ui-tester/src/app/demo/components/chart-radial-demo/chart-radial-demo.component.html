@@ -20,14 +20,17 @@
                 [value]="seriesType()"
                 (valueChange)="onSeriesTypeChange($event)"></mona-segmented>
         </div>
-        <div class="flex items-center gap-2">
+        <!-- On a phone the options are wider than the stage, so they scroll here instead of the page. -->
+        <div class="flex max-w-full items-center gap-2">
             <span class="text-sm font-medium" id="chart-radial-data-set">Data</span>
-            <mona-segmented
-                aria-labelledby="chart-radial-data-set"
-                size="small"
-                [options]="dataSetOptions()"
-                [value]="dataSet()"
-                (valueChange)="onDataSetChange($event)"></mona-segmented>
+            <div class="min-w-0 overflow-x-auto p-0.5">
+                <mona-segmented
+                    aria-labelledby="chart-radial-data-set"
+                    size="small"
+                    [options]="dataSetOptions()"
+                    [value]="dataSet()"
+                    (valueChange)="onDataSetChange($event)"></mona-segmented>
+            </div>
         </div>
         @if (seriesType() !== "gauge") {
             <div class="flex items-center gap-2">

@@ -1,5 +1,5 @@
 import { Clipboard } from "@angular/cdk/clipboard";
-import { Component, computed, inject, input } from "@angular/core";
+import { Component, DestroyRef, ElementRef, afterNextRender, computed, inject, input } from "@angular/core";
 import { LucideCopy } from "@lucide/angular";
 import HighlightJS from "highlight.js/lib/core";
 import json from "highlight.js/lib/languages/json";
@@ -7,6 +7,7 @@ import typescript from "highlight.js/lib/languages/typescript";
 import html from "highlight.js/lib/languages/xml";
 import plaintext from "highlight.js/lib/languages/plaintext";
 import { dedent } from "../../utils/codeSample";
+import { codeRegionLabel, watchScrollableRegion } from "../../utils/scrollableRegion";
 
 HighlightJS.registerLanguage("typescript", typescript);
 HighlightJS.registerLanguage("html", html);
@@ -44,6 +45,18 @@ export class CodeViewerComponent {
     protected readonly processedCode = computed(() => dedent(this.code()));
     public readonly code = input.required<string>();
     public readonly language = input<string>("plaintext");
+
+    public constructor() {
+        const destroyRef = inject(DestroyRef);
+        const host = inject<ElementRef<HTMLElement>>(ElementRef);
+        afterNextRender(() => {
+            const pre = host.nativeElement.querySelector("pre");
+            if (pre != null) {
+                destroyRef.onDestroy(watchScrollableRegion(pre, () => codeRegionLabel(this.language())));
+            }
+        });
+    }
+
     protected copyToClipboard(): void {
         const code = this.processedCode();
         this.#clipboard.copy(code);

@@ -133,7 +133,10 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
     template: `
         <button monaButton (click)="showNotification()">Show Notification</button>
         <button monaButton look="error" (click)="hideAll()">Hide All Notifications</button>
-        <div #scopedContainer class="h-80 w-160 mt-4 p-1 relative overflow-hidden" style="border: 2px dashed #888;">
+        <div
+            #scopedContainer
+            class="h-80 w-160 max-w-full mt-4 p-1 relative overflow-hidden"
+            style="border: 2px dashed #888;">
             <mona-placeholder>appendTo target</mona-placeholder>
         </div>
         <ng-template #contentTemplate>

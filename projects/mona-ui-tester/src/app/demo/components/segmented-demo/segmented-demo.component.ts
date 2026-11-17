@@ -84,31 +84,34 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
     template: `
         @let featureData = features();
         <div class="flex w-full flex-col items-center gap-4">
-            <mona-segmented
-                [aria-label]="ariaLabel()"
-                [aria-labelledby]="ariaLabelledBy()"
-                [name]="name()"
-                [alignment]="alignment()"
-                [animate]="animate()"
-                [disabled]="disabled()"
-                [invalid]="invalid()"
-                [options]="options()"
-                [readonly]="readonly()"
-                [required]="required()"
-                [rounded]="rounded()"
-                [size]="size()"
-                [touched]="touched()"
-                [(value)]="value"
-                [class]="'w-full ' + userClass()">
-                @if (featureData["itemTemplate"].active) {
-                    <ng-template monaSegmentedItemTemplate let-option>
-                        <span class="flex items-center gap-1.5">
-                            <svg [lucideIcon]="iconMap[option.value]" [size]="16"></svg>
-                            {{ option.label }}
-                        </span>
-                    </ng-template>
-                }
-            </mona-segmented>
+            <!-- On a phone the options are wider than the stage, so they scroll here instead of the page. -->
+            <div class="w-full overflow-x-auto p-1">
+                <mona-segmented
+                    [aria-label]="ariaLabel()"
+                    [aria-labelledby]="ariaLabelledBy()"
+                    [name]="name()"
+                    [alignment]="alignment()"
+                    [animate]="animate()"
+                    [disabled]="disabled()"
+                    [invalid]="invalid()"
+                    [options]="options()"
+                    [readonly]="readonly()"
+                    [required]="required()"
+                    [rounded]="rounded()"
+                    [size]="size()"
+                    [touched]="touched()"
+                    [(value)]="value"
+                    [class]="'w-full min-w-max ' + userClass()">
+                    @if (featureData["itemTemplate"].active) {
+                        <ng-template monaSegmentedItemTemplate let-option>
+                            <span class="flex items-center gap-1.5">
+                                <svg [lucideIcon]="iconMap[option.value]" [size]="16"></svg>
+                                {{ option.label }}
+                            </span>
+                        </ng-template>
+                    }
+                </mona-segmented>
+            </div>
             <span>Selected value: {{ value() }}</span>
         </div>
     `

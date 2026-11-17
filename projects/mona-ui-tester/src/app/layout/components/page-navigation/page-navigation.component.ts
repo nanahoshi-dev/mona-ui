@@ -13,12 +13,11 @@ const SECTION_SCROLL_OFFSET = 24;
     templateUrl: "./page-navigation.component.html"
 })
 export class PageNavigationComponent {
-    readonly #document = inject(DOCUMENT);
     readonly #destroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #pageService = inject(PageService);
     readonly #route = inject(ActivatedRoute);
     readonly #router = inject(Router);
-    #scrollSubscription: Subscription | null = null;
     readonly #url = toSignal(
         this.#router.events.pipe(
             filter(e => e instanceof NavigationEnd),
@@ -27,6 +26,7 @@ export class PageNavigationComponent {
         ),
         { requireSync: true }
     );
+    #scrollSubscription: Subscription | null = null;
     protected readonly activeSectionId = signal("");
     protected readonly currentRoute = computed(() => {
         const fullPath = this.#url();
@@ -36,7 +36,11 @@ export class PageNavigationComponent {
         }
         return fullPath;
     });
+    /** The current section's dot, in the color a theme gives what's drawn by a fill alone. */
+    protected readonly indicatorColor = "var(--mona-indicator-color, var(--color-primary))";
     protected readonly sections = this.#pageService.sections;
+    /** The current section's link, in the color a theme gives text in its primary color. */
+    protected readonly textColor = "var(--mona-primary-text-color, var(--color-primary))";
     /**
      * In the order the headings come on the page, which isn't the order their files load in. A heading not on the page
      * yet keeps its place.

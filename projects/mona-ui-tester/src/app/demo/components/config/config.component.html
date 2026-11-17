@@ -62,7 +62,7 @@
     @for (entry of features; track $index) {
         <li class="flex flex-col gap-2 py-2 select-none" [style.padding-left.rem]="level * 1.5">
             <div class="flex">
-                <div class="flex flex-col flex-1 px-2 gap-2 text-sm">
+                <div class="flex min-w-0 flex-col flex-1 px-2 gap-2 text-sm [overflow-wrap:anywhere]">
                     <div class="font-semibold">{{ entry[1].name }}</div>
                     <div class="text-muted-foreground leading-relaxed">{{ entry[1].description }}</div>
                 </div>
@@ -72,12 +72,15 @@
                             monaButton
                             size="small"
                             look="ghost"
+                            [attr.aria-label]="'Show code for ' + entry[1].name"
+                            [attr.aria-expanded]="entry[1].codeVisible ?? false"
                             (click)="entry[1].codeVisible = !entry[1].codeVisible">
-                            <svg lucideCode [size]="16"></svg>
+                            <svg lucideCode aria-hidden="true" [size]="16"></svg>
                         </button>
                     }
                     @if (entry[1].type === "boolean" || !entry[1].type) {
                         <mona-switch
+                            [aria-label]="entry[1].name"
                             [ngModel]="entry[1].active"
                             size="small"
                             (ngModelChange)="
@@ -87,6 +90,7 @@
                             "></mona-switch>
                     } @else if (entry[1].type === "number") {
                         <mona-numeric-text-box
+                            [aria-label]="entry[1].name"
                             [ngModel]="entry[1].numericValue"
                             (ngModelChange)="
                                 parentKey
@@ -100,6 +104,7 @@
                             class="w-37.5"></mona-numeric-text-box>
                     } @else if (entry[1].type === "dropdown") {
                         <mona-dropdown-list
+                            [aria-label]="entry[1].name"
                             [data]="entry[1].dropdownDataSource"
                             [ngModel]="entry[1].dropdownValue"
                             [placeholder]="entry[1].placeholder ?? ''"
@@ -136,7 +141,7 @@
                         </mona-dropdown-list>
                     } @else if (entry[1].type === "string") {
                         <mona-text-box
-                            [aria-label]="entry[0]"
+                            [aria-label]="entry[1].name"
                             [ngModel]="entry[1].stringValue"
                             (ngModelChange)="
                                 parentKey

@@ -73,7 +73,7 @@ export class CardDemoComponent extends AbstractDemoComponent<CardComponent> {
     ],
     template: `
         @let featureData = features();
-        <mona-card [role]="role()" [rounded]="rounded()" [class]="'w-96 ' + userClass()">
+        <mona-card [role]="role()" [rounded]="rounded()" [class]="'w-96 max-w-full ' + userClass()">
             @if (featureData["header"].active) {
                 <mona-card-header>
                     <h3 class="font-semibold text-sm" *monaCardTitle>Login to your account</h3>

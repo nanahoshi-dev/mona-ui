@@ -87,6 +87,17 @@ describe("built-in theme contrast", () => {
             expect(findThemeProblems(_name, _variant, profile)).toEqual([]);
         });
 
+        // The calendar's heading and the editor's links, through --mona-primary-text-color when a theme sets it.
+        it.each(["surface", "canvas", "surface-raised", "surface-overlay"])(
+            "keeps text in the primary color at 4.5:1 on %s",
+            surface => {
+                const text = profile.custom?.["--mona-primary-text-color"] ?? "var(--color-primary)";
+                expect(
+                    contrast({ ...colors, "--color-primary-text": text }, "primary-text", surface)
+                ).toBeGreaterThanOrEqual(4.5);
+            }
+        );
+
         it("draws what's only a fill at 3:1 on the surface", () => {
             const indicator = profile.custom?.["--mona-indicator-color"] ?? "var(--color-primary)";
             const value = resolve({ ...colors, "--color-indicator": indicator }, "--color-indicator");

@@ -1,5 +1,5 @@
 import { DatePipe, JsonPipe } from "@angular/common";
-import { Component, input, output } from "@angular/core";
+import { Component, computed, input, output } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ColorPickerComponent } from "@nanahoshi/mona-ui/color-picker";
 import { DropdownListComponent, DropdownListValueTemplateDirective } from "@nanahoshi/mona-ui/dropdown-list";
@@ -31,6 +31,8 @@ import { ProcessedConfigItem } from "../../utils/componentConfig";
     templateUrl: "./api-input-list-item.component.html"
 })
 export class ApiInputListItemComponent {
+    /** What the row shows as the input's name, and what its control is named after. */
+    protected readonly label = computed(() => this.entry().alias ?? this.entry().name);
     public readonly entry = input.required<ProcessedConfigItem>();
     public readonly metadata = input.required<ComponentMetadata>();
     public readonly valueChange = output<{ property: string; value: unknown }>();

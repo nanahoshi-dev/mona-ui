@@ -98,6 +98,14 @@ custom: {
 }
 ```
 
+Where the primary color is text, as in the calendar's heading and the editor's links, components use `--mona-primary-text-color`, which also falls back to the primary color. If your primary color doesn't reach 4.5:1 against the surface, set it to a lighter tone, as Anna Dark does with its focus violet:
+
+```typescript
+custom: {
+    "--mona-primary-text-color": "var(--color-focus-indicator)"
+}
+```
+
 ### Contrast Borders
 
 `--color-border-control-contrast` and `--color-border-control-contrast-hover` are the only optional colors. When the user asks for more contrast, the theme service uses them in place of `--color-border-control` and `--color-border-control-hover`, for fields, buttons, chips, chart gridlines and everything else that shares those borders. Give them at least 3:1 against `--color-input-background`. A theme without them keeps its usual borders.

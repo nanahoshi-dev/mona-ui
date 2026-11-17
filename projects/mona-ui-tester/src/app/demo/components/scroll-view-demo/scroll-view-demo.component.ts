@@ -110,7 +110,7 @@ export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewCom
             [pagerRounded]="pagerRounded()"
             [rounded]="rounded()"
             [width]="width()"
-            [class]="userClass()">
+            [class]="'max-w-full ' + userClass()">
             <ng-template [monaScrollViewSlide]="data()" let-item>
                 <img [src]="item" alt="" />
             </ng-template>

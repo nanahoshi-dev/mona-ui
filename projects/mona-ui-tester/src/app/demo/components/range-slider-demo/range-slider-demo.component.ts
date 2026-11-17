@@ -124,7 +124,7 @@ export class RangeSliderDemoComponent extends AbstractDemoComponent<RangeSliderC
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
-        <div class="flex flex-col gap-4">
+        <div class="flex max-w-full flex-col gap-4">
             <span>Range: {{ form.value().value()[0] }} - {{ form.value().value()[1] }}</span>
             <mona-range-slider
                 aria-label="Hour range"
@@ -173,7 +173,7 @@ export class RangeSliderWrapperComponent implements ComponentInputsAsSignal<Rang
         readonly(schema.value, { when: () => this.readonly() });
     });
     protected readonly size = computed(() =>
-        this.orientation() === "horizontal" ? { width: "400px" } : { height: "400px" }
+        this.orientation() === "horizontal" ? { "max-width": "100%", width: "400px" } : { height: "400px" }
     );
     public readonly ariaLabelEnd = input<ReturnType<RangeSliderComponent["ariaLabelEnd"]>>("Maximum value");
     public readonly ariaLabelStart = input<ReturnType<RangeSliderComponent["ariaLabelStart"]>>("Minimum value");

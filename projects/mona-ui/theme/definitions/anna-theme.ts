@@ -29,11 +29,13 @@ export const annaTheme = Object.freeze({
         light: Object.freeze({
             colors: annaThemeColors.light,
             components,
-            // The deep violet is 8.4:1 on the light surface, so what's drawn by a fill alone takes it as it is. It's
-            // set here anyway, so that a part of the page in Anna Light doesn't inherit the dark variant's lighter one.
+            // The deep violet is 8.4:1 on the light surface, so what's drawn by a fill alone and text in the primary
+            // color take it as it is. They're set here anyway, so that a part of the page in Anna Light doesn't
+            // inherit the dark variant's lighter violets.
             custom: Object.freeze({
                 "--mona-indicator-color": "var(--color-primary)",
-                "--mona-indicator-foreground": "var(--color-primary-foreground)"
+                "--mona-indicator-foreground": "var(--color-primary-foreground)",
+                "--mona-primary-text-color": "var(--color-primary)"
             }),
             effects: createDefaultThemeEffects(),
             motion,
@@ -44,10 +46,12 @@ export const annaTheme = Object.freeze({
             colors: annaThemeColors.dark,
             components,
             // The violet fill is 1.73:1 on Anna's surface, which is fine under a label and not as the only thing
-            // showing a value. What's drawn by a fill alone takes the lighter violet instead.
+            // showing a value. What's drawn by a fill alone takes the lighter violet instead, and text in the primary
+            // color takes the focus violet, which is 4.5:1 on every surface.
             custom: Object.freeze({
                 "--mona-indicator-color": "var(--color-primary-border)",
-                "--mona-indicator-foreground": "#161718"
+                "--mona-indicator-foreground": "#161718",
+                "--mona-primary-text-color": "var(--color-focus-indicator)"
             }),
             effects: createDefaultThemeEffects(),
             motion,

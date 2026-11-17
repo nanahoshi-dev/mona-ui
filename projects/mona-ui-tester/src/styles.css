@@ -63,6 +63,18 @@
 /*    background: var(--color-scrollbar-corner);*/
 /*}*/
 
+/* Nord's comment and meta colors are 2.4:1 and 4.4:1 on the dark code background. These are 5.8:1 and 6.6:1. */
+.hljs-comment,
+.hljs-quote {
+    color: #8a94a8;
+}
+
+.hljs-meta,
+.hljs-meta .hljs-keyword,
+.hljs-template-tag {
+    color: #81a1c1;
+}
+
 html,
 body {
     width: 100%;
@@ -174,7 +186,7 @@ markdown.block {
     }
 
     & a:not(app-example *) {
-        color: var(--color-primary);
+        color: var(--mona-primary-text-color, var(--color-primary));
         text-decoration: underline;
     }
 
@@ -207,12 +219,22 @@ markdown.block {
         margin-bottom: 1rem;
     }
 
+    /* A table wider than the column scrolls in here, so the page itself doesn't scroll sideways on a phone. */
+    & .docs-table-scroll:not(app-example *) {
+        overflow-x: auto;
+        margin-bottom: 1rem;
+    }
+
     & table:not(app-example *) {
         width: 100%;
         font-size: 0.875rem;
         border-collapse: collapse;
         margin-bottom: 1rem;
         border: 1px solid var(--color-border);
+    }
+
+    & .docs-table-scroll > table:not(app-example *) {
+        margin-bottom: 0;
     }
 
     & thead:not(app-example *) {

@@ -60,17 +60,20 @@ export class ColorPaletteDemoComponent extends AbstractDemoComponent<ColorPalett
     template: `
         @let customPaletteActive = features()["customPalette"] && features()["customPalette"].active;
         @let namedPaletteActive = features()["namedPalette"] && features()["namedPalette"].active;
-        <div class="flex flex-col gap-4">
+        <div class="flex max-w-full flex-col gap-4">
             <span>Color: {{ form.color().value() }}</span>
-            <mona-color-palette
-                [aria-label]="ariaLabel()"
-                [aria-labelledby]="ariaLabelledBy()"
-                [clearable]="clearable()"
-                [columns]="columns()"
-                [formField]="form.color"
-                [palette]="namedPaletteActive ? namedPalette : customPaletteActive ? customPalette : palette()"
-                [rounded]="rounded()"
-                [tileSize]="tileSize()"></mona-color-palette>
+            <!-- The columns set the palette's width, so on a phone it scrolls here instead of the page. -->
+            <div class="overflow-x-auto p-1">
+                <mona-color-palette
+                    [aria-label]="ariaLabel()"
+                    [aria-labelledby]="ariaLabelledBy()"
+                    [clearable]="clearable()"
+                    [columns]="columns()"
+                    [formField]="form.color"
+                    [palette]="namedPaletteActive ? namedPalette : customPaletteActive ? customPalette : palette()"
+                    [rounded]="rounded()"
+                    [tileSize]="tileSize()"></mona-color-palette>
+            </div>
         </div>
     `
 })

@@ -169,7 +169,7 @@ export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderCom
         readonly(schema.value, { when: () => this.readonly() });
     });
     protected readonly size = computed(() =>
-        this.orientation() === "horizontal" ? { width: "400px" } : { height: "400px" }
+        this.orientation() === "horizontal" ? { "max-width": "100%", width: "400px" } : { height: "400px" }
     );
     public readonly ariaLabel = input<ReturnType<SliderComponent["ariaLabel"]>>("Slider value");
     public readonly ariaLabelledBy = input<ReturnType<SliderComponent["ariaLabelledBy"]>>("");
