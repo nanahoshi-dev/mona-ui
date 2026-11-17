@@ -68,7 +68,7 @@ function generateDenseRange(count: number): Array<{ readonly from: number; reado
         ScatterSeriesComponent,
         SwitchComponent
     ],
-    selector: "mona-chart-sync-density-demo",
+    selector: "app-chart-sync-density-demo",
     templateUrl: "./chart-sync-density-demo.component.html",
     styles: [
         `
@@ -92,47 +92,40 @@ function generateDenseRange(count: number): Array<{ readonly from: number; reado
     ]
 })
 export class ChartSyncDensityDemoComponent {
-    public readonly pointCounts = [10_000, 100_000, 500_000] as const;
-
-    public readonly algorithms = ["auto", "minmax", "lttb"] as const;
     public readonly algorithm = signal<(typeof this.algorithms)[number]>("auto");
-    public readonly downsamplingEnabled = signal(true);
-    public readonly renderer = signal<ChartRendererMode>("canvas");
-    public readonly showTooltips = signal(false);
-
-    public readonly lineCount = signal<number>(100_000);
-    public readonly scatterCount = signal<number>(100_000);
-
-    public readonly denseLineA = computed(() => generateDenseLine(this.lineCount(), 0));
-    public readonly denseLineB = computed(() => generateDenseLine(Math.floor(this.lineCount() / 2), 700));
-
-    public readonly denseScatter = computed(() => generateDenseScatter(this.scatterCount()));
+    public readonly algorithms = ["auto", "minmax", "lttb"] as const;
+    public readonly dashboardSync = computed<ChartSynchronizationInput>(() => ({
+        crosshair: { showTooltip: this.showTooltips() },
+        group: "dense-dashboard"
+    }));
     public readonly denseBubble = computed(() =>
         generateDenseBubble(this.scatterCount()).map(p => ({ ...p, size: p.size }))
     );
+    public readonly denseLineA = computed(() => generateDenseLine(this.lineCount(), 0));
+    public readonly denseLineB = computed(() => generateDenseLine(Math.floor(this.lineCount() / 2), 700));
     public readonly denseRange = computed(() => generateDenseRange(this.lineCount()));
+    public readonly denseScatter = computed(() => generateDenseScatter(this.scatterCount()));
+    public readonly downsamplingEnabled = signal(true);
+    public readonly downsamplingInput = computed<ChartDownsamplingInput>(() => ({
+        algorithm: this.algorithm(),
+        enabled: this.downsamplingEnabled()
+    }));
+    public readonly lineCount = signal<number>(100_000);
+    public readonly overviewSync = computed<ChartSynchronizationInput>(() => ({
+        group: "dense-dashboard",
+        viewport: { mode: "relative" }
+    }));
+    public readonly pointCounts = [10_000, 100_000, 500_000] as const;
+    public readonly renderer = signal<ChartRendererMode>("canvas");
+    public readonly scatterCount = signal<number>(100_000);
+    public readonly showTooltips = signal(false);
     public readonly stackedData = computed(() =>
-        generateDenseLine(this.lineCount(), 0).map((p, i) => ({
+        generateDenseLine(this.lineCount(), 0).map(p => ({
             positive: p.y + 30,
             negative: -(Math.abs(p.y) / 2 + 4),
             x: p.x
         }))
     );
-
-    public readonly downsamplingInput = computed<ChartDownsamplingInput>(() => ({
-        algorithm: this.algorithm(),
-        enabled: this.downsamplingEnabled()
-    }));
-
-    public readonly dashboardSync = computed<ChartSynchronizationInput>(() => ({
-        crosshair: { showTooltip: this.showTooltips() },
-        group: "dense-dashboard"
-    }));
-
-    public readonly overviewSync = computed<ChartSynchronizationInput>(() => ({
-        group: "dense-dashboard",
-        viewport: { mode: "relative" }
-    }));
 
     public onLineCountChange(event: Event): void {
         this.lineCount.set(Number.parseInt((event.target as HTMLSelectElement).value, 10));

@@ -20,7 +20,7 @@ import {
     MultiSelectSummaryTagTemplateDirective,
     MultiSelectTagTemplateDirective
 } from "@nanahoshi/mona-ui/multi-select";
-import { dropdownFoodData } from "../../../../assets/dropdown.data";
+import { type DropdownFoodItem, dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import {
@@ -74,7 +74,7 @@ const TAG_TEMPLATE_CODE = `<ng-template monaMultiSelectTagTemplate let-item>
     templateUrl: "./multi-select-demo.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectComponent> {
+export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectComponent<DropdownFoodItem>> {
     readonly #injector = createFeatureInjector({
         dataSet: dropdownDataSetFeatureConfig("multi select"),
         filtering: dropdownFilteringFeatureConfig("multi select"),
@@ -117,9 +117,8 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         },
         virtualization: dropdownVirtualizationFeatureConfig("multi select")
     });
-    protected readonly MultiSelectWrapperComponent = MultiSelectWrapperComponent;
-    protected readonly config = computed<ComponentConfig<MultiSelectComponent>>(() => ({
-        inputs: deriveInputConfig<MultiSelectComponent>(this.metadata(), {
+    protected readonly config = computed<ComponentConfig<MultiSelectComponent<DropdownFoodItem>>>(() => ({
+        inputs: deriveInputConfig<MultiSelectComponent<DropdownFoodItem>>(this.metadata(), {
             // The demo labels the field with visible text referenced through aria-labelledby.
             ariaDescribedBy: undefined,
             ariaLabel: undefined,
@@ -132,7 +131,11 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
             invalid: undefined,
             itemDisabled: {
                 type: "dropdown",
-                value: ["active", (item: any) => item.price > 5, (item: any) => item.price < 5],
+                value: [
+                    "active",
+                    (item: DropdownFoodItem) => item.price > 5,
+                    (item: DropdownFoodItem) => item.price < 5
+                ],
                 defaultValue: null,
                 clearable: true,
                 placeholder: "Select a condition..."
@@ -190,6 +193,7 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("MultiSelectComponent");
+    protected readonly wrapperComponent = MultiSelectWrapperComponent;
 }
 
 @Component({

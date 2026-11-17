@@ -98,7 +98,7 @@ export class ColorPickerDemoComponent extends AbstractDemoComponent<ColorPickerC
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ColorPickerComponent");
-    protected readonly ColorPickerWrapperComponent = ColorPickerWrapperComponent;
+    protected readonly wrapperComponent = ColorPickerWrapperComponent;
 }
 
 @Component({
@@ -127,23 +127,23 @@ export class ColorPickerDemoComponent extends AbstractDemoComponent<ColorPickerC
 })
 export class ColorPickerWrapperComponent implements ComponentInputsAsSignal<ColorPickerComponent> {
     readonly #formModel = signal<ColorPickerFormModel>({ color: null });
+    protected readonly customPalette = customColorPalette;
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.color, { when: () => this.disabled() });
         readonly(schema.color, { when: () => this.readonly() });
         required(schema.color, { when: () => this.required() });
     });
-    protected readonly customPalette = customColorPalette;
     public readonly ariaLabel = input("");
     public readonly ariaLabelledBy = input("");
     public readonly closeOnSelect = input(true, { transform: booleanAttribute });
     public readonly columns = input<ReturnType<ColorPickerComponent["columns"]>>(10);
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly format = input<ReturnType<ColorPickerComponent["format"]>>("hex");
-    public readonly readonly = input(false, { transform: booleanAttribute });
-    public readonly required = input(false, { transform: booleanAttribute });
     public readonly opacity = input(true, { transform: booleanAttribute });
     public readonly palette = input<ReturnType<ColorPickerComponent["palette"]>>("flat");
+    public readonly readonly = input(false, { transform: booleanAttribute });
+    public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<ColorPickerComponent["rounded"]>>("medium");
     public readonly showButtons = input(true, { transform: booleanAttribute });
     public readonly showClearButton = input(false, { transform: booleanAttribute });

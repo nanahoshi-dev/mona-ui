@@ -216,7 +216,7 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("DialogComponent");
-    protected readonly DialogWrapperComponent = DialogWrapperComponent;
+    protected readonly wrapperComponent = DialogWrapperComponent;
 }
 
 @Component({
@@ -319,18 +319,18 @@ class DialogWrapperComponent implements ComponentInputsAsSignal<DialogComponent>
     protected readonly features = inject(FeatureConfigHandler).data;
     protected dynamicDialogRef: DialogRef | null = null;
     public readonly actions = input<ReturnType<DialogComponent["actions"]>>([]);
-    public readonly ariaLabel = input<ReturnType<DialogComponent["ariaLabel"]>>();
     public readonly actionsLayout = input<ReturnType<DialogComponent["actionsLayout"]>>("end");
+    public readonly ariaLabel = input<ReturnType<DialogComponent["ariaLabel"]>>();
     public readonly closable = input<ReturnType<DialogComponent["closable"]>>(true);
     public readonly closeOnEscape = input<ReturnType<DialogComponent["closeOnEscape"]>>(true);
     public readonly description = input<ReturnType<DialogComponent["description"]>>("");
     public readonly focusedElement = input<ReturnType<DialogComponent["focusedElement"]>>("");
     public readonly height = input<ReturnType<DialogComponent["height"]>>(135);
+    public readonly left = input<ReturnType<DialogComponent["left"]>>();
     public readonly maxHeight = input<ReturnType<DialogComponent["maxHeight"]>>();
     public readonly maxWidth = input<ReturnType<DialogComponent["maxWidth"]>>();
     public readonly minHeight = input<ReturnType<DialogComponent["minHeight"]>>();
     public readonly minWidth = input<ReturnType<DialogComponent["minWidth"]>>();
-    public readonly left = input<ReturnType<DialogComponent["left"]>>();
     public readonly modal = input<ReturnType<DialogComponent["modal"]>>(true);
     public readonly rounded = input<ReturnType<DialogComponent["rounded"]>>("medium");
     public readonly text = input<ReturnType<DialogComponent["text"]>>("");
@@ -344,7 +344,7 @@ class DialogWrapperComponent implements ComponentInputsAsSignal<DialogComponent>
         // this.dialogVisible.set(false);
     }
 
-    protected onClose(event: PopupCloseEvent): void {
+    protected onClose(_event: PopupCloseEvent): void {
         console.log("Dialog is about to close");
         // event.preventDefault();
         this.dialogVisible.set(false);

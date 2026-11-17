@@ -111,7 +111,7 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("RatingComponent");
-    protected readonly RatingWrapperComponent = RatingWrapperComponent;
+    protected readonly wrapperComponent = RatingWrapperComponent;
 }
 
 @Component({

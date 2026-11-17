@@ -16,7 +16,7 @@ import {
     DropdownVirtualScrollDirective
 } from "@nanahoshi/mona-ui/dropdowns";
 import { range } from "@mirei/ts-collections";
-import { dropdownFoodData } from "../../../../assets/dropdown.data";
+import { type DropdownFoodItem, dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import {
@@ -78,7 +78,7 @@ function buildGroupingFeatureConfig() {
     imports: [DemoContainerComponent, NgComponentOutlet],
     templateUrl: "./dropdown-list-demo.component.html"
 })
-export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownListComponent> {
+export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownListComponent<DropdownFoodItem>> {
     readonly #injector = createFeatureInjector({
         dataSet: dropdownDataSetFeatureConfig("autocomplete"),
         filtering: dropdownFilteringFeatureConfig("dropdown"),
@@ -124,7 +124,7 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         virtualization: dropdownVirtualizationFeatureConfig("dropdown")
     });
     protected readonly config = computed(() => ({
-        inputs: deriveInputConfig<DropdownListComponent<any>>(this.metadata(), {
+        inputs: deriveInputConfig<DropdownListComponent<DropdownFoodItem>>(this.metadata(), {
             // The demo labels the field with visible text referenced through aria-labelledby.
             ariaDescribedBy: undefined,
             ariaLabel: undefined,
@@ -137,7 +137,11 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
             invalid: undefined,
             itemDisabled: {
                 type: "dropdown",
-                value: ["active", (item: any) => item.price > 5, (item: any) => item.price < 5],
+                value: [
+                    "active",
+                    (item: DropdownFoodItem) => item.price > 5,
+                    (item: DropdownFoodItem) => item.price < 5
+                ],
                 defaultValue: null,
                 clearable: true,
                 placeholder: "Select a condition..."
@@ -188,7 +192,7 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("DropdownListComponent");
-    protected readonly DropdownListWrapperComponent = DropdownListWrapperComponent;
+    protected readonly wrapperComponent = DropdownListWrapperComponent;
 }
 
 @Component({
@@ -312,12 +316,12 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
             .toArray();
     });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly filtering = computed(() => buildFilterableOptions(this.features()));
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.value, { when: () => this.disabled() });
         readonly(schema.value, { when: () => this.readonly() });
         required(schema.value, { when: () => this.required() });
     });
-    protected readonly filtering = computed(() => buildFilterableOptions(this.features()));
     protected readonly formValueText = computed(() => {
         const value = this.form.value().value();
         if (this.valuePrimitive()) {

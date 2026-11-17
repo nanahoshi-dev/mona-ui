@@ -53,7 +53,7 @@ import { EventViewerComponent } from "../event-viewer/event-viewer.component";
 const NODE_TEMPLATE_CODE = `<ng-template monaTreeViewNodeTemplate let-dataItem let-element="element">
     <div class="flex items-center gap-2">
         @if (mode() === "hierarchical") {
-            @let icon = dataItem.items.length === 0 ? FileIcon : FolderIcon;
+            @let icon = dataItem.items.length === 0 ? fileIcon : folderIcon;
             <svg [lucideIcon]="icon" [size]="14"></svg>
             <span>{{ dataItem.text }}</span>
         } @else {
@@ -66,19 +66,19 @@ const NODE_TEMPLATE_CODE = `<ng-template monaTreeViewNodeTemplate let-dataItem l
 </ng-template>`;
 
 interface TreeNodeDataItem {
-    id: string;
-    text: string;
-    items: TreeNodeDataItem[];
     disabled?: boolean;
+    id: string;
+    items: TreeNodeDataItem[];
+    text: string;
 }
 
 interface FlatTreeNodeDataItem {
-    id: string;
-    text: string;
-    parentId: string | null;
     disabled?: boolean;
-    type?: "category" | "product";
     icon?: LucideIconInput;
+    id: string;
+    parentId: string | null;
+    text: string;
+    type?: "category" | "product";
 }
 
 const childSelectors = [
@@ -93,7 +93,7 @@ const childSelectors = [
 const hasChildrenPredicates = [(x: TreeNodeDataItem) => x.items.length > 0];
 
 const hasCheckboxPredicates = [
-    (x: TreeNodeDataItem | FlatTreeNodeDataItem) => true,
+    (_item: TreeNodeDataItem | FlatTreeNodeDataItem) => true,
     (x: TreeNodeDataItem | FlatTreeNodeDataItem) => x.text.endsWith("s")
 ];
 
@@ -282,7 +282,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("TreeViewComponent");
-    protected readonly TreeViewWrapperComponent = TreeViewWrapperComponent;
+    protected readonly wrapperComponent = TreeViewWrapperComponent;
 }
 
 @Component({
@@ -339,7 +339,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
                     <ng-template monaTreeViewNodeTemplate let-dataItem let-element="element">
                         <div class="flex items-center gap-2">
                             @if (mode() === "hierarchical") {
-                                @let icon = dataItem.items.length === 0 ? FileIcon : FolderIcon;
+                                @let icon = dataItem.items.length === 0 ? fileIcon : folderIcon;
                                 <svg [lucideIcon]="icon" [size]="14"></svg>
                                 <span>{{ dataItem.text }}</span>
                             } @else {
@@ -408,6 +408,7 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
     });
     protected readonly expandedKeys = signal<string[]>([]);
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly fileIcon = LucideFile;
     protected readonly filterable = computed(() => {
         const features = this.features();
         const subFeatures = features["filterable"].subFeatures || {};
@@ -419,6 +420,7 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         };
         return filterableSettings;
     });
+    protected readonly folderIcon = LucideFolder;
     protected readonly hasCheckbox = computed(() => {
         const features = this.features();
         const subFeatures = features["checkable"].subFeatures || {};
@@ -496,10 +498,6 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
     protected onSelectionChange(nodeItem: NodeItem<TreeNodeDataItem>) {
         console.log(nodeItem);
     }
-
-    protected readonly TreeViewComponent = TreeViewComponent;
-    protected readonly FileIcon = LucideFile;
-    protected readonly FolderIcon = LucideFolder;
 }
 
 function generateFileTreeData(idPrefix: string = ""): TreeNodeDataItem[] {

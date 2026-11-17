@@ -230,7 +230,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ListBoxComponent");
-    protected readonly ListBoxWrapperComponent = ListBoxWrapperComponent;
+    protected readonly wrapperComponent = ListBoxWrapperComponent;
 }
 
 @Component({

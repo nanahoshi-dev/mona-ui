@@ -52,7 +52,7 @@ export class ColorPaletteDemoComponent extends AbstractDemoComponent<ColorPalett
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ColorPaletteComponent");
-    protected readonly ColorPaletteWrapperComponent = ColorPaletteWrapperComponent;
+    protected readonly wrapperComponent = ColorPaletteWrapperComponent;
 }
 
 @Component({
@@ -79,13 +79,13 @@ export class ColorPaletteDemoComponent extends AbstractDemoComponent<ColorPalett
 })
 export class ColorPaletteWrapperComponent implements ComponentInputsAsSignal<ColorPaletteComponent> {
     readonly #formModel = signal<ColorPaletteFormModel>({ color: null });
+    protected readonly customPalette = customColorPalette;
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.color, { when: () => this.disabled() });
         readonly(schema.color, { when: () => this.readonly() });
         required(schema.color, { when: () => this.required() });
     });
-    protected readonly customPalette = customColorPalette;
     protected readonly namedPalette = namedColorPalette;
     public readonly ariaLabel = input<ReturnType<ColorPaletteComponent["ariaLabel"]>>("");
     public readonly ariaLabelledBy = input("");

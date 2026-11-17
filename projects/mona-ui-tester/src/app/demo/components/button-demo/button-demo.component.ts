@@ -21,7 +21,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     templateUrl: "./button-demo.component.html"
 })
 export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> {
-    protected readonly ButtonWrapperComponent = ButtonWrapperComponent;
     protected readonly config = computed<ComponentConfig<ButtonDirective>>(() => ({
         inputs: deriveInputConfig<ButtonDirective>(this.metadata(), {
             ariaHasPopup: {
@@ -65,6 +64,7 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
         })
     }));
     protected readonly metadata = this.getMetadata("ButtonDirective");
+    protected readonly wrapperComponent = ButtonWrapperComponent;
 }
 
 @Component({

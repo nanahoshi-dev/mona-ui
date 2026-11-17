@@ -36,6 +36,9 @@ jobs:
           npx ng version
           npx vitest --version
 
+      - name: Lint
+        run: npm run lint
+
       - name: Build Metadata
         run: npm run build:metadata
 

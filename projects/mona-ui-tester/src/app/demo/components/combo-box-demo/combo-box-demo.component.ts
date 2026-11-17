@@ -16,7 +16,7 @@ import {
     DropdownVirtualScrollDirective
 } from "@nanahoshi/mona-ui/dropdowns";
 import { ImmutableSet, range } from "@mirei/ts-collections";
-import { dropdownFoodData } from "../../../../assets/dropdown.data";
+import { type DropdownFoodItem, dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { deriveInputConfig } from "../../utils/deriveInputConfig";
 import {
@@ -73,7 +73,7 @@ function buildGroupingFeatureConfig() {
     templateUrl: "./combo-box-demo.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxComponent> {
+export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxComponent<DropdownFoodItem>> {
     readonly #injector = createFeatureInjector({
         dataSet: dropdownDataSetFeatureConfig("combo box"),
         filtering: dropdownFilteringFeatureConfig("combo box"),
@@ -85,8 +85,8 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
         prefixTemplate: { ...dropdownPrefixTemplateFeatureConfig("combo box"), code: PREFIX_TEMPLATE_CODE },
         virtualization: dropdownVirtualizationFeatureConfig("combo box")
     });
-    protected readonly config = computed<ComponentConfig<ComboBoxComponent>>(() => ({
-        inputs: deriveInputConfig<ComboBoxComponent>(this.metadata(), {
+    protected readonly config = computed<ComponentConfig<ComboBoxComponent<DropdownFoodItem>>>(() => ({
+        inputs: deriveInputConfig<ComboBoxComponent<DropdownFoodItem>>(this.metadata(), {
             // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
             ariaDescribedBy: undefined,
             ariaLabel: undefined,
@@ -101,7 +101,11 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
             invalid: undefined,
             itemDisabled: {
                 type: "dropdown",
-                value: ["active", (item: any) => item.price > 5, (item: any) => item.price < 5],
+                value: [
+                    "active",
+                    (item: DropdownFoodItem) => item.price > 5,
+                    (item: DropdownFoodItem) => item.price < 5
+                ],
                 defaultValue: null,
                 clearable: true,
                 placeholder: "Select a condition..."
@@ -148,7 +152,7 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ComboBoxComponent");
-    protected readonly ComboBoxWrapperComponent = ComboBoxWrapperComponent;
+    protected readonly wrapperComponent = ComboBoxWrapperComponent;
 }
 
 @Component({
@@ -267,12 +271,12 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
         return this.#comboBoxVirtualData();
     });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly filtering = computed(() => buildFilterableOptions(this.features()));
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.value, { when: () => this.disabled() });
         readonly(schema.value, { when: () => this.readonly() });
         required(schema.value, { when: () => this.required() });
     });
-    protected readonly filtering = computed(() => buildFilterableOptions(this.features()));
     protected readonly formValueText = computed(() => {
         const value = this.form.value().value();
         if (this.valuePrimitive()) {

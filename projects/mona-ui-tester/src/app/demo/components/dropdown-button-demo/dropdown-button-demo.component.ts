@@ -183,7 +183,7 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("DropdownButtonComponent");
-    protected readonly DropdownButtonWrapperComponent = DropdownButtonWrapperComponent;
+    protected readonly wrapperComponent = DropdownButtonWrapperComponent;
 }
 
 @Component({

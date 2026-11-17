@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, Injector, linkedSignal, Signal, signal } from "@angular/core";
+import { Component, inject, Injector, linkedSignal, Signal, signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { filter, map } from "rxjs";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
@@ -14,11 +14,8 @@ export abstract class AbstractDemoComponent<TComponent> {
         computation: () => extractConfigValues(this.config())
     });
 
-    protected onInputValueChange(value: any): void {
-        this.inputs.update(currentValues => {
-            return { ...currentValues, ...value };
-        });
-    }
+    protected abstract config: Signal<ComponentConfig<TComponent>>;
+    protected abstract metadata: Signal<ComponentMetadata>;
 
     protected getMetadata(name: string): Signal<ComponentMetadata> {
         return toSignal(
@@ -30,6 +27,9 @@ export abstract class AbstractDemoComponent<TComponent> {
         );
     }
 
-    protected abstract config: Signal<ComponentConfig<TComponent>>;
-    protected abstract metadata: Signal<ComponentMetadata>;
+    protected onInputValueChange(value: Readonly<Record<string, unknown>>): void {
+        this.inputs.update(currentValues => {
+            return { ...currentValues, ...value };
+        });
+    }
 }

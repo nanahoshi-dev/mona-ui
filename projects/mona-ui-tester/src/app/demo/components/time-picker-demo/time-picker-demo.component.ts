@@ -31,7 +31,6 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
             name: "Prevent Open"
         }
     });
-    protected readonly TimePickerWrapperComponent = TimePickerWrapperComponent;
     protected readonly config = computed<ComponentConfig<TimePickerComponent>>(() => ({
         inputs: deriveInputConfig<TimePickerComponent>(this.metadata(), {
             // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
@@ -91,6 +90,7 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("TimePickerComponent");
+    protected readonly wrapperComponent = TimePickerWrapperComponent;
 }
 
 @Component({

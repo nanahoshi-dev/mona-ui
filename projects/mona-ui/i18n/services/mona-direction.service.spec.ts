@@ -1,6 +1,6 @@
-import { Directionality } from "@angular/cdk/bidi";
-import { Component, ElementRef, EventEmitter, inject } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { type Direction, Directionality } from "@angular/cdk/bidi";
+import { Component, EventEmitter } from "@angular/core";
+import { TestBed } from "@angular/core/testing";
 import { describe, expect, it, vi } from "vitest";
 import { MonaI18nService } from "./mona-i18n.service";
 import type { MonaTextDirection } from "../models/mona-direction";
@@ -27,7 +27,7 @@ describe("MonaDirectionService and direction utilities", () => {
         });
 
         it("respects CDK Directionality when element has no dir attribute", () => {
-            const fakeDir = { value: "rtl", change: new EventEmitter<any>() } as Directionality;
+            const fakeDir = { value: "rtl", change: new EventEmitter<Direction>() } as Directionality;
             expect(resolveComponentDirection(null, fakeDir)).toBe("rtl");
         });
 
@@ -44,7 +44,7 @@ describe("MonaDirectionService and direction utilities", () => {
         });
 
         it("prefers element [dir] attribute over root Directionality", () => {
-            const fakeDir = { value: "ltr", change: new EventEmitter<any>() } as Directionality;
+            const fakeDir = { value: "ltr", change: new EventEmitter<Direction>() } as Directionality;
             const div = document.createElement("div");
             div.setAttribute("dir", "rtl");
             const child = document.createElement("span");
@@ -181,7 +181,7 @@ describe("MonaDirectionService and direction utilities", () => {
         });
 
         it("updates reactively when CDK directionality changes", () => {
-            const changeEmitter = new EventEmitter<any>();
+            const changeEmitter = new EventEmitter<Direction>();
             const fakeDirectionality = { value: "ltr", change: changeEmitter };
 
             TestBed.configureTestingModule({
@@ -474,20 +474,18 @@ describe("MonaDirectionService and direction utilities", () => {
             expect(spuriousCallbackFired).toBe(false);
             extraCleanup();
 
-            const previousDisconnectCount = disconnectSpy.mock.calls.length;
+            const rootContentObserver =
+                observeSpy.mock.contexts[observeSpy.mock.calls.indexOf(rootContentObserverCalls[0])];
 
             // Destroy 9 consumers: root content observer must NOT disconnect
             for (let i = 0; i < 9; i++) {
                 cleanups[i]();
             }
-            // Disconnect should not have been called on the container observer yet
-            const containerDisconnectsBeforeFinal = disconnectSpy.mock.calls.filter(
-                call => call.length === 0 // disconnect() has 0 args
-            );
+            expect(disconnectSpy.mock.contexts).not.toContain(rootContentObserver);
 
             // Destroy the final consumer: now the shared observer disconnects
             cleanups[9]();
-            expect(disconnectSpy.mock.calls.length).toBeGreaterThan(previousDisconnectCount);
+            expect(disconnectSpy.mock.contexts).toContain(rootContentObserver);
 
             observeSpy.mockRestore();
             disconnectSpy.mockRestore();

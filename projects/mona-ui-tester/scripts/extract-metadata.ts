@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { CallExpression, JSDocTag, Node, Project, SyntaxKind, Type } from "ts-morph";
+import { CallExpression, type ClassDeclaration, JSDocTag, Node, Project, SyntaxKind, Type } from "ts-morph";
 
 interface ComponentInputMetadata {
     /** The name consumers bind, when the input or output is aliased (`input("", { alias: "aria-label" })`). */
@@ -167,7 +167,7 @@ function extractAlias(callExpression: CallExpression, isRequired: boolean): stri
 }
 
 function extractInputsFromInheritanceChain(
-    classDeclaration: any,
+    classDeclaration: ClassDeclaration,
     visitedClasses = new Set<string>()
 ): ComponentInputMetadata[] {
     const className = classDeclaration.getName();

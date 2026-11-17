@@ -40,7 +40,7 @@ export class PlaceholderDemoComponent extends AbstractDemoComponent<PlaceholderC
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("PlaceholderComponent");
-    protected readonly PlaceholderWrapperComponent = PlaceholderWrapperComponent;
+    protected readonly wrapperComponent = PlaceholderWrapperComponent;
 }
 
 @Component({

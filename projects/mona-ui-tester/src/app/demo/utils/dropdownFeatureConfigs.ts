@@ -44,7 +44,7 @@ export function buildVirtualScrollOptions(featureData: ComponentConfigFeatureIte
     };
 }
 
-export const dropdownFilteringFeatureConfig = <TDropdown = any>(
+export const dropdownFilteringFeatureConfig = <TDropdown = unknown>(
     type: string
 ): ComponentConfigFeatureItemOptions<TDropdown> => {
     return {
@@ -97,7 +97,7 @@ export const dropdownDataSetFeatureConfig = (type: string): ComponentConfigFeatu
     };
 };
 
-export const dropdownGroupingFeatureConfig = <TDropdown = any>(
+export const dropdownGroupingFeatureConfig = <TDropdown = unknown>(
     type: string
 ): ComponentConfigFeatureItemOptions<TDropdown> => {
     return {
@@ -156,7 +156,7 @@ export const dropdownGroupingFeatureConfig = <TDropdown = any>(
     };
 };
 
-export const dropdownPrefixTemplateFeatureConfig = <TDropdown = any>(
+export const dropdownPrefixTemplateFeatureConfig = <TDropdown = unknown>(
     type: string
 ): ComponentConfigFeatureItemOptions<TDropdown> => {
     return {
@@ -167,7 +167,7 @@ export const dropdownPrefixTemplateFeatureConfig = <TDropdown = any>(
     };
 };
 
-export const dropdownPreventPopupEventFeatureConfig = <TDropdown = any>(
+export const dropdownPreventPopupEventFeatureConfig = <TDropdown = unknown>(
     eventType: string
 ): ComponentConfigFeatureItemOptions<TDropdown> => {
     return {
@@ -178,7 +178,7 @@ export const dropdownPreventPopupEventFeatureConfig = <TDropdown = any>(
     };
 };
 
-export const dropdownSuffixTemplateFeatureConfig = <TDropdown = any>(
+export const dropdownSuffixTemplateFeatureConfig = <TDropdown = unknown>(
     type: string
 ): ComponentConfigFeatureItemOptions<TDropdown> => {
     return {
@@ -189,7 +189,7 @@ export const dropdownSuffixTemplateFeatureConfig = <TDropdown = any>(
     };
 };
 
-export const dropdownFooterTemplateFeatureConfig = <TDropdown = any>(
+export const dropdownFooterTemplateFeatureConfig = <TDropdown = unknown>(
     type: string
 ): ComponentConfigFeatureItemOptions<TDropdown> => {
     return {
@@ -212,7 +212,7 @@ export const NO_DATA_TEMPLATE_CODE = `<ng-template monaDropDownNoDataTemplate>
     </div>
 </ng-template>`;
 
-export const dropdownNoDataTemplateFeatureConfig = <TDropdown = any>(
+export const dropdownNoDataTemplateFeatureConfig = <TDropdown = unknown>(
     type: string
 ): ComponentConfigFeatureItemOptions<TDropdown> => {
     return {
@@ -223,7 +223,7 @@ export const dropdownNoDataTemplateFeatureConfig = <TDropdown = any>(
     };
 };
 
-export const dropdownHeaderTemplateFeatureConfig = <TDropdown = any>(
+export const dropdownHeaderTemplateFeatureConfig = <TDropdown = unknown>(
     type: string
 ): ComponentConfigFeatureItemOptions<TDropdown> => {
     return {
@@ -249,7 +249,7 @@ export const ITEM_TEMPLATE_CODE = `<ng-template monaDropDownItemTemplate let-ite
     </div>
 </ng-template>`;
 
-export const dropdownItemTemplateFeatureConfig = <TDropdown = any>(
+export const dropdownItemTemplateFeatureConfig = <TDropdown = unknown>(
     type: string
 ): ComponentConfigFeatureItemOptions<TDropdown> => {
     return {
@@ -260,7 +260,7 @@ export const dropdownItemTemplateFeatureConfig = <TDropdown = any>(
     };
 };
 
-export const dropdownVirtualizationFeatureConfig = <TDropdown = any>(
+export const dropdownVirtualizationFeatureConfig = <TDropdown = unknown>(
     type: string
 ): ComponentConfigFeatureItemOptions<TDropdown> => {
     return {
@@ -285,9 +285,9 @@ export const dropdownVirtualizationFeatureConfig = <TDropdown = any>(
     };
 };
 
-export const getFormValueText = (formValue: any, field: DropdownFieldSelectorType<unknown>) => {
+export const getFormValueText = (formValue: unknown, field: DropdownFieldSelectorType<unknown>): unknown => {
     if (typeof field === "string") {
-        return formValue ? (formValue as any)[field as string] : "";
+        return formValue ? (formValue as Readonly<Record<string, unknown>>)[field] : "";
     } else if (typeof field === "function") {
         return field(formValue);
     }

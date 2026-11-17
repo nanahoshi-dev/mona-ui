@@ -131,7 +131,6 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
             active: false
         }
     });
-    protected readonly SplitButtonWrapperComponent = SplitButtonWrapperComponent;
     protected readonly config = computed<ComponentConfig<SplitButtonComponent>>(() => ({
         inputs: deriveInputConfig<SplitButtonComponent>(this.metadata(), {
             ariaLabel: {
@@ -174,6 +173,7 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SplitButtonComponent");
+    protected readonly wrapperComponent = SplitButtonWrapperComponent;
 }
 
 @Component({

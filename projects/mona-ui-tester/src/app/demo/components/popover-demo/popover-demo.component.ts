@@ -86,7 +86,7 @@ export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("PopoverComponent");
-    protected readonly PopoverWrapperComponent = PopoverWrapperComponent;
+    protected readonly wrapperComponent = PopoverWrapperComponent;
 }
 
 @Component({
@@ -163,6 +163,6 @@ class PopoverWrapperComponent implements ComponentInputsAsSignal<PopoverComponen
     public readonly position = input<ReturnType<PopoverComponent["position"]>>("top");
     public readonly rounded = input<ReturnType<PopoverComponent["rounded"]>>("medium");
     public readonly target = input<ReturnType<PopoverComponent["target"]>>(this.#document.body);
-    public readonly trigger = input<ReturnType<PopoverComponent["trigger"]>>("click");
     public readonly title = input<ReturnType<PopoverComponent["title"]>>("");
+    public readonly trigger = input<ReturnType<PopoverComponent["trigger"]>>("click");
 }

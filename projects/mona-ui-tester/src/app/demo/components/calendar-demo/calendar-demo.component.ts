@@ -96,7 +96,7 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("CalendarComponent");
-    protected readonly CalendarWrapperComponent = CalendarWrapperComponent;
+    protected readonly wrapperComponent = CalendarWrapperComponent;
 }
 
 @Component({

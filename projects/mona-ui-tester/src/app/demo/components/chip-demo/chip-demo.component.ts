@@ -41,7 +41,6 @@ export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
             description: "Allows custom prefix content to be displayed before the chip label."
         }
     });
-    protected readonly ChipWrapperComponent = ChipWrapperComponent;
     protected readonly config = computed<ComponentConfig<ChipComponent>>(() => ({
         inputs: deriveInputConfig<ChipComponent>(this.metadata(), {
             label: {
@@ -73,6 +72,7 @@ export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ChipComponent");
+    protected readonly wrapperComponent = ChipWrapperComponent;
 }
 
 @Component({

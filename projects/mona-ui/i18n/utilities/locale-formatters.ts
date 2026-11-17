@@ -2,20 +2,20 @@ import { canonicalizeLocaleId } from "./locale-id";
 
 export interface NumberSymbols {
     readonly decimal: string;
+    readonly digits: ReadonlyMap<string, string>;
     readonly group: string;
     readonly minus: string;
-    readonly digits: ReadonlyMap<string, string>;
 }
 
 export interface NumberGroupingPattern {
-    readonly primaryGroupSize: number;
-    readonly secondaryGroupSize: number;
     readonly groupSeparator: string;
     /**
      * Fewest integer digits the locale groups when formatting (5 in es-ES, which formats 1000 but 10.000).
      * Parsing does not enforce it: "1.000" is still read as 1000 in es-ES.
      */
     readonly minimumGroupedIntegerDigits: number;
+    readonly primaryGroupSize: number;
+    readonly secondaryGroupSize: number;
 }
 
 /** Full-width forms of printable ASCII ("！" to "～"), offset from ASCII by U+FEE0. */
@@ -258,6 +258,10 @@ export type LocalizedNumberParseMode = "edit" | "locale";
 
 export interface ParseLocalizedNumberOptions {
     /**
+     * Legacy convenience flag equivalent to `mode: "edit"`.
+     */
+    alternateDecimal?: boolean;
+    /**
      * When "locale" (default), parses strictly according to canonical locale rules.
      * Only the locale's canonical decimal separator is treated as decimal, and only
      * canonical grouping separators are treated as grouping.
@@ -265,10 +269,6 @@ export interface ParseLocalizedNumberOptions {
      * during interactive input entry, unless the alternate is the locale's group separator.
      */
     mode?: LocalizedNumberParseMode;
-    /**
-     * Legacy convenience flag equivalent to `mode: "edit"`.
-     */
-    alternateDecimal?: boolean;
 }
 
 /**
@@ -735,8 +735,8 @@ interface EditValidationResult<T> {
 const EDIT_SYNTAX_ERROR = { complete: false, reason: "syntax", valid: false, value: null } as const;
 
 export interface ValidateLocalizedNumberEditOptions {
-    readonly decimals?: number;
     readonly allowSign?: boolean;
+    readonly decimals?: number;
 }
 
 /** @hidden Exported for Mona UI's other entry points; applications don't need it. */

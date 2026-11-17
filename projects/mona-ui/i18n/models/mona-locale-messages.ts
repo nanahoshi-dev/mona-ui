@@ -58,6 +58,7 @@ export interface MonaLocaleMessages {
     colorPalette: MonaColorPaletteMessages;
     colorPicker: MonaColorPickerMessages;
     comboBox: MonaComboBoxMessages;
+    command: MonaCommandMessages;
     datePicker: MonaDatePickerMessages;
     dateRangePicker: MonaDateRangePickerMessages;
     dateTimePicker: MonaDateTimePickerMessages;
@@ -78,11 +79,10 @@ export interface MonaLocaleMessages {
     pager: MonaPagerMessages;
     progressBar: MonaProgressBarMessages;
     qrCode: MonaQrCodeMessages;
-    sidebar: MonaSidebarMessages;
     rating: MonaRatingMessages;
-    command: MonaCommandMessages;
     scrollView: MonaScrollViewMessages;
     sheet: MonaSheetMessages;
+    sidebar: MonaSidebarMessages;
     slider: MonaSliderMessages;
     spinner: MonaSpinnerMessages;
     splitButton: MonaSplitButtonMessages;

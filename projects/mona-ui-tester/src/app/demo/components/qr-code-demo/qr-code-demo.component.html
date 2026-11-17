@@ -1,3 +1,3 @@
 <app-demo-container [config]="config()" [metadata]="metadata()" (valueChange)="onInputValueChange($event)">
-    <ng-container [ngComponentOutlet]="QrCodeWrapperComponent" [ngComponentOutletInputs]="inputs()"></ng-container>
+    <ng-container [ngComponentOutlet]="wrapperComponent" [ngComponentOutletInputs]="inputs()"></ng-container>
 </app-demo-container>

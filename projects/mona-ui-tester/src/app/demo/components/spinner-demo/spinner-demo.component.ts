@@ -48,7 +48,7 @@ export class SpinnerDemoComponent extends AbstractDemoComponent<SpinnerComponent
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SpinnerComponent");
-    protected readonly spinnerWrapperComponent = SpinnerWrapperComponent;
+    protected readonly wrapperComponent = SpinnerWrapperComponent;
 }
 
 @Component({

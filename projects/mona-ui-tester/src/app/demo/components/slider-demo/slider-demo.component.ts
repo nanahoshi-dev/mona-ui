@@ -109,7 +109,7 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SliderComponent");
-    protected readonly SliderWrapperComponent = SliderWrapperComponent;
+    protected readonly wrapperComponent = SliderWrapperComponent;
 }
 
 @Component({

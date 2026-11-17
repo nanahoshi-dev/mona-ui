@@ -62,6 +62,8 @@ export default [
                 }
             ],
             "@angular-eslint/no-input-rename": "off",
+            // Angular 22 makes OnPush the default, so components leave changeDetection out.
+            "@angular-eslint/prefer-on-push-component-change-detection": "off",
             "@typescript-eslint/explicit-function-return-type": "off",
             "@typescript-eslint/explicit-member-accessibility": "off",
             "@typescript-eslint/member-ordering": [
@@ -149,10 +151,12 @@ export default [
                     format: ["camelCase"]
                 },
                 {
+                    // Keys that are data rather than names are left alone: CSS variables, kebab-case and PascalCase
+                    // names, numbers such as weekdays, and labels with spaces or slashes such as themes and routes.
                     selector: ["objectLiteralProperty", "typeProperty"],
                     format: ["camelCase"],
                     filter: {
-                        regex: "^([\\[(].*[\\])]|--.*|[A-Za-z]+-[A-Za-z-]*|[A-Z][A-Za-z]*)$",
+                        regex: "^([\\[(].*[\\])]|--.*|[A-Za-z]+-[A-Za-z-]*|[A-Z][A-Za-z]*|\\d+|.*[ /].*)$",
                         match: false
                     }
                 },

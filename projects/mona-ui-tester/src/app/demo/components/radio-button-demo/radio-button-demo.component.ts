@@ -14,7 +14,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     templateUrl: "./radio-button-demo.component.html"
 })
 export class RadioButtonDemoComponent extends AbstractDemoComponent<RadioButtonComponent> {
-    protected readonly RadioButtonWrapperComponent = RadioButtonWrapperComponent;
     protected readonly config = computed<ComponentConfig<RadioButtonComponent>>(() => ({
         inputs: deriveInputConfig<RadioButtonComponent>(this.metadata(), {
             label: {
@@ -56,6 +55,7 @@ export class RadioButtonDemoComponent extends AbstractDemoComponent<RadioButtonC
         })
     }));
     protected readonly metadata = this.getMetadata("RadioButtonComponent");
+    protected readonly wrapperComponent = RadioButtonWrapperComponent;
 }
 
 @Component({
@@ -191,7 +191,7 @@ export class RadioButtonWrapperComponent implements ComponentInputsAsSignal<Radi
     public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<RadioButtonComponent["rounded"]>>("full");
     public readonly userClass = input<ReturnType<RadioButtonComponent["userClass"]>>("");
-    public readonly value = model<any>(undefined);
+    public readonly value = model<unknown>(undefined);
 
     public constructor() {}
 

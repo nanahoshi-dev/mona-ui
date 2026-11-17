@@ -163,7 +163,7 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ContextMenuComponent");
-    protected readonly ContextMenuWrapperComponent = ContextMenuWrapperComponent;
+    protected readonly wrapperComponent = ContextMenuWrapperComponent;
 }
 
 @Component({
@@ -323,7 +323,7 @@ class ContextMenuWrapperComponent implements ComponentInputsAsSignal<ContextMenu
     public readonly target = input.required<ReturnType<ContextMenuComponent["target"]>>();
     public readonly width = input<ReturnType<ContextMenuComponent["width"]>>();
 
-    protected onMenuClick(event: any, source: string): void {
+    protected onMenuClick(event: unknown, source: string): void {
         console.log("Menu item clicked: ", source, event);
     }
 }

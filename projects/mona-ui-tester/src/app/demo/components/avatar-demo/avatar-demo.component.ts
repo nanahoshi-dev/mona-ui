@@ -12,7 +12,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     templateUrl: "./avatar-demo.component.html"
 })
 export class AvatarDemoComponent extends AbstractDemoComponent<AvatarComponent> {
-    protected readonly AvatarWrapperComponent = AvatarWrapperComponent;
     protected readonly config = computed<ComponentConfig<AvatarComponent>>(() => ({
         inputs: deriveInputConfig<AvatarComponent>(this.metadata(), {
             backgroundColor: {
@@ -70,6 +69,7 @@ export class AvatarDemoComponent extends AbstractDemoComponent<AvatarComponent> 
         })
     }));
     protected readonly metadata = this.getMetadata("AvatarComponent");
+    protected readonly wrapperComponent = AvatarWrapperComponent;
 }
 
 @Component({

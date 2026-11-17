@@ -3,29 +3,30 @@ import { orderBy } from "@mirei/ts-collections";
 import { FeatureConfigHandler } from "./featureInjection";
 
 type GetInputSignalValue<T> =
-    T extends InputSignal<infer V> ? V : T extends InputSignalWithTransform<any, infer U> ? U : never;
+    T extends InputSignal<infer V> ? V : T extends InputSignalWithTransform<infer _T, infer U> ? U : never;
 
 type GetOutputSignalValue<T> = T extends OutputEmitterRef<infer V> ? V : never;
 
 export type ComponentInputs<TComponent> = {
     [
-        K in keyof TComponent as TComponent[K] extends InputSignalWithTransform<any, any> ? K : never
-    ]?: TComponent[K] extends InputSignalWithTransform<any, any> ? GetInputSignalValue<TComponent[K]> : never;
+        K in keyof TComponent as TComponent[K] extends InputSignalWithTransform<infer _T, infer _U> ? K : never
+    ]?: TComponent[K] extends InputSignalWithTransform<infer _T, infer _U> ? GetInputSignalValue<TComponent[K]> : never;
 };
 
 export type ComponentOutputs<TComponent> = {
-    [K in keyof TComponent as TComponent[K] extends OutputEmitterRef<any> ? K : never]?: GetOutputSignalValue<
+    [K in keyof TComponent as TComponent[K] extends OutputEmitterRef<infer _V> ? K : never]?: GetOutputSignalValue<
         TComponent[K]
     >;
 };
 
-type GetSignalType<T> = T extends InputSignalWithTransform<any, any> ? T : T extends ModelSignal<any> ? T : never;
+type GetSignalType<T> =
+    T extends InputSignalWithTransform<infer _T, infer _U> ? T : T extends ModelSignal<infer _T> ? T : never;
 
 export type ComponentInputsAsSignal<TComponent> = {
     [
-        K in keyof TComponent as TComponent[K] extends InputSignalWithTransform<any, any>
+        K in keyof TComponent as TComponent[K] extends InputSignalWithTransform<infer _T, infer _U>
             ? K
-            : TComponent[K] extends ModelSignal<any>
+            : TComponent[K] extends ModelSignal<infer _T>
               ? K
               : never
     ]?: GetSignalType<TComponent[K]>;
@@ -80,7 +81,7 @@ export type ComponentConfigInputType<TComponent> = {
           }
         | {
               type: Extract<ComponentConfigType, "function">;
-              value: Function;
+              value: (...args: never[]) => unknown;
           }
         | {
               type: Extract<ComponentConfigType, "object">;
@@ -95,10 +96,12 @@ export type ComponentConfigOutputType<TComponent> = {
     };
 };
 
+// Features live in one record keyed by name, so a dropdown value's type is only known where a demo reads it by key.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface ComponentConfigFeatureItemOptions<TDropdown = any> {
     active: boolean;
-    code?: string;
     clearable?: boolean;
+    code?: string;
     /**
      * Where a parts playground's code sample writes this feature's `code` among its element's content: `"start"` before
      * everything else, such as a header region, or `"end"` after it, the default.
@@ -143,6 +146,8 @@ export type ComponentConfig<TComponent> = {
     outputs?: ComponentConfigOutputType<TComponent>;
 };
 
+// The API panel binds each item's value to the control for its type, so the value's type is only known there.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ProcessedConfigItem<TValue = any, TDefault = any> = {
     alias?: string; // Optional alias for the input
     configType: ComponentConfigType;
@@ -188,7 +193,7 @@ export function createComponentInputConfigArray<TComponent>(
     configInput: ComponentConfigInputType<TComponent>
 ): ProcessedConfigItem[] {
     const processedArray: ProcessedConfigItem[] = [];
-    const getRuntimeValueType = (val: any): ProcessedConfigItem["valueType"] => {
+    const getRuntimeValueType = (val: unknown): ProcessedConfigItem["valueType"] => {
         if (Array.isArray(val)) {
             return "array";
         }
@@ -290,7 +295,7 @@ export function extractConfigValues<TComponent>(
         if (Object.prototype.hasOwnProperty.call(inputs, key)) {
             const configItem = inputs[key];
             if (configItem) {
-                let valueToAssign: any;
+                let valueToAssign: unknown;
                 if (configItem.type === "iterable") {
                     valueToAssign = configItem.value;
                 } else if (Array.isArray(configItem.value) && configItem.value.length > 0) {

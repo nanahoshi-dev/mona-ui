@@ -67,7 +67,6 @@ export class BreadcrumbDemoComponent extends AbstractDemoComponent<BreadcrumbCom
             description: "Use a custom icon for the breadcrumb separator."
         }
     });
-    protected readonly BreadcrumbWrapperComponent = BreadcrumbWrapperComponent;
     protected readonly config = computed<ComponentConfig<BreadcrumbComponent>>(() => ({
         inputs: deriveInputConfig<BreadcrumbComponent>(this.metadata(), {
             ariaLabel: {
@@ -92,6 +91,7 @@ export class BreadcrumbDemoComponent extends AbstractDemoComponent<BreadcrumbCom
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("BreadcrumbComponent");
+    protected readonly wrapperComponent = BreadcrumbWrapperComponent;
 }
 
 @Component({

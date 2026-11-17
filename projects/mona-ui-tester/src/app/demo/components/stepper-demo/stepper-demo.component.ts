@@ -154,7 +154,7 @@ export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("StepperComponent");
-    protected readonly StepperWrapperComponent = StepperWrapperComponent;
+    protected readonly wrapperComponent = StepperWrapperComponent;
 }
 
 @Component({

@@ -160,7 +160,7 @@
             }
         </li>
         @if (entry[1].subFeatures && entry[1].active) {
-            @let subFeatureEntries = Object.entries(entry[1].subFeatures);
+            @let subFeatureEntries = featureEntries(entry[1].subFeatures);
             @if (subFeatureEntries.length > 0) {
                 <ng-container
                     [ngTemplateOutlet]="featureListTemplate"

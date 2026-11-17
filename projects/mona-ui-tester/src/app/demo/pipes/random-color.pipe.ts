@@ -4,7 +4,7 @@ import { Pipe, PipeTransform } from "@angular/core";
     name: "randomColor"
 })
 export class RandomColorPipe implements PipeTransform {
-    public transform(value: unknown): string {
+    public transform(_value: unknown): string {
         const randomColor = () => {
             const letters = "0123456789ABCDEF";
             let color = "#";

@@ -152,7 +152,6 @@ export class EditorDemoComponent extends AbstractDemoComponent<EditorComponent> 
             type: "boolean"
         }
     });
-    protected readonly EditorWrapperComponent = EditorWrapperComponent;
     protected readonly config = signal<ComponentConfig<EditorComponent>>({
         inputs: {
             disabled: {
@@ -175,6 +174,7 @@ export class EditorDemoComponent extends AbstractDemoComponent<EditorComponent> 
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("EditorComponent");
+    protected readonly wrapperComponent = EditorWrapperComponent;
 }
 
 @Component({

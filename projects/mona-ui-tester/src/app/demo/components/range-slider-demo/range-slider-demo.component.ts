@@ -45,7 +45,6 @@ export class RangeSliderDemoComponent extends AbstractDemoComponent<RangeSliderC
             active: false
         }
     });
-    protected readonly RangeSliderWrapperComponent = RangeSliderWrapperComponent;
     protected readonly config = computed<ComponentConfig<RangeSliderComponent>>(() => ({
         inputs: deriveInputConfig<RangeSliderComponent>(this.metadata(), {
             // invalid/touched are written by the FormField directive via [formField] below;
@@ -109,6 +108,7 @@ export class RangeSliderDemoComponent extends AbstractDemoComponent<RangeSliderC
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("RangeSliderComponent");
+    protected readonly wrapperComponent = RangeSliderWrapperComponent;
 }
 
 @Component({

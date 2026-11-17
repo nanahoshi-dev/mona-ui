@@ -83,7 +83,7 @@ export class SwitchDemoComponent extends AbstractDemoComponent<SwitchComponent> 
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SwitchComponent");
-    protected readonly SwitchWrapperComponent = SwitchWrapperComponent;
+    protected readonly wrapperComponent = SwitchWrapperComponent;
 }
 
 @Component({

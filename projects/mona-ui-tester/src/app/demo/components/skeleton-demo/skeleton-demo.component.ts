@@ -38,7 +38,7 @@ export class SkeletonDemoComponent extends AbstractDemoComponent<SkeletonCompone
         })
     }));
     protected readonly metadata = this.getMetadata("SkeletonComponent");
-    protected readonly SkeletonWrapperComponent = SkeletonWrapperComponent;
+    protected readonly wrapperComponent = SkeletonWrapperComponent;
 }
 
 @Component({
