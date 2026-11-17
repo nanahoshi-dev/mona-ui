@@ -189,6 +189,22 @@ export const ZH_TW_MESSAGES = {
         datePicker: "日期選取器",
         openCalendar: "開啟行事曆"
     },
+    dateRangePicker: {
+        dateRangePicker: "日期範圍選取器",
+        end: "結束日期",
+        lastDays: (count: number) => `最近 ${localizeNumber(count)} 天`,
+        lastMonth: "上個月",
+        lastWeek: "上週",
+        lastYear: "去年",
+        openCalendar: "開啟行事曆",
+        presets: "快速選取",
+        start: "開始日期",
+        thisMonth: "本月",
+        thisWeek: "本週",
+        thisYear: "今年",
+        today: "今天",
+        yesterday: "昨天"
+    },
     dateTimePicker: {
         calendar: "行事曆",
         cancel: "取消",

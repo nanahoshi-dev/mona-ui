@@ -135,6 +135,13 @@ export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
         typeName: "MonaDatePickerMessages"
     },
     {
+        constName: "DATE_RANGE_PICKER_DEFAULT_MESSAGES",
+        file: "date-range-picker/i18n/date-range-picker.default-messages.ts",
+        namespace: "dateRangePicker",
+        style: "type",
+        typeName: "MonaDateRangePickerMessages"
+    },
+    {
         constName: "DATETIME_PICKER_DEFAULT_MESSAGES",
         file: "datetime-picker/i18n/datetime-picker.default-messages.ts",
         namespace: "dateTimePicker",

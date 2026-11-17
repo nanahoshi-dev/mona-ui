@@ -188,6 +188,22 @@ export const JA_JP_MESSAGES = {
         datePicker: "日付選択",
         openCalendar: "カレンダーを開く"
     },
+    dateRangePicker: {
+        dateRangePicker: "日付範囲の選択",
+        end: "終了日",
+        lastDays: (count: number) => `過去 ${localizeNumber(count)} 日間`,
+        lastMonth: "先月",
+        lastWeek: "先週",
+        lastYear: "昨年",
+        openCalendar: "カレンダーを開く",
+        presets: "クイック選択",
+        start: "開始日",
+        thisMonth: "今月",
+        thisWeek: "今週",
+        thisYear: "今年",
+        today: "今日",
+        yesterday: "昨日"
+    },
     dateTimePicker: {
         calendar: "カレンダー",
         cancel: "キャンセル",

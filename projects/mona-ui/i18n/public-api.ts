@@ -22,6 +22,7 @@ export * from "./message-types/color-picker.messages";
 export * from "./message-types/combo-box.messages";
 export * from "./message-types/command.messages";
 export * from "./message-types/date-picker.messages";
+export * from "./message-types/date-range-picker.messages";
 export * from "./message-types/datetime-picker.messages";
 export * from "./message-types/dialog.messages";
 export * from "./message-types/dropdown-list.messages";

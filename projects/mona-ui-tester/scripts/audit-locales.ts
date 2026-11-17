@@ -165,6 +165,7 @@ export const MONA_MESSAGE_NAMESPACES = [
     "comboBox",
     "command",
     "datePicker",
+    "dateRangePicker",
     "dateTimePicker",
     "dialog",
     "dropdownList",

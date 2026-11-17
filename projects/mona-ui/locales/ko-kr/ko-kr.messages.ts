@@ -192,6 +192,22 @@ export const KO_KR_MESSAGES = {
         datePicker: "날짜 선택기",
         openCalendar: "달력 열기"
     },
+    dateRangePicker: {
+        dateRangePicker: "날짜 범위 선택기",
+        end: "종료 날짜",
+        lastDays: (count: number) => `최근 ${localizeNumber(count)}일`,
+        lastMonth: "지난달",
+        lastWeek: "지난주",
+        lastYear: "작년",
+        openCalendar: "달력 열기",
+        presets: "빠른 선택",
+        start: "시작 날짜",
+        thisMonth: "이번 달",
+        thisWeek: "이번 주",
+        thisYear: "올해",
+        today: "오늘",
+        yesterday: "어제"
+    },
     dateTimePicker: {
         calendar: "달력",
         cancel: "취소",

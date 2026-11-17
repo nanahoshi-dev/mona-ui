@@ -212,6 +212,26 @@ export const TR_TR_MESSAGES = {
         datePicker: "Tarih seçici",
         openCalendar: "Takvimi aç"
     },
+    dateRangePicker: {
+        dateRangePicker: "Tarih aralığı seçici",
+        end: "Bitiş tarihi",
+        lastDays: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Son ${localizeNumber(count)} gün`,
+                other: () => `Son ${localizeNumber(count)} gün`
+            }),
+        lastMonth: "Geçen ay",
+        lastWeek: "Geçen hafta",
+        lastYear: "Geçen yıl",
+        openCalendar: "Takvimi aç",
+        presets: "Hızlı aralıklar",
+        start: "Başlangıç tarihi",
+        thisMonth: "Bu ay",
+        thisWeek: "Bu hafta",
+        thisYear: "Bu yıl",
+        today: "Bugün",
+        yesterday: "Dün"
+    },
     dateTimePicker: {
         calendar: "Takvim",
         cancel: "İptal",

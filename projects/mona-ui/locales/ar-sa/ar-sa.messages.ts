@@ -224,6 +224,30 @@ export const AR_SA_MESSAGES = {
         datePicker: "منتقي التاريخ",
         openCalendar: "فتح التقويم"
     },
+    dateRangePicker: {
+        dateRangePicker: "منتقي نطاق التاريخ",
+        end: "تاريخ الانتهاء",
+        lastDays: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                zero: () => `آخر ${localizeNumber(count)} يوم`,
+                one: () => "آخر يوم",
+                two: () => "آخر يومين",
+                few: () => `آخر ${localizeNumber(count)} أيام`,
+                many: () => `آخر ${localizeNumber(count)} يومًا`,
+                other: () => `آخر ${localizeNumber(count)} يوم`
+            }),
+        lastMonth: "الشهر الماضي",
+        lastWeek: "الأسبوع الماضي",
+        lastYear: "العام الماضي",
+        openCalendar: "فتح التقويم",
+        presets: "نطاقات سريعة",
+        start: "تاريخ البدء",
+        thisMonth: "هذا الشهر",
+        thisWeek: "هذا الأسبوع",
+        thisYear: "هذا العام",
+        today: "اليوم",
+        yesterday: "أمس"
+    },
     dateTimePicker: {
         calendar: "التقويم",
         cancel: "إلغاء",

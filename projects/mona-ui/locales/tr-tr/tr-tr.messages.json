@@ -170,6 +170,22 @@
         "datePicker": "Tarih seçici",
         "openCalendar": "Takvimi aç"
     },
+    "dateRangePicker": {
+        "dateRangePicker": "Tarih aralığı seçici",
+        "end": "Bitiş tarihi",
+        "lastDays": "{count, plural, one {Son # gün} other {Son # gün}}",
+        "lastMonth": "Geçen ay",
+        "lastWeek": "Geçen hafta",
+        "lastYear": "Geçen yıl",
+        "openCalendar": "Takvimi aç",
+        "presets": "Hızlı aralıklar",
+        "start": "Başlangıç tarihi",
+        "thisMonth": "Bu ay",
+        "thisWeek": "Bu hafta",
+        "thisYear": "Bu yıl",
+        "today": "Bugün",
+        "yesterday": "Dün"
+    },
     "dateTimePicker": {
         "calendar": "Takvim",
         "cancel": "İptal",

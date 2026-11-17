@@ -170,6 +170,22 @@
         "datePicker": "日期选择器",
         "openCalendar": "打开日历"
     },
+    "dateRangePicker": {
+        "dateRangePicker": "日期范围选择器",
+        "end": "结束日期",
+        "lastDays": "{count, plural, other {最近 # 天}}",
+        "lastMonth": "上月",
+        "lastWeek": "上周",
+        "lastYear": "去年",
+        "openCalendar": "打开日历",
+        "presets": "快速选择",
+        "start": "开始日期",
+        "thisMonth": "本月",
+        "thisWeek": "本周",
+        "thisYear": "今年",
+        "today": "今天",
+        "yesterday": "昨天"
+    },
     "dateTimePicker": {
         "calendar": "日历",
         "cancel": "取消",

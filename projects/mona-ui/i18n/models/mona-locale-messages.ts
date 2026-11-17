@@ -10,6 +10,7 @@ import type { MonaColorPaletteMessages } from "../message-types/color-palette.me
 import type { MonaColorPickerMessages } from "../message-types/color-picker.messages";
 import type { MonaComboBoxMessages } from "../message-types/combo-box.messages";
 import type { MonaDatePickerMessages } from "../message-types/date-picker.messages";
+import type { MonaDateRangePickerMessages } from "../message-types/date-range-picker.messages";
 import type { MonaDateTimePickerMessages } from "../message-types/datetime-picker.messages";
 import type { MonaDialogMessages } from "../message-types/dialog.messages";
 import type { MonaDropdownListMessages } from "../message-types/dropdown-list.messages";
@@ -58,6 +59,7 @@ export interface MonaLocaleMessages {
     colorPicker: MonaColorPickerMessages;
     comboBox: MonaComboBoxMessages;
     datePicker: MonaDatePickerMessages;
+    dateRangePicker: MonaDateRangePickerMessages;
     dateTimePicker: MonaDateTimePickerMessages;
     dialog: MonaDialogMessages;
     dropdownList: MonaDropdownListMessages;

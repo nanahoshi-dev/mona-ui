@@ -214,6 +214,26 @@ export const DE_DE_MESSAGES = {
         datePicker: "Datumsauswahl",
         openCalendar: "Kalender öffnen"
     },
+    dateRangePicker: {
+        dateRangePicker: "Datumsbereichsauswahl",
+        end: "Enddatum",
+        lastDays: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => "Letzter Tag",
+                other: () => `Letzte ${localizeNumber(count)} Tage`
+            }),
+        lastMonth: "Letzter Monat",
+        lastWeek: "Letzte Woche",
+        lastYear: "Letztes Jahr",
+        openCalendar: "Kalender öffnen",
+        presets: "Schnellauswahl",
+        start: "Startdatum",
+        thisMonth: "Dieser Monat",
+        thisWeek: "Diese Woche",
+        thisYear: "Dieses Jahr",
+        today: "Heute",
+        yesterday: "Gestern"
+    },
     dateTimePicker: {
         calendar: "Kalender",
         cancel: "Abbrechen",
