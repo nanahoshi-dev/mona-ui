@@ -344,6 +344,21 @@ export const RU_RU_MESSAGES = {
         startsWith: "Начинается с",
         value: "Значение"
     },
+    formField: {
+        email: "Введите корректный адрес электронной почты.",
+        invalid: "Введите корректное значение.",
+        max: (max: number) => `Значение не должно превышать ${localizeNumber(max)}.`,
+        maxDate: (maxDate: string) => `Дата не должна быть позже ${maxDate}.`,
+        maxLength: (maxLength: number) =>
+            `Введите не более ${plural(PLURAL_RULES.select(maxLength), { one: () => `${localizeNumber(maxLength)} символа`, few: () => `${localizeNumber(maxLength)} символов`, many: () => `${localizeNumber(maxLength)} символов`, other: () => `${localizeNumber(maxLength)} символа` })}.`,
+        min: (min: number) => `Значение должно быть не меньше ${localizeNumber(min)}.`,
+        minDate: (minDate: string) => `Дата не должна быть раньше ${minDate}.`,
+        minLength: (minLength: number) =>
+            `Введите не менее ${plural(PLURAL_RULES.select(minLength), { one: () => `${localizeNumber(minLength)} символа`, few: () => `${localizeNumber(minLength)} символов`, many: () => `${localizeNumber(minLength)} символов`, other: () => `${localizeNumber(minLength)} символа` })}.`,
+        optional: "Необязательно",
+        pattern: "Введите значение в ожидаемом формате.",
+        required: "Это поле обязательно для заполнения."
+    },
     grid: {
         all: "(Все)",
         apply: "Применить",

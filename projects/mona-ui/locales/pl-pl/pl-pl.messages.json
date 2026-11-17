@@ -293,6 +293,19 @@
         "startsWith": "Zaczyna się od",
         "value": "Wartość"
     },
+    "formField": {
+        "email": "Wpisz prawidłowy adres e-mail.",
+        "invalid": "Wpisz prawidłową wartość.",
+        "max": "Wartość nie może być większa niż {max}.",
+        "maxDate": "Data nie może być późniejsza niż {maxDate}.",
+        "maxLength": "Wpisz najwyżej {maxLength, plural, one {# znak} few {# znaki} many {# znaków} other {# znaku}}.",
+        "min": "Wartość nie może być mniejsza niż {min}.",
+        "minDate": "Data nie może być wcześniejsza niż {minDate}.",
+        "minLength": "Wpisz co najmniej {minLength, plural, one {# znak} few {# znaki} many {# znaków} other {# znaku}}.",
+        "optional": "Opcjonalnie",
+        "pattern": "Wpisz wartość w oczekiwanym formacie.",
+        "required": "To pole jest wymagane."
+    },
     "grid": {
         "all": "(Wszystkie)",
         "apply": "Zastosuj",

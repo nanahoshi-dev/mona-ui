@@ -293,6 +293,19 @@
         "startsWith": "يبدأ بـ",
         "value": "القيمة"
     },
+    "formField": {
+        "email": "أدخل عنوان بريد إلكتروني صالحًا.",
+        "invalid": "أدخل قيمة صالحة.",
+        "max": "يجب ألا تزيد القيمة على {max}.",
+        "maxDate": "يجب ألا يكون التاريخ بعد {maxDate}.",
+        "maxLength": "أدخل {maxLength, plural, zero {# حرف} one {حرفًا واحدًا} two {حرفين} few {# أحرف} many {# حرفًا} other {# حرف}} على الأكثر.",
+        "min": "يجب ألا تقل القيمة عن {min}.",
+        "minDate": "يجب ألا يكون التاريخ قبل {minDate}.",
+        "minLength": "أدخل {minLength, plural, zero {# حرف} one {حرفًا واحدًا} two {حرفين} few {# أحرف} many {# حرفًا} other {# حرف}} على الأقل.",
+        "optional": "اختياري",
+        "pattern": "أدخل قيمة بالتنسيق المتوقع.",
+        "required": "هذا الحقل مطلوب."
+    },
     "grid": {
         "all": "(الكل)",
         "apply": "تطبيق",

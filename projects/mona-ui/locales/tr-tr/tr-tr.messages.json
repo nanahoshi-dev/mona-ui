@@ -293,6 +293,19 @@
         "startsWith": "İle başlar",
         "value": "Değer"
     },
+    "formField": {
+        "email": "Geçerli bir e-posta adresi girin.",
+        "invalid": "Geçerli bir değer girin.",
+        "max": "Değer en fazla {max} olmalıdır.",
+        "maxDate": "Tarih en geç {maxDate} olmalıdır.",
+        "maxLength": "En fazla {maxLength} karakter girin.",
+        "min": "Değer en az {min} olmalıdır.",
+        "minDate": "Tarih en erken {minDate} olmalıdır.",
+        "minLength": "En az {minLength} karakter girin.",
+        "optional": "İsteğe bağlı",
+        "pattern": "Beklenen biçimde bir değer girin.",
+        "required": "Bu alan zorunludur."
+    },
     "grid": {
         "all": "(Tümü)",
         "apply": "Uygula",

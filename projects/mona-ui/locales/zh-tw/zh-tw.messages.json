@@ -293,6 +293,19 @@
         "startsWith": "開頭為",
         "value": "值"
     },
+    "formField": {
+        "email": "請輸入有效的電子郵件地址。",
+        "invalid": "請輸入有效的值。",
+        "max": "值不得大於 {max}。",
+        "maxDate": "日期不得晚於 {maxDate}。",
+        "maxLength": "最多輸入 {maxLength} 個字元。",
+        "min": "值不得小於 {min}。",
+        "minDate": "日期不得早於 {minDate}。",
+        "minLength": "至少輸入 {minLength} 個字元。",
+        "optional": "選填",
+        "pattern": "請依照要求的格式輸入。",
+        "required": "此欄位為必填。"
+    },
     "grid": {
         "all": "(全部)",
         "apply": "套用",

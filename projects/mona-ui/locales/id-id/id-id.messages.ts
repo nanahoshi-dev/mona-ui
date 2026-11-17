@@ -316,6 +316,19 @@ export const ID_ID_MESSAGES = {
         startsWith: "Diawali dengan",
         value: "Nilai"
     },
+    formField: {
+        email: "Masukkan alamat email yang valid.",
+        invalid: "Masukkan nilai yang valid.",
+        max: (max: number) => `Nilai maksimal ${localizeNumber(max)}.`,
+        maxDate: (maxDate: string) => `Tanggal tidak boleh setelah ${maxDate}.`,
+        maxLength: (maxLength: number) => `Masukkan maksimal ${localizeNumber(maxLength)} karakter.`,
+        min: (min: number) => `Nilai minimal ${localizeNumber(min)}.`,
+        minDate: (minDate: string) => `Tanggal tidak boleh sebelum ${minDate}.`,
+        minLength: (minLength: number) => `Masukkan minimal ${localizeNumber(minLength)} karakter.`,
+        optional: "Opsional",
+        pattern: "Masukkan nilai dalam format yang diharapkan.",
+        required: "Kolom ini wajib diisi."
+    },
     grid: {
         all: "(Semua)",
         apply: "Terapkan",

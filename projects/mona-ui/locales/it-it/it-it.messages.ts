@@ -340,6 +340,21 @@ export const IT_IT_MESSAGES = {
         startsWith: "Inizia con",
         value: "Valore"
     },
+    formField: {
+        email: "Inserisci un indirizzo email valido.",
+        invalid: "Inserisci un valore valido.",
+        max: (max: number) => `Il valore deve essere al massimo ${localizeNumber(max)}.`,
+        maxDate: (maxDate: string) => `La data non può essere successiva al ${maxDate}.`,
+        maxLength: (maxLength: number) =>
+            `Inserisci al massimo ${plural(PLURAL_RULES.select(maxLength), { one: () => `${localizeNumber(maxLength)} carattere`, other: () => `${localizeNumber(maxLength)} caratteri` })}.`,
+        min: (min: number) => `Il valore deve essere almeno ${localizeNumber(min)}.`,
+        minDate: (minDate: string) => `La data non può essere precedente al ${minDate}.`,
+        minLength: (minLength: number) =>
+            `Inserisci almeno ${plural(PLURAL_RULES.select(minLength), { one: () => `${localizeNumber(minLength)} carattere`, other: () => `${localizeNumber(minLength)} caratteri` })}.`,
+        optional: "Facoltativo",
+        pattern: "Inserisci un valore nel formato previsto.",
+        required: "Questo campo è obbligatorio."
+    },
     grid: {
         all: "(Tutti)",
         apply: "Applica",

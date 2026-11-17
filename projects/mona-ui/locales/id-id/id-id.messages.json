@@ -293,6 +293,19 @@
         "startsWith": "Diawali dengan",
         "value": "Nilai"
     },
+    "formField": {
+        "email": "Masukkan alamat email yang valid.",
+        "invalid": "Masukkan nilai yang valid.",
+        "max": "Nilai maksimal {max}.",
+        "maxDate": "Tanggal tidak boleh setelah {maxDate}.",
+        "maxLength": "Masukkan maksimal {maxLength} karakter.",
+        "min": "Nilai minimal {min}.",
+        "minDate": "Tanggal tidak boleh sebelum {minDate}.",
+        "minLength": "Masukkan minimal {minLength} karakter.",
+        "optional": "Opsional",
+        "pattern": "Masukkan nilai dalam format yang diharapkan.",
+        "required": "Kolom ini wajib diisi."
+    },
     "grid": {
         "all": "(Semua)",
         "apply": "Terapkan",

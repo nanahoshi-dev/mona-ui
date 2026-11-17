@@ -339,6 +339,21 @@ export const ES_ES_MESSAGES = {
         startsWith: "Empieza con",
         value: "Valor"
     },
+    formField: {
+        email: "Introduce una dirección de correo electrónico válida.",
+        invalid: "Introduce un valor válido.",
+        max: (max: number) => `El valor debe ser como máximo ${localizeNumber(max)}.`,
+        maxDate: (maxDate: string) => `La fecha debe ser igual o anterior al ${maxDate}.`,
+        maxLength: (maxLength: number) =>
+            `Introduce como máximo ${plural(PLURAL_RULES.select(maxLength), { one: () => `${localizeNumber(maxLength)} carácter`, other: () => `${localizeNumber(maxLength)} caracteres` })}.`,
+        min: (min: number) => `El valor debe ser como mínimo ${localizeNumber(min)}.`,
+        minDate: (minDate: string) => `La fecha debe ser igual o posterior al ${minDate}.`,
+        minLength: (minLength: number) =>
+            `Introduce al menos ${plural(PLURAL_RULES.select(minLength), { one: () => `${localizeNumber(minLength)} carácter`, other: () => `${localizeNumber(minLength)} caracteres` })}.`,
+        optional: "Opcional",
+        pattern: "Introduce un valor con el formato esperado.",
+        required: "Este campo es obligatorio."
+    },
     grid: {
         all: "(Todos)",
         apply: "Aplicar",

@@ -26,6 +26,7 @@ import { DROPDOWN_LIST_DEFAULT_MESSAGES } from "../dropdown-list/i18n/dropdown-l
 import { DROPDOWNS_DEFAULT_MESSAGES } from "../dropdowns/i18n/dropdowns.default-messages";
 import { EDITOR_DEFAULT_MESSAGES } from "../editor/i18n/editor.default-messages";
 import { FILTER_DEFAULT_MESSAGES } from "../filter/i18n/filter.default-messages";
+import { FORM_FIELD_DEFAULT_MESSAGES } from "../form-field/i18n/form-field.default-messages";
 import { GRID_DEFAULT_MESSAGES } from "../grid/i18n/grid.default-messages";
 import { LIST_BOX_DEFAULT_MESSAGES } from "../list-box/i18n/list-box.default-messages";
 import { LIST_DEFAULT_MESSAGES } from "../internal/list/i18n/list.default-messages";
@@ -115,6 +116,7 @@ const ENGLISH_DEFAULTS = {
     dropdowns: DROPDOWNS_DEFAULT_MESSAGES,
     editor: EDITOR_DEFAULT_MESSAGES,
     filter: FILTER_DEFAULT_MESSAGES,
+    formField: FORM_FIELD_DEFAULT_MESSAGES,
     grid: GRID_DEFAULT_MESSAGES,
     listBox: LIST_BOX_DEFAULT_MESSAGES,
     label: LABEL_DEFAULT_MESSAGES,

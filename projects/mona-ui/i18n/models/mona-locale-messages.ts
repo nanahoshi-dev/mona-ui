@@ -16,6 +16,7 @@ import type { MonaDropdownListMessages } from "../message-types/dropdown-list.me
 import type { MonaDropdownsMessages } from "../message-types/dropdowns.messages";
 import type { MonaEditorMessages } from "../message-types/editor.messages";
 import type { MonaFilterMessages } from "../message-types/filter.messages";
+import type { MonaFormFieldMessages } from "../message-types/form-field.messages";
 import type { MonaGridMessages } from "../message-types/grid.messages";
 import type { MonaLabelMessages } from "../message-types/label.messages";
 import type { MonaListMessages } from "../message-types/list.messages";
@@ -63,6 +64,7 @@ export interface MonaLocaleMessages {
     dropdowns: MonaDropdownsMessages;
     editor: MonaEditorMessages;
     filter: MonaFilterMessages;
+    formField: MonaFormFieldMessages;
     grid: MonaGridMessages;
     label: MonaLabelMessages;
     list: MonaListMessages;

@@ -340,6 +340,21 @@ export const FR_FR_MESSAGES = {
         startsWith: "Commence par",
         value: "Valeur"
     },
+    formField: {
+        email: "Saisissez une adresse e-mail valide.",
+        invalid: "Saisissez une valeur valide.",
+        max: (max: number) => `La valeur doit être inférieure ou égale à ${localizeNumber(max)}.`,
+        maxDate: (maxDate: string) => `La date doit être antérieure ou égale au ${maxDate}.`,
+        maxLength: (maxLength: number) =>
+            `Saisissez au maximum ${plural(PLURAL_RULES.select(maxLength), { one: () => `${localizeNumber(maxLength)} caractère`, other: () => `${localizeNumber(maxLength)} caractères` })}.`,
+        min: (min: number) => `La valeur doit être supérieure ou égale à ${localizeNumber(min)}.`,
+        minDate: (minDate: string) => `La date doit être postérieure ou égale au ${minDate}.`,
+        minLength: (minLength: number) =>
+            `Saisissez au moins ${plural(PLURAL_RULES.select(minLength), { one: () => `${localizeNumber(minLength)} caractère`, other: () => `${localizeNumber(minLength)} caractères` })}.`,
+        optional: "Facultatif",
+        pattern: "Saisissez une valeur au format attendu.",
+        required: "Ce champ est obligatoire."
+    },
     grid: {
         all: "(Tout)",
         apply: "Appliquer",

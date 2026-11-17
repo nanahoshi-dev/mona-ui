@@ -356,6 +356,21 @@ export const PL_PL_MESSAGES = {
         startsWith: "Zaczyna się od",
         value: "Wartość"
     },
+    formField: {
+        email: "Wpisz prawidłowy adres e-mail.",
+        invalid: "Wpisz prawidłową wartość.",
+        max: (max: number) => `Wartość nie może być większa niż ${localizeNumber(max)}.`,
+        maxDate: (maxDate: string) => `Data nie może być późniejsza niż ${maxDate}.`,
+        maxLength: (maxLength: number) =>
+            `Wpisz najwyżej ${plural(PLURAL_RULES.select(maxLength), { one: () => `${localizeNumber(maxLength)} znak`, few: () => `${localizeNumber(maxLength)} znaki`, many: () => `${localizeNumber(maxLength)} znaków`, other: () => `${localizeNumber(maxLength)} znaku` })}.`,
+        min: (min: number) => `Wartość nie może być mniejsza niż ${localizeNumber(min)}.`,
+        minDate: (minDate: string) => `Data nie może być wcześniejsza niż ${minDate}.`,
+        minLength: (minLength: number) =>
+            `Wpisz co najmniej ${plural(PLURAL_RULES.select(minLength), { one: () => `${localizeNumber(minLength)} znak`, few: () => `${localizeNumber(minLength)} znaki`, many: () => `${localizeNumber(minLength)} znaków`, other: () => `${localizeNumber(minLength)} znaku` })}.`,
+        optional: "Opcjonalnie",
+        pattern: "Wpisz wartość w oczekiwanym formacie.",
+        required: "To pole jest wymagane."
+    },
     grid: {
         all: "(Wszystkie)",
         apply: "Zastosuj",

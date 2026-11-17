@@ -313,6 +313,19 @@ export const ZH_TW_MESSAGES = {
         startsWith: "開頭為",
         value: "值"
     },
+    formField: {
+        email: "請輸入有效的電子郵件地址。",
+        invalid: "請輸入有效的值。",
+        max: (max: number) => `值不得大於 ${localizeNumber(max)}。`,
+        maxDate: (maxDate: string) => `日期不得晚於 ${maxDate}。`,
+        maxLength: (maxLength: number) => `最多輸入 ${localizeNumber(maxLength)} 個字元。`,
+        min: (min: number) => `值不得小於 ${localizeNumber(min)}。`,
+        minDate: (minDate: string) => `日期不得早於 ${minDate}。`,
+        minLength: (minLength: number) => `至少輸入 ${localizeNumber(minLength)} 個字元。`,
+        optional: "選填",
+        pattern: "請依照要求的格式輸入。",
+        required: "此欄位為必填。"
+    },
     grid: {
         all: "(全部)",
         apply: "套用",

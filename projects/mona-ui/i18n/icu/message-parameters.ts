@@ -382,6 +382,19 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         startsWith: null,
         value: null
     },
+    formField: {
+        email: null,
+        invalid: null,
+        max: [{ name: "max", type: "number" }],
+        maxDate: [{ name: "maxDate", type: "string" }],
+        maxLength: [{ name: "maxLength", type: "number" }],
+        min: [{ name: "min", type: "number" }],
+        minDate: [{ name: "minDate", type: "string" }],
+        minLength: [{ name: "minLength", type: "number" }],
+        optional: null,
+        pattern: null,
+        required: null
+    },
     grid: {
         all: null,
         apply: null,

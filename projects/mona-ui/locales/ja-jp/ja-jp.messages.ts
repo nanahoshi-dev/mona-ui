@@ -312,6 +312,19 @@ export const JA_JP_MESSAGES = {
         startsWith: "で始まる",
         value: "値"
     },
+    formField: {
+        email: "有効なメールアドレスを入力してください。",
+        invalid: "有効な値を入力してください。",
+        max: (max: number) => `${localizeNumber(max)}以下の値を指定してください。`,
+        maxDate: (maxDate: string) => `${maxDate}以前の日付を指定してください。`,
+        maxLength: (maxLength: number) => `${localizeNumber(maxLength)}文字以内で入力してください。`,
+        min: (min: number) => `${localizeNumber(min)}以上の値を指定してください。`,
+        minDate: (minDate: string) => `${minDate}以降の日付を指定してください。`,
+        minLength: (minLength: number) => `${localizeNumber(minLength)}文字以上で入力してください。`,
+        optional: "任意",
+        pattern: "正しい形式で入力してください。",
+        required: "この項目は必須です。"
+    },
     grid: {
         all: "(すべて)",
         apply: "適用",

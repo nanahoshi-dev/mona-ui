@@ -349,6 +349,21 @@ export const AR_SA_MESSAGES = {
         startsWith: "يبدأ بـ",
         value: "القيمة"
     },
+    formField: {
+        email: "أدخل عنوان بريد إلكتروني صالحًا.",
+        invalid: "أدخل قيمة صالحة.",
+        max: (max: number) => `يجب ألا تزيد القيمة على ${localizeNumber(max)}.`,
+        maxDate: (maxDate: string) => `يجب ألا يكون التاريخ بعد ${maxDate}.`,
+        maxLength: (maxLength: number) =>
+            `أدخل ${plural(PLURAL_RULES.select(maxLength), { zero: () => `${localizeNumber(maxLength)} حرف`, one: () => "حرفًا واحدًا", two: () => "حرفين", few: () => `${localizeNumber(maxLength)} أحرف`, many: () => `${localizeNumber(maxLength)} حرفًا`, other: () => `${localizeNumber(maxLength)} حرف` })} على الأكثر.`,
+        min: (min: number) => `يجب ألا تقل القيمة عن ${localizeNumber(min)}.`,
+        minDate: (minDate: string) => `يجب ألا يكون التاريخ قبل ${minDate}.`,
+        minLength: (minLength: number) =>
+            `أدخل ${plural(PLURAL_RULES.select(minLength), { zero: () => `${localizeNumber(minLength)} حرف`, one: () => "حرفًا واحدًا", two: () => "حرفين", few: () => `${localizeNumber(minLength)} أحرف`, many: () => `${localizeNumber(minLength)} حرفًا`, other: () => `${localizeNumber(minLength)} حرف` })} على الأقل.`,
+        optional: "اختياري",
+        pattern: "أدخل قيمة بالتنسيق المتوقع.",
+        required: "هذا الحقل مطلوب."
+    },
     grid: {
         all: "(الكل)",
         apply: "تطبيق",

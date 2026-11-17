@@ -184,6 +184,13 @@ export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
         typeName: "MonaFilterMessages"
     },
     {
+        constName: "FORM_FIELD_DEFAULT_MESSAGES",
+        file: "form-field/i18n/form-field.default-messages.ts",
+        namespace: "formField",
+        style: "type",
+        typeName: "MonaFormFieldMessages"
+    },
+    {
         constName: "GRID_DEFAULT_MESSAGES",
         file: "grid/i18n/grid.default-messages.ts",
         namespace: "grid",
