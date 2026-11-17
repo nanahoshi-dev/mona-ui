@@ -180,6 +180,7 @@ export const MONA_MESSAGE_NAMESPACES = [
     "otpInput",
     "pager",
     "progressBar",
+    "qrCode",
     "sidebar",
     "rating",
     "scrollView",

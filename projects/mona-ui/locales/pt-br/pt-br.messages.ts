@@ -491,6 +491,9 @@ export const PT_BR_MESSAGES = {
     progressBar: {
         label: "Progresso"
     },
+    qrCode: {
+        label: "Código QR"
+    },
     rating: {
         notRated: "Não avaliado",
         valueText: (value: number, max: number) => `${localizeNumber(value)} de ${localizeNumber(max)}`

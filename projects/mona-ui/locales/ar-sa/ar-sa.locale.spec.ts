@@ -51,6 +51,7 @@ describe("MONA_AR_SA_LOCALE", () => {
             "numericTextBox",
             "otpInput",
             "pager",
+            "qrCode",
             "rating",
             "scrollView",
             "sheet",
@@ -67,7 +68,7 @@ describe("MONA_AR_SA_LOCALE", () => {
             "window"
         ] as const;
 
-        it("defines all 44 canonical message namespaces", () => {
+        it("defines all 45 canonical message namespaces", () => {
             for (const ns of expectedNamespaces) {
                 expect(MONA_AR_SA_LOCALE.messages[ns], `Namespace ${ns} must be defined`).toBeDefined();
             }

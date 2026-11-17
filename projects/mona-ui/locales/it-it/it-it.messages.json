@@ -423,6 +423,9 @@
     "progressBar": {
         "label": "Avanzamento"
     },
+    "qrCode": {
+        "label": "Codice QR"
+    },
     "rating": {
         "notRated": "Nessuna valutazione",
         "valueText": "{value} di {max}"

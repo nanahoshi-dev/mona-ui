@@ -423,6 +423,9 @@
     "progressBar": {
         "label": "进度"
     },
+    "qrCode": {
+        "label": "二维码"
+    },
     "rating": {
         "notRated": "未评分",
         "valueText": "第 {value} 级，共 {max} 级"

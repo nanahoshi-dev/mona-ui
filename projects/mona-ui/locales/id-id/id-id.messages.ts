@@ -452,6 +452,9 @@ export const ID_ID_MESSAGES = {
     progressBar: {
         label: "Kemajuan"
     },
+    qrCode: {
+        label: "Kode QR"
+    },
     rating: {
         notRated: "Belum dinilai",
         valueText: (value: number, max: number) => `${localizeNumber(value)} dari ${localizeNumber(max)}`

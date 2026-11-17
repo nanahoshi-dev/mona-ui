@@ -423,6 +423,9 @@
     "progressBar": {
         "label": "Ход выполнения"
     },
+    "qrCode": {
+        "label": "QR-код"
+    },
     "rating": {
         "notRated": "Без оценки",
         "valueText": "{value} из {max}"

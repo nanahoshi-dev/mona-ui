@@ -502,6 +502,9 @@ export const RU_RU_MESSAGES = {
     progressBar: {
         label: "Ход выполнения"
     },
+    qrCode: {
+        label: "QR-код"
+    },
     rating: {
         notRated: "Без оценки",
         valueText: (value: number, max: number) => `${localizeNumber(value)} из ${localizeNumber(max)}`

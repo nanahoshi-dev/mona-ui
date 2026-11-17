@@ -247,6 +247,13 @@ export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
         typeName: "MonaProgressBarMessages"
     },
     {
+        constName: "QR_CODE_DEFAULT_MESSAGES",
+        file: "qr-code/i18n/qr-code.default-messages.ts",
+        namespace: "qrCode",
+        style: "type",
+        typeName: "MonaQrCodeMessages"
+    },
+    {
         constName: "SIDEBAR_DEFAULT_MESSAGES",
         file: "sidebar/i18n/sidebar.default-messages.ts",
         namespace: "sidebar",
