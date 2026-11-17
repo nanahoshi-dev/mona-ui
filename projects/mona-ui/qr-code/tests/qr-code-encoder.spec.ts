@@ -77,7 +77,8 @@ describe("QR code tables", () => {
 
     it("counts the data modules the drawn function patterns leave, for every version", () => {
         for (let version = 1; version <= 40; version++) {
-            const matrix = encode("1", "L", { minVersion: version });
+            // The reserved modules don't depend on the mask, and a fixed one skips scoring all eight.
+            const matrix = encode("1", "L", { mask: 0, minVersion: version });
             expect(matrix.version).toBe(version);
             const unreserved = matrix.reserved.reduce((count, reserved) => count + (reserved ? 0 : 1), 0);
             expect(unreserved, `version ${version}`).toBe(rawDataModules(version));
@@ -197,11 +198,13 @@ describe("encodeQrCode", () => {
     });
 
     it("chooses the smallest version that holds the value", () => {
-        expect(encode("a".repeat(17), "L").version).toBe(1);
-        expect(encode("a".repeat(18), "L").version).toBe(2);
-        expect(encode("a".repeat(2953), "L").version).toBe(40);
-        expect(encode("1".repeat(7089), "L").version).toBe(40);
-        expect(encode("A".repeat(4296), "L").version).toBe(40);
+        // The version is chosen before the mask, and a fixed one skips scoring all eight on the large symbols.
+        const versionOf = (text: string) => encode(text, "L", { mask: 0 }).version;
+        expect(versionOf("a".repeat(17))).toBe(1);
+        expect(versionOf("a".repeat(18))).toBe(2);
+        expect(versionOf("a".repeat(2953))).toBe(40);
+        expect(versionOf("1".repeat(7089))).toBe(40);
+        expect(versionOf("A".repeat(4296))).toBe(40);
     });
 
     it("stores digits and uppercase in their denser modes", () => {
