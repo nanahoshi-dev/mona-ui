@@ -1,0 +1,5 @@
+# Commits that only reformat code. GitHub's blame view skips them.
+# To skip them locally too: git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# style: format the repository with Prettier
+e7c95c8f93506063949e6c6298078f905889e587
