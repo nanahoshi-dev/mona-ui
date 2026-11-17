@@ -7,15 +7,15 @@
                     class="relative z-10 size-2 rounded-full border bg-background transition-colors"
                     aria-hidden="true"
                     [class.border-border]="activeSectionId() !== item.id()"
-                    [style.background-color]="activeSectionId() === item.id() ? 'var(--color-primary)' : null"
-                    [style.border-color]="activeSectionId() === item.id() ? 'var(--color-primary)' : null"></span>
+                    [style.background-color]="activeSectionId() === item.id() ? indicatorColor : null"
+                    [style.border-color]="activeSectionId() === item.id() ? indicatorColor : null"></span>
                 <a
                     class="block py-1.5 text-sm leading-6 transition-colors cursor-pointer"
                     [attr.aria-current]="activeSectionId() === item.id() ? 'location' : null"
                     [class.font-semibold]="activeSectionId() === item.id()"
                     [class.font-medium]="activeSectionId() !== item.id()"
                     [class.text-muted-foreground]="activeSectionId() !== item.id()"
-                    [style.color]="activeSectionId() === item.id() ? 'var(--color-primary)' : null"
+                    [style.color]="activeSectionId() === item.id() ? textColor : null"
                     (click)="navigateToSection($event, item.id())"
                     href="{{ currentRoute() }}#{{ item.id() }}">
                     <span class="block">{{ item.header() }}</span>

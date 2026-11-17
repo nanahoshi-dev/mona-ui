@@ -13,7 +13,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     templateUrl: "./input-demo.component.html"
 })
 export class InputDemoComponent extends AbstractDemoComponent<TextBoxDirective> {
-    protected readonly InputWrapperComponent = InputWrapperComponent;
     protected readonly config = computed<ComponentConfig<TextBoxDirective>>(() => ({
         inputs: deriveInputConfig<TextBoxDirective>(this.metadata(), {
             // invalid/touched are written by the FormField directive via [formField] below;
@@ -38,6 +37,7 @@ export class InputDemoComponent extends AbstractDemoComponent<TextBoxDirective> 
         })
     }));
     protected readonly metadata = this.getMetadata("TextBoxDirective");
+    protected readonly wrapperComponent = InputWrapperComponent;
 }
 
 @Component({
@@ -47,6 +47,7 @@ export class InputDemoComponent extends AbstractDemoComponent<TextBoxDirective> 
             <span>Value: {{ form.text().value() }}</span>
             <input
                 type="text"
+                aria-label="Sample text"
                 [rounded]="rounded()"
                 [size]="size()"
                 [formField]="form.text"

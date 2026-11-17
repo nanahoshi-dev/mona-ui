@@ -15,10 +15,21 @@
             }
         </select>
     </label>
-    <mona-switch [checked]="downsamplingEnabled()" (checkedChange)="downsamplingEnabled.set($event)">
-        Downsampling
-    </mona-switch>
-    <mona-switch [checked]="showTooltips()" (checkedChange)="showTooltips.set($event)">Sync tooltips</mona-switch>
+    <!-- A switch doesn't show what's inside it, so each one's label sits beside it and names it. -->
+    <span class="flex items-center gap-2">
+        <mona-switch
+            aria-labelledby="chart-sync-density-downsampling"
+            [checked]="downsamplingEnabled()"
+            (checkedChange)="downsamplingEnabled.set($event)"></mona-switch>
+        <span id="chart-sync-density-downsampling">Downsampling</span>
+    </span>
+    <span class="flex items-center gap-2">
+        <mona-switch
+            aria-labelledby="chart-sync-density-tooltips"
+            [checked]="showTooltips()"
+            (checkedChange)="showTooltips.set($event)"></mona-switch>
+        <span id="chart-sync-density-tooltips">Sync tooltips</span>
+    </span>
 </div>
 
 <p class="section-title">Synchronized dense dashboard — pan/zoom or hover the top chart</p>

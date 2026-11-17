@@ -73,7 +73,7 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
     }));
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("TabsComponent");
-    protected readonly TabsWrapperComponent = TabsWrapperComponent;
+    protected readonly wrapperComponent = TabsWrapperComponent;
 }
 
 @Component({
@@ -105,7 +105,9 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
                         </div>
                         <div class="flex items-center justify-center py-1 relative">
                             <div class="flex shrink-0 h-px border-b border-border/90 w-full"></div>
-                            <span class="absolute bg-background px-1 text-sm text-gray-400">OR CONTINUE WITH</span>
+                            <span class="absolute bg-background px-1 text-sm text-muted-foreground"
+                                >OR CONTINUE WITH</span
+                            >
                         </div>
                         <div class="flex flex-col gap-1">
                             <button monaButton>Custom Login 1</button>

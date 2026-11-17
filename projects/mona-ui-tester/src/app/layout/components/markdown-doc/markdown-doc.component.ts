@@ -14,6 +14,7 @@ import {
 } from "@angular/core";
 import { Router } from "@angular/router";
 import { MarkdownComponent } from "ngx-markdown";
+import { codeRegionLabel, watchScrollableRegion } from "../../../demo/utils/scrollableRegion";
 import { createUniqueHeadingId } from "../../docs-heading-id";
 import { routeInternalLink } from "../../internal-links";
 import type { SectionItem } from "../../models/SectionItem";
@@ -38,6 +39,7 @@ export class MarkdownDocComponent {
     readonly #registeredItems = signal<SectionItem[]>([]);
     readonly #router = inject(Router);
     #examples: ComponentRef<ExampleComponent>[] = [];
+    #stopWatchingCodeBlocks: Array<() => void> = [];
 
     protected readonly assetUrl = computed(() => `/assets/${this.src()}`);
     /**
@@ -52,6 +54,7 @@ export class MarkdownDocComponent {
     public constructor() {
         this.#destroyRef.onDestroy(() => {
             this.#destroyExamples();
+            this.#unwatchCodeBlocks();
             this.#registeredItems().forEach(item => this.#pageService.removeSection(item));
         });
     }
@@ -100,6 +103,7 @@ export class MarkdownDocComponent {
 
         this.#rewriteFragmentLinks();
         this.#mountExamples();
+        this.#watchCodeBlocks();
 
         this.#registeredItems.set(items);
         this.#pageService.setSections(items);
@@ -131,6 +135,21 @@ export class MarkdownDocComponent {
             this.#application.attachView(example.hostView);
             this.#examples.push(example);
         }
+    }
+
+    #unwatchCodeBlocks(): void {
+        this.#stopWatchingCodeBlocks.forEach(stop => stop());
+        this.#stopWatchingCodeBlocks = [];
+    }
+
+    /** A fenced block that's too wide scrolls, so it has to take focus while it does. */
+    #watchCodeBlocks(): void {
+        this.#unwatchCodeBlocks();
+        const blocks = Array.from(this.#elementRef.nativeElement.querySelectorAll("pre")) as HTMLPreElement[];
+        this.#stopWatchingCodeBlocks = blocks.map(block => {
+            const language = /\blanguage-([\w-]+)/.exec(block.querySelector("code")?.className ?? "")?.[1];
+            return watchScrollableRegion(block, () => codeRegionLabel(language));
+        });
     }
 
     /**

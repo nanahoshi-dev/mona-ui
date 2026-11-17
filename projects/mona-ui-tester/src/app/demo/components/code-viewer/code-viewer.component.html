@@ -1,12 +1,12 @@
 <div
     class="relative backdrop-blur-sm border border-black text-white rounded-sm font-mono text-sm overflow-hidden flex flex-row">
-    <div class="px-4 py-2 text-right text-slate-500 bg-zinc-950 select-none border-r border-r-black">
+    <div class="px-4 py-2 text-right text-zinc-400 bg-zinc-950 select-none border-r border-r-black">
         @for (line of lineNumbers(); track line) {
             <div>{{ line }}</div>
         }
     </div>
     <pre
-        class="flex-grow overflow-x-auto px-2 py-2 bg-zinc-900"><code class="block" [innerHTML]="highlightedCode()"></code></pre>
+        class="flex-grow overflow-x-auto px-2 py-2 bg-zinc-900 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white"><code class="block" [innerHTML]="highlightedCode()"></code></pre>
     <button
         type="button"
         aria-label="Copy code"
