@@ -1,0 +1,6 @@
+<div class="flex max-w-sm flex-col items-start gap-3">
+    <mona-form-field class="w-full" label="Username" [error]="error()">
+        <mona-text-box [invalid]="!!error()" [touched]="!!error()" [(value)]="username" />
+    </mona-form-field>
+    <button monaButton type="button" (click)="check()">Check availability</button>
+</div>

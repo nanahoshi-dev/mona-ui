@@ -570,6 +570,36 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./fieldset/legend-template/legend-template-example.component").then(module => module.FieldsetLegendTemplateExampleComponent),
         mainFile: "legend-template-example.component.ts"
     },
+    "form-field/custom-errors": {
+        files: ["custom-errors-example.component.ts", "custom-errors-example.component.html"],
+        load: () => import("./form-field/custom-errors/custom-errors-example.component").then(module => module.FormFieldCustomErrorsExampleComponent),
+        mainFile: "custom-errors-example.component.ts"
+    },
+    "form-field/hint-and-optional": {
+        files: ["hint-and-optional-example.component.ts", "hint-and-optional-example.component.html"],
+        load: () => import("./form-field/hint-and-optional/hint-and-optional-example.component").then(module => module.FormFieldHintAndOptionalExampleComponent),
+        mainFile: "hint-and-optional-example.component.ts"
+    },
+    "form-field/horizontal": {
+        files: ["horizontal-example.component.ts", "horizontal-example.component.html"],
+        load: () => import("./form-field/horizontal/horizontal-example.component").then(module => module.FormFieldHorizontalExampleComponent),
+        mainFile: "horizontal-example.component.ts"
+    },
+    "form-field/other-controls": {
+        files: ["other-controls-example.component.ts", "other-controls-example.component.html"],
+        load: () => import("./form-field/other-controls/other-controls-example.component").then(module => module.FormFieldOtherControlsExampleComponent),
+        mainFile: "other-controls-example.component.ts"
+    },
+    "form-field/server-error": {
+        files: ["server-error-example.component.ts", "server-error-example.component.html"],
+        load: () => import("./form-field/server-error/server-error-example.component").then(module => module.FormFieldServerErrorExampleComponent),
+        mainFile: "server-error-example.component.ts"
+    },
+    "form-field/signal-forms": {
+        files: ["signal-forms-example.component.ts", "signal-forms-example.component.html"],
+        load: () => import("./form-field/signal-forms/signal-forms-example.component").then(module => module.FormFieldSignalFormsExampleComponent),
+        mainFile: "signal-forms-example.component.ts"
+    },
     "grid-columns/locked-columns": {
         files: ["locked-columns-example.component.ts", "locked-columns-example.component.html"],
         load: () => import("./grid-columns/locked-columns/locked-columns-example.component").then(module => module.GridLockedColumnsExampleComponent),

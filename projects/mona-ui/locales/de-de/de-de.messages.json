@@ -293,6 +293,19 @@
         "startsWith": "Beginnt mit",
         "value": "Wert"
     },
+    "formField": {
+        "email": "Geben Sie eine gültige E-Mail-Adresse ein.",
+        "invalid": "Geben Sie einen gültigen Wert ein.",
+        "max": "Der Wert darf höchstens {max} betragen.",
+        "maxDate": "Das Datum darf nicht nach dem {maxDate} liegen.",
+        "maxLength": "Geben Sie höchstens {maxLength} Zeichen ein.",
+        "min": "Der Wert muss mindestens {min} betragen.",
+        "minDate": "Das Datum darf nicht vor dem {minDate} liegen.",
+        "minLength": "Geben Sie mindestens {minLength} Zeichen ein.",
+        "optional": "Optional",
+        "pattern": "Geben Sie einen Wert im erwarteten Format ein.",
+        "required": "Dieses Feld ist erforderlich."
+    },
     "grid": {
         "all": "(Alle)",
         "apply": "Anwenden",

@@ -337,6 +337,19 @@ export const TR_TR_MESSAGES = {
         startsWith: "İle başlar",
         value: "Değer"
     },
+    formField: {
+        email: "Geçerli bir e-posta adresi girin.",
+        invalid: "Geçerli bir değer girin.",
+        max: (max: number) => `Değer en fazla ${localizeNumber(max)} olmalıdır.`,
+        maxDate: (maxDate: string) => `Tarih en geç ${maxDate} olmalıdır.`,
+        maxLength: (maxLength: number) => `En fazla ${localizeNumber(maxLength)} karakter girin.`,
+        min: (min: number) => `Değer en az ${localizeNumber(min)} olmalıdır.`,
+        minDate: (minDate: string) => `Tarih en erken ${minDate} olmalıdır.`,
+        minLength: (minLength: number) => `En az ${localizeNumber(minLength)} karakter girin.`,
+        optional: "İsteğe bağlı",
+        pattern: "Beklenen biçimde bir değer girin.",
+        required: "Bu alan zorunludur."
+    },
     grid: {
         all: "(Tümü)",
         apply: "Uygula",

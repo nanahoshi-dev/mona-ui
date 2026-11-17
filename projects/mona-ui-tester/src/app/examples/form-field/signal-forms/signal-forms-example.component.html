@@ -1,0 +1,17 @@
+<form class="flex max-w-sm flex-col gap-4" novalidate (submit)="onSubmit($event)">
+    <mona-form-field label="Name">
+        <mona-text-box [formField]="account.name" />
+    </mona-form-field>
+    <mona-form-field label="Email" hint="We send the confirmation here.">
+        <mona-text-box type="email" [formField]="account.email" />
+    </mona-form-field>
+    <mona-form-field label="Password" hint="At least 12 characters.">
+        <mona-text-box type="password" [formField]="account.password" />
+    </mona-form-field>
+    <div class="flex items-center gap-3">
+        <button monaButton look="primary" type="submit">Create account</button>
+        @if (created()) {
+            <span class="text-sm" role="status">Account created.</span>
+        }
+    </div>
+</form>

@@ -340,6 +340,19 @@ export const DE_DE_MESSAGES = {
         startsWith: "Beginnt mit",
         value: "Wert"
     },
+    formField: {
+        email: "Geben Sie eine gültige E-Mail-Adresse ein.",
+        invalid: "Geben Sie einen gültigen Wert ein.",
+        max: (max: number) => `Der Wert darf höchstens ${localizeNumber(max)} betragen.`,
+        maxDate: (maxDate: string) => `Das Datum darf nicht nach dem ${maxDate} liegen.`,
+        maxLength: (maxLength: number) => `Geben Sie höchstens ${localizeNumber(maxLength)} Zeichen ein.`,
+        min: (min: number) => `Der Wert muss mindestens ${localizeNumber(min)} betragen.`,
+        minDate: (minDate: string) => `Das Datum darf nicht vor dem ${minDate} liegen.`,
+        minLength: (minLength: number) => `Geben Sie mindestens ${localizeNumber(minLength)} Zeichen ein.`,
+        optional: "Optional",
+        pattern: "Geben Sie einen Wert im erwarteten Format ein.",
+        required: "Dieses Feld ist erforderlich."
+    },
     grid: {
         all: "(Alle)",
         apply: "Anwenden",

@@ -293,6 +293,19 @@
         "startsWith": "Starts with",
         "value": "Value"
     },
+    "formField": {
+        "email": "Enter a valid email address.",
+        "invalid": "Enter a valid value.",
+        "max": "The value must be at most {max}.",
+        "maxDate": "The date must be on or before {maxDate}.",
+        "maxLength": "Enter at most {maxLength, plural, one {# character} other {# characters}}.",
+        "min": "The value must be at least {min}.",
+        "minDate": "The date must be on or after {minDate}.",
+        "minLength": "Enter at least {minLength, plural, one {# character} other {# characters}}.",
+        "optional": "Optional",
+        "pattern": "Enter a value in the expected format.",
+        "required": "This field is required."
+    },
     "grid": {
         "all": "(All)",
         "apply": "Apply",

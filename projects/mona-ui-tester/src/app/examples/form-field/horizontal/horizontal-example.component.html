@@ -1,0 +1,11 @@
+<div class="flex max-w-lg flex-col gap-4 [--mona-form-field-label-width:8rem]">
+    <mona-form-field label="Product" orientation="horizontal">
+        <mona-text-box />
+    </mona-form-field>
+    <mona-form-field label="Quantity" orientation="horizontal" hint="Up to 500 per order.">
+        <mona-numeric-text-box [minValue]="1" [maxValue]="500" />
+    </mona-form-field>
+    <mona-form-field label="Unit" orientation="horizontal">
+        <mona-dropdown-list class="w-full" [data]="units" />
+    </mona-form-field>
+</div>

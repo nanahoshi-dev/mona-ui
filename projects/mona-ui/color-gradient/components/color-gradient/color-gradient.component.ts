@@ -26,6 +26,7 @@ import { LucideChevronsUpDown, LucideCopy, LucideDropletOff } from "@lucide/angu
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
     Channel,
+    FIELD_ASSOCIATION_BOUNDARY,
     formatAlpha,
     hex2rgba,
     HSV,
@@ -91,6 +92,7 @@ const DEFAULT_RGB: RGB = { r: 255, g: 255, b: 255 };
         DropdownButtonTextTemplateDirective,
         LucideCopy
     ],
+    viewProviders: [...FIELD_ASSOCIATION_BOUNDARY],
     host: {
         "[class]": "baseClasses()",
         "[attr.data-disabled]": "effectiveDisabled()",
@@ -98,6 +100,7 @@ const DEFAULT_RGB: RGB = { r: 255, g: 255, b: 255 };
         "(focusout)": "onFocusOut($event)",
         "[attr.data-invalid]": "invalidState() || null",
         "[attr.role]": "'group'",
+        "[attr.aria-describedby]": "describedBy()",
         "[attr.aria-label]": "labelledBy() ? null : ariaLabel() || messages().colorGradient",
         "[attr.aria-labelledby]": "labelledBy()",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null"
@@ -112,8 +115,10 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     readonly #i18n = inject(MonaI18nService);
     readonly #label = injectLabelAssociation({
         activate: () => this.focus(),
+        ariaDescribedBy: () => this.ariaDescribedBy(),
         ariaLabel: () => this.ariaLabel(),
-        ariaLabelledBy: () => this.ariaLabelledBy()
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
     });
     readonly #viewReady = signal(false);
     /** Whether the color on screen differs from the value because of something the user did. */
@@ -171,6 +176,7 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
             onClick: () => this.onResetColorClick()
         }
     ]);
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly hex = computed(() => {
         const rgb = this.rgb();
@@ -226,6 +232,12 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
      * The `Apply` button is only displayed when `showButtons` is set to true.
      */
     public readonly apply = output<void>();
+
+    /**
+     * @description Id of an element that describes the color gradient, such as a hint or an error message.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
 
     /**
      * @description Accessible name of the group of controls.

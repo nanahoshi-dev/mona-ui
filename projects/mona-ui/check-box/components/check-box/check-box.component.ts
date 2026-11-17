@@ -41,8 +41,10 @@ import { createElementControlId, injectEffectiveDisabled, injectLabelAssociation
 })
 export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariantInput, FormCheckboxControl {
     readonly #label = injectLabelAssociation({
+        ariaDescribedBy: () => this.ariaDescribedBy(),
         ariaLabel: () => this.ariaLabel(),
         ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus(),
         wrapped: false
     });
     protected readonly checkBoxClasses = computed(() => {
@@ -58,6 +60,7 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
         const variantClasses = checkboxContainerLabelThemeVariants({ labelSize });
         return twMerge(variantClasses, classes);
     });
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly indeterminateState = linkedSignal(() => this.indeterminate());
     protected readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>("checkBox");

@@ -20,7 +20,12 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { Action } from "@nanahoshi/mona-ui/internal";
-import { createElementControlId, injectEffectiveDisabled, rxTimeout } from "@nanahoshi/mona-ui/internal";
+import {
+    createElementControlId,
+    injectEffectiveDisabled,
+    injectLabelAssociation,
+    rxTimeout
+} from "@nanahoshi/mona-ui/internal";
 import { formatNumber, getNumberSymbols, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { concatMap, delay, filter, map, of, Subject, switchMap, takeUntil, tap, timer } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -70,6 +75,12 @@ export abstract class NumericTextBoxBaseComponent<
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #i18n = inject(MonaI18nService);
+    readonly #label = injectLabelAssociation({
+        ariaDescribedBy: () => this.ariaDescribedBy(),
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
+    });
     /** The value this component last wrote, so a value set from outside can be told apart. */
     #ownValue: TValue | null | undefined = undefined;
     #pendingPaste = false;
@@ -82,6 +93,7 @@ export abstract class NumericTextBoxBaseComponent<
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly focused = signal(false);
     protected readonly formattedValue = computed(() => {
@@ -101,6 +113,7 @@ export abstract class NumericTextBoxBaseComponent<
         () => this.touched() && (this.invalid() || (this.required() && this.value() == null))
     );
     protected readonly keydown$ = new Subject<KeyboardEvent>();
+    protected readonly labelledBy = this.#label.labelledBy;
     protected readonly messages = this.#i18n.componentMessages("numericTextBox", NUMERIC_TEXT_BOX_DEFAULT_MESSAGES);
     protected readonly prefixTemplateList = contentChildren(NumericTextBoxPrefixTemplateDirective, {
         read: TemplateRef

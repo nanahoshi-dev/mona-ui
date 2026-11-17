@@ -45,7 +45,15 @@ Without a form, use the control's two-way binding: `[(value)]`, or `[(checked)]`
 
 ## 2. Naming a Control
 
-Every control needs a name that assistive technology can read. There are four ways to give one.
+Every control needs a name that assistive technology can read. There are five ways to give one.
+
+**Put it in a form field.** `mona-form-field` names the control with its label, describes it with its hint, and shows the errors of the bound field once the control is touched. It works for every control in the table below, and for a native input. See [Form Field](/components/form-field).
+
+```html
+<mona-form-field label="Email" hint="We send the confirmation here.">
+    <mona-text-box [formField]="account.email"></mona-text-box>
+</mona-form-field>
+```
 
 **Wrap it in a label.** The label's `text` names the control, and a click on it reaches the control. Only `text` can do this, because text projected next to the control can't be referenced without pulling in the control's own content. A wrapped control with no `text` warns in development.
 
@@ -89,15 +97,15 @@ If more than one applies, an explicit `aria-labelledby` wins, and then `aria-lab
 | `mona-color-palette`                             | Yes                       | Yes           | Yes                             | No        | No              |
 | `mona-color-picker`                              | Yes                       | Yes           | Yes                             | No        | No              |
 | `mona-color-gradient`                            | Yes                       | Yes           | Yes                             | No        | No              |
-| `mona-numeric-text-box`, `mona-decimal-text-box` | Yes, named by the browser | Focus only    | Yes                             | Yes       | No              |
+| `mona-numeric-text-box`, `mona-decimal-text-box` | Yes                       | Focus only    | Yes                             | Yes       | No              |
 | `mona-date-picker`                               | Yes                       | Focus only    | Yes                             | Yes       | No              |
-| `mona-dropdown-list`                             | No                        | Focus only    | Yes                             | No        | No              |
+| `mona-dropdown-list`                             | Yes                       | Focus only    | Yes                             | No        | No              |
 
 A check box and a radio button render their own `<label>`, and its text has to stay their name, so a wrapping `mona-label` doesn't name them. Use their `label` input, or `[for]` from outside.
 
 A text area is a directive on a native `<textarea>`, so a label's `for` and an `id` work as they do for any native element.
 
-"Focus only" means `[for]` makes a click on the label focus the control, but doesn't name it. Name those controls with `inputId` and a string `for`, by wrapping them where the table says yes, or with `aria-labelledby` pointing at the label's `id`. A dropdown list has no native input, so `aria-labelledby` or `aria-label` is the only way to name it. The other dropdowns and pickers have their own pages; see each one for how to name it.
+"Focus only" means `[for]` makes a click on the label focus the control, but doesn't name it. Name those controls with `inputId` and a string `for`, by wrapping them where the table says yes, or with `aria-labelledby` pointing at the label's `id`. A dropdown list has no native input, so wrap it, or name it with `aria-labelledby` or `aria-label`. The other dropdowns, the pickers and the editor take a wrapping label or form field the same way.
 
 ---
 

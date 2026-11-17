@@ -20,7 +20,7 @@
         [attr.aria-invalid]="invalidState() ? 'true' : null"
         [attr.aria-label]="ariaLabel() || label() || null"
         [attr.aria-labelledby]="labelledBy()"
-        [attr.aria-describedby]="ariaDescribedBy() || null"
+        [attr.aria-describedby]="describedBy()"
         [attr.aria-readonly]="readonly() ? 'true' : null"
         (click)="onInputClick($event)"
         (change)="onInputChange($event)"

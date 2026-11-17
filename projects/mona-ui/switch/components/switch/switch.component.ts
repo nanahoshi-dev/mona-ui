@@ -76,6 +76,7 @@ import { injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona
         "[attr.role]": "'switch'",
         "[attr.aria-checked]": "checked()",
         "[attr.aria-disabled]": "effectiveDisabled() || undefined",
+        "[attr.aria-describedby]": "describedBy()",
         "[attr.aria-label]": "ariaLabel()",
         "[attr.aria-labelledby]": "labelledBy()",
         "[attr.aria-readonly]": "readonly() || null",
@@ -95,8 +96,10 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #label = injectLabelAssociation({
         activate: () => this.activateFromLabel(),
+        ariaDescribedBy: () => this.ariaDescribedBy(),
         ariaLabel: () => this.ariaLabel(),
-        ariaLabelledBy: () => this.ariaLabelledBy()
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
     });
     protected readonly classes = computed(() => {
         const rounded = this.rounded();
@@ -104,6 +107,7 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
         const classes = switchThemeVariants({ rounded, size });
         return twMerge(classes, this.userClass());
     });
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly handleClasses = computed(() => {
         const rounded = this.rounded();
@@ -124,6 +128,12 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
     protected readonly labelledBy = this.#label.labelledBy;
     protected readonly offLabelTemplate = contentChild(SwitchOffLabelTemplateDirective, { read: TemplateRef });
     protected readonly onLabelTemplate = contentChild(SwitchOnLabelTemplateDirective, { read: TemplateRef });
+
+    /**
+     * @description Id of an element that describes the switch, such as a hint or an error message.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
 
     /**
      * @description Accessible name for the host element. Describe what the component represents.

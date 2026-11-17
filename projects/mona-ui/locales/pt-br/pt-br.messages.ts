@@ -341,6 +341,21 @@ export const PT_BR_MESSAGES = {
         startsWith: "Começa com",
         value: "Valor"
     },
+    formField: {
+        email: "Digite um endereço de e-mail válido.",
+        invalid: "Digite um valor válido.",
+        max: (max: number) => `O valor deve ser no máximo ${localizeNumber(max)}.`,
+        maxDate: (maxDate: string) => `A data deve ser igual ou anterior a ${maxDate}.`,
+        maxLength: (maxLength: number) =>
+            `Digite no máximo ${plural(PLURAL_RULES.select(maxLength), { one: () => `${localizeNumber(maxLength)} caractere`, other: () => `${localizeNumber(maxLength)} caracteres` })}.`,
+        min: (min: number) => `O valor deve ser no mínimo ${localizeNumber(min)}.`,
+        minDate: (minDate: string) => `A data deve ser igual ou posterior a ${minDate}.`,
+        minLength: (minLength: number) =>
+            `Digite pelo menos ${plural(PLURAL_RULES.select(minLength), { one: () => `${localizeNumber(minLength)} caractere`, other: () => `${localizeNumber(minLength)} caracteres` })}.`,
+        optional: "Opcional",
+        pattern: "Digite um valor no formato esperado.",
+        required: "Este campo é obrigatório."
+    },
     grid: {
         all: "(Todos)",
         apply: "Aplicar",

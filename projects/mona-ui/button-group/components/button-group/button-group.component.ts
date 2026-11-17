@@ -35,6 +35,7 @@ import {
     providers: [ButtonService],
     host: {
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
+        "[attr.aria-describedby]": "describedBy()",
         "[attr.aria-label]": "labelledBy() ? null : ariaLabel() || messages().buttonGroup",
         "[attr.aria-labelledby]": "labelledBy()",
         "[attr.data-invalid]": "invalidState() || null",
@@ -53,8 +54,10 @@ export class ButtonGroupComponent<T = unknown>
     readonly #i18n = inject(MonaI18nService);
     readonly #label = injectLabelAssociation({
         activate: () => this.focus(),
+        ariaDescribedBy: () => this.ariaDescribedBy(),
         ariaLabel: () => this.ariaLabel(),
-        ariaLabelledBy: () => this.ariaLabelledBy()
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
     });
     /** The buttons seen selected last time, to tell which one is new and which one to bring back. */
     #lastSelected: readonly ButtonDirective[] = [];
@@ -75,6 +78,7 @@ export class ButtonGroupComponent<T = unknown>
      * disabled state, but not its selection.
      */
     protected readonly components = contentChildren(BUTTON_GROUP_MEMBER);
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly invalidState = computed(() => this.touched() && this.invalid());
     protected readonly labelledBy = this.#label.labelledBy;
@@ -92,6 +96,12 @@ export class ButtonGroupComponent<T = unknown>
      * @default true
      */
     public readonly allowEmpty = input(true, { transform: booleanAttribute });
+
+    /**
+     * @description Id of an element that describes the button group, such as a hint or an error message.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
 
     /**
      * @description Accessible name for the host element. Override when multiple button groups appear on the same page

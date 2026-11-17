@@ -293,6 +293,19 @@
         "startsWith": "Commence par",
         "value": "Valeur"
     },
+    "formField": {
+        "email": "Saisissez une adresse e-mail valide.",
+        "invalid": "Saisissez une valeur valide.",
+        "max": "La valeur doit être inférieure ou égale à {max}.",
+        "maxDate": "La date doit être antérieure ou égale au {maxDate}.",
+        "maxLength": "Saisissez au maximum {maxLength, plural, one {# caractère} other {# caractères}}.",
+        "min": "La valeur doit être supérieure ou égale à {min}.",
+        "minDate": "La date doit être postérieure ou égale au {minDate}.",
+        "minLength": "Saisissez au moins {minLength, plural, one {# caractère} other {# caractères}}.",
+        "optional": "Facultatif",
+        "pattern": "Saisissez une valeur au format attendu.",
+        "required": "Ce champ est obligatoire."
+    },
     "grid": {
         "all": "(Tout)",
         "apply": "Appliquer",

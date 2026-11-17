@@ -42,6 +42,7 @@ import {
     host: {
         "[attr.aria-disabled]": "effectiveDisabled() || undefined",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
+        "[attr.aria-describedby]": "describedBy()",
         "[attr.aria-label]": "ariaLabel()",
         "[attr.aria-labelledby]": "labelledBy()",
         "[attr.aria-readonly]": "readonly() || null",
@@ -62,8 +63,10 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #label = injectLabelAssociation({
         activate: () => this.focus(),
+        ariaDescribedBy: () => this.ariaDescribedBy(),
         ariaLabel: () => this.ariaLabel(),
-        ariaLabelledBy: () => this.ariaLabelledBy()
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
     });
     #lastAnimatedIndex: number | null = null;
     #lastOptions: readonly SegmentedOption<T>[] | null = null;
@@ -75,6 +78,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
         const classes = segmentedContainerThemeVariants({ alignment: this.alignment(), rounded: this.rounded() });
         return twMerge(classes, this.userClass());
     });
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly geometryReady = computed(() => !!this.indicatorGeometry());
     protected readonly groupName = createElementControlId();
@@ -134,6 +138,12 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
      * @default true
      */
     public readonly animate = input(true, { transform: booleanAttribute });
+
+    /**
+     * @description Id of an element that describes the segmented control, such as a hint or an error message.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
 
     /**
      * @description Accessible name for the radio group. Provide either `aria-label` or `aria-labelledby`.

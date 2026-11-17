@@ -1,0 +1,12 @@
+<div class="flex max-w-sm flex-col items-start gap-3">
+    <mona-form-field class="w-full" label="Postcode" hint="Two digits, a hyphen and three digits.">
+        <ng-template monaFormFieldErrorTemplate let-message>
+            <span class="inline-flex items-center gap-1">
+                <svg lucideCircleAlert class="size-3.5 shrink-0" aria-hidden="true"></svg>
+                {{ message }}
+            </span>
+        </ng-template>
+        <mona-text-box [formField]="address.postcode" />
+    </mona-form-field>
+    <button class="text-sm underline" type="button" (click)="touch()">Show the error</button>
+</div>

@@ -105,5 +105,5 @@ describe("ChartSyncDensityDemoComponent", () => {
             // display override collapses the plot surface to zero height and blanks the chart.
             expect(host.style.display, `chart ${index} inline display`).not.toBe("block");
         }
-    });
+    }, renderTimeout);
 });

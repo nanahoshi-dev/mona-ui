@@ -1,0 +1,14 @@
+<div class="flex max-w-sm flex-col gap-4">
+    <mona-form-field label="Full name" required>
+        <mona-text-box required />
+    </mona-form-field>
+    <mona-form-field label="Company" optional>
+        <mona-text-box />
+    </mona-form-field>
+    <mona-form-field label="VAT number" optional optionalText="If you have one">
+        <ng-template monaFormFieldHintTemplate>
+            The format depends on the country. <a class="underline" href="#vat">Where to find it</a>
+        </ng-template>
+        <mona-text-box />
+    </mona-form-field>
+</div>

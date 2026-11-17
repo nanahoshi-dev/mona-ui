@@ -54,8 +54,10 @@ export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<s
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #i18n = inject(MonaI18nService);
     readonly #label = injectLabelAssociation({
+        ariaDescribedBy: () => this.ariaDescribedBy(),
         ariaLabel: () => this.ariaLabel(),
-        ariaLabelledBy: () => this.ariaLabelledBy()
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
     });
     protected readonly classes = computed(() => {
         const rounded = this.rounded();
@@ -64,6 +66,7 @@ export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<s
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>("input");
     protected readonly invalidInput = computed(

@@ -45,7 +45,9 @@ import {
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import {
     createElementControlId,
+    FIELD_ASSOCIATION_BOUNDARY,
     injectEffectiveDisabled,
+    injectLabelAssociation,
     restoreOverlayScroll,
     rxFromResize
 } from "@nanahoshi/mona-ui/internal";
@@ -106,17 +108,18 @@ import {
         IndicatorIconComponent
     ],
     hostDirectives: [DropdownDataHandlerDirective, DropdownListPopupHandlerDirective, DropdownLiveRegionDirective],
+    viewProviders: [...FIELD_ASSOCIATION_BOUNDARY],
     host: {
         "[attr.aria-activedescendant]": "activeDescendant()",
         "[attr.aria-busy]": "loading() ? 'true' : undefined",
         "[attr.aria-controls]": "listId",
-        "[attr.aria-describedby]": "ariaDescribedBy() || null",
+        "[attr.aria-describedby]": "describedBy()",
         "[attr.aria-disabled]": "effectiveDisabled() ? true : undefined",
         "[attr.aria-expanded]": "expanded()",
         "[attr.aria-haspopup]": "'listbox'",
         "[attr.aria-invalid]": "invalidState() ? true : undefined",
         "[attr.aria-label]": "effectiveAriaLabel() || null",
-        "[attr.aria-labelledby]": "ariaLabelledBy() || null",
+        "[attr.aria-labelledby]": "labelledBy()",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
         "[attr.data-disabled]": "effectiveDisabled() || null",
@@ -140,6 +143,13 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    readonly #label = injectLabelAssociation({
+        activate: () => this.focus(),
+        ariaDescribedBy: () => this.ariaDescribedBy(),
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
+    });
     readonly #listService = inject(ListService<TData>);
     readonly #multiSelectService = inject(MultiSelectService);
     readonly #popupRef = this.#dropdownService.popupRef;
@@ -170,8 +180,9 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
             !this.effectiveDisabled() &&
             !this.readonly()
     );
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveAriaLabel = computed(
-        () => this.ariaLabel() || (this.ariaLabelledBy() ? "" : this.placeholder())
+        () => this.ariaLabel() || (this.labelledBy() ? "" : this.placeholder())
     );
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
@@ -194,6 +205,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         return multiSelectItemContainerThemeVariants({ rounded });
     });
     protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
+    protected readonly labelledBy = this.#label.labelledBy;
     protected readonly listId = createElementControlId();
     protected readonly listPopupClass = computed(() => {
         const rounded = this.rounded();

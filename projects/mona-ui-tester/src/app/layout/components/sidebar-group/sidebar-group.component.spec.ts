@@ -2,7 +2,7 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Router, provideRouter } from "@angular/router";
 import axe from "axe-core";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { DOCS_MANIFEST } from "../../docs-manifest";
 import type { DocsCategory } from "../../docs-manifest";
 import { SidebarGroupComponent } from "./sidebar-group.component";
@@ -23,7 +23,11 @@ describe("SidebarGroupComponent", () => {
         fixture.detectChanges();
     }
 
+    // Which sections are open is saved, and spec files share a window, so each test starts from no saved choice.
+    afterEach(() => localStorage.removeItem("mona-docs-navigation"));
+
     beforeEach(async () => {
+        localStorage.removeItem("mona-docs-navigation");
         await TestBed.configureTestingModule({
             imports: [SidebarGroupComponent],
             providers: [

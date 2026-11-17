@@ -47,6 +47,7 @@ interface PaletteGrid {
         "(focusout)": "onFocusOut($event)",
         "[attr.data-required]": "required() || null",
         "[attr.role]": "'grid'",
+        "[attr.aria-describedby]": "describedBy()",
         "[attr.aria-label]": "labelledBy() ? null : ariaLabel() || messages().colorPalette",
         "[attr.aria-labelledby]": "labelledBy()",
         "[attr.aria-disabled]": "effectiveDisabled()",
@@ -62,8 +63,10 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
     readonly #i18n = inject(MonaI18nService);
     readonly #label = injectLabelAssociation({
         activate: () => this.focus(),
+        ariaDescribedBy: () => this.ariaDescribedBy(),
         ariaLabel: () => this.ariaLabel(),
-        ariaLabelledBy: () => this.ariaLabelledBy()
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
     });
     protected readonly activeColorIndex = computed(() => {
         const focused = this.focusedColorIndex();
@@ -83,6 +86,7 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
         }
         return rows;
     });
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly focusedColorIndex = signal<number>(-1);
     protected readonly grid = computed<PaletteGrid>(() => {
@@ -125,6 +129,12 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
         return this.tileKeys().indexOf(key);
     });
     protected readonly tileKeys = computed(() => this.grid().tiles.map(tile => colorKey(tile.color, this.#document)));
+
+    /**
+     * @description Id of an element that describes the color palette, such as a hint or an error message.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
 
     /**
      * @description Accessible label for the color palette grid.

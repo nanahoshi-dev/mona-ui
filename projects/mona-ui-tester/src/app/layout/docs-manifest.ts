@@ -92,6 +92,7 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
             component("decimal-textbox", "Decimal Text Box", "numeric-text-box", "A numeric input whose value is a decimal string, for exact values like money.", { apiExports: ["DecimalTextBoxComponent", "NumericTextBoxPrefixTemplateDirective"] }),
             component("editor", "Editor", "editor", "A rich text editor with a configurable toolbar and an HTML value."),
             component("fieldset", "Fieldset", "fieldset", "Groups related form controls under a labelled border."),
+            component("form-field", "Form Field", "form-field", "Labels one form control, describes it with a hint and shows its validation errors."),
             component("input", "Input", "text-box", "Styles a native input element and keeps its browser behavior.", { apiExports: ["InputType", "TextBoxDirective"] }),
             component("label", "Label", "label", "Styled, accessible labels associated with form controls."),
             component("numeric-textbox", "Numeric Text Box", "numeric-text-box", "A number input with spinner buttons, bounds and decimal formatting.", { apiExports: ["NUMERIC_TEXT_BOX_DEFAULT_MESSAGES", "NumericTextBoxComponent", "NumericTextBoxPrefixTemplateDirective"] }),

@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Router, provideRouter } from "@angular/router";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DOCS_MANIFEST, flattenDocsPages } from "../../docs-manifest";
 import { SidebarComponent } from "./sidebar.component";
 
@@ -10,6 +10,9 @@ class EmptyComponent {}
 
 describe("SidebarComponent", () => {
     let fixture: ComponentFixture<SidebarComponent>;
+
+    // Opening a section saves it. Spec files share a window, so a section left open here would start open in others.
+    afterEach(() => localStorage.removeItem("mona-docs-navigation"));
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({

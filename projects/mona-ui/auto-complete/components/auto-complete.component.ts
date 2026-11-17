@@ -21,7 +21,13 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import { createElementControlId, injectEffectiveDisabled, rxTimeout } from "@nanahoshi/mona-ui/internal";
+import {
+    createElementControlId,
+    FIELD_ASSOCIATION_BOUNDARY,
+    injectEffectiveDisabled,
+    injectLabelAssociation,
+    rxTimeout
+} from "@nanahoshi/mona-ui/internal";
 import { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import {
@@ -101,6 +107,7 @@ import {
         ListItemTemplateDirective,
         IndicatorIconComponent
     ],
+    viewProviders: [...FIELD_ASSOCIATION_BOUNDARY],
     host: {
         // The host has no role: the inner input is the combobox and carries the name, description and state. A static
         // aria-* attribute written on <mona-auto-complete> would otherwise stay on the host as well.
@@ -127,6 +134,12 @@ export class AutoCompleteComponent<TData = unknown>
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #i18n = inject(MonaI18nService);
+    readonly #label = injectLabelAssociation({
+        ariaDescribedBy: () => this.ariaDescribedBy(),
+        ariaLabel: () => this.ariaLabel(),
+        ariaLabelledBy: () => this.ariaLabelledBy(),
+        focus: () => this.focus()
+    });
     readonly #listService = inject(ListService);
     readonly #popupRef = this.#dropdownService.popupRef;
 
@@ -165,6 +178,7 @@ export class AutoCompleteComponent<TData = unknown>
             !this.effectiveDisabled() &&
             !this.readonly()
     );
+    protected readonly describedBy = this.#label.describedBy;
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
     protected readonly expanded = computed(() => this.#popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropdownFooterTemplateDirective, { read: TemplateRef });
@@ -181,6 +195,7 @@ export class AutoCompleteComponent<TData = unknown>
     );
     protected readonly isEmpty = computed(() => !this.#listService.viewItems().any());
     protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
+    protected readonly labelledBy = this.#label.labelledBy;
     protected readonly listId = createElementControlId();
     protected readonly listPopupClass = computed(() => {
         const rounded = this.rounded();
