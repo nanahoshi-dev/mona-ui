@@ -1,0 +1,9 @@
+<div class="flex max-w-sm flex-col gap-4">
+    <mona-form-field label="Booking" hint="Within the next year. We're closed on Mondays.">
+        <mona-date-range-picker
+            [disabledDates]="isMonday"
+            [maxDate]="lastDay"
+            [minDate]="today"
+            [(value)]="booking" />
+    </mona-form-field>
+</div>

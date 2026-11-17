@@ -127,6 +127,7 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
             component("color-palette", "Color Palette", "color-palette", "A grid of selectable color swatches from a built-in or custom scheme."),
             component("color-picker", "Color Picker", "color-picker", "A compact control that opens a color palette or gradient editor."),
             component("date-picker", "Date Picker", "date-picker", "A date input that opens a calendar popup."),
+            component("date-range-picker", "Date Range Picker", "date-range-picker", "Two date inputs for a range of days, with a calendar popup that shows two months."),
             component("datetime-picker", "Date Time Picker", "datetime-picker", "An input for choosing a date and a time together."),
             component("time-picker", "Time Picker", "time-picker", "A time input that opens a time selector popup.")
         ]

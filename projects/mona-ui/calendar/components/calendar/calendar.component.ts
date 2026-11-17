@@ -12,6 +12,7 @@ import {
     input,
     linkedSignal,
     model,
+    numberAttribute,
     output,
     signal,
     untracked
@@ -19,9 +20,9 @@ import {
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { LucideChevronLeft, LucideChevronRight } from "@lucide/angular";
-import { Dictionary, index, lastOrDefault, range, select } from "@mirei/ts-collections";
+import { firstOrDefault, index, lastOrDefault, range, select } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
-import { PreventableEvent, TakeFirstPipe } from "@nanahoshi/mona-ui/common";
+import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import type { CalendarView, DateDisabledType } from "@nanahoshi/mona-ui/date-input";
 import { CalendarService } from "@nanahoshi/mona-ui/date-input";
 import { createElementControlId, injectEffectiveDisabled, rxTimeout } from "@nanahoshi/mona-ui/internal";
@@ -30,6 +31,7 @@ import { DateTime } from "luxon";
 import { fromEvent, skip } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import {
+    formatGregorianDateRangeToLocaleString,
     formatGregorianDateToLocaleString,
     formatNumber,
     getLocaleFirstDayOfWeek,
@@ -44,16 +46,20 @@ import { CalendarMonthCellTemplateDirective } from "../../directives/calendar-mo
 import { CalendarYearCellTemplateDirective } from "../../directives/calendar-year-cell-template.directive";
 import { DecadeYearDirective } from "../../directives/decade-year.directive";
 import { MonthDayDirective } from "../../directives/month-day.directive";
+import type { MonthDayEntry, MonthDayRangeEnds } from "../../directives/month-day.directive";
 import { YearMonthDirective } from "../../directives/year-month.directive";
 import type { CalendarSelection } from "../../models/CalendarSelection";
 import type { FirstDayOfWeek } from "../../models/FirstDayOfWeek";
+import type { MonthGrid, MonthGridWeek } from "../../models/MonthGrid";
 import type { CalendarVariantInput, CalendarVariantProps } from "../../styles/calendar.styles";
 import {
     calendarBaseThemeVariants,
     calendarDecadeViewGridThemeVariants,
     calendarHeaderThemeVariants,
+    calendarMonthCaptionThemeVariants,
     calendarMonthViewGridHeaderThemeVariants,
     calendarMonthViewGridThemeVariants,
+    calendarMonthViewThemeVariants,
     calendarYearViewGridThemeVariants
 } from "../../styles/calendar.styles";
 import { compareDates, toDayKey } from "../../utils/compareDates";
@@ -66,6 +72,15 @@ function startOfDay(date: Date): Date {
 /** Whole calendar days from `start` to `end`, whatever their times and across DST changes. */
 function calendarDaysBetween(start: DateTime, end: DateTime): number {
     return Math.round(end.startOf("day").diff(start.startOf("day"), "days").days);
+}
+
+/** The most months the month view shows at once. */
+const MAX_MONTHS = 12;
+
+/** Turns the `months` input into a whole number of months from 1 to {@link MAX_MONTHS}. */
+function monthCount(value: unknown): number {
+    const count = Math.trunc(numberAttribute(value, 1));
+    return Number.isFinite(count) ? Math.min(MAX_MONTHS, Math.max(1, count)) : 1;
 }
 
 const FIRST_DAY_OF_WEEK_TO_ISO: Record<FirstDayOfWeek, number> = {
@@ -87,7 +102,6 @@ const FIRST_DAY_OF_WEEK_TO_ISO: Record<FirstDayOfWeek, number> = {
         DecadeYearDirective,
         YearMonthDirective,
         NgTemplateOutlet,
-        TakeFirstPipe,
         LucideChevronLeft,
         LucideChevronRight
     ],
@@ -109,29 +123,6 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     readonly #direction = injectComponentDirection();
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #i18n = inject(MonaI18nService);
-    readonly #monthDict = computed(() => {
-        const day = this.navigatedDate();
-        const firstDayOfMonth = gregorianDateTime(day, this.#i18n.localeId()).startOf("month");
-        const lastDayOfMonth = gregorianDateTime(day, this.#i18n.localeId()).endOf("month");
-        const firstDayIso = FIRST_DAY_OF_WEEK_TO_ISO[this.effectiveFirstDay()];
-
-        const daysToSubtract = (firstDayOfMonth.weekday - firstDayIso + 7) % 7;
-        const firstDayOfCalendar = firstDayOfMonth.minus({ days: daysToSubtract });
-
-        const lastDayOfWeekIso = ((firstDayIso + 5) % 7) + 1;
-        const daysToAdd = (lastDayOfWeekIso - lastDayOfMonth.weekday + 7) % 7;
-        const lastDayOfCalendar = lastDayOfMonth.plus({ days: daysToAdd });
-
-        const dictionary = new Dictionary<Date, number>();
-        for (let i = firstDayOfCalendar; i <= lastDayOfCalendar; i = i.plus({ days: 1 })) {
-            dictionary.add(i.toJSDate(), i.day);
-        }
-
-        return dictionary.toImmutableDictionary(
-            e => e.key,
-            e => e.value
-        );
-    });
     readonly #outputValue = computed(() => {
         const selection = this.selection();
         const selectedDates = this.selectedDates();
@@ -157,9 +148,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         const messages = this.messages();
         switch (view) {
             case "month":
-                return messages.calendarLabel(
-                    formatGregorianDateToLocaleString(navigatedDate, locale, { year: "numeric", month: "long" })
-                );
+                return messages.calendarLabel(this.headerMonthYear());
             case "year":
                 return messages.yearViewLabel(
                     formatGregorianDateToLocaleString(navigatedDate, locale, { year: "numeric" })
@@ -205,12 +194,19 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     protected readonly headerClass = computed(() => {
         return calendarHeaderThemeVariants({});
     });
+    /** The month shown, or the span of the months shown when there are more than one. */
     protected readonly headerMonthYear = computed(() => {
         const locale = this.#i18n.localeId();
-        return formatGregorianDateToLocaleString(this.navigatedDate(), locale, {
-            year: "numeric",
-            month: "long"
-        });
+        const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long" };
+        const count = this.months();
+        if (count === 1) {
+            return formatGregorianDateToLocaleString(this.navigatedDate(), locale, options);
+        }
+        const first = this.viewStart();
+        const last = DateTime.fromJSDate(first)
+            .plus({ months: count - 1 })
+            .toJSDate();
+        return formatGregorianDateRangeToLocaleString(first, last, locale, options);
     });
     protected readonly headerYear = computed(() => {
         const locale = this.#i18n.localeId();
@@ -240,41 +236,63 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         return date => isOutOfRange(date) || keys.has(toDayKey(date));
     });
     protected readonly messages = this.#i18n.componentMessages("calendar", CALENDAR_DEFAULT_MESSAGES);
-    protected readonly monthBounds = computed(() => {
-        const navigatedDate = this.navigatedDate();
-        const firstDayOfMonth = gregorianDateTime(navigatedDate, this.#i18n.localeId()).startOf("month");
-        const lastDayOfMonth = gregorianDateTime(navigatedDate, this.#i18n.localeId()).endOf("month");
-        return { start: firstDayOfMonth.toJSDate(), end: lastDayOfMonth.toJSDate() };
-    });
+    protected readonly monthCaptionClass = calendarMonthCaptionThemeVariants();
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
-    protected readonly monthDictChunked = computed(() => {
-        const dict = this.#monthDict();
-        return dict
-            .chunk(7)
-            .select(e =>
-                e.toImmutableDictionary(
-                    e => e.key,
-                    e => e.value
-                )
-            )
-            .toImmutableSet();
-    });
     protected readonly monthGridClass = computed(() => {
         return calendarMonthViewGridThemeVariants();
     });
     protected readonly monthGridHeaderClass = computed(() => {
         return calendarMonthViewGridHeaderThemeVariants();
     });
-    protected readonly months = computed(() => {
+    /**
+     * The months the month view shows, from {@link viewStart}. With more than one, a day of the months around each one
+     * is a blank cell, so no date is shown, or focused, twice.
+     */
+    protected readonly monthGrids = computed<readonly MonthGrid[]>(() => {
         const locale = this.#i18n.localeId();
-        const names = range(1, 12)
-            .select(m => gregorianDateTimeFromObject({ year: 2024, month: m, day: 1 }, locale).toFormat("LLL"))
+        const count = this.months();
+        const firstDayIso = FIRST_DAY_OF_WEEK_TO_ISO[this.effectiveFirstDay()];
+        const lastDayOfWeekIso = ((firstDayIso + 5) % 7) + 1;
+        const start = gregorianDateTime(this.viewStart(), locale).startOf("month");
+        return range(0, count)
+            .select((offset): MonthGrid => {
+                const firstDayOfMonth = start.plus({ months: offset });
+                const lastDayOfMonth = firstDayOfMonth.endOf("month");
+                const firstDayOfGrid = firstDayOfMonth.minus({
+                    days: (firstDayOfMonth.weekday - firstDayIso + 7) % 7
+                });
+                const lastDayOfGrid = lastDayOfMonth.plus({
+                    days: (lastDayOfWeekIso - lastDayOfMonth.weekday + 7) % 7
+                });
+                const days: (MonthDayEntry | null)[] = [];
+                for (let day = firstDayOfGrid; day <= lastDayOfGrid; day = day.plus({ days: 1 })) {
+                    const blank = count > 1 && !day.hasSame(firstDayOfMonth, "month");
+                    days.push(blank ? null : { key: day.toJSDate(), value: day.day });
+                }
+                const weeks = range(0, days.length / 7)
+                    .select((week): MonthGridWeek => {
+                        const firstDay = firstDayOfGrid.plus({ weeks: week });
+                        return {
+                            days: days.slice(week * 7, week * 7 + 7),
+                            key: firstDay.toMillis(),
+                            weekNumber: this.getWeekNumber(firstDay.toJSDate())
+                        };
+                    })
+                    .toArray();
+                return {
+                    bounds: [firstDayOfMonth.toJSDate(), lastDayOfMonth.toJSDate()],
+                    caption: formatGregorianDateToLocaleString(firstDayOfMonth.toJSDate(), locale, {
+                        year: "numeric",
+                        month: "long"
+                    }),
+                    captionId: `${this.gridId}-month-${offset}`,
+                    key: firstDayOfMonth.toMillis(),
+                    weeks
+                };
+            })
             .toArray();
-        return index(names)
-            .chunk(3)
-            .select(e => e.select(m => [m[0] + 1, m[1]] as const).toImmutableSet())
-            .toImmutableSet();
     });
+    protected readonly monthViewClass = calendarMonthViewThemeVariants();
     // Midnight, so a date picked with the keyboard before any value exists carries no clock time.
     protected readonly navigatedDate = signal(startOfDay(new Date()));
     protected readonly nextButtonLabel = computed(() => {
@@ -301,6 +319,15 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             case "decade":
                 return messages.previousDecade;
         }
+    });
+    /** The first and last selected days in range selection, so the days between them are drawn apart from the ends. */
+    protected readonly rangeEnds = computed<MonthDayRangeEnds | null>(() => {
+        if (this.selection() !== "range") {
+            return null;
+        }
+        const first = firstOrDefault(this.selectedDates());
+        const last = lastOrDefault(this.selectedDates());
+        return first && last ? { start: toDayKey(first), end: toDayKey(last) } : null;
     });
     protected readonly rangePreviewDate = signal<Date | null>(null);
     protected readonly rangePreviewDates = computed(() => {
@@ -347,6 +374,28 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         return this.messages().goToToday(todayStr);
     });
     protected readonly todayUnavailable = computed(() => this.isDayUnavailable()(this.today()));
+    /**
+     * The first month the month view shows. It stays where it is while the active day is in one of the months shown,
+     * and otherwise moves just far enough to show it.
+     */
+    protected readonly viewStart = linkedSignal<{ readonly count: number; readonly date: Date }, Date>({
+        source: () => ({ count: this.months(), date: this.navigatedDate() }),
+        computation: (source, previous) => {
+            const month = DateTime.fromJSDate(source.date).startOf("month");
+            if (previous) {
+                const first = DateTime.fromJSDate(previous.value);
+                const last = first.plus({ months: source.count - 1 });
+                if (month < first) {
+                    return month.toJSDate();
+                }
+                if (month > last) {
+                    return month.minus({ months: source.count - 1 }).toJSDate();
+                }
+                return previous.value;
+            }
+            return month.toJSDate();
+        }
+    });
     protected readonly viewSwitchButtonLabel = computed(() => {
         const view = this.calendarView();
         const locale = this.#i18n.localeId();
@@ -354,9 +403,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         const messages = this.messages();
         switch (view) {
             case "month":
-                return messages.switchToYearView(
-                    formatGregorianDateToLocaleString(navigatedDate, locale, { year: "numeric", month: "long" })
-                );
+                return messages.switchToYearView(this.headerMonthYear());
             case "year":
                 return messages.switchToDecadeView(
                     formatGregorianDateToLocaleString(navigatedDate, locale, { year: "numeric" })
@@ -385,6 +432,17 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective);
     protected readonly yearGridClass = computed(() => {
         return calendarYearViewGridThemeVariants();
+    });
+    /** The months of the year view, three to a row. */
+    protected readonly yearViewMonths = computed(() => {
+        const locale = this.#i18n.localeId();
+        const names = range(1, 12)
+            .select(m => gregorianDateTimeFromObject({ year: 2024, month: m, day: 1 }, locale).toFormat("LLL"))
+            .toArray();
+        return index(names)
+            .chunk(3)
+            .select(e => e.select(m => [m[0] + 1, m[1]] as const).toImmutableSet())
+            .toImmutableSet();
     });
 
     /**
@@ -427,6 +485,14 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
      * @description Sets the minimum date that can be selected.
      */
     public readonly minDate = input<Date | null>();
+
+    /**
+     * @description How many months the month view shows side by side, from 1 to 12. They wrap onto new rows when the
+     * calendar is narrow. With more than one, each month has a caption, the days of the months around it are left
+     * blank, and the previous and next buttons move the view by one month.
+     * @default 1
+     */
+    public readonly months = input(1, { transform: monthCount });
 
     /**
      * @description Sets the readonly state of the calendar.
@@ -473,7 +539,8 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
 
     /**
      * @description The current value of the calendar: a `Date` in single selection, the selected dates in multiple
-     * selection, and `[start, end]` in range selection. A range is written once both ends are picked.
+     * selection, and `[start, end]` in range selection. A range is written once both ends are picked. In range
+     * selection, a value with one date is a range's start: the next day picked ends the range.
      * @default null
      */
     public readonly value = model<Date | Date[] | null>(null);
@@ -510,10 +577,16 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         effect(() => {
             const v = this.value();
             untracked(() => {
+                if (this.selection() === "range") {
+                    // A range with only its start waits for the next day picked to end it, as after a first click.
+                    this.pendingRangeStart.set(Array.isArray(v) && v.length === 1 ? startOfDay(v[0]) : null);
+                    this.rangePreviewDate.set(null);
+                }
                 // Show the last selected date. Clearing the selection leaves the view where it is.
                 const lastDate = Array.isArray(v) ? lastOrDefault(v) : v;
                 if (lastDate) {
                     this.navigatedDate.set(lastDate);
+                    this.showSelectionStart(Array.isArray(v) ? firstOrDefault(v) : null, lastDate);
                 }
             });
         });
@@ -586,7 +659,10 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     }
 
     protected onMonthClick(month: number): void {
-        this.navigatedDate.set(DateTime.fromJSDate(this.navigatedDate()).set({ month }).toJSDate());
+        const date = DateTime.fromJSDate(this.navigatedDate()).set({ month });
+        this.navigatedDate.set(date.toJSDate());
+        // The picked month comes first in the month view.
+        this.viewStart.set(date.startOf("month").toJSDate());
         this.calendarView.set("month");
     }
 
@@ -597,6 +673,8 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     protected onNavigationClick(direction: "prev" | "next"): void {
         this.rangePreviewDate.set(null);
         const date = DateTime.fromJSDate(this.navigatedDate());
+        // Read before the active day moves, which can move the view on its own.
+        const viewStart = DateTime.fromJSDate(this.viewStart());
         let unit: DurationObjectUnits;
         switch (this.calendarView()) {
             case "month":
@@ -610,6 +688,10 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                 break;
         }
         this.navigatedDate.set(direction === "prev" ? date.minus(unit).toJSDate() : date.plus(unit).toJSDate());
+        if (this.calendarView() === "month") {
+            // The whole view moves by a month, so the active day keeps its place among the months shown.
+            this.viewStart.set(viewStart.plus({ months: direction === "prev" ? -1 : 1 }).toJSDate());
+        }
     }
 
     protected onTodayButtonClick(): void {
@@ -1176,6 +1258,22 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => this.handleKeydown(event));
+    }
+
+    /**
+     * Moves the view back so a selection that spans months starts in it, as long as its last date, which is active,
+     * stays in it too.
+     */
+    private showSelectionStart(firstDate: Date | null | undefined, lastDate: Date): void {
+        const count = this.months();
+        if (!firstDate || count === 1) {
+            return;
+        }
+        const firstMonth = DateTime.fromJSDate(firstDate).startOf("month");
+        const earliestStart = DateTime.fromJSDate(lastDate)
+            .startOf("month")
+            .minus({ months: count - 1 });
+        this.viewStart.set((firstMonth > earliestStart ? firstMonth : earliestStart).toJSDate());
     }
 
     private switchToLowerView(): void {

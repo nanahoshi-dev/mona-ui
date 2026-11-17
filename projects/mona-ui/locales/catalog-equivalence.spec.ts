@@ -20,6 +20,7 @@ import { COLOR_PICKER_DEFAULT_MESSAGES } from "../color-picker/i18n/color-picker
 import { COMMAND_DEFAULT_MESSAGES } from "@nanahoshi/mona-ui/command";
 import { COMBO_BOX_DEFAULT_MESSAGES } from "../combo-box/i18n/combo-box.default-messages";
 import { DATE_PICKER_DEFAULT_MESSAGES } from "../date-picker/i18n/date-picker.default-messages";
+import { DATE_RANGE_PICKER_DEFAULT_MESSAGES } from "../date-range-picker/i18n/date-range-picker.default-messages";
 import { DATETIME_PICKER_DEFAULT_MESSAGES } from "../datetime-picker/i18n/datetime-picker.default-messages";
 import { DIALOG_DEFAULT_MESSAGES } from "../dialog/i18n/dialog.default-messages";
 import { DROPDOWN_LIST_DEFAULT_MESSAGES } from "../dropdown-list/i18n/dropdown-list.default-messages";
@@ -110,6 +111,7 @@ const ENGLISH_DEFAULTS = {
     colorPicker: COLOR_PICKER_DEFAULT_MESSAGES,
     comboBox: COMBO_BOX_DEFAULT_MESSAGES,
     datePicker: DATE_PICKER_DEFAULT_MESSAGES,
+    dateRangePicker: DATE_RANGE_PICKER_DEFAULT_MESSAGES,
     dateTimePicker: DATETIME_PICKER_DEFAULT_MESSAGES,
     dialog: DIALOG_DEFAULT_MESSAGES,
     dropdownList: DROPDOWN_LIST_DEFAULT_MESSAGES,

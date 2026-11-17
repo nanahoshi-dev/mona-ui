@@ -225,6 +225,28 @@ export const PL_PL_MESSAGES = {
         datePicker: "Selektor daty",
         openCalendar: "Otwórz kalendarz"
     },
+    dateRangePicker: {
+        dateRangePicker: "Selektor zakresu dat",
+        end: "Data końcowa",
+        lastDays: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => "Ostatni dzień",
+                few: () => `Ostatnie ${localizeNumber(count)} dni`,
+                many: () => `Ostatnie ${localizeNumber(count)} dni`,
+                other: () => `Ostatnie ${localizeNumber(count)} dnia`
+            }),
+        lastMonth: "Poprzedni miesiąc",
+        lastWeek: "Poprzedni tydzień",
+        lastYear: "Poprzedni rok",
+        openCalendar: "Otwórz kalendarz",
+        presets: "Szybkie zakresy",
+        start: "Data początkowa",
+        thisMonth: "Ten miesiąc",
+        thisWeek: "Ten tydzień",
+        thisYear: "Ten rok",
+        today: "Dzisiaj",
+        yesterday: "Wczoraj"
+    },
     dateTimePicker: {
         calendar: "Kalendarz",
         cancel: "Anuluj",

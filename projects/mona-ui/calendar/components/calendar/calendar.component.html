@@ -75,65 +75,86 @@
 
 @if (calendarView() === "month") {
     @let columnCount = weekNumber() ? 8 : 7;
-    <div
-        role="grid"
-        class="flex flex-col gap-0.5"
-        [attr.aria-labelledby]="gridId + '-heading'"
-        [attr.aria-disabled]="effectiveDisabled() || null"
-        [attr.aria-invalid]="invalidState() ? 'true' : null"
-        [attr.aria-readonly]="readonly() || null"
-        (pointerleave)="onMonthGridPointerLeave()">
-        <div role="row" [class]="monthGridHeaderClass()" [style.grid-template-columns]="`repeat(${columnCount}, 32px)`">
-            @if (weekNumber()) {
-                <!-- Week numbers are visual only: every day is already named by its full date. -->
-                <div aria-hidden="true"></div>
-            }
-            @for (day of weekdays(); track day.full) {
-                <div role="columnheader">
-                    <span aria-hidden="true">{{ day.display }}</span>
-                    <span class="sr-only">{{ day.full }}</span>
-                </div>
-            }
-        </div>
-        @for (row of monthDictChunked(); track $index) {
-            <div role="row" [class]="monthGridClass()" [style.grid-template-columns]="`repeat(${columnCount}, 32px)`">
-                @if (weekNumber()) {
-                    @let firstEntry = row | monaTakeFirst;
-                    @if (firstEntry) {
-                        @let week = getWeekNumber(firstEntry.key);
-                        <div aria-hidden="true">{{ formatInteger(week) }}</div>
-                    }
+    @let multipleMonths = monthGrids().length > 1;
+    <div [class]="monthViewClass">
+        @for (grid of monthGrids(); track grid.key) {
+            <div class="flex flex-col">
+                @if (multipleMonths) {
+                    <div [class]="monthCaptionClass" [id]="grid.captionId">{{ grid.caption }}</div>
                 }
-                <!-- Track by time: the month is rebuilt with new Date objects on every navigation. -->
-                @for (entry of row; track entry.key.getTime()) {
+                <div
+                    role="grid"
+                    class="flex flex-col gap-0.5"
+                    [attr.aria-labelledby]="multipleMonths ? grid.captionId : gridId + '-heading'"
+                    [attr.aria-disabled]="effectiveDisabled() || null"
+                    [attr.aria-invalid]="invalidState() ? 'true' : null"
+                    [attr.aria-readonly]="readonly() || null"
+                    (pointerleave)="onMonthGridPointerLeave()">
                     <div
-                        (dayPointerEnter)="onDayPointerEnter($event)"
-                        (daySelect)="onDayClick($event.date, $event.event)"
-                        monaMonthDay
-                        [disabled]="effectiveDisabled()"
-                        [isDayUnavailable]="isDayUnavailable()"
-                        [monthBounds]="[monthBounds().start, monthBounds().end]"
-                        [navigatedDate]="navigatedDate()"
-                        [rangePreviewKeys]="rangePreviewKeys()"
-                        [rounded]="rounded()"
-                        [selectedKeys]="selectedKeys()"
-                        [today]="today()"
-                        [entry]="entry">
-                        @if (monthCellTemplate()) {
-                            <ng-container
-                                [ngTemplateOutlet]="monthCellTemplate()?.templateRef"
-                                [ngTemplateOutletContext]="{ $implicit: entry.value, date: entry.key }"></ng-container>
-                        } @else {
-                            <span>{{ formatInteger(entry.value) }}</span>
+                        role="row"
+                        [class]="monthGridHeaderClass()"
+                        [style.grid-template-columns]="`repeat(${columnCount}, 32px)`">
+                        @if (weekNumber()) {
+                            <!-- Week numbers are visual only: every day is already named by its full date. -->
+                            <div aria-hidden="true"></div>
+                        }
+                        @for (day of weekdays(); track day.full) {
+                            <div role="columnheader">
+                                <span aria-hidden="true">{{ day.display }}</span>
+                                <span class="sr-only">{{ day.full }}</span>
+                            </div>
                         }
                     </div>
-                }
+                    @for (week of grid.weeks; track week.key) {
+                        <div
+                            role="row"
+                            [class]="monthGridClass()"
+                            [style.grid-template-columns]="`repeat(${columnCount}, 32px)`">
+                            @if (weekNumber()) {
+                                <div aria-hidden="true">{{ formatInteger(week.weekNumber) }}</div>
+                            }
+                            <!-- Track by time: the months are rebuilt with new Date objects on every navigation. -->
+                            @for (entry of week.days; track entry ? entry.key.getTime() : -$index - 1) {
+                                @if (entry) {
+                                    <div
+                                        (dayPointerEnter)="onDayPointerEnter($event)"
+                                        (daySelect)="onDayClick($event.date, $event.event)"
+                                        monaMonthDay
+                                        [disabled]="effectiveDisabled()"
+                                        [isDayUnavailable]="isDayUnavailable()"
+                                        [monthBounds]="grid.bounds"
+                                        [navigatedDate]="navigatedDate()"
+                                        [rangeEnds]="rangeEnds()"
+                                        [rangePreviewKeys]="rangePreviewKeys()"
+                                        [rounded]="rounded()"
+                                        [selectedKeys]="selectedKeys()"
+                                        [today]="today()"
+                                        [entry]="entry">
+                                        @if (monthCellTemplate()) {
+                                            <ng-container
+                                                [ngTemplateOutlet]="monthCellTemplate()?.templateRef"
+                                                [ngTemplateOutletContext]="{
+                                                    $implicit: entry.value,
+                                                    date: entry.key
+                                                }"></ng-container>
+                                        } @else {
+                                            <span>{{ formatInteger(entry.value) }}</span>
+                                        }
+                                    </div>
+                                } @else {
+                                    <!-- A day of the month before or after, shown in its own month instead. -->
+                                    <div role="gridcell"></div>
+                                }
+                            }
+                        </div>
+                    }
+                </div>
             </div>
         }
     </div>
 } @else if (calendarView() === "year") {
     <div role="grid" class="flex flex-col gap-0.5" [attr.aria-labelledby]="gridId + '-heading'">
-        @for (row of months(); track $index) {
+        @for (row of yearViewMonths(); track $index) {
             <div role="row" [class]="yearGridClass()">
                 @for (monthItem of row; track monthItem) {
                     <div

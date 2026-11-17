@@ -32,6 +32,7 @@ describe("MONA_DE_DE_LOCALE", () => {
             "comboBox",
             "command",
             "datePicker",
+            "dateRangePicker",
             "dateTimePicker",
             "dialog",
             "dropdownList",
@@ -64,7 +65,7 @@ describe("MONA_DE_DE_LOCALE", () => {
             "window"
         ] as const;
 
-        it("defines all 46 canonical message namespaces", () => {
+        it("defines all 47 canonical message namespaces", () => {
             for (const ns of expectedNamespaces) {
                 expect(MONA_DE_DE_LOCALE.messages[ns], `Namespace ${ns} must be defined`).toBeDefined();
             }

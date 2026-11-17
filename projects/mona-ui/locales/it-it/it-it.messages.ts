@@ -214,6 +214,26 @@ export const IT_IT_MESSAGES = {
         datePicker: "Selettore data",
         openCalendar: "Apri calendario"
     },
+    dateRangePicker: {
+        dateRangePicker: "Selettore intervallo di date",
+        end: "Data di fine",
+        lastDays: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => "Ultimo giorno",
+                other: () => `Ultimi ${localizeNumber(count)} giorni`
+            }),
+        lastMonth: "Mese scorso",
+        lastWeek: "Settimana scorsa",
+        lastYear: "Anno scorso",
+        openCalendar: "Apri calendario",
+        presets: "Intervalli rapidi",
+        start: "Data di inizio",
+        thisMonth: "Questo mese",
+        thisWeek: "Questa settimana",
+        thisYear: "Quest’anno",
+        today: "Oggi",
+        yesterday: "Ieri"
+    },
     dateTimePicker: {
         calendar: "Calendario",
         cancel: "Annulla",

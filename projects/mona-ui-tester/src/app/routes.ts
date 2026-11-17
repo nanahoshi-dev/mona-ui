@@ -231,6 +231,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "date-range-picker",
+                loadComponent: () =>
+                    import("./docs/components/date-range-picker-doc/date-range-picker-doc.component").then(
+                        m => m.DateRangePickerDocComponent
+                    )
+            },
+            {
                 path: "datetime-picker",
                 loadComponent: () =>
                     import("./docs/components/datetime-picker-doc/datetime-picker-doc.component").then(

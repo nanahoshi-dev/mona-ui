@@ -191,6 +191,22 @@ export const ID_ID_MESSAGES = {
         datePicker: "Pemilih tanggal",
         openCalendar: "Buka kalender"
     },
+    dateRangePicker: {
+        dateRangePicker: "Pemilih rentang tanggal",
+        end: "Tanggal akhir",
+        lastDays: (count: number) => `${localizeNumber(count)} hari terakhir`,
+        lastMonth: "Bulan lalu",
+        lastWeek: "Minggu lalu",
+        lastYear: "Tahun lalu",
+        openCalendar: "Buka kalender",
+        presets: "Rentang cepat",
+        start: "Tanggal mulai",
+        thisMonth: "Bulan ini",
+        thisWeek: "Minggu ini",
+        thisYear: "Tahun ini",
+        today: "Hari ini",
+        yesterday: "Kemarin"
+    },
     dateTimePicker: {
         calendar: "Kalender",
         cancel: "Batal",

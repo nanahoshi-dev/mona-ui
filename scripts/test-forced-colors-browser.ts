@@ -44,6 +44,7 @@ const ROUTES = [
     "combo-box",
     "command",
     "date-picker",
+    "date-range-picker",
     "datetime-picker",
     "decimal-textbox",
     "dropdown-button",

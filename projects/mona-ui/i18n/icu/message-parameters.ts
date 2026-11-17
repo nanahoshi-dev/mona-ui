@@ -252,6 +252,22 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         datePicker: null,
         openCalendar: null
     },
+    dateRangePicker: {
+        dateRangePicker: null,
+        end: null,
+        lastDays: [{ name: "count", type: "number" }],
+        lastMonth: null,
+        lastWeek: null,
+        lastYear: null,
+        openCalendar: null,
+        presets: null,
+        start: null,
+        thisMonth: null,
+        thisWeek: null,
+        thisYear: null,
+        today: null,
+        yesterday: null
+    },
     dateTimePicker: {
         calendar: null,
         cancel: null,

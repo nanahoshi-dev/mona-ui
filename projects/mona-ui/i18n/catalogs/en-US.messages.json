@@ -170,6 +170,22 @@
         "datePicker": "Date picker",
         "openCalendar": "Open calendar"
     },
+    "dateRangePicker": {
+        "dateRangePicker": "Date range picker",
+        "end": "End date",
+        "lastDays": "Last {count, plural, one {# day} other {# days}}",
+        "lastMonth": "Last month",
+        "lastWeek": "Last week",
+        "lastYear": "Last year",
+        "openCalendar": "Open calendar",
+        "presets": "Quick ranges",
+        "start": "Start date",
+        "thisMonth": "This month",
+        "thisWeek": "This week",
+        "thisYear": "This year",
+        "today": "Today",
+        "yesterday": "Yesterday"
+    },
     "dateTimePicker": {
         "calendar": "Calendar",
         "cancel": "Cancel",

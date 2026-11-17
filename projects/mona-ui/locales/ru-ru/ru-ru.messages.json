@@ -170,6 +170,22 @@
         "datePicker": "Выбор даты",
         "openCalendar": "Открыть календарь"
     },
+    "dateRangePicker": {
+        "dateRangePicker": "Выбор диапазона дат",
+        "end": "Дата окончания",
+        "lastDays": "{count, plural, one {Последний # день} few {Последние # дня} many {Последние # дней} other {Последние # дня}}",
+        "lastMonth": "Прошлый месяц",
+        "lastWeek": "Прошлая неделя",
+        "lastYear": "Прошлый год",
+        "openCalendar": "Открыть календарь",
+        "presets": "Быстрый выбор",
+        "start": "Дата начала",
+        "thisMonth": "Этот месяц",
+        "thisWeek": "Эта неделя",
+        "thisYear": "Этот год",
+        "today": "Сегодня",
+        "yesterday": "Вчера"
+    },
     "dateTimePicker": {
         "calendar": "Календарь",
         "cancel": "Отмена",

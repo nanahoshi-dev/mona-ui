@@ -71,6 +71,7 @@ const coveredEntryPoints: readonly (readonly [entry: string, docs: readonly stri
     ["color-palette", ["color-palette"]],
     ["color-picker", ["color-picker"]],
     ["command", ["command"]],
+    ["date-range-picker", ["date-range-picker"]],
     ["expansion-panel", ["expansion-panel"]],
     ["fieldset", ["fieldset"]],
     ["form-field", ["form-field"]],

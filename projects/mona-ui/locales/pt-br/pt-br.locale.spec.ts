@@ -40,6 +40,7 @@ describe("MONA_PT_BR_LOCALE", () => {
             "comboBox",
             "command",
             "datePicker",
+            "dateRangePicker",
             "dateTimePicker",
             "dialog",
             "dropdownList",
@@ -75,8 +76,8 @@ describe("MONA_PT_BR_LOCALE", () => {
             "window"
         ] as const;
 
-        it("defines all 46 canonical message namespaces", () => {
-            expect(Object.keys(MONA_PT_BR_LOCALE.messages)).toHaveLength(46);
+        it("defines all 47 canonical message namespaces", () => {
+            expect(Object.keys(MONA_PT_BR_LOCALE.messages)).toHaveLength(47);
             expect(Object.keys(MONA_PT_BR_LOCALE.messages).sort()).toEqual([...expectedNamespaces].sort());
             for (const ns of expectedNamespaces) {
                 expect(MONA_PT_BR_LOCALE.messages[ns], `Namespace ${ns} must be defined`).toBeDefined();

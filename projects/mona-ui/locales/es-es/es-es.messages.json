@@ -170,6 +170,22 @@
         "datePicker": "Selector de fecha",
         "openCalendar": "Abrir calendario"
     },
+    "dateRangePicker": {
+        "dateRangePicker": "Selector de intervalo de fechas",
+        "end": "Fecha de fin",
+        "lastDays": "{count, plural, one {Último día} other {Últimos # días}}",
+        "lastMonth": "Mes pasado",
+        "lastWeek": "Semana pasada",
+        "lastYear": "Año pasado",
+        "openCalendar": "Abrir calendario",
+        "presets": "Intervalos rápidos",
+        "start": "Fecha de inicio",
+        "thisMonth": "Este mes",
+        "thisWeek": "Esta semana",
+        "thisYear": "Este año",
+        "today": "Hoy",
+        "yesterday": "Ayer"
+    },
     "dateTimePicker": {
         "calendar": "Calendario",
         "cancel": "Cancelar",

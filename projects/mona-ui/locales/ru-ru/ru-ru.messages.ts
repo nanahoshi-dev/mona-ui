@@ -219,6 +219,28 @@ export const RU_RU_MESSAGES = {
         datePicker: "Выбор даты",
         openCalendar: "Открыть календарь"
     },
+    dateRangePicker: {
+        dateRangePicker: "Выбор диапазона дат",
+        end: "Дата окончания",
+        lastDays: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Последний ${localizeNumber(count)} день`,
+                few: () => `Последние ${localizeNumber(count)} дня`,
+                many: () => `Последние ${localizeNumber(count)} дней`,
+                other: () => `Последние ${localizeNumber(count)} дня`
+            }),
+        lastMonth: "Прошлый месяц",
+        lastWeek: "Прошлая неделя",
+        lastYear: "Прошлый год",
+        openCalendar: "Открыть календарь",
+        presets: "Быстрый выбор",
+        start: "Дата начала",
+        thisMonth: "Этот месяц",
+        thisWeek: "Эта неделя",
+        thisYear: "Этот год",
+        today: "Сегодня",
+        yesterday: "Вчера"
+    },
     dateTimePicker: {
         calendar: "Календарь",
         cancel: "Отмена",

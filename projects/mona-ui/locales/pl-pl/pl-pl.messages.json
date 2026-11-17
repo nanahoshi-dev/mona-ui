@@ -170,6 +170,22 @@
         "datePicker": "Selektor daty",
         "openCalendar": "Otwórz kalendarz"
     },
+    "dateRangePicker": {
+        "dateRangePicker": "Selektor zakresu dat",
+        "end": "Data końcowa",
+        "lastDays": "{count, plural, one {Ostatni dzień} few {Ostatnie # dni} many {Ostatnie # dni} other {Ostatnie # dnia}}",
+        "lastMonth": "Poprzedni miesiąc",
+        "lastWeek": "Poprzedni tydzień",
+        "lastYear": "Poprzedni rok",
+        "openCalendar": "Otwórz kalendarz",
+        "presets": "Szybkie zakresy",
+        "start": "Data początkowa",
+        "thisMonth": "Ten miesiąc",
+        "thisWeek": "Ten tydzień",
+        "thisYear": "Ten rok",
+        "today": "Dzisiaj",
+        "yesterday": "Wczoraj"
+    },
     "dateTimePicker": {
         "calendar": "Kalendarz",
         "cancel": "Anuluj",

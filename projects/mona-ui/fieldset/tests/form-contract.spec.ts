@@ -9,6 +9,7 @@ import { ColorPaletteComponent } from "@nanahoshi/mona-ui/color-palette";
 import { ColorPickerComponent } from "@nanahoshi/mona-ui/color-picker";
 import { ComboBoxComponent } from "@nanahoshi/mona-ui/combo-box";
 import { DatePickerComponent } from "@nanahoshi/mona-ui/date-picker";
+import { DateRangePickerComponent } from "@nanahoshi/mona-ui/date-range-picker";
 import { DateTimePickerComponent } from "@nanahoshi/mona-ui/datetime-picker";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { EditorComponent } from "@nanahoshi/mona-ui/editor";
@@ -280,6 +281,7 @@ class ColorFormHostComponent {
             <mona-calendar />
             <mona-combo-box [data]="items" aria-label="Combo" />
             <mona-date-picker aria-label="Date" />
+            <mona-date-range-picker aria-label="Stay" />
             <mona-datetime-picker aria-label="Date and time" />
             <mona-editor aria-label="Editor" />
             <mona-numeric-text-box aria-label="Number" />
@@ -292,6 +294,7 @@ class ColorFormHostComponent {
         CalendarComponent,
         ComboBoxComponent,
         DatePickerComponent,
+        DateRangePickerComponent,
         DateTimePickerComponent,
         EditorComponent,
         FieldsetComponent,
@@ -752,11 +755,14 @@ describe("form control contract", () => {
                 "mona-auto-complete",
                 "mona-combo-box",
                 "mona-date-picker",
+                "mona-date-range-picker",
                 "mona-datetime-picker",
                 "mona-numeric-text-box",
                 "mona-time-picker"
             ]) {
-                expect(root.querySelector<HTMLInputElement>(selector + " input")!.disabled, selector).toBe(true);
+                const inputs = Array.from(root.querySelectorAll<HTMLInputElement>(selector + " input"));
+                expect(inputs.length, selector).toBeGreaterThan(0);
+                expect(inputs.every(input => input.disabled), selector).toBe(true);
             }
         });
 

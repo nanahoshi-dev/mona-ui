@@ -1,0 +1,11 @@
+<form class="flex max-w-sm flex-col gap-4" novalidate (submit)="onSubmit($event)">
+    <mona-form-field label="Leave" hint="Up to two weeks.">
+        <mona-date-range-picker [formField]="request.leave" />
+    </mona-form-field>
+    <div class="flex items-center gap-3">
+        <button monaButton look="primary" type="submit">Request leave</button>
+        @if (sent()) {
+            <span class="text-sm" role="status">Request sent.</span>
+        }
+    </div>
+</form>
