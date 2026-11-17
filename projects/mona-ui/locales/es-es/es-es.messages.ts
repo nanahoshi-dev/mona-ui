@@ -326,6 +326,41 @@ export const ES_ES_MESSAGES = {
         undo: "Deshacer",
         widthPx: "Anchura (px)"
     },
+    fileUpload: {
+        browse: "Examinar archivos",
+        browseFile: "Elegir un archivo",
+        cancel: (name: string) => `Cancelar la subida de ${name}`,
+        clear: "Borrar",
+        dropFile: "Arrastra un archivo aquí",
+        dropFiles: "Arrastra archivos aquí",
+        dropToAdd: "Suelta para añadir",
+        fileFailed: (name: string) => `No se ha podido subir ${name}.`,
+        fileRejected: (name: string, reason: string) => `No se ha añadido ${name}. ${reason}`,
+        fileRemoved: (name: string) => `Se ha quitado ${name}.`,
+        fileTypes: (types: string) => `Tipos de archivo: ${types}`,
+        fileUploaded: (name: string) => `Se ha subido ${name}.`,
+        files: "Archivos",
+        filesAdded: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} archivo añadido.`,
+                other: () => `${localizeNumber(count)} archivos añadidos.`
+            }),
+        invalidType: "Este tipo de archivo no se admite.",
+        maxFileSize: (size: string) => `Tamaño máx. de archivo: ${size}`,
+        maxFiles: (count: number) =>
+            `Hasta ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} archivo`, other: () => `${localizeNumber(count)} archivos` })}`,
+        readyToUpload: "Listo para subir",
+        remove: (name: string) => `Quitar ${name}`,
+        retry: (name: string) => `Reintentar la subida de ${name}`,
+        tooLarge: (size: string) => `El archivo ocupa más de ${size}.`,
+        tooMany: (count: number) =>
+            `No se pueden añadir más de ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} archivo`, other: () => `${localizeNumber(count)} archivos` })}.`,
+        tooSmall: (size: string) => `El archivo ocupa menos de ${size}.`,
+        upload: "Subir",
+        uploadFailed: "No se ha podido subir.",
+        uploaded: "Subido",
+        uploading: "Subiendo"
+    },
     filter: {
         and: "Y",
         apply: "Aplicar",

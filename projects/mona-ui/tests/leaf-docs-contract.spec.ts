@@ -74,6 +74,7 @@ const coveredEntryPoints: readonly (readonly [entry: string, docs: readonly stri
     ["date-range-picker", ["date-range-picker"]],
     ["expansion-panel", ["expansion-panel"]],
     ["fieldset", ["fieldset"]],
+    ["file-upload", ["file-upload"]],
     ["form-field", ["form-field"]],
     ["label", ["label"]],
     ["otp-input", ["otp-input"]],

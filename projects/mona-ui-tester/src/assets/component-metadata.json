@@ -11432,6 +11432,159 @@
       }
     ]
   },
+  "FileUploadComponent": {
+    "name": "FileUploadComponent",
+    "selector": "\"mona-file-upload\"",
+    "inputs": [
+      {
+        "description": "File types the dialog offers and the checks accept, as in the native `accept` attribute: extensions\nsuch as `.pdf`, MIME types such as `image/png`, or `image/*`. Files dropped on the zone are checked against it\ntoo, since the dialog's filter doesn't apply to them. Empty accepts every file.",
+        "kind": "input",
+        "name": "accept",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of an element that describes the browse button, such as an error message. A form field's hint\nand errors are added after it.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string | null",
+        "alias": "aria-describedby",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Accessible name of the group, when no label names it.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string | null",
+        "alias": "aria-label",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Id of the element that names the group.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string | null",
+        "alias": "aria-labelledby",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Uploads each file as soon as it's added. When off, files wait for the upload button, or for\n`uploadFiles()`. Has no effect without an `upload` function.",
+        "kind": "input",
+        "name": "autoUpload",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Turns off the drop zone, the browse button and the list's buttons. When bound to a signal form\nfield via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Marks the upload as invalid. When bound to a signal form field via `[formField]`, this is written\nby the `FormField` directive.",
+        "kind": "input",
+        "name": "invalid",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "The largest file size in bytes. Larger files are listed as rejected, and not added.",
+        "kind": "input",
+        "name": "maxFileSize",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "The most files the list holds, when `multiple` is on. Files past it are listed as rejected.",
+        "kind": "input",
+        "name": "maxFiles",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "The smallest file size in bytes. Smaller files, such as empty ones, are listed as rejected.",
+        "kind": "input",
+        "name": "minFileSize",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Lets the person add several files. When off, a new file replaces the one in the list.",
+        "kind": "input",
+        "name": "multiple",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Keeps the list as it is: files can't be added or removed.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Emitted when the person removes a file, by its remove or cancel button or by the clear button,\nwith the file as it was. Delete an uploaded file from the server here.",
+        "kind": "output",
+        "name": "remove",
+        "type": "FileUploadItem"
+      },
+      {
+        "description": "Marks the upload as required: it's invalid when touched with no file in its value.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Emitted when focus leaves the component, and when files are dropped on it. The `FormField`\ndirective listens to this to mark the field as touched.",
+        "kind": "output",
+        "name": "touch",
+        "type": "void"
+      },
+      {
+        "description": "Sets the touched state. When bound to a signal form field via `[formField]`, this is written by the\n`FormField` directive.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Uploads one file, and returns a promise or an observable, such as HttpClient's request with\n`reportProgress: true` and `observe: \"events\"`. Without it, the component only picks files, and the value holds\nthem for the form to send.",
+        "kind": "input",
+        "name": "upload",
+        "type": "FileUploadHandler | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Emitted when a file fails to upload, with the error in its `error`.",
+        "kind": "output",
+        "name": "uploadError",
+        "type": "FileUploadItem"
+      },
+      {
+        "description": "Emitted when a file finishes uploading, with what the upload returned in its `response`.",
+        "kind": "output",
+        "name": "uploadSuccess",
+        "type": "FileUploadItem"
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The files the checks let through, or with an `upload` function, the files that finished\nuploading. Setting it from outside replaces the list, and stops the uploads that are running.",
+        "kind": "model",
+        "name": "value",
+        "type": "File[]",
+        "defaultValue": "[]"
+      }
+    ]
+  },
   "FilterMenuComponent": {
     "name": "FilterMenuComponent",
     "selector": "\"mona-filter-menu\"",

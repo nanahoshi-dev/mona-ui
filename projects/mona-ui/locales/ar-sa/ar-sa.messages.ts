@@ -340,6 +340,45 @@ export const AR_SA_MESSAGES = {
         undo: "تراجع",
         widthPx: "العرض (px)"
     },
+    fileUpload: {
+        browse: "استعراض الملفات",
+        browseFile: "اختيار ملف",
+        cancel: (name: string) => `إلغاء رفع ${name}`,
+        clear: "مسح",
+        dropFile: "اسحب ملفًا إلى هنا",
+        dropFiles: "اسحب الملفات إلى هنا",
+        dropToAdd: "أفلِت للإضافة",
+        fileFailed: (name: string) => `تعذّر رفع ${name}.`,
+        fileRejected: (name: string, reason: string) => `لم تتم إضافة ${name}. ${reason}`,
+        fileRemoved: (name: string) => `تمت إزالة ${name}.`,
+        fileTypes: (types: string) => `أنواع الملفات: ${types}`,
+        fileUploaded: (name: string) => `تم رفع ${name}.`,
+        files: "الملفات",
+        filesAdded: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                zero: () => "لم تتم إضافة أي ملف.",
+                one: () => "تمت إضافة ملف واحد.",
+                two: () => "تمت إضافة ملفين.",
+                few: () => `تمت إضافة ${localizeNumber(count)} ملفات.`,
+                many: () => `تمت إضافة ${localizeNumber(count)} ملفًا.`,
+                other: () => `تمت إضافة ${localizeNumber(count)} ملف.`
+            }),
+        invalidType: "نوع هذا الملف غير مقبول.",
+        maxFileSize: (size: string) => `الحد الأقصى لحجم الملف: ${size}`,
+        maxFiles: (count: number) =>
+            `حتى ${plural(PLURAL_RULES.select(count), { zero: () => `${localizeNumber(count)} ملف`, one: () => "ملف واحد", two: () => "ملفين", few: () => `${localizeNumber(count)} ملفات`, many: () => `${localizeNumber(count)} ملفًا`, other: () => `${localizeNumber(count)} ملف` })}`,
+        readyToUpload: "جاهز للرفع",
+        remove: (name: string) => `إزالة ${name}`,
+        retry: (name: string) => `إعادة محاولة رفع ${name}`,
+        tooLarge: (size: string) => `حجم الملف أكبر من ${size}.`,
+        tooMany: (count: number) =>
+            `لا يمكن إضافة أكثر من ${plural(PLURAL_RULES.select(count), { zero: () => `${localizeNumber(count)} ملف`, one: () => "ملف واحد", two: () => "ملفين", few: () => `${localizeNumber(count)} ملفات`, many: () => `${localizeNumber(count)} ملفًا`, other: () => `${localizeNumber(count)} ملف` })}.`,
+        tooSmall: (size: string) => `حجم الملف أصغر من ${size}.`,
+        upload: "رفع",
+        uploadFailed: "فشل الرفع.",
+        uploaded: "تم الرفع",
+        uploading: "جارٍ الرفع"
+    },
     filter: {
         and: "و",
         apply: "تطبيق",

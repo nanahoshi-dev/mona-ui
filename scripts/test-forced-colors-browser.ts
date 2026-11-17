@@ -52,6 +52,7 @@ const ROUTES = [
     "editor",
     "expansion-panel",
     "fieldset",
+    "file-upload",
     "form-field",
     "grid",
     "input",

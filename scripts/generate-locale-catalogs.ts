@@ -184,6 +184,13 @@ export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
         typeName: "MonaEditorMessages"
     },
     {
+        constName: "FILE_UPLOAD_DEFAULT_MESSAGES",
+        file: "file-upload/i18n/file-upload.default-messages.ts",
+        namespace: "fileUpload",
+        style: "type",
+        typeName: "MonaFileUploadMessages"
+    },
+    {
         constName: "FILTER_DEFAULT_MESSAGES",
         file: "filter/i18n/filter.default-messages.ts",
         namespace: "filter",

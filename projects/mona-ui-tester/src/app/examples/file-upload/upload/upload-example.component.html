@@ -1,0 +1,14 @@
+<div class="flex max-w-md flex-col gap-4">
+    <mona-form-field label="Documents">
+        <mona-file-upload [upload]="upload" (remove)="onRemove($event)" (uploadSuccess)="onUploadSuccess($event)" />
+    </mona-form-field>
+    <mona-check-box label="Server offline" [(checked)]="offline" />
+    <p class="text-sm text-muted-foreground">
+        On the server:
+        @for (file of stored(); track file.id) {
+            <code>{{ file.name }} ({{ file.id }})</code>{{ $last ? "" : ", " }}
+        } @empty {
+            nothing yet
+        }
+    </p>
+</div>

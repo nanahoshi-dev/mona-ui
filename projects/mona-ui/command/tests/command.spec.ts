@@ -448,6 +448,22 @@ describe("mona-command", () => {
 
             expect(results.violations).toEqual([]);
         });
+
+        // An inline command menu opens no focus trap, which would load CDK's styles as a side effect.
+        it("hides what it announces", async () => {
+            const region = (): HTMLElement | null => document.querySelector("body > .cdk-live-announcer-element");
+            const fixture = setup(StaticHostComponent);
+            await fixture.whenStable();
+
+            await type(fixture, "cafe");
+
+            await vi.waitFor(() => expect(region()?.textContent).toBe("1 result available"));
+            const style = getComputedStyle(region() as HTMLElement);
+            expect(style.position).toBe("absolute");
+            expect(style.width).toBe("1px");
+            expect(style.height).toBe("1px");
+            expect(style.overflow).toBe("hidden");
+        });
     });
 
     describe("mona-command-dialog", () => {

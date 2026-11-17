@@ -1,4 +1,3 @@
-import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
@@ -22,6 +21,7 @@ import type { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { createElementControlId, injectLabelledByText } from "@nanahoshi/mona-ui/internal";
 import { FilterInputComponent } from "@nanahoshi/mona-ui/internal/filter-input";
+import { injectLiveAnnouncer } from "@nanahoshi/mona-ui/internal/live-announcer";
 import {
     type ChildrenLoadErrorEvent,
     type ChildrenSelector,
@@ -56,7 +56,7 @@ const LOADING_ANNOUNCEMENT_DELAY = 400;
     }
 })
 export class TreeViewComponent<T> implements ITreeView<T> {
-    readonly #announcer = inject(LiveAnnouncer);
+    readonly #announcer = injectLiveAnnouncer();
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
     readonly #labelledByText = injectLabelledByText(() => this.ariaLabelledBy());

@@ -1,4 +1,3 @@
-import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { Clipboard } from "@angular/cdk/clipboard";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -43,6 +42,7 @@ import {
     rgba2hsva,
     RGBChannel
 } from "@nanahoshi/mona-ui/internal";
+import { injectLiveAnnouncer } from "@nanahoshi/mona-ui/internal/live-announcer";
 import {
     DropdownButtonComponent,
     DropdownButtonItemComponent,
@@ -107,7 +107,7 @@ const DEFAULT_RGB: RGB = { r: 255, g: 255, b: 255 };
     }
 })
 export class ColorGradientComponent implements ColorGradientVariantInputs, FormValueControl<string | null | undefined> {
-    readonly #announcer = inject(LiveAnnouncer);
+    readonly #announcer = injectLiveAnnouncer();
     readonly #clipboard = inject(Clipboard);
     readonly #destroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);

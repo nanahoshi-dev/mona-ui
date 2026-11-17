@@ -304,6 +304,13 @@ export const routes: Routes = [
                     import("./docs/components/fieldset-doc/fieldset-doc.component").then(m => m.FieldsetDocComponent)
             },
             {
+                path: "file-upload",
+                loadComponent: () =>
+                    import("./docs/components/file-upload-doc/file-upload-doc.component").then(
+                        m => m.FileUploadDocComponent
+                    )
+            },
+            {
                 path: "form-field",
                 loadComponent: () =>
                     import("./docs/components/form-field-doc/form-field-doc.component").then(

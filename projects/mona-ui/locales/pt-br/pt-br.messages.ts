@@ -328,6 +328,41 @@ export const PT_BR_MESSAGES = {
         undo: "Desfazer",
         widthPx: "Largura (px)"
     },
+    fileUpload: {
+        browse: "Procurar arquivos",
+        browseFile: "Escolher um arquivo",
+        cancel: (name: string) => `Cancelar o envio de ${name}`,
+        clear: "Limpar",
+        dropFile: "Arraste um arquivo para cá",
+        dropFiles: "Arraste arquivos para cá",
+        dropToAdd: "Solte para adicionar",
+        fileFailed: (name: string) => `Não foi possível enviar ${name}.`,
+        fileRejected: (name: string, reason: string) => `${name} não foi adicionado. ${reason}`,
+        fileRemoved: (name: string) => `${name} removido.`,
+        fileTypes: (types: string) => `Tipos de arquivo: ${types}`,
+        fileUploaded: (name: string) => `${name} enviado.`,
+        files: "Arquivos",
+        filesAdded: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} arquivo adicionado.`,
+                other: () => `${localizeNumber(count)} arquivos adicionados.`
+            }),
+        invalidType: "Este tipo de arquivo não é aceito.",
+        maxFileSize: (size: string) => `Tamanho máx. do arquivo: ${size}`,
+        maxFiles: (count: number) =>
+            `Até ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} arquivo`, other: () => `${localizeNumber(count)} arquivos` })}`,
+        readyToUpload: "Pronto para enviar",
+        remove: (name: string) => `Remover ${name}`,
+        retry: (name: string) => `Tentar enviar ${name} novamente`,
+        tooLarge: (size: string) => `O arquivo é maior que ${size}.`,
+        tooMany: (count: number) =>
+            `Não é possível adicionar mais de ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} arquivo`, other: () => `${localizeNumber(count)} arquivos` })}.`,
+        tooSmall: (size: string) => `O arquivo é menor que ${size}.`,
+        upload: "Enviar",
+        uploadFailed: "Falha no envio.",
+        uploaded: "Enviado",
+        uploading: "Enviando"
+    },
     filter: {
         and: "E",
         apply: "Aplicar",

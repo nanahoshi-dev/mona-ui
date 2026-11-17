@@ -365,6 +365,38 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         undo: null,
         widthPx: null
     },
+    fileUpload: {
+        browse: null,
+        browseFile: null,
+        cancel: [{ name: "name", type: "string" }],
+        clear: null,
+        dropFile: null,
+        dropFiles: null,
+        dropToAdd: null,
+        fileFailed: [{ name: "name", type: "string" }],
+        fileRejected: [
+            { name: "name", type: "string" },
+            { name: "reason", type: "string" }
+        ],
+        fileRemoved: [{ name: "name", type: "string" }],
+        fileTypes: [{ name: "types", type: "string" }],
+        fileUploaded: [{ name: "name", type: "string" }],
+        files: null,
+        filesAdded: [{ name: "count", type: "number" }],
+        invalidType: null,
+        maxFileSize: [{ name: "size", type: "string" }],
+        maxFiles: [{ name: "count", type: "number" }],
+        readyToUpload: null,
+        remove: [{ name: "name", type: "string" }],
+        retry: [{ name: "name", type: "string" }],
+        tooLarge: [{ name: "size", type: "string" }],
+        tooMany: [{ name: "count", type: "number" }],
+        tooSmall: [{ name: "size", type: "string" }],
+        upload: null,
+        uploadFailed: null,
+        uploaded: null,
+        uploading: null
+    },
     filter: {
         and: null,
         apply: null,

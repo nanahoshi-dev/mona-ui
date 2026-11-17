@@ -1,4 +1,3 @@
-import { LiveAnnouncer } from "@angular/cdk/a11y";
 import {
     afterRenderEffect,
     booleanAttribute,
@@ -15,6 +14,7 @@ import {
 import { ImmutableSet } from "@mirei/ts-collections";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { injectLiveAnnouncer } from "@nanahoshi/mona-ui/internal/live-announcer";
 import { COMMAND_DEFAULT_MESSAGES } from "../../i18n/command.default-messages";
 import type { CommandFilter, CommandFilterMode } from "../../models/CommandFilter";
 import type { CommandSelectEvent } from "../../models/CommandSelectEvent";
@@ -39,7 +39,7 @@ export class CommandComponent {
     readonly #i18n = inject(MonaI18nService);
     readonly #inputElement = signal<HTMLInputElement | null>(null);
     readonly #items = signal(ImmutableSet.create<CommandItemComponent>());
-    readonly #liveAnnouncer = inject(LiveAnnouncer);
+    readonly #liveAnnouncer = injectLiveAnnouncer();
 
     readonly #visibleItems = computed(() =>
         this.#items()
