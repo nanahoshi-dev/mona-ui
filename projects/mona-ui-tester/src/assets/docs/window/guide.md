@@ -92,7 +92,7 @@ Content placed directly inside `<mona-window>`, outside these templates, is the 
 window/basic
 ```
 
-On `<mona-window>`, `draggable` defaults to `true` and `resizable` to `false`. Through `WindowService.open()`, both default to `false`. The pointer drags the window by its title bar and resizes it from eight edge and corner handles. A drag starts once the pointer has moved a few pixels with the primary button pressed, and never from the title bar's buttons or the controls of an action template. A dragged window keeps its size past the viewport's edges, and its title bar stays below the top edge. The keyboard does both from the title bar — see [Keyboard](#keyboard).
+On `<mona-window>`, `draggable` defaults to `true` and `resizable` to `false`. Through `WindowService.open()`, both default to `false`. The pointer drags the window by its title bar and resizes it from eight edge and corner handles. A drag starts once the pointer has moved a few pixels with the primary button pressed, and never from the title bar's buttons or the controls of an action template. A dragged window keeps its size past the viewport's edges, and its title bar stays below the top edge. A resized edge stops at `minWidth`, `minHeight`, `maxWidth` and `maxHeight`, which default to 50 pixels and the viewport's size, and at the viewport's edges. The keyboard does both from the title bar — see [Keyboard](#keyboard).
 
 ### Minimize and maximize
 

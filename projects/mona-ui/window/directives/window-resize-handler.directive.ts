@@ -80,132 +80,37 @@ export class WindowResizeHandlerDirective {
         };
     }
 
+    /**
+     * Moves the dragged edges, each on its own axis. An edge stops at the size limits and at the viewport rather than
+     * ignoring the move, so a fast drag still reaches the limit and a corner keeps resizing on its other axis.
+     */
     #computeResize(
         direction: WindowResizeHandlerDirection,
         deltaX: number,
         deltaY: number,
         initial: ResizeBox,
         bounds: ResizeBounds
-    ): { width?: number; height?: number; left?: number; top?: number } | null {
+    ): { width?: number; height?: number; left?: number; top?: number } {
         const { minWidth, minHeight, maxWidth, maxHeight, innerWidth, innerHeight } = bounds;
-        let height: number | undefined;
-        let left: number | undefined;
-        let width: number | undefined;
-        let top: number | undefined;
+        // The minimum wins when the space left is smaller than it.
+        const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(value, max));
+        const result: { width?: number; height?: number; left?: number; top?: number } = {};
 
-        switch (direction) {
-            case "northwest":
-                if (initial.top + deltaY <= 0 || initial.height - deltaY < minHeight) {
-                    return null;
-                }
-                if (initial.height - deltaY > maxHeight || initial.width - deltaX > maxWidth) {
-                    return null;
-                }
-
-                height = initial.height - deltaY;
-                top = initial.top + deltaY;
-
-                if (initial.left + deltaX < 0 || initial.width - deltaX < minWidth) {
-                    return null;
-                }
-
-                width = initial.width - deltaX;
-                left = initial.left + deltaX;
-                break;
-            case "north":
-                if (initial.top + deltaY <= 0 || initial.height - deltaY < minHeight) {
-                    return null;
-                }
-                if (initial.height - deltaY > maxHeight) {
-                    return null;
-                }
-                height = initial.height - deltaY;
-                top = initial.top + deltaY;
-                break;
-            case "northeast":
-                if (initial.top + deltaY <= 0 || initial.height - deltaY < minHeight) {
-                    return null;
-                }
-                if (initial.height - deltaY > maxHeight || initial.width + deltaX > maxWidth) {
-                    return null;
-                }
-
-                height = initial.height - deltaY;
-                top = initial.top + deltaY;
-
-                if (initial.width + deltaX < minWidth || initial.left + initial.width + deltaX > innerWidth) {
-                    return null;
-                }
-
-                width = initial.width + deltaX;
-                break;
-            case "east":
-                if (initial.width + deltaX < minWidth || initial.left + initial.width + deltaX > innerWidth) {
-                    return null;
-                }
-                if (initial.width + deltaX > maxWidth) {
-                    return null;
-                }
-
-                width = initial.width + deltaX;
-                break;
-            case "southeast":
-                if (initial.height + deltaY < minHeight || initial.top + initial.height + deltaY > innerHeight) {
-                    return null;
-                }
-                if (initial.height + deltaY > maxHeight || initial.width + deltaX > maxWidth) {
-                    return null;
-                }
-
-                height = initial.height + deltaY;
-
-                if (initial.width + deltaX < minWidth || initial.left + initial.width + deltaX > innerWidth) {
-                    return null;
-                }
-
-                width = initial.width + deltaX;
-                break;
-            case "south":
-                if (initial.height + deltaY < minHeight || initial.top + initial.height + deltaY > innerHeight) {
-                    return null;
-                }
-                if (initial.height + deltaY > maxHeight) {
-                    return null;
-                }
-
-                height = initial.height + deltaY;
-                break;
-            case "southwest":
-                if (initial.height + deltaY < minHeight || initial.top + initial.height + deltaY > innerHeight) {
-                    return null;
-                }
-                if (initial.height + deltaY > maxHeight || initial.width - deltaX > maxWidth) {
-                    return null;
-                }
-
-                height = initial.height + deltaY;
-
-                if (initial.left + deltaX < 0 || initial.width - deltaX < minWidth) {
-                    return null;
-                }
-
-                width = initial.width - deltaX;
-                left = initial.left + deltaX;
-                break;
-            case "west":
-                if (initial.left + deltaX < 0 || initial.width - deltaX < minWidth) {
-                    return null;
-                }
-                if (initial.width - deltaX > maxWidth) {
-                    return null;
-                }
-
-                width = initial.width - deltaX;
-                left = initial.left + deltaX;
-                break;
+        if (direction.includes("east")) {
+            result.width = clamp(initial.width + deltaX, minWidth, Math.min(maxWidth, innerWidth - initial.left));
+        } else if (direction.includes("west")) {
+            const right = initial.left + initial.width;
+            result.width = clamp(initial.width - deltaX, minWidth, Math.min(maxWidth, right));
+            result.left = right - result.width;
         }
-
-        return { width, height, left, top };
+        if (direction.includes("south")) {
+            result.height = clamp(initial.height + deltaY, minHeight, Math.min(maxHeight, innerHeight - initial.top));
+        } else if (direction.includes("north")) {
+            const bottom = initial.top + initial.height;
+            result.height = clamp(initial.height - deltaY, minHeight, Math.min(maxHeight, bottom));
+            result.top = bottom - result.height;
+        }
+        return result;
     }
 
     #onPointerDown(event: PointerEvent): void {
@@ -234,11 +139,7 @@ export class WindowResizeHandlerDirective {
             }
             const deltaX = moveEvent.clientX - initialX;
             const deltaY = moveEvent.clientY - initialY;
-            const result = this.#computeResize(this.direction(), deltaX, deltaY, initial, bounds);
-            if (!result) {
-                return;
-            }
-            this.#applyResize(result, initial);
+            this.#applyResize(this.#computeResize(this.direction(), deltaX, deltaY, initial, bounds), initial);
         };
         const cleanup = () => {
             this.#document.removeEventListener("pointermove", onPointerMove);
