@@ -411,13 +411,13 @@ describe("indexed dense projection", () => {
         host.data.set([{ high: 60, low: 40, x: 50 }]);
         render();
 
-        const denseTarget = host.chart()["cartesianXYScene"]()
-            ?.hitTargets.find(target => target.seriesType === "rangeArea");
+        const denseScene = host.chart()["cartesianXYScene"]();
+        const denseTarget = denseScene?.hitTargets.find(target => target.seriesType === "rangeArea");
 
         host.downsampling.set(false);
         render();
-        const fullTarget = host.chart()["cartesianXYScene"]()
-            ?.hitTargets.find(target => target.seriesType === "rangeArea");
+        const fullScene = host.chart()["cartesianXYScene"]();
+        const fullTarget = fullScene?.hitTargets.find(target => target.seriesType === "rangeArea");
 
         expect(denseTarget).toMatchObject({ radius: 16, visualRadius: 0 });
         expect(fullTarget).toMatchObject({ radius: denseTarget?.radius, visualRadius: denseTarget?.visualRadius });
@@ -603,13 +603,14 @@ describe("indexed dense projection", () => {
         }));
         host.data.set(data);
         render();
-        const before = host.chart()["cartesianXYScene"]()
-            ?.series.find(s => s.type === "scatter") as { markers: readonly unknown[] } | undefined;
+        const beforeScene = host.chart()["cartesianXYScene"]();
+        const before = beforeScene?.series.find(s => s.type === "scatter") as
+            { markers: readonly unknown[] } | undefined;
 
         host.viewport.set({ axes: [{ axis: "x", axisId: "x-main", kind: "continuous", max: 20, min: 0 }] });
         render();
-        const after = host.chart()["cartesianXYScene"]()
-            ?.series.find(s => s.type === "scatter") as { markers: readonly unknown[] } | undefined;
+        const afterScene = host.chart()["cartesianXYScene"]();
+        const after = afterScene?.series.find(s => s.type === "scatter") as { markers: readonly unknown[] } | undefined;
 
         expect(after).toBeDefined();
         expect(before).toBeDefined();

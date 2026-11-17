@@ -4,3 +4,20 @@ coverage
 dist
 .angular
 .vscode
+
+# Local Claude Code state, such as worktrees that hold whole copies of the repository.
+.claude/
+
+# Markdown is content: Prettier would rejoin the docs' hand-wrapped code samples into 120-column lines.
+*.md
+
+# Generated files. generate:cldr-week-data, audit:i18n-rtl, generate:examples and build:metadata write them back
+# unformatted, so formatting them by hand would be undone on the next run.
+scripts/cldr/
+projects/mona-ui/i18n/utilities/locale-week-likely-data.ts
+projects/mona-ui-tester/scripts/i18n-rtl-baseline.json
+projects/mona-ui-tester/src/app/examples/examples.generated.ts
+projects/mona-ui-tester/src/assets/component-metadata.json
+
+# Saved reference pages, not source.
+/api_reference_layout_concepts*.html

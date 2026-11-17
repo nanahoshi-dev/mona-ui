@@ -378,13 +378,13 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
-        lineSnippet: 'physicalSide: "left", class: "border-r border-(--color-sidebar-border)"',
+        lineSnippet: 'class: "border-r border-(--color-sidebar-border)"',
         reason: "Sidebar non-drawer physical border variant mapped from semantic direction"
     },
     {
         category: "rtl-physical-style",
         filePattern: "projects/mona-ui/sidebar/styles/sidebar.styles.ts",
-        lineSnippet: 'physicalSide: "right", class: "border-l border-(--color-sidebar-border)"',
+        lineSnippet: 'class: "border-l border-(--color-sidebar-border)"',
         reason: "Sidebar non-drawer physical border variant mapped from semantic direction"
     },
     {
