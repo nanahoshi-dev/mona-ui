@@ -445,10 +445,19 @@
         "transferTo": "نقل إلى القائمة الأخرى",
         "transferToList": "نقل إلى {list}"
     },
+    "maskedTextBox": {
+        "characterNotAllowed": "لا يمكن إدخال هذا الحرف هنا",
+        "clear": "مسح",
+        "digitOnly": "يمكن إدخال رقم فقط هنا",
+        "digitOrSignOnly": "يمكن إدخال رقم أو علامة زائد أو ناقص فقط هنا",
+        "letterOnly": "يمكن إدخال حرف فقط هنا",
+        "letterOrDigitOnly": "يمكن إدخال حرف أو رقم فقط هنا"
+    },
     "multiSelect": {
         "clear": "مسح",
         "itemsCount": "+ {count}",
-        "removeMoreItems": "حذف العناصر الإضافية ({count})"
+        "removeMoreItems": "حذف العناصر الإضافية ({count})",
+        "selectAll": "تحديد الكل"
     },
     "notification": {
         "close": "إغلاق",

@@ -36,6 +36,7 @@ export * from "./message-types/form-field.messages";
 export * from "./message-types/grid.messages";
 export * from "./message-types/list.messages";
 export * from "./message-types/list-box.messages";
+export * from "./message-types/masked-text-box.messages";
 export * from "./message-types/multi-select.messages";
 export * from "./message-types/notification.messages";
 export * from "./message-types/numeric-text-box.messages";

@@ -1,0 +1,13 @@
+<div class="flex max-w-xs flex-col gap-3">
+    <mona-form-field label="Brand color" hint="A hex color: six digits from 0 to 9 and A to F.">
+        <mona-masked-text-box class="w-40" [mask]="mask" [rules]="rules" [includeLiterals]="true" [(value)]="color">
+            <ng-template monaMaskedTextBoxSuffixTemplate>
+                <span
+                    aria-hidden="true"
+                    class="me-2 size-5 rounded-sm border border-border forced-color-adjust-none"
+                    [style.background-color]="swatch()"></span>
+            </ng-template>
+        </mona-masked-text-box>
+    </mona-form-field>
+    <p class="text-sm">Value: {{ color() || "empty" }}</p>
+</div>

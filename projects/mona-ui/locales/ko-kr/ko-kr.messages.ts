@@ -472,10 +472,19 @@ export const KO_KR_MESSAGES = {
         transferTo: "다른 목록으로 이동",
         transferToList: (list: string) => `${list}(으)로 이동`
     },
+    maskedTextBox: {
+        characterNotAllowed: "이 문자는 여기에 입력할 수 없습니다",
+        clear: "지우기",
+        digitOnly: "여기에는 숫자만 입력할 수 있습니다",
+        digitOrSignOnly: "여기에는 숫자, 더하기, 빼기 기호만 입력할 수 있습니다",
+        letterOnly: "여기에는 문자만 입력할 수 있습니다",
+        letterOrDigitOnly: "여기에는 문자나 숫자만 입력할 수 있습니다"
+    },
     multiSelect: {
         clear: "지우기",
         itemsCount: (count: number) => `+ ${localizeNumber(count)}개`,
-        removeMoreItems: (count: number) => `나머지 ${localizeNumber(count)}개 삭제`
+        removeMoreItems: (count: number) => `나머지 ${localizeNumber(count)}개 삭제`,
+        selectAll: "모두 선택"
     },
     notification: {
         close: "닫기",

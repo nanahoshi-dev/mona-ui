@@ -1,9 +1,16 @@
 @if (checkboxes()) {
     <!-- Visual only: the option row owns selection, so the checkbox is inert (not focusable, clicks reach the row). -->
-    <input type="checkbox" [checked]="itemChecked()" monaCheckbox class="aspect-square" inert aria-hidden="true" />
+    <input
+        type="checkbox"
+        [checked]="itemChecked()"
+        [indeterminate]="itemIndeterminate()"
+        monaCheckbox
+        class="aspect-square"
+        inert
+        aria-hidden="true" />
 }
 
-@if (template()) {
+@if (template() && !isSelectAll()) {
     <ng-container [ngTemplateOutlet]="template()" [ngTemplateOutletContext]="{ $implicit: dataItem() }"></ng-container>
 } @else {
     <span [class]="textClasses()">{{ itemText() }}</span>

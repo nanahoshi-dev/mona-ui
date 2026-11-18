@@ -394,6 +394,13 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     public readonly showClearButton = input(false, { transform: booleanAttribute });
 
     /**
+     * @description Starts the list with a "Select all" option, which selects every enabled item the filter leaves, or
+     * deselects them when they're all selected. Its checkbox shows when only some are.
+     * @default false
+     */
+    public readonly showSelectAll = input(false, { transform: booleanAttribute });
+
+    /**
      * @description The size of the multi select component.
      * @default "medium"
      */
@@ -491,6 +498,14 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         effect(() => {
             const checkboxVisible = this.checkboxes();
             untracked(() => this.#listService.setSelectableOptions({ checkboxes: checkboxVisible }));
+        });
+        effect(() => {
+            const showSelectAll = this.showSelectAll();
+            const label = this.messages().selectAll;
+            untracked(() => {
+                this.#listService.selectAllEnabled.set(showSelectAll);
+                this.#listService.selectAllLabel.set(label);
+            });
         });
         // Custom values are typed in the popup's filter box, which the host never sees the keys of.
         effect(onCleanup => {

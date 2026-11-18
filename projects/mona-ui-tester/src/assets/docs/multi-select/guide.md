@@ -84,6 +84,14 @@ Each structural directive below is an `ng-template` placed as projected content 
 multi-select/checkboxes
 ```
 
+### Selecting every option at once
+
+`showSelectAll` puts a "Select all" option first in the popup. It selects every enabled option the filter leaves, and once they're all selected, deselects them. Its checkbox shows a dash while only some of them are selected. Options that are disabled keep their state, so Legal here stays out.
+
+```example
+multi-select/select-all
+```
+
 ### Collapsing tags into a summary
 
 Apply `monaMultiSelectSummaryTag` to collapse tags beyond `tagCount` into a single summary chip (default text: "+N items"). A negative `tagCount` (the default) shows every selected item as its own tag and never renders the summary chip. `monaMultiSelectSummaryTagTemplate` replaces the summary chip's text.
@@ -179,6 +187,13 @@ Set `autoClose` to `true` to close the popup after each selection instead of kee
 
 With nothing highlighted, such as when the filter matches no option, Enter in the filter box does nothing, and leaves the selection as it is. With `allowCustomValue`, it adds the typed text, unless an option was reached with the arrow keys since the text last changed: then it toggles that option, as it would without custom values. `allowCustomValue` without `monaDropDownFilterable` has nowhere to type, and warns in development.
 
+### Select all
+
+- "Select all" covers the options the filter leaves, so filtering and then choosing it adds only those, and keeps the options already selected. Choosing it again, once all of those are selected, deselects only those.
+- It has a checkbox whether or not `checkboxes` is set, and it reads as selected once every option it covers is selected.
+- It's left out while the filter leaves no enabled option, and with `autoClose` the popup closes after it as after any option.
+- It counts among the options, in the position screen readers announce. Its text is the multi-select's `selectAll` message.
+
 ### `showClearButton` clears every selection
 
 `showClearButton` renders a single clear button that removes all selected items at once, not one at a time.
@@ -210,6 +225,8 @@ With nothing highlighted, such as when the filter matches no option, Enter in th
 | `Space`                 | Toggle the popup open or closed.                                                                                                                  |
 | `Backspace`             | Remove the most recently selected tag.                                                                                                            |
 | `Escape` / `Tab`        | Close the popup.                                                                                                                                  |
+
+With `showSelectAll`, "Select all" is the first option in the list, so the arrow keys reach it as they reach any other, wrapping included. `Enter` on it selects or deselects the options it covers.
 
 ### Focus
 

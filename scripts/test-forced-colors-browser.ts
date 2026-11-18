@@ -59,6 +59,7 @@ const ROUTES = [
     "input",
     "list-box",
     "list-view",
+    "masked-textbox",
     "menubar",
     "multi-select",
     "numeric-textbox",

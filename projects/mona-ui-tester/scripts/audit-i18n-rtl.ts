@@ -541,6 +541,18 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/masked-text-box/components/masked-text-box/masked-text-box.component.ts",
+        lineSnippet: "scrollLeft",
+        reason: "The masked input sits in a dir=ltr field, so its scrollLeft is the physical offset the ghost follows"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/masked-text-box/components/masked-text-box/masked-text-box.component.ts",
+        lineSnippet: "translateX(",
+        reason: "The ghost moves with the input's text inside a dir=ltr field, which scrolls the same way in every locale"
+    },
+    {
+        category: "rtl-manual-review",
         filePattern: "projects/mona-ui/window/directives/window-drag-handler.directive.ts",
         lineSnippet: "rect.left",
         reason: "Desktop window drag handler operates in 2D viewport coordinates"

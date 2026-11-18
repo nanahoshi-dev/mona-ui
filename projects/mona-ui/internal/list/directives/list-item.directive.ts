@@ -4,7 +4,7 @@ import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../models/ListItem";
 import { ListService } from "../services/list.service";
-import { listItemContentThemeVariants } from "../styles/list.styles";
+import { LIST_SELECT_ALL_ITEM_CLASSES, listItemContentThemeVariants } from "../styles/list.styles";
 
 @Directive({
     selector: "li[monaListItem]",
@@ -49,15 +49,16 @@ export class ListItemDirective<TData> {
         const highlighted = this.highlighted();
         const selected = this.selected();
         const selectableOptions = this.#listService.selectableOptions();
-        const checkboxes = selectableOptions.checkboxes;
+        const selectAll = this.item() === this.#listService.selectAllItem;
         const classes = listItemContentThemeVariants({
             disabled,
             highlighted,
             selected,
-            checkboxes,
+            checkboxes: selectableOptions.checkboxes || selectAll,
             selectable: selectableOptions.enabled
         });
-        return twMerge(classes);
+        // A line sets "Select all" apart from the options it acts on.
+        return twMerge(classes, selectAll ? LIST_SELECT_ALL_ITEM_CLASSES : "");
     });
     public readonly item = input.required<ListItem<TData>>();
 

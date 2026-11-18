@@ -25,6 +25,7 @@ import type { MonaGridMessages } from "../message-types/grid.messages";
 import type { MonaLabelMessages } from "../message-types/label.messages";
 import type { MonaListMessages } from "../message-types/list.messages";
 import type { MonaListBoxMessages } from "../message-types/list-box.messages";
+import type { MonaMaskedTextBoxMessages } from "../message-types/masked-text-box.messages";
 import type { MonaMultiSelectMessages } from "../message-types/multi-select.messages";
 import type { MonaNotificationMessages } from "../message-types/notification.messages";
 import type { MonaNumericTextBoxMessages } from "../message-types/numeric-text-box.messages";
@@ -79,6 +80,7 @@ export interface MonaLocaleMessages {
     label: MonaLabelMessages;
     list: MonaListMessages;
     listBox: MonaListBoxMessages;
+    maskedTextBox: MonaMaskedTextBoxMessages;
     multiSelect: MonaMultiSelectMessages;
     notification: MonaNotificationMessages;
     numericTextBox: MonaNumericTextBoxMessages;

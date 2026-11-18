@@ -1,0 +1,15 @@
+<div class="flex max-w-sm flex-col gap-2">
+    <mona-form-field label="Notify" hint="Legal is archived and can't be notified.">
+        <mona-multi-select
+            monaDropDownFilterable
+            textField="name"
+            valueField="id"
+            itemDisabled="archived"
+            [valuePrimitive]="true"
+            [checkboxes]="true"
+            [showSelectAll]="true"
+            [data]="teams"
+            [(value)]="notified" />
+    </mona-form-field>
+    <span aria-live="polite" class="text-sm">{{ notified().length }} of {{ teams.length }} teams</span>
+</div>

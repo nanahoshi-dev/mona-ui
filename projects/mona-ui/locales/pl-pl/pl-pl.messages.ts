@@ -547,12 +547,21 @@ export const PL_PL_MESSAGES = {
         transferTo: "Przenieś do drugiej listy",
         transferToList: (list: string) => `Przenieś do listy „${list}”`
     },
+    maskedTextBox: {
+        characterNotAllowed: "Tego znaku nie można tu wpisać",
+        clear: "Wyczyść",
+        digitOnly: "Tu można wpisać tylko cyfrę",
+        digitOrSignOnly: "Tu można wpisać tylko cyfrę, plus lub minus",
+        letterOnly: "Tu można wpisać tylko literę",
+        letterOrDigitOnly: "Tu można wpisać tylko literę lub cyfrę"
+    },
     multiSelect: {
         clear: "Wyczyść",
         itemsCount: (count: number) =>
             `+ ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} element`, few: () => `${localizeNumber(count)} elementy`, many: () => `${localizeNumber(count)} elementów`, other: () => `${localizeNumber(count)} elementu` })}`,
         removeMoreItems: (count: number) =>
-            `Usuń jeszcze ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} element`, few: () => `${localizeNumber(count)} elementy`, many: () => `${localizeNumber(count)} elementów`, other: () => `${localizeNumber(count)} elementu` })}`
+            `Usuń jeszcze ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} element`, few: () => `${localizeNumber(count)} elementy`, many: () => `${localizeNumber(count)} elementów`, other: () => `${localizeNumber(count)} elementu` })}`,
+        selectAll: "Zaznacz wszystko"
     },
     notification: {
         close: "Zamknij",

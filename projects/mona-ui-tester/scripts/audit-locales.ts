@@ -167,6 +167,7 @@ export const MONA_MESSAGE_NAMESPACES = [
     "label",
     "list",
     "listBox",
+    "maskedTextBox",
     "multiSelect",
     "notification",
     "numericTextBox",

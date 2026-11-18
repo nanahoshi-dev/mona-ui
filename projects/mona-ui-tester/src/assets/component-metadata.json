@@ -13087,6 +13087,207 @@
       }
     ]
   },
+  "MaskedTextBoxComponent": {
+    "name": "MaskedTextBoxComponent",
+    "selector": "\"mona-masked-text-box\"",
+    "inputs": [
+      {
+        "description": "Id of an element that describes the inner input, such as a hint that gives the format.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name of the inner input. Prefer a visible label, linked through {@link inputId} or\n`aria-labelledby`.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that labels the inner input.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Displays a clear button that empties the value. The button is hidden while the value is empty or the\nbox is disabled or read-only.",
+        "kind": "input",
+        "name": "clearButton",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Whether the value includes the mask's literals: `(555) 123-4567` instead of `5551234567`.",
+        "kind": "input",
+        "name": "includeLiterals",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Additional HTML attributes applied directly to the inner `<input>` element, such as `autocomplete`.\nAn `inputmode` here replaces the one the mask picks.",
+        "kind": "input",
+        "name": "inputAttributes",
+        "type": "AttributeConfig",
+        "defaultValue": "{}"
+      },
+      {
+        "description": "Emitted when the inner input loses focus, including when focus moves to the clear button or to\ncontent in the prefix or suffix templates.",
+        "kind": "output",
+        "name": "inputBlur",
+        "type": "FocusEvent"
+      },
+      {
+        "description": "Additional CSS classes applied to the inner `<input>` element.",
+        "kind": "input",
+        "name": "inputClass",
+        "type": "string | string[]",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Emitted when the inner input gains focus.",
+        "kind": "output",
+        "name": "inputFocus",
+        "type": "FocusEvent"
+      },
+      {
+        "description": "Id of the inner `<input>` element. Point a `<label for>` or `<mona-label for>` at it to label the\nbox. A unique id is generated when it isn't set.",
+        "kind": "input",
+        "name": "inputId",
+        "type": "string",
+        "defaultValue": "generated"
+      },
+      {
+        "description": "Inline styles applied to the inner `<input>` element. Accepts a style string or a\n`CSSStyleDeclaration` partial.",
+        "kind": "input",
+        "name": "inputStyle",
+        "type": "string | Partial<CSSStyleDeclaration> | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Marks the box as invalid. When bound to a signal form field via `[formField]`, this is written by\nthe `FormField` directive. Once touched, the box also shows as invalid while it's partly filled.",
+        "kind": "input",
+        "name": "invalid",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "The format, one character per slot or literal. `0` is a digit, `9` an optional digit, `#` an\noptional digit, `+` or `-`, `L` a letter, `?` an optional letter, `A` a letter or digit, `a` an optional letter or\ndigit, `&` any character but a space, and `C` an optional one. Anything else is a literal, and so is a character\nafter a backslash, such as `\\0`.",
+        "kind": "input",
+        "name": "mask",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Name of the inner input, used by browsers and password managers for autofill. When bound to a\nsignal form field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input",
+        "name": "name",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Text shown while the box is empty and doesn't have focus, in place of the mask.",
+        "kind": "input",
+        "name": "placeholder",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The character shown in an empty slot.",
+        "kind": "input",
+        "name": "prompt",
+        "type": "string",
+        "defaultValue": "\"_\""
+      },
+      {
+        "description": "Prevents value changes while preserving the component's visual state.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Marks the box as required. Triggers the invalid state when the value is empty and the field has\nbeen touched.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Border-radius preset applied to the component.",
+        "kind": "input",
+        "name": "rounded",
+        "type": "MaskedTextBoxVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Mask characters of your own, each mapped to a pattern one character must match, such as\n`{ H: /[0-9a-f]/i }`. They can replace the built-in ones, and their slots are required.",
+        "kind": "input",
+        "name": "rules",
+        "type": "MaskRules",
+        "defaultValue": "{}"
+      },
+      {
+        "description": "Size preset controlling the component's dimensions.",
+        "kind": "input",
+        "name": "size",
+        "type": "MaskedTextBoxVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Emitted when focus leaves the box, including its clear button and prefix and suffix content. Form\ndirectives (`[formField]`, `ngModel`, `formControl`) listen to this to mark the field as touched.",
+        "kind": "output",
+        "name": "touch",
+        "type": "void"
+      },
+      {
+        "description": "Sets the touched state of the box. When bound to a signal form field via `[formField]`, this is\nwritten by the `FormField` directive.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Two-way bindable value: the characters typed into the slots, up to the last one filled, with a space\nfor an empty slot before it. {@link includeLiterals} adds the mask's literals. A value that doesn't line up with\nthe mask, such as `555-123-4567` for `(000) 000-0000`, is fitted into it and written back as it reads.",
+        "kind": "model",
+        "name": "value",
+        "type": "string",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
   "MenuComponent": {
     "name": "MenuComponent",
     "selector": "\"mona-menu\"",
@@ -13485,6 +13686,13 @@
         "description": "Renders a button that clears all selected items when at least one item is selected.",
         "kind": "input",
         "name": "showClearButton",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Starts the list with a \"Select all\" option, which selects every enabled item the filter leaves, or\ndeselects them when they're all selected. Its checkbox shows when only some are.",
+        "kind": "input",
+        "name": "showSelectAll",
         "type": "boolean",
         "defaultValue": "false"
       },

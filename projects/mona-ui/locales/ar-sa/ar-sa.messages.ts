@@ -525,10 +525,19 @@ export const AR_SA_MESSAGES = {
         transferTo: "نقل إلى القائمة الأخرى",
         transferToList: (list: string) => `نقل إلى ${list}`
     },
+    maskedTextBox: {
+        characterNotAllowed: "لا يمكن إدخال هذا الحرف هنا",
+        clear: "مسح",
+        digitOnly: "يمكن إدخال رقم فقط هنا",
+        digitOrSignOnly: "يمكن إدخال رقم أو علامة زائد أو ناقص فقط هنا",
+        letterOnly: "يمكن إدخال حرف فقط هنا",
+        letterOrDigitOnly: "يمكن إدخال حرف أو رقم فقط هنا"
+    },
     multiSelect: {
         clear: "مسح",
         itemsCount: (count: number) => `+ ${localizeNumber(count)}`,
-        removeMoreItems: (count: number) => `حذف العناصر الإضافية (${localizeNumber(count)})`
+        removeMoreItems: (count: number) => `حذف العناصر الإضافية (${localizeNumber(count)})`,
+        selectAll: "تحديد الكل"
     },
     notification: {
         close: "إغلاق",

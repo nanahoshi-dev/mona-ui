@@ -468,10 +468,19 @@ export const JA_JP_MESSAGES = {
         transferTo: "もう一方のリストへ移動",
         transferToList: (list: string) => `${list}へ移動`
     },
+    maskedTextBox: {
+        characterNotAllowed: "この文字はここに入力できません",
+        clear: "クリア",
+        digitOnly: "ここには数字のみ入力できます",
+        digitOrSignOnly: "ここには数字、プラス、マイナスのみ入力できます",
+        letterOnly: "ここには文字のみ入力できます",
+        letterOrDigitOnly: "ここには文字または数字のみ入力できます"
+    },
     multiSelect: {
         clear: "クリア",
         itemsCount: (count: number) => `+ ${localizeNumber(count)}件`,
-        removeMoreItems: (count: number) => `他の${localizeNumber(count)}件を削除`
+        removeMoreItems: (count: number) => `他の${localizeNumber(count)}件を削除`,
+        selectAll: "すべて選択"
     },
     notification: {
         close: "閉じる",
