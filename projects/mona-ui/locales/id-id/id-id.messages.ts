@@ -8,8 +8,14 @@ function localizeNumber(value: number, options?: Intl.NumberFormatOptions): stri
 }
 
 export const ID_ID_MESSAGES = {
+    alert: {
+        dismissLabel: (title?: string) => (title ? `Tutup ${title}` : "Tutup peringatan")
+    },
     autoComplete: {
         clear: "Bersihkan"
+    },
+    avatar: {
+        moreLabel: (count: number) => `${localizeNumber(count)} lainnya`
     },
     breadcrumb: {
         breadcrumb: "Navigasi remah roti",
@@ -589,6 +595,9 @@ export const ID_ID_MESSAGES = {
         seconds: "Detik",
         set: "Atur",
         timeSelector: "Pemilih waktu"
+    },
+    toolbar: {
+        moreLabel: "Lainnya"
     },
     treeView: {
         collapse: "Ciutkan",

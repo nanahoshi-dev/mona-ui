@@ -8,7 +8,9 @@ export * from "./models/mona-i18n-config";
 export * from "./models/mona-locale";
 export * from "./models/mona-locale-messages";
 
+export * from "./message-types/alert.messages";
 export * from "./message-types/auto-complete.messages";
+export * from "./message-types/avatar.messages";
 export * from "./message-types/breadcrumb.messages";
 export * from "./message-types/button-group.messages";
 export * from "./message-types/calendar.messages";
@@ -54,6 +56,7 @@ export * from "./message-types/tabs.messages";
 export * from "./message-types/text-box.messages";
 export * from "./message-types/time-picker.messages";
 export * from "./message-types/time-selector.messages";
+export * from "./message-types/toolbar.messages";
 export * from "./message-types/tree-view.messages";
 export * from "./message-types/window.messages";
 

@@ -44,11 +44,25 @@ export interface DefaultCatalogTarget {
 
 export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
     {
+        constName: "ALERT_DEFAULT_MESSAGES",
+        file: "alert/i18n/alert.default-messages.ts",
+        namespace: "alert",
+        style: "type",
+        typeName: "MonaAlertMessages"
+    },
+    {
         constName: "AUTO_COMPLETE_DEFAULT_MESSAGES",
         file: "auto-complete/i18n/auto-complete.default-messages.ts",
         namespace: "autoComplete",
         style: "type",
         typeName: "MonaAutoCompleteMessages"
+    },
+    {
+        constName: "AVATAR_DEFAULT_MESSAGES",
+        file: "avatar/i18n/avatar.default-messages.ts",
+        namespace: "avatar",
+        style: "type",
+        typeName: "MonaAvatarMessages"
     },
     {
         constName: "BREADCRUMB_DEFAULT_MESSAGES",
@@ -364,6 +378,13 @@ export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
         namespace: "timeSelector",
         style: "type",
         typeName: "MonaTimeSelectorMessages"
+    },
+    {
+        constName: "TOOLBAR_DEFAULT_MESSAGES",
+        file: "toolbar/i18n/toolbar.default-messages.ts",
+        namespace: "toolbar",
+        style: "type",
+        typeName: "MonaToolbarMessages"
     },
     {
         constName: "TREE_DEFAULT_MESSAGES",

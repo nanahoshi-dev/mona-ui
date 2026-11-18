@@ -1,6 +1,12 @@
 {
+    "alert": {
+        "dismissLabel": "{title, select, undefined {닫기} other {{title} 닫기}}"
+    },
     "autoComplete": {
         "clear": "지우기"
+    },
+    "avatar": {
+        "moreLabel": "외 {count}"
     },
     "breadcrumb": {
         "breadcrumb": "이동 경로",
@@ -559,6 +565,9 @@
         "seconds": "초",
         "set": "설정",
         "timeSelector": "시간 선택기"
+    },
+    "toolbar": {
+        "moreLabel": "더 보기"
     },
     "treeView": {
         "collapse": "축소",

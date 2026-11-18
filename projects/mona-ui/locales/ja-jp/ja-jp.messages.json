@@ -1,6 +1,12 @@
 {
+    "alert": {
+        "dismissLabel": "{title, select, undefined {閉じる} other {{title}を閉じる}}"
+    },
     "autoComplete": {
         "clear": "クリア"
+    },
+    "avatar": {
+        "moreLabel": "ほか{count}"
     },
     "breadcrumb": {
         "breadcrumb": "パンくずリスト",
@@ -559,6 +565,9 @@
         "seconds": "秒",
         "set": "設定",
         "timeSelector": "時刻選択"
+    },
+    "toolbar": {
+        "moreLabel": "その他"
     },
     "treeView": {
         "collapse": "折りたたむ",

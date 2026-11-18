@@ -24,7 +24,9 @@ describe("MONA_JA_JP_LOCALE", () => {
 
     describe("completeness", () => {
         const expectedNamespaces = [
+            "alert",
             "autoComplete",
+            "avatar",
             "breadcrumb",
             "buttonGroup",
             "calendar",
@@ -67,11 +69,12 @@ describe("MONA_JA_JP_LOCALE", () => {
             "textBox",
             "timePicker",
             "timeSelector",
+            "toolbar",
             "treeView",
             "window"
         ] as const;
 
-        it("defines all 48 canonical message namespaces", () => {
+        it("defines all 51 canonical message namespaces", () => {
             for (const ns of expectedNamespaces) {
                 expect(MONA_JA_JP_LOCALE.messages[ns], `Namespace ${ns} must be defined`).toBeDefined();
             }

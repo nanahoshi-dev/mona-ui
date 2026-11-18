@@ -17,8 +17,14 @@ function plural(
 }
 
 export const RU_RU_MESSAGES = {
+    alert: {
+        dismissLabel: (title?: string) => (title ? `Закрыть: ${title}` : "Закрыть уведомление")
+    },
     autoComplete: {
         clear: "Очистить"
+    },
+    avatar: {
+        moreLabel: (count: number) => `ещё ${localizeNumber(count)}`
     },
     breadcrumb: {
         breadcrumb: "Навигационная цепочка",
@@ -654,6 +660,9 @@ export const RU_RU_MESSAGES = {
         seconds: "Секунды",
         set: "Установить",
         timeSelector: "Выбор времени"
+    },
+    toolbar: {
+        moreLabel: "Ещё"
     },
     treeView: {
         collapse: "Свернуть",

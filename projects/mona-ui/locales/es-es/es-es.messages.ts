@@ -17,8 +17,14 @@ function plural(
 }
 
 export const ES_ES_MESSAGES = {
+    alert: {
+        dismissLabel: (title?: string) => (title ? `Descartar ${title}` : "Descartar aviso")
+    },
     autoComplete: {
         clear: "Limpiar"
+    },
+    avatar: {
+        moreLabel: (count: number) => `${localizeNumber(count)} más`
     },
     breadcrumb: {
         breadcrumb: "Ruta de navegación",
@@ -641,6 +647,9 @@ export const ES_ES_MESSAGES = {
         seconds: "Segundos",
         set: "Establecer",
         timeSelector: "Selector de hora"
+    },
+    toolbar: {
+        moreLabel: "Más"
     },
     treeView: {
         collapse: "Contraer",

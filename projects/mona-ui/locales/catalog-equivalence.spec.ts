@@ -7,7 +7,9 @@ import {
 } from "@nanahoshi/mona-ui/i18n/icu";
 import { describe, expect, it } from "vitest";
 import EN_US_SOURCE from "../i18n/catalogs/en-US.messages.json";
+import { ALERT_DEFAULT_MESSAGES } from "../alert/i18n/alert.default-messages";
 import { AUTO_COMPLETE_DEFAULT_MESSAGES } from "../auto-complete/i18n/auto-complete.default-messages";
+import { AVATAR_DEFAULT_MESSAGES } from "../avatar/i18n/avatar.default-messages";
 import { BREADCRUMB_DEFAULT_MESSAGES } from "../breadcrumb/i18n/breadcrumb.default-messages";
 import { BUTTON_GROUP_DEFAULT_MESSAGES } from "../button-group/i18n/button-group.default-messages";
 import { CALENDAR_DEFAULT_MESSAGES } from "../calendar/i18n/calendar.default-messages";
@@ -53,6 +55,7 @@ import { TABS_DEFAULT_MESSAGES } from "../tabs/i18n/tabs.default-messages";
 import { TEXT_BOX_DEFAULT_MESSAGES } from "../text-box/i18n/text-box.default-messages";
 import { TIME_PICKER_DEFAULT_MESSAGES } from "../time-picker/i18n/time-picker.default-messages";
 import { TIME_SELECTOR_DEFAULT_MESSAGES } from "../time-selector/i18n/time-selector.default-messages";
+import { TOOLBAR_DEFAULT_MESSAGES } from "../toolbar/i18n/toolbar.default-messages";
 import { TREE_DEFAULT_MESSAGES } from "../internal/tree/i18n/tree.default-messages";
 import { WINDOW_DEFAULT_MESSAGES } from "../window/i18n/window.default-messages";
 import AR_SA_SOURCE from "./ar-sa/ar-sa.messages.json";
@@ -100,7 +103,9 @@ const NUMBER_SAMPLES: readonly number[] = [0, 1, 2, 3, 5, 11, 21, 22, 25, 101, 1
 const STRING_SAMPLES: readonly string[] = ["", "Apple", "undefined", "constructor", "{x} 'y' #"];
 
 const ENGLISH_DEFAULTS = {
+    alert: ALERT_DEFAULT_MESSAGES,
     autoComplete: AUTO_COMPLETE_DEFAULT_MESSAGES,
+    avatar: AVATAR_DEFAULT_MESSAGES,
     breadcrumb: BREADCRUMB_DEFAULT_MESSAGES,
     buttonGroup: BUTTON_GROUP_DEFAULT_MESSAGES,
     calendar: CALENDAR_DEFAULT_MESSAGES,
@@ -146,6 +151,7 @@ const ENGLISH_DEFAULTS = {
     textBox: TEXT_BOX_DEFAULT_MESSAGES,
     timePicker: TIME_PICKER_DEFAULT_MESSAGES,
     timeSelector: TIME_SELECTOR_DEFAULT_MESSAGES,
+    toolbar: TOOLBAR_DEFAULT_MESSAGES,
     treeView: TREE_DEFAULT_MESSAGES,
     window: WINDOW_DEFAULT_MESSAGES
 } satisfies MonaLocaleMessages;

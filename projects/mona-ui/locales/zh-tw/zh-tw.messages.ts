@@ -8,8 +8,14 @@ function localizeNumber(value: number, options?: Intl.NumberFormatOptions): stri
 }
 
 export const ZH_TW_MESSAGES = {
+    alert: {
+        dismissLabel: (title?: string) => (title ? `關閉${title}` : "關閉提示")
+    },
     autoComplete: {
         clear: "清除"
+    },
+    avatar: {
+        moreLabel: (count: number) => `還有 ${localizeNumber(count)} 個`
     },
     breadcrumb: {
         breadcrumb: "階層連結導航",
@@ -585,6 +591,9 @@ export const ZH_TW_MESSAGES = {
         seconds: "秒",
         set: "設定",
         timeSelector: "時間選取器"
+    },
+    toolbar: {
+        moreLabel: "更多"
     },
     treeView: {
         collapse: "摺疊",

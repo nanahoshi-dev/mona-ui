@@ -1,6 +1,12 @@
 {
+    "alert": {
+        "dismissLabel": "{title, select, undefined {Dismiss} other {Dismiss, {title}}}"
+    },
     "autoComplete": {
         "clear": "Clear"
+    },
+    "avatar": {
+        "moreLabel": "{count} more"
     },
     "breadcrumb": {
         "breadcrumb": "Breadcrumb",
@@ -559,6 +565,9 @@
         "seconds": "Seconds",
         "set": "Set",
         "timeSelector": "Time selector"
+    },
+    "toolbar": {
+        "moreLabel": "More"
     },
     "treeView": {
         "collapse": "Collapse",

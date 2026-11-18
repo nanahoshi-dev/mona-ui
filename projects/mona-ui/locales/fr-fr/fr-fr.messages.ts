@@ -17,8 +17,15 @@ function plural(
 }
 
 export const FR_FR_MESSAGES = {
+    alert: {
+        dismissLabel: (title?: string) => (title ? `Fermer ${title}` : "Fermer l’alerte")
+    },
     autoComplete: {
         clear: "Effacer"
+    },
+    avatar: {
+        moreLabel: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} autre` : `${localizeNumber(count)} autres`
     },
     breadcrumb: {
         breadcrumb: "Fil d’Ariane",
@@ -643,6 +650,9 @@ export const FR_FR_MESSAGES = {
         seconds: "Secondes",
         set: "Valider",
         timeSelector: "Sélecteur d’heure"
+    },
+    toolbar: {
+        moreLabel: "Plus"
     },
     treeView: {
         collapse: "Réduire",

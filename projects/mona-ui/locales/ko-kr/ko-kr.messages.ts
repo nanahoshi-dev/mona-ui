@@ -8,8 +8,14 @@ function localizeNumber(value: number, options?: Intl.NumberFormatOptions): stri
 }
 
 export const KO_KR_MESSAGES = {
+    alert: {
+        dismissLabel: (title?: string) => (title ? `${title} 닫기` : "닫기")
+    },
     autoComplete: {
         clear: "지우기"
+    },
+    avatar: {
+        moreLabel: (count: number) => `외 ${localizeNumber(count)}`
     },
     breadcrumb: {
         breadcrumb: "이동 경로",
@@ -590,6 +596,9 @@ export const KO_KR_MESSAGES = {
         seconds: "초",
         set: "설정",
         timeSelector: "시간 선택기"
+    },
+    toolbar: {
+        moreLabel: "더 보기"
     },
     treeView: {
         collapse: "축소",

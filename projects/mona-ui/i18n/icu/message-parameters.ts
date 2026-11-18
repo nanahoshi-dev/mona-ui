@@ -10,8 +10,14 @@ import type { MonaMessageParameter } from "./models/mona-locale-data";
 export const MONA_MESSAGE_PARAMETERS: Readonly<
     Record<string, Readonly<Record<string, readonly MonaMessageParameter[] | null>>>
 > = {
+    alert: {
+        dismissLabel: [{ name: "title", optional: true, type: "string" }]
+    },
     autoComplete: {
         clear: null
+    },
+    avatar: {
+        moreLabel: [{ name: "count", type: "number" }]
     },
     breadcrumb: {
         breadcrumb: null,
@@ -686,6 +692,9 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         seconds: null,
         set: null,
         timeSelector: null
+    },
+    toolbar: {
+        moreLabel: null
     },
     treeView: {
         collapse: null,

@@ -1,6 +1,12 @@
 {
+    "alert": {
+        "dismissLabel": "{title, select, undefined {关闭提示} other {关闭{title}}}"
+    },
     "autoComplete": {
         "clear": "清除"
+    },
+    "avatar": {
+        "moreLabel": "还有 {count} 个"
     },
     "breadcrumb": {
         "breadcrumb": "面包屑导航",
@@ -559,6 +565,9 @@
         "seconds": "秒",
         "set": "设置",
         "timeSelector": "时间选择器"
+    },
+    "toolbar": {
+        "moreLabel": "更多"
     },
     "treeView": {
         "collapse": "折叠",

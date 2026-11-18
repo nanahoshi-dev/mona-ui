@@ -1,6 +1,12 @@
 {
+    "alert": {
+        "dismissLabel": "{title, select, undefined {Fermer l’alerte} other {Fermer {title}}}"
+    },
     "autoComplete": {
         "clear": "Effacer"
+    },
+    "avatar": {
+        "moreLabel": "{count, plural, =1 {# autre} other {# autres}}"
     },
     "breadcrumb": {
         "breadcrumb": "Fil d’Ariane",
@@ -559,6 +565,9 @@
         "seconds": "Secondes",
         "set": "Valider",
         "timeSelector": "Sélecteur d’heure"
+    },
+    "toolbar": {
+        "moreLabel": "Plus"
     },
     "treeView": {
         "collapse": "Réduire",

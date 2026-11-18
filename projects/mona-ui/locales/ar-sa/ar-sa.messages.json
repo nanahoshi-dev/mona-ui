@@ -1,6 +1,12 @@
 {
+    "alert": {
+        "dismissLabel": "{title, select, undefined {إغلاق التنبيه} other {إغلاق {title}}}"
+    },
     "autoComplete": {
         "clear": "مسح"
+    },
+    "avatar": {
+        "moreLabel": "و{count} آخرون"
     },
     "breadcrumb": {
         "breadcrumb": "مسار التنقل",
@@ -559,6 +565,9 @@
         "seconds": "الثواني",
         "set": "تعيين",
         "timeSelector": "منتقي الوقت"
+    },
+    "toolbar": {
+        "moreLabel": "المزيد"
     },
     "treeView": {
         "collapse": "طي",
