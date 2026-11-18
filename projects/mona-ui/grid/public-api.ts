@@ -58,6 +58,8 @@ export * from "./directives/grid-export.directive";
 export * from "./directives/grid-virtual-scroll.directive";
 export * from "./components/grid-command-column/grid-command-column.component";
 export * from "./components/grid-column/grid-column.component";
+export * from "./components/grid-column-group/grid-column-group.component";
+export type { ColumnGroup } from "./models/ColumnGroup";
 export * from "./components/grid/grid.component";
 export type { EditableOptions, GridRowCommand } from "./models/EditableOptions";
 export type { ReorderableOptions } from "./models/ReorderableOptions";

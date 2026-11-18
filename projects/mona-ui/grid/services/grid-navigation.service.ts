@@ -282,6 +282,14 @@ export class GridNavigationService {
         }
     }
 
+    /** The cell in a row that spans a column: the column's own cell, or a column group title over it. */
+    #findCellCovering(
+        rowCells: readonly { key: string; value: NavigationData }[],
+        colIndex: number
+    ): { key: string; value: NavigationData } | undefined {
+        return rowCells.find(e => e.value.colIndex <= colIndex && colIndex < e.value.colIndex + (e.value.colSpan ?? 1));
+    }
+
     #findCellsInRow(rowIndex: number, section: GridNavigationSection): { key: string; value: NavigationData }[] {
         return this.#cells()
             .where(e => e.value.section === section && e.value.rowIndex === rowIndex)
@@ -342,9 +350,11 @@ export class GridNavigationService {
     }
 
     #findFirstHeaderCell(): { key: string; value: NavigationData } | null {
+        // The column headers' row, under any column group rows, comes first in its column.
         return this.#cells()
             .where(d => d.value.section === "header")
             .orderBy(d => d.value.colIndex)
+            .thenByDescending(d => d.value.rowIndex)
             .firstOrDefault();
     }
 
@@ -436,6 +446,11 @@ export class GridNavigationService {
         const lastNonGroupCellKey = this.#lastNonGroupCellKey();
         const lastNonGroupCellData = lastNonGroupCellKey ? this.#cellElementDict().get(lastNonGroupCellKey) : null;
         return lastNonGroupCellData?.colIndex ?? 0;
+    }
+
+    /** Whether a header row is a row of column group titles, which sits above the column headers. */
+    #isColumnGroupRow(row: { rowIndex: number; section: GridNavigationSection }): boolean {
+        return row.section === "header" && row.rowIndex < -1;
     }
 
     #navigateByPage(direction: "down" | "up", cellKey: string): boolean {
@@ -532,7 +547,8 @@ export class GridNavigationService {
         if (!data) {
             return false;
         }
-        if (!data.groupHeader) {
+        // A column group's title keeps the column focus came up from, so Arrow Down goes back to it.
+        if (!data.groupHeader && !this.#spansColumn(data, this.#getTargetColumn())) {
             this.#lastNonGroupCellKey.set(cellKey);
         }
         const targetColIndex = this.#getTargetColumn();
@@ -549,14 +565,23 @@ export class GridNavigationService {
             }
         }
 
-        const nextRow = this.#findNextRow(data.section, data.rowIndex, direction);
+        let nextRow = this.#findNextRow(data.section, data.rowIndex, direction);
+        let targetRowCells = nextRow == null ? [] : this.#findCellsInRow(nextRow.rowIndex, nextRow.section);
+        // A column group row has no cell over a column outside its groups: the column's header goes on up there.
+        while (
+            nextRow != null &&
+            this.#isColumnGroupRow(nextRow) &&
+            this.#findCellCovering(targetRowCells, targetColIndex) == null
+        ) {
+            nextRow = this.#findNextRow(nextRow.section, nextRow.rowIndex, direction);
+            targetRowCells = nextRow == null ? [] : this.#findCellsInRow(nextRow.rowIndex, nextRow.section);
+        }
         if (nextRow == null) {
             return false;
         }
         if (nextRow.section === "body") {
             return this.#focusRow(nextRow.rowIndex, targetColIndex);
         }
-        const targetRowCells = this.#findCellsInRow(nextRow.rowIndex, nextRow.section);
         const targetCell = this.#pickCellInRow(targetRowCells, targetColIndex);
         this.#focusCell(targetCell.key, targetCell.value);
         return true;
@@ -582,6 +607,7 @@ export class GridNavigationService {
         return (
             left.cellKind === right.cellKind &&
             left.colIndex === right.colIndex &&
+            left.colSpan === right.colSpan &&
             left.columnId === right.columnId &&
             left.editable === right.editable &&
             left.element === right.element &&
@@ -614,7 +640,7 @@ export class GridNavigationService {
             return colIndex === "last" ? rowCells[rowCells.length - 1] : rowCells[0];
         }
         return (
-            rowCells.find(e => e.value.colIndex === colIndex) ??
+            this.#findCellCovering(rowCells, colIndex) ??
             rowCells.find(e => e.value.colIndex >= colIndex) ??
             rowCells[rowCells.length - 1]
         );
@@ -721,6 +747,12 @@ export class GridNavigationService {
         this.#lastFocusedCellKey.set(key);
         this.#lastFocusedCellSnapshot.set(this.#createSnapshot(data));
     }
+
+    /** Whether a cell spanning several columns, as a column group's title does, is over a column. */
+    #spansColumn(data: NavigationData, colIndex: number): boolean {
+        const colSpan = data.colSpan ?? 1;
+        return colSpan > 1 && data.colIndex <= colIndex && colIndex < data.colIndex + colSpan;
+    }
 }
 
 export type GridCellKind = "command" | "data" | "detail" | "filter" | "footer" | "group" | "header";
@@ -746,6 +778,8 @@ export interface GridNavigationViewport {
 export interface NavigationData {
     cellKind: GridCellKind;
     colIndex: number;
+    /** How many columns the cell spans from `colIndex`; 1 when left out. */
+    colSpan?: number;
     columnId?: string;
     editable: boolean;
     element: HTMLTableCellElement;

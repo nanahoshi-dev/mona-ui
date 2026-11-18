@@ -1,0 +1,27 @@
+<mona-grid
+    aria-label="Departures"
+    class="w-full"
+    rowKey="flight"
+    [data]="flights"
+    [pageSize]="5"
+    monaGridReorderable
+    monaGridResizable>
+    <ng-template monaGridToolbarTemplate>
+        <span class="text-sm font-medium">Departures</span>
+    </ng-template>
+    <mona-grid-column field="flight" title="Flight" [locked]="true" [width]="100" />
+    <mona-grid-column-group title="Route">
+        <mona-grid-column-group title="Departure">
+            <mona-grid-column field="from" title="Airport" [width]="190" />
+            <mona-grid-column field="departs" title="Time" [width]="90" />
+        </mona-grid-column-group>
+        <mona-grid-column-group title="Arrival">
+            <mona-grid-column field="to" title="Airport" [width]="190" />
+            <mona-grid-column field="arrives" title="Time" [width]="90" />
+        </mona-grid-column-group>
+    </mona-grid-column-group>
+    <mona-grid-column-group title="Aircraft">
+        <mona-grid-column field="aircraft" title="Type" [width]="150" />
+        <mona-grid-column field="seats" title="Seats" type="number" [width]="90" />
+    </mona-grid-column-group>
+</mona-grid>

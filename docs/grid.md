@@ -13,8 +13,9 @@
 | Detail rows             | `monaGridDetailTemplate`                   | `[(expandedKeys)]`         | —                                                                |
 | Server data             | `monaGridServerBinding`                    | `total`, `skip`, `loading` | `dataStateChange`                                                |
 | State persistence       | `monaGridStatePersistence`                 | `[(state)]`                | —                                                                |
-| CSV export              | `monaGridExport`                           | —                          | —                                                                |
+| CSV and Excel export    | `monaGridExport`                           | —                          | —                                                                |
 | Virtual scrolling       | `monaGridVirtualScroll`                    | `scrollEndThreshold`       | `scrollEnd`                                                      |
+| Column groups           | `<mona-grid-column-group>` around columns  | —                          | —                                                                |
 | Column resizing, moving | `monaGridResizable`, `monaGridReorderable` | —                          | `columnResize`, `columnReorder`                                  |
 | Row moving              | `monaGridRowReorderable`                   | —                          | `rowReorder`                                                     |
 
@@ -53,6 +54,25 @@ export class OrdersComponent {
 - `data` takes any iterable of objects. The grid never changes it: sorting, filtering, editing and row moves are reported to you, and you replace `data`.
 - Each `<mona-grid-column>` reads `field` from every row. `type` (`"string"`, `"number"`, `"date"` or `"boolean"`) picks the sorting, the filter operators and the built-in editor. It defaults to `"string"`.
 - `format` changes the cell text: a format string for date columns, or a function `(value, row, column) => string` for any column.
+
+**Column groups.** Wrap columns in a `<mona-grid-column-group title="...">` to put a header over them. Groups nest, and each level adds a header row above the column headers:
+
+```html
+<mona-grid aria-label="Orders" [data]="orders()">
+    <mona-grid-column field="orderId" title="Order ID" type="number" />
+    <mona-grid-column-group title="Shipping">
+        <mona-grid-column field="shipName" title="Ship name" />
+        <mona-grid-column-group title="Address">
+            <mona-grid-column field="shipCity" title="City" />
+            <mona-grid-column field="shipCountry" title="Country" />
+        </mona-grid-column-group>
+    </mona-grid-column-group>
+</mona-grid>
+```
+
+- A group's columns stay next to each other. Moving a column keeps it inside its group, and a nested group moves past it as a whole. A column outside the group can't be dropped into it.
+- Hiding a column narrows its group, and a group with no visible column disappears. A locked column moves to its side of the grid on its own, so its group's header splits there; lock every column of a group to keep it in one piece. While the grid scrolls sideways, a group's title stays in view beside the locked columns as long as part of the group does.
+- The CSV export writes the column titles only; the Excel export writes the groups as merged header cells.
 
 **Set `rowKey`.** `rowKey` is a field name, or a function, that gives each row a unique, stable value, such as a database id. The grid builds each row's identity from it. Without `rowKey`, a row is known only by its object, so a refetch that returns new objects looks like all new rows. With it:
 
@@ -467,14 +487,17 @@ public constructor() {
 - `schemaVersion` rejects states saved with another version, so a column change in your app doesn't restore a stale layout. `loadState(state)` (through `#ref="monaGridStatePersistence"`) returns a status such as `"applied"` or `"rejected-invalid"`; an invalid state changes nothing.
 - With server binding, restoring a state emits one `dataStateChange` at `skip: 0`. Use it to load the restored query instead of starting your own first request.
 
-### CSV export
+### CSV and Excel export
 
 ```html
-<button monaButton (click)="ordersExport.exportCsv('orders.csv')">Export</button>
+<button monaButton (click)="ordersExport.exportCsv('orders.csv')">Export as CSV</button>
+<button monaButton (click)="ordersExport.exportExcel('orders.xlsx')">Export as Excel</button>
 <mona-grid [data]="orders()" monaGridExport #ordersExport="monaGridExport"></mona-grid>
 ```
 
 `exportCsv(filename?)` downloads the visible columns of every row in the current view: filtered and sorted, all pages. With server binding it exports the loaded page; fetch a full export through your own API. Dates are written as `YYYY-MM-DD` in local time. Text starting with `=`, `+`, `-`, `@`, a tab or a carriage return gets a leading `'`, so spreadsheets don't run it as a formula.
+
+`exportExcel(filename?)` downloads the same rows and columns as an `.xlsx` workbook, and returns a promise that resolves once the download starts. Numbers, `true`/`false` and dates keep their types, with dates in the spreadsheet's own short date format. Column groups become merged header cells, the header rows and left-locked columns stay in view as the sheet scrolls, and columns keep the grid's widths. The sheet is named after the file. Text is never read as a formula there, so it's written as it is.
 
 ---
 
@@ -484,7 +507,7 @@ The grid is one Tab stop. <kbd>Tab</kbd> moves into the grid at the cell that la
 
 | Key                                                              | Action                                                                                                                                                       |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| <kbd>↓</kbd> / <kbd>↑</kbd>                                      | Same column in the next / previous row, across the header, the filter row, the add row and the body.                                                         |
+| <kbd>↓</kbd> / <kbd>↑</kbd>                                      | Same column in the next / previous row, across the header, the filter row, the add row and the body. Column group headers are reached from any column under them. |
 | <kbd>←</kbd> / <kbd>→</kbd>                                      | Previous / next cell (mirrored right to left). On a group row, collapses / expands it first.                                                                 |
 | <kbd>Home</kbd> / <kbd>End</kbd>                                 | First / last cell in the row.                                                                                                                                |
 | <kbd>Ctrl</kbd>+<kbd>Home</kbd> / <kbd>Ctrl</kbd>+<kbd>End</kbd> | First / last cell in the grid (<kbd>Cmd</kbd> too). With virtual scrolling, scrolls to the last row first.                                                   |
@@ -496,7 +519,7 @@ The grid is one Tab stop. <kbd>Tab</kbd> moves into the grid at the cell that la
 | <kbd>Shift</kbd>+<kbd>↓</kbd> / <kbd>Shift</kbd>+<kbd>↑</kbd>    | Moves to the next / previous row and extends the selection to it.                                                                                            |
 | <kbd>Ctrl</kbd>+<kbd>A</kbd>                                     | With multiple selection, selects every row in the select-all scope (<kbd>Cmd</kbd> too).                                                                     |
 | <kbd>Ctrl</kbd>+<kbd>C</kbd>                                     | Copies the focused body cell's text, unless text is selected or a row is being edited (<kbd>Cmd</kbd> too).                                                  |
-| <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>←</kbd> / <kbd>→</kbd>     | With `monaGridReorderable`, moves the focused header's column one place and announces its position (<kbd>Cmd</kbd> too).                                     |
+| <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>←</kbd> / <kbd>→</kbd>     | With `monaGridReorderable`, moves the focused header's column one place within its column group and announces its position (<kbd>Cmd</kbd> too).             |
 | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd>                    | With `monaGridGroupable`, groups by the focused header's column and announces it (<kbd>Cmd</kbd> too).                                                       |
 | <kbd>Delete</kbd> / <kbd>Backspace</kbd>                         | On a chip in the group panel, removes that grouping.                                                                                                         |
 | <kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd>                 | Leaves the grid. While editing a cell, saves it and edits the next / previous editable cell.                                                                 |

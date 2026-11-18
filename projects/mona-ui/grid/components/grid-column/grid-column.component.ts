@@ -1,4 +1,13 @@
-import { booleanAttribute, Component, computed, contentChild, forwardRef, input, TemplateRef } from "@angular/core";
+import {
+    booleanAttribute,
+    Component,
+    computed,
+    contentChild,
+    forwardRef,
+    inject,
+    input,
+    TemplateRef
+} from "@angular/core";
 import { DataType } from "@nanahoshi/mona-ui/common";
 import { v4 } from "uuid";
 import { GridCellTemplateDirective } from "../../directives/grid-cell-template.directive";
@@ -11,6 +20,7 @@ import type { AggregateFunction } from "../../models/AggregateFunction";
 import type { Column, ColumnFormat, ColumnSortComparator } from "../../models/Column";
 import { GRID_COLUMN_DEFINITION, GridColumnDefinition } from "../../models/GridColumnDefinition";
 import type { GridColumnLockedPosition } from "../../models/GridColumnLockedPosition";
+import { GridColumnGroupComponent } from "../grid-column-group/grid-column-group.component";
 
 /** Like `booleanAttribute`, but `null` and `undefined` stay `null`: not set, so the grid decides. */
 function nullableBooleanAttribute(value: unknown): boolean | null {
@@ -41,6 +51,7 @@ export class GridColumnComponent implements GridColumnDefinition {
         format: this.format() ?? null,
         groupFooterTemplate: this.groupFooterTemplate() ?? null,
         groupSortDirection: null,
+        groups: this.#group?.path() ?? [],
         headerTemplate: this.headerTemplate() ?? null,
         hidden: this.hidden(),
         id: this.#columnId,
@@ -60,6 +71,7 @@ export class GridColumnComponent implements GridColumnDefinition {
         width: this.width() ?? null
     }));
     readonly #columnId = v4();
+    readonly #group = inject(GridColumnGroupComponent, { optional: true });
     private readonly cellTemplate = contentChild(GridCellTemplateDirective, { read: TemplateRef });
     private readonly editTemplate = contentChild(GridEditTemplateDirective, { read: TemplateRef });
     private readonly footerTemplate = contentChild(GridFooterTemplateDirective, { read: TemplateRef });

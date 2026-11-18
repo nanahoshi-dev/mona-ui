@@ -38,7 +38,8 @@ export class GridSavedStateExampleComponent {
     protected readonly orders = Array.from({ length: 24 }, (_, index) => ({
         orderId: 10248 + index,
         customer: ["Ernst Handel", "Hanari Carnes", "=Island Trading", "Folk och fä HB"][index % 4],
-        freight: 12.5 + ((index * 17) % 60)
+        freight: 12.5 + ((index * 17) % 60),
+        orderDate: new Date(2024, 6, 4 + index * 3)
     }));
     /** Restored on the next visit: sort, column order, widths, visibility and page size. */
     protected readonly state = signal<GridState | null>(readSavedState());

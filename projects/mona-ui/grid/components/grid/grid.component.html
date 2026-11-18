@@ -116,15 +116,61 @@
                 [style.width.px]="gridService.tableWidth()">
                 <colgroup monaGridColgroup></colgroup>
                 <thead role="rowgroup" [style.visibility]="!gridWidthSet() ? 'hidden' : undefined">
+                    @let groupDepth = gridService.headerGroupDepth();
+                    @for (groupRow of gridService.headerGroupRows(); track $index; let level = $index) {
+                        <tr role="row" [attr.aria-rowindex]="level + 1" [class]="headerGroupRowClass()">
+                            @for (cell of groupRow; track cell.key) {
+                                @if (cell.kind === "group") {
+                                    <th
+                                        scope="colgroup"
+                                        role="columnheader"
+                                        [attr.data-column-group-id]="cell.group.id"
+                                        [attr.aria-colspan]="cell.colSpan"
+                                        [monaGridLockedCell]="null"
+                                        [lockedCellHeader]="true"
+                                        [stickyState]="cell.sticky"
+                                        monaGridLogicalCell
+                                        [cellKind]="'header'"
+                                        [columnId]="'$group:' + cell.key"
+                                        [rowIndex]="level - groupDepth - 1"
+                                        [colIndex]="cell.colIndex"
+                                        [columnSpan]="cell.colSpan"
+                                        [ariaColIndex]="cell.ariaColIndex"
+                                        [section]="'header'"
+                                        [firstInRow]="cell.firstInRow"
+                                        [lastInRow]="cell.lastInRow"
+                                        [class]="headerGroupCellClass()"
+                                        [style.width.px]="cell.width">
+                                        <span
+                                            [class]="headerGroupTitleClass()"
+                                            [style.inset-inline-start.px]="
+                                                cell.sticky === null ? gridService.stickyInset().start : null
+                                            "
+                                            [title]="cell.group.title"
+                                            >{{ cell.group.title }}</span
+                                        >
+                                    </th>
+                                } @else {
+                                    <th
+                                        aria-hidden="true"
+                                        [monaGridLockedCell]="cell.layoutKey"
+                                        [lockedCellHeader]="true"
+                                        [class]="headerGroupSpacerCellClass()"
+                                        [style.width.px]="cell.width"></th>
+                                }
+                            }
+                        </tr>
+                    }
                     <tr
                         role="row"
-                        aria-rowindex="1"
+                        data-grid-column-header-row
+                        [attr.aria-rowindex]="groupDepth + 1"
                         cdkDropList
                         cdkDropListOrientation="horizontal"
                         [cdkDropListSortingDisabled]="true"
                         [cdkDropListConnectedTo]="groupable() ? [groupColumnList()!] : []"
                         (cdkDropListDropped)="onColumnDrop()"
-                        [class]="headerTableRowClass()">
+                        [class]="headerTableColumnRowClass()">
                         @for (layoutColumn of gridService.layout(); track layoutColumn.key) {
                             @if (layoutColumn.kind === "column") {
                                 @let column = layoutColumn.column;
@@ -355,7 +401,7 @@
                         }
                     </tr>
                     @if (filterRowEnabled()) {
-                        <tr role="row" aria-rowindex="2" [class]="headerTableRowClass()">
+                        <tr role="row" [attr.aria-rowindex]="groupDepth + 2" [class]="headerTableRowClass()">
                             @for (layoutColumn of gridService.layout(); track layoutColumn.key) {
                                 @if (layoutColumn.kind === "column") {
                                     @let column = layoutColumn.column;

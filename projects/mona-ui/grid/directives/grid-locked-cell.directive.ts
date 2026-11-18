@@ -1,4 +1,5 @@
 import { computed, Directive, ElementRef, inject, input } from "@angular/core";
+import type { GridStickyState } from "../models/GridStickyState";
 import { GridService } from "../services/grid.service";
 
 const STICKY_EDGE_BORDER = "1px solid var(--color-border)";
@@ -37,6 +38,10 @@ export class GridLockedCellDirective {
         return state?.side === "start" ? state.offset : null;
     });
     protected readonly state = computed(() => {
+        const stickyState = this.stickyState();
+        if (stickyState !== undefined) {
+            return stickyState;
+        }
         const layoutKey = this.layoutKey();
         return layoutKey ? (this.#gridService.layoutColumnByKey().get(layoutKey)?.sticky ?? null) : null;
     });
@@ -54,4 +59,9 @@ export class GridLockedCellDirective {
      */
     public readonly layoutKey = input<string | null>(null, { alias: "monaGridLockedCell" });
     public readonly lockedCellHeader = input(false);
+    /**
+     * The sticky state of a cell that spans several layout columns, such as a column group's title, in place of a
+     * layout column's. Left `undefined`, the layout column's is used.
+     */
+    public readonly stickyState = input<GridStickyState | null | undefined>(undefined);
 }

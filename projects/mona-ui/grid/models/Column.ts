@@ -2,6 +2,7 @@ import type { TemplateRef } from "@angular/core";
 import type { DataType } from "@nanahoshi/mona-ui/common";
 import type { SortDirection } from "@nanahoshi/mona-ui/query";
 import type { AggregateFunction } from "./AggregateFunction";
+import type { ColumnGroup } from "./ColumnGroup";
 import type { GridColumnLockedPosition } from "./GridColumnLockedPosition";
 
 export type ColumnKind = "command" | "data";
@@ -47,6 +48,10 @@ export interface ColumnConfig {
     readonly format: ColumnFormat | null;
     /** The column's `monaGridGroupFooterTemplate`, which renders its cell in group footer rows, or `null`. */
     readonly groupFooterTemplate: TemplateRef<unknown> | null;
+    /**
+     * The `mona-grid-column-group`s the column sits in, outermost first. Left out, or empty, when it isn't in a group.
+     */
+    readonly groups?: readonly ColumnGroup[];
     /**
      * The column's `monaGridHeaderTemplate`, which replaces the whole header content and receives the column, or
      * `null`.

@@ -7,6 +7,7 @@ import {
     ListViewHeaderTemplateDirective,
     ListViewSelectableDirective
 } from "@nanahoshi/mona-ui/list-view";
+import { getColumnGroups } from "../../services/grid-column-groups";
 import { GridService } from "../../services/grid.service";
 
 @Component({
@@ -25,7 +26,11 @@ export class GridColumnChooserComponent {
     readonly #gridService = inject(GridService);
     protected readonly columnListSource = computed(() => {
         const columns = this.#gridService.columns();
-        const source = columns.select(c => ({ field: c.field, title: c.title }));
+        // A column in a group shows the group's title before its own, so columns of the same name stay apart.
+        const source = columns.select(c => ({
+            field: c.field,
+            title: [...getColumnGroups(c).map(group => group.title), c.title].join(" / ")
+        }));
         const filterText = this.filterText();
         if (!filterText) {
             return source.toImmutableSet();
