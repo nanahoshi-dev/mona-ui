@@ -545,6 +545,8 @@ describe("PopupService", () => {
     });
 
     describe("closeOnScroll", () => {
+        afterEach(() => vi.restoreAllMocks());
+
         it("closes on page scroll when the anchor also sits in a scrollable container", () => {
             const { anchor } = createScrollableAnchor();
             popupRef = service.create({
@@ -556,6 +558,7 @@ describe("PopupService", () => {
             let closed = false;
             popupRef.closed.subscribe(() => (closed = true));
 
+            vi.spyOn(window, "scrollY", "get").mockReturnValue(40);
             window.dispatchEvent(new Event("scroll"));
 
             expect(closed).toBe(true);
@@ -573,10 +576,32 @@ describe("PopupService", () => {
             let closed = false;
             popupRef.closed.subscribe(() => (closed = true));
 
+            scrollContainer.scrollTop = 40;
             scrollContainer.dispatchEvent(new Event("scroll"));
 
             expect(closed).toBe(true);
             popupRef = null;
+        });
+
+        // Browsers report a scroll on the next frame. Focusing a field that is partly out of view scrolls it in,
+        // and when the same task opens the popup, that scroll's event arrives once the popup is open.
+        it("stays open for the event of a scroll made before it opened", () => {
+            const { anchor, scrollContainer } = createScrollableAnchor();
+            scrollContainer.scrollTop = 40;
+            vi.spyOn(window, "scrollY", "get").mockReturnValue(40);
+            popupRef = service.create({
+                anchor,
+                animation: false,
+                closeOnScroll: true,
+                content: PopupTestContentComponent
+            });
+            let closed = false;
+            popupRef.closed.subscribe(() => (closed = true));
+
+            scrollContainer.dispatchEvent(new Event("scroll"));
+            document.dispatchEvent(new Event("scroll", { bubbles: true }));
+
+            expect(closed).toBe(false);
         });
     });
 

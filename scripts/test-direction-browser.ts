@@ -2612,6 +2612,64 @@ async function runTests(): Promise<void> {
         await calPage.close();
         console.log("    [PASS] Arabic Calendar Weekday Header Real-Browser Geometry verified (LTR & RTL)\n");
 
+        // 14. A dropdown popup opened in the task that focuses its field stays open. Focusing a field that is partly
+        // out of view scrolls it in, and the browser reports that scroll on the next frame, once the popup is open.
+        console.log("--> Testing dropdown popups opened as focus scrolls their field into view");
+        const popupPage = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+        await popupPage.goto(`http://127.0.0.1:${port}/browser-test/popup-scroll`, { waitUntil: "networkidle" });
+        await popupPage.waitForSelector('[data-testid="popup-scroll-box"]');
+
+        for (const { testId, key } of [
+            { testId: "popup-scroll-multi-select", key: "Enter" },
+            { testId: "popup-scroll-dropdown-list", key: "Enter" },
+            { testId: "popup-scroll-combo-box", key: "ArrowDown" },
+            { testId: "popup-scroll-auto-complete", key: "ArrowDown" }
+        ]) {
+            // No named functions inside evaluate: tsx wraps them in a __name helper the page doesn't have.
+            const field = popupPage.locator(`[data-testid="${testId}"]`);
+            const combobox =
+                (await field.getAttribute("role")) === "combobox" ? field : field.locator('[role="combobox"]');
+            // Leave the bottom 16px of the field below the box's visible area.
+            await field.evaluate(element => {
+                const box = document.querySelector('[data-testid="popup-scroll-box"]') as HTMLElement;
+                box.scrollTop += element.getBoundingClientRect().bottom - box.getBoundingClientRect().bottom - 16;
+            });
+            await popupPage.waitForTimeout(150);
+
+            // Focus and open in one task, so the scroll focus makes is reported after the popup opens.
+            const focusScrolled = await combobox.evaluate((element, key) => {
+                const box = document.querySelector('[data-testid="popup-scroll-box"]') as HTMLElement;
+                const scrollTopBeforeFocus = box.scrollTop;
+                (element as HTMLElement).focus();
+                const scrolled = box.scrollTop !== scrollTopBeforeFocus;
+                element.dispatchEvent(
+                    new KeyboardEvent("keydown", { altKey: key === "ArrowDown", bubbles: true, cancelable: true, key })
+                );
+                return scrolled;
+            }, key);
+            await popupPage.waitForTimeout(200);
+            const expandedAfterOpen = await combobox.getAttribute("aria-expanded");
+
+            // A scroll after opening still closes it.
+            await popupPage.evaluate(() => {
+                (document.querySelector('[data-testid="popup-scroll-box"]') as HTMLElement).scrollTop -= 40;
+            });
+            await popupPage.waitForTimeout(200);
+            const expandedAfterScroll = await combobox.getAttribute("aria-expanded");
+
+            assert(focusScrolled, `[${testId}] Focusing the partly hidden field scrolled the box`);
+            assert(
+                expandedAfterOpen === "true",
+                `[${testId}] Popup opened as focus scrolled the field in stays open (aria-expanded: ${expandedAfterOpen})`
+            );
+            assert(
+                expandedAfterScroll === "false",
+                `[${testId}] Scrolling the box after opening closes the popup (aria-expanded: ${expandedAfterScroll})`
+            );
+        }
+        await popupPage.close();
+        console.log("    [PASS] Dropdown popups opened as focus scrolls their field in stay open\n");
+
         console.log("==================================================");
         console.log("  ALL BROWSER DIRECTION GEOMETRY TESTS PASSED!");
         console.log("==================================================\n");

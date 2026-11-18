@@ -698,6 +698,12 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/popup/services/popup.service.ts",
+        lineSnippet: "element.scrollLeft",
+        reason: "Scroll closing only checks whether a container's scrollLeft changed, which holds in either direction"
+    },
+    {
+        category: "rtl-manual-review",
         filePattern: "projects/mona-ui/scroll-view/components/scroll-view/scroll-view.component.ts",
         lineSnippet: "const currentScrollLeft = element.scrollLeft",
         reason: "ScrollView pager calculates cumulative scroll target from element scrollLeft"

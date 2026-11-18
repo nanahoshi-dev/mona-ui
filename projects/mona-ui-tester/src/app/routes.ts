@@ -667,5 +667,10 @@ export const routes: Routes = [
         path: "browser-test/direction-geometry",
         loadComponent: () =>
             import("./browser-test/direction-geometry-fixture.component").then(m => m.DirectionGeometryFixtureComponent)
+    },
+    {
+        path: "browser-test/popup-scroll",
+        loadComponent: () =>
+            import("./browser-test/popup-scroll-fixture.component").then(m => m.PopupScrollFixtureComponent)
     }
 ];
