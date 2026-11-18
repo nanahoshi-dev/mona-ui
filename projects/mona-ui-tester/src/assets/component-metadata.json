@@ -2288,13 +2288,6 @@
       {
         "description": "",
         "kind": "input",
-        "name": "active",
-        "type": "boolean",
-        "required": true
-      },
-      {
-        "description": "",
-        "kind": "input",
         "name": "popupHeight",
         "type": "number",
         "required": true

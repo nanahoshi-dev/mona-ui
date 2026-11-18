@@ -135,6 +135,7 @@ The popup button has `tabindex="-1"`, so the picker is one Tab stop. Keyboard us
 | `Alt+ArrowRight` / `Alt+ArrowLeft` | Input, calendar or time selector | Shows the Time or Date view (swapped in right-to-left layouts) |
 | `ArrowRight` / `ArrowLeft`, `Home` / `End` | Tabs | Selects and focuses the Date or Time tab (arrows swapped in right-to-left layouts) |
 | `Enter` | Input | Writes the typed text to `value` |
+| `Tab` / `Shift+Tab` | Time view | Moves through the Now button, each time selector list and the Set and Cancel buttons, then back to the Time tab |
 | `Enter` | Time selector | Sets the chosen date and time and closes the popup |
 
-Inside the panel, the calendar's and the time selector's own keyboard maps apply. Closing the popup returns focus to the input, unless the user moved focus elsewhere.
+Inside the panel, the calendar's and the time selector's own keyboard maps apply. Each list in the time selector is a Tab stop, so keyboard users can reach every list that scrolls, and the arrow keys act on the list that has focus; the [Time Picker](../time-picker) page lists its keys. Closing the popup returns focus to the input, unless the user moved focus elsewhere.

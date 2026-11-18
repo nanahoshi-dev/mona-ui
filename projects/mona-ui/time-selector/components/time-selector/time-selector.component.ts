@@ -257,7 +257,7 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     }
 
     /**
-     * Moves focus to the active list.
+     * Moves focus to the list that had it last, the hour list at first.
      * @param options passed to the native `focus()` call, for example `{ preventScroll: true }`.
      */
     public focus(options?: FocusOptions): void {
@@ -298,6 +298,11 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
             return;
         }
         this.navigateTo(this.navigatedDate().set({ hour }));
+    }
+
+    /** Keeps the arrow keys on the list that has focus, however it got there: Tab, a click or the arrow keys. */
+    protected onListFocus(listType: TimeListType): void {
+        this.focusedList.set(listType);
     }
 
     protected onMeridiemClick(meridiem: Meridiem): void {

@@ -5,14 +5,18 @@ import {
     type TimeSelectorListVariantProps
 } from "../styles/time-selector.styles";
 
+/**
+ * Each list is a listbox of its own, so each is a Tab stop. A scrolling list that keyboard users can't reach fails
+ * WCAG 2.1.1 (axe's `scrollable-region-focusable`), and a native time input also tabs between its segments.
+ */
 @Directive({
     selector: "ol[monaTimeSelectorList]",
     host: {
         role: "listbox",
+        tabindex: "0",
         "[class]": "baseClass()",
         "[style.padding-top.px]": "listPadding()",
-        "[style.padding-bottom.px]": "listPadding()",
-        "[attr.tabindex]": "active() ? 0 : -1"
+        "[style.padding-bottom.px]": "listPadding()"
     }
 })
 export class TimeSelectorListDirective implements TimeSelectorListVariantInput {
@@ -29,7 +33,6 @@ export class TimeSelectorListDirective implements TimeSelectorListVariantInput {
         const popupHeight = this.popupHeight();
         return popupHeight / 2 - itemHeight / 2;
     });
-    public readonly active = input.required<boolean>();
     public readonly popupHeight = input.required<number>();
     public readonly size = input.required<TimeSelectorListVariantProps["size"]>();
 }
