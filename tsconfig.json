@@ -19,6 +19,7 @@
         "outDir": "./dist/out-tsc",
         "paths": {
             "@nanahoshi/mona-ui": ["./projects/mona-ui/src/lib"],
+            "@nanahoshi/mona-ui/alert": ["./projects/mona-ui/alert/public-api.ts"],
             "@nanahoshi/mona-ui/auto-complete": ["./projects/mona-ui/auto-complete/public-api.ts"],
             "@nanahoshi/mona-ui/avatar": ["./projects/mona-ui/avatar/public-api.ts"],
             "@nanahoshi/mona-ui/badge": ["./projects/mona-ui/badge/public-api.ts"],

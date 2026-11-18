@@ -1,0 +1,46 @@
+@if (showIcon()) {
+    <span [class]="iconClass" aria-hidden="true">
+        @if (iconTemplate(); as template) {
+            <ng-container [ngTemplateOutlet]="template"></ng-container>
+        } @else {
+            @switch (look()) {
+                @case ("success") {
+                    <svg lucideCircleCheck></svg>
+                }
+                @case ("warning") {
+                    <svg lucideTriangleAlert></svg>
+                }
+                @case ("error") {
+                    <svg lucideCircleX></svg>
+                }
+                @default {
+                    <svg lucideInfo></svg>
+                }
+            }
+        }
+    </span>
+}
+
+<div [class]="bodyClass">
+    @if (title()) {
+        <div #titleElement [class]="titleClass">{{ title() }}</div>
+    }
+    <div #descriptionElement>
+        <ng-content></ng-content>
+    </div>
+    <ng-content select="[monaAlertActions]"></ng-content>
+</div>
+
+@if (dismissible()) {
+    <button
+        monaButton
+        type="button"
+        look="ghost"
+        size="small"
+        [iconOnly]="true"
+        [class]="dismissClass"
+        [attr.aria-label]="dismissLabel() || messages().dismissLabel(title() || undefined)"
+        (click)="dismiss.emit($event)">
+        <svg lucideX [size]="16"></svg>
+    </button>
+}
