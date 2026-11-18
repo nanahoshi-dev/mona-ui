@@ -1,0 +1,14 @@
+<div class="flex flex-wrap items-center gap-3">
+    <button monaButton type="button">
+        Inbox
+        @if (unread() > 0) {
+            <span monaBadge look="primary" rounded="full">
+                {{ unread() }}
+                <span class="sr-only">unread</span>
+            </span>
+        }
+    </button>
+    <button monaButton type="button" look="ghost" [disabled]="unread() === 0" (click)="markAllRead()">
+        Mark all as read
+    </button>
+</div>

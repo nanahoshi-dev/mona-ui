@@ -1,0 +1,98 @@
+<div class="flex flex-col gap-3">
+    <!-- Drag the corner to narrow the box: the items that don't fit move into the More menu. -->
+    <div class="w-[28rem] min-w-24 max-w-full resize-x overflow-hidden rounded-md border border-border p-1">
+        <mona-toolbar aria-label="Formatting" size="small">
+            <button
+                monaButton
+                monaToolbarItem
+                type="button"
+                size="small"
+                look="ghost"
+                aria-label="Undo"
+                [iconOnly]="true"
+                (click)="lastAction.set('Undone.')">
+                <svg lucideUndo2 [size]="16"></svg>
+            </button>
+            <button
+                monaButton
+                monaToolbarItem
+                type="button"
+                size="small"
+                look="ghost"
+                aria-label="Redo"
+                [iconOnly]="true"
+                (click)="lastAction.set('Redone.')">
+                <svg lucideRedo2 [size]="16"></svg>
+            </button>
+            <mona-separator monaToolbarItem orientation="vertical" class="h-5" />
+            <button
+                monaButton
+                monaToolbarItem
+                type="button"
+                size="small"
+                look="ghost"
+                aria-label="Bold"
+                [iconOnly]="true"
+                [toggleable]="true"
+                [(selected)]="bold">
+                <svg lucideBold [size]="16"></svg>
+            </button>
+            <button
+                monaButton
+                monaToolbarItem
+                type="button"
+                size="small"
+                look="ghost"
+                aria-label="Italic"
+                [iconOnly]="true"
+                [toggleable]="true"
+                [(selected)]="italic">
+                <svg lucideItalic [size]="16"></svg>
+            </button>
+            <button
+                monaButton
+                monaToolbarItem
+                type="button"
+                size="small"
+                look="ghost"
+                aria-label="Underline"
+                [iconOnly]="true"
+                [toggleable]="true"
+                [(selected)]="underline">
+                <svg lucideUnderline [size]="16"></svg>
+            </button>
+            <button
+                monaButton
+                monaToolbarItem
+                type="button"
+                size="small"
+                look="ghost"
+                aria-label="Strikethrough"
+                [iconOnly]="true"
+                [toggleable]="true"
+                [(selected)]="strikethrough">
+                <svg lucideStrikethrough [size]="16"></svg>
+            </button>
+            <mona-separator monaToolbarItem orientation="vertical" class="h-5" />
+            <button
+                monaButton
+                monaToolbarItem
+                type="button"
+                size="small"
+                look="ghost"
+                overflowText="Insert link…"
+                (click)="lastAction.set('Link dialog opened.')">
+                <svg lucideLink [size]="16"></svg>
+                Link
+            </button>
+            <button monaButton monaToolbarItem type="button" size="small" look="ghost" (click)="clearFormatting()">
+                <svg lucideRemoveFormatting [size]="16"></svg>
+                Clear formatting
+            </button>
+        </mona-toolbar>
+    </div>
+    <p class="text-sm">
+        Bold {{ bold() ? "on" : "off" }}, italic {{ italic() ? "on" : "off" }}, underline
+        {{ underline() ? "on" : "off" }}, strikethrough {{ strikethrough() ? "on" : "off" }}. {{ lastAction() }}
+    </p>
+</div>

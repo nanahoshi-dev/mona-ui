@@ -1,0 +1,18 @@
+<div class="flex max-w-md flex-col gap-3">
+    <input monaTextBox type="search" aria-label="Search tasks" placeholder="Search tasks" />
+    <mona-toolbar aria-label="Task filters" overflow="wrap" class="gap-2">
+        @for (filter of filters; track filter) {
+            <button
+                monaButton
+                type="button"
+                size="small"
+                look="outline"
+                [toggleable]="true"
+                [selected]="selected().has(filter)"
+                (selectedChange)="toggle(filter, $event)">
+                {{ filter }}
+            </button>
+        }
+    </mona-toolbar>
+    <p class="text-sm">{{ selected().size }} filters on.</p>
+</div>

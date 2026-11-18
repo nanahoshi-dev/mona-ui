@@ -19,8 +19,10 @@
         "outDir": "./dist/out-tsc",
         "paths": {
             "@nanahoshi/mona-ui": ["./projects/mona-ui/src/lib"],
+            "@nanahoshi/mona-ui/alert": ["./projects/mona-ui/alert/public-api.ts"],
             "@nanahoshi/mona-ui/auto-complete": ["./projects/mona-ui/auto-complete/public-api.ts"],
             "@nanahoshi/mona-ui/avatar": ["./projects/mona-ui/avatar/public-api.ts"],
+            "@nanahoshi/mona-ui/badge": ["./projects/mona-ui/badge/public-api.ts"],
             "@nanahoshi/mona-ui/breadcrumb": ["./projects/mona-ui/breadcrumb/public-api.ts"],
             "@nanahoshi/mona-ui/button": ["./projects/mona-ui/button/public-api.ts"],
             "@nanahoshi/mona-ui/button-group": ["./projects/mona-ui/button-group/public-api.ts"],
@@ -85,6 +87,7 @@
             "@nanahoshi/mona-ui/rating": ["./projects/mona-ui/rating/public-api.ts"],
             "@nanahoshi/mona-ui/scroll-view": ["./projects/mona-ui/scroll-view/public-api.ts"],
             "@nanahoshi/mona-ui/segmented": ["./projects/mona-ui/segmented/public-api.ts"],
+            "@nanahoshi/mona-ui/separator": ["./projects/mona-ui/separator/public-api.ts"],
             "@nanahoshi/mona-ui/sheet": ["./projects/mona-ui/sheet/public-api.ts"],
             "@nanahoshi/mona-ui/sidebar": ["./projects/mona-ui/sidebar/public-api.ts"],
             "@nanahoshi/mona-ui/skeleton": ["./projects/mona-ui/skeleton/public-api.ts"],
@@ -100,6 +103,7 @@
             "@nanahoshi/mona-ui/theme": ["./projects/mona-ui/theme/public-api.ts"],
             "@nanahoshi/mona-ui/time-picker": ["./projects/mona-ui/time-picker/public-api.ts"],
             "@nanahoshi/mona-ui/time-selector": ["./projects/mona-ui/time-selector/public-api.ts"],
+            "@nanahoshi/mona-ui/toolbar": ["./projects/mona-ui/toolbar/public-api.ts"],
             "@nanahoshi/mona-ui/tooltip": ["./projects/mona-ui/tooltip/public-api.ts"],
             "@nanahoshi/mona-ui/tree-view": ["./projects/mona-ui/tree-view/public-api.ts"],
             "@nanahoshi/mona-ui/window": ["./projects/mona-ui/window/public-api.ts"]

@@ -8,8 +8,14 @@ function localizeNumber(value: number, options?: Intl.NumberFormatOptions): stri
 }
 
 export const JA_JP_MESSAGES = {
+    alert: {
+        dismissLabel: (title?: string) => (title ? `${title}を閉じる` : "閉じる")
+    },
     autoComplete: {
         clear: "クリア"
+    },
+    avatar: {
+        moreLabel: (count: number) => `ほか${localizeNumber(count)}`
     },
     breadcrumb: {
         breadcrumb: "パンくずリスト",
@@ -585,6 +591,9 @@ export const JA_JP_MESSAGES = {
         seconds: "秒",
         set: "設定",
         timeSelector: "時刻選択"
+    },
+    toolbar: {
+        moreLabel: "その他"
     },
     treeView: {
         collapse: "折りたたむ",

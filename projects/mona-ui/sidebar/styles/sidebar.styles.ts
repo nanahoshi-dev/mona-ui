@@ -1,4 +1,5 @@
 import { cva } from "class-variance-authority";
+import { BADGE_BASE_CLASSES } from "@nanahoshi/mona-ui/badge";
 import { themeRaisedBackdropClasses } from "@nanahoshi/mona-ui/internal";
 import type { SidebarVariant } from "../models/SidebarVariant";
 
@@ -395,11 +396,11 @@ export const sidebarBackdropThemeVariants = cva(
     }
 );
 
+/** A medium badge from `@nanahoshi/mona-ui/badge`, in the sidebar's accent color, at the end of its row. */
 export const sidebarMenuBadgeThemeVariants = cva(
     `
-        ms-auto flex items-center justify-center shrink-0
-        min-w-5 h-5 px-1.5
-        rounded-md text-xs font-medium tabular-nums
+        ${BADGE_BASE_CLASSES}
+        ms-auto h-5 min-w-5 px-1.5 rounded-md text-xs
         bg-(--color-sidebar-accent) text-(--color-sidebar-accent-foreground)
         pointer-events-none select-none
     `,

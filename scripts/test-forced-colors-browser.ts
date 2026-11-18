@@ -19,6 +19,7 @@ const screenshotDir = flags.find(flag => flag.startsWith("--screenshots="))?.spl
 const requestedRoutes = process.argv.slice(2).filter(argument => !argument.startsWith("--"));
 
 const ROUTES = [
+    "alert",
     "auto-complete",
     "breadcrumb",
     "button",
@@ -79,6 +80,7 @@ const ROUTES = [
     "textarea",
     "textbox",
     "time-picker",
+    "toolbar",
     "tree-view"
 ];
 const MAX_TABS_PER_ROUTE = 60;

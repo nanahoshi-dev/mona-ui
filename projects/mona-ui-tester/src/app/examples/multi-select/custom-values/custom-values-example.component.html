@@ -1,0 +1,16 @@
+<div class="flex max-w-sm flex-col gap-1">
+    <label id="multi-select-custom-label" monaLabel [for]="skillList">Skills</label>
+    <mona-multi-select
+        #skillList
+        aria-labelledby="multi-select-custom-label"
+        aria-describedby="multi-select-custom-hint"
+        filterPlaceholder="Find or add a skill"
+        monaDropDownFilterable
+        [allowCustomValue]="true"
+        [data]="skills()"
+        [(value)]="value"
+        (valueAdd)="add($event)" />
+    <span id="multi-select-custom-hint" class="text-sm text-muted-foreground">
+        Type a skill that isn't listed and press Enter to add it.
+    </span>
+</div>

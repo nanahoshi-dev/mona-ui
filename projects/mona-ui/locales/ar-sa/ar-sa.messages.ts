@@ -17,8 +17,14 @@ function plural(
 }
 
 export const AR_SA_MESSAGES = {
+    alert: {
+        dismissLabel: (title?: string) => (title ? `إغلاق ${title}` : "إغلاق التنبيه")
+    },
     autoComplete: {
         clear: "مسح"
+    },
+    avatar: {
+        moreLabel: (count: number) => `و${localizeNumber(count)} آخرون`
     },
     breadcrumb: {
         breadcrumb: "مسار التنقل",
@@ -644,6 +650,9 @@ export const AR_SA_MESSAGES = {
         seconds: "الثواني",
         set: "تعيين",
         timeSelector: "منتقي الوقت"
+    },
+    toolbar: {
+        moreLabel: "المزيد"
     },
     treeView: {
         collapse: "طي",

@@ -1,0 +1,10 @@
+<ng-content></ng-content>
+@if (collapsedCount() > 0) {
+    <span
+        role="img"
+        [class]="moreClass"
+        [style]="moreStyles()"
+        [attr.aria-label]="messages().moreLabel(collapsedCount())">
+        {{ moreText() }}
+    </span>
+}

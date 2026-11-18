@@ -11,6 +11,7 @@ import {
     forwardRef,
     inject,
     input,
+    isDevMode,
     model,
     output,
     TemplateRef,
@@ -153,6 +154,8 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     readonly #listService = inject(ListService<TData>);
     readonly #multiSelectService = inject(MultiSelectService);
     readonly #popupRef = this.#dropdownService.popupRef;
+    /** Whether the arrow keys moved the highlight since the filter text last changed. */
+    #navigatedByArrows = false;
 
     protected readonly activeDescendant = computed(() => {
         const highlightedItem = this.#listService.highlightedItem();
@@ -248,6 +251,14 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         }
         return tagCount;
     });
+
+    /**
+     * @description Lets people add values that aren't in {@link data}: Enter in the popup's filter box, on text that
+     * matches no item, emits {@link valueAdd} with the text, and an item whose text it matches is selected instead.
+     * Needs `monaDropDownFilterable`, whose filter box is where the text is typed.
+     * @default false
+     */
+    public readonly allowCustomValue = input(false, { transform: booleanAttribute });
 
     /**
      * @description ID of an element that describes the multi select, such as help text or an error message.
@@ -425,6 +436,13 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     public readonly value = model<Iterable<TValue>>([]);
 
     /**
+     * @description Emitted with the trimmed text when Enter is pressed in the filter box on text that matches no item.
+     * Only emitted when {@link allowCustomValue} is true. Add an item for it to {@link data} and to {@link value}; the
+     * filter box is cleared for the next one.
+     */
+    public readonly valueAdd = output<string>();
+
+    /**
      * @description Sets the value field of the multi select component.
      * It is used for stable item identity, matching externally supplied values, and primitive
      * value projection when {@link valuePrimitive} is enabled.
@@ -452,6 +470,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
                 this.initialize();
                 this.setEventListeners();
                 this.setSubscriptions();
+                this.warnIfCustomValueHasNoFilter();
             }
         });
         effect(() => {
@@ -472,6 +491,25 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         effect(() => {
             const checkboxVisible = this.checkboxes();
             untracked(() => this.#listService.setSelectableOptions({ checkboxes: checkboxVisible }));
+        });
+        // Custom values are typed in the popup's filter box, which the host never sees the keys of.
+        effect(onCleanup => {
+            const popupElement = this.#popupRef()?.overlayRef.overlayElement;
+            if (popupElement == null) {
+                return;
+            }
+            this.#navigatedByArrows = false;
+            const onKeydown = (event: KeyboardEvent): void => this.handlePopupKeydown(event);
+            const onInput = (): void => {
+                this.#navigatedByArrows = false;
+            };
+            // Capture, so Enter on custom text is handled before the list selects the highlighted item with it.
+            popupElement.addEventListener("keydown", onKeydown, true);
+            popupElement.addEventListener("input", onInput, true);
+            onCleanup(() => {
+                popupElement.removeEventListener("keydown", onKeydown, true);
+                popupElement.removeEventListener("input", onInput, true);
+            });
         });
     }
 
@@ -551,6 +589,28 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         this.focus();
     }
 
+    private addCustomValue(input: HTMLInputElement, text: string): void {
+        const caseSensitive = this.#listService.filterableOptions().caseSensitive;
+        const match = this.#listService.getMatchingFilteredItem(text);
+        const matchText = match ? this.#listService.getItemText(match) : null;
+        const exact =
+            matchText != null && (caseSensitive ? matchText === text : matchText.toLowerCase() === text.toLowerCase());
+        if (match && exact) {
+            if (!this.#listService.isSelected(match)) {
+                this.#listService.selectItem(match);
+                this.updateValue(this.getSelectedControlValues());
+            }
+        } else {
+            this.valueAdd.emit(text);
+        }
+        // Clearing it the way typing does tells a filterChange listener too.
+        input.value = "";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        if (this.autoClose()) {
+            this.#popupRef()?.close();
+        }
+    }
+
     private getSelectedControlValues(): TValue[] {
         return this.selectedListItems()
             .select(item => {
@@ -567,6 +627,39 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
             return;
         }
         this.toggleHighlightedItem();
+    }
+
+    /**
+     * Enter in the filter box. With custom values, it adds the typed text: the item it names is selected, or `valueAdd`
+     * offers it. An item reached with the arrow keys is left to the list, which toggles it. With nothing highlighted,
+     * the list would toggle the first selected item, so Enter does nothing then.
+     */
+    private handlePopupKeydown(event: KeyboardEvent): void {
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            this.#navigatedByArrows = true;
+            return;
+        }
+        const input = event.target;
+        if (
+            event.key !== "Enter" ||
+            event.isComposing ||
+            event.keyCode === 229 ||
+            !(input instanceof HTMLInputElement)
+        ) {
+            return;
+        }
+        const text = input.value.trim();
+        const highlightedItem = this.#listService.highlightedItem();
+        if (this.allowCustomValue() && text !== "" && !(this.#navigatedByArrows && highlightedItem != null)) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.addCustomValue(input, text);
+            return;
+        }
+        if (highlightedItem == null) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
     }
 
     private handlePopupPositionUpdate(): void {
@@ -674,5 +767,14 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
 
     private updateValue(value: Iterable<TValue>): void {
         this.value.set(value);
+    }
+
+    private warnIfCustomValueHasNoFilter(): void {
+        if (isDevMode() && this.allowCustomValue() && !this.#listService.filterableOptions().enabled) {
+            console.warn(
+                "[Mona MultiSelect] allowCustomValue needs monaDropDownFilterable: custom values are typed in its filter box.",
+                this.#hostElementRef.nativeElement
+            );
+        }
     }
 }

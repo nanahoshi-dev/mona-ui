@@ -1,4 +1,6 @@
+import type { MonaAlertMessages } from "../message-types/alert.messages";
 import type { MonaAutoCompleteMessages } from "../message-types/auto-complete.messages";
+import type { MonaAvatarMessages } from "../message-types/avatar.messages";
 import type { MonaBreadcrumbMessages } from "../message-types/breadcrumb.messages";
 import type { MonaButtonGroupMessages } from "../message-types/button-group.messages";
 import type { MonaCalendarMessages } from "../message-types/calendar.messages";
@@ -44,11 +46,14 @@ import type { MonaTabsMessages } from "../message-types/tabs.messages";
 import type { MonaTextBoxMessages } from "../message-types/text-box.messages";
 import type { MonaTimePickerMessages } from "../message-types/time-picker.messages";
 import type { MonaTimeSelectorMessages } from "../message-types/time-selector.messages";
+import type { MonaToolbarMessages } from "../message-types/toolbar.messages";
 import type { MonaTreeViewMessages } from "../message-types/tree-view.messages";
 import type { MonaWindowMessages } from "../message-types/window.messages";
 
 export interface MonaLocaleMessages {
+    alert: MonaAlertMessages;
     autoComplete: MonaAutoCompleteMessages;
+    avatar: MonaAvatarMessages;
     breadcrumb: MonaBreadcrumbMessages;
     buttonGroup: MonaButtonGroupMessages;
     calendar: MonaCalendarMessages;
@@ -94,6 +99,7 @@ export interface MonaLocaleMessages {
     textBox: MonaTextBoxMessages;
     timePicker: MonaTimePickerMessages;
     timeSelector: MonaTimeSelectorMessages;
+    toolbar: MonaToolbarMessages;
     treeView: MonaTreeViewMessages;
     window: MonaWindowMessages;
 }

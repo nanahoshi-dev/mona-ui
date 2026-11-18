@@ -1,0 +1,22 @@
+<form class="flex max-w-md flex-col gap-4" (submit)="submit($event)">
+    @if (failed()) {
+        <mona-alert
+            look="error"
+            title="Changes not saved"
+            announce="assertive"
+            [dismissible]="true"
+            (dismiss)="dismiss()">
+            The server didn't respond. Your changes are still here.
+            <div monaAlertActions>
+                <button monaButton type="button" size="small" look="error" (click)="retry()">Try again</button>
+            </div>
+        </mona-alert>
+    }
+    <label class="flex flex-col gap-1 text-sm font-medium">
+        Display name
+        <input monaTextBox type="text" value="Jane Smith" />
+    </label>
+    <div>
+        <button #saveButton monaButton type="submit" look="primary" [loading]="saving()">Save</button>
+    </div>
+</form>

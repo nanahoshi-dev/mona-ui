@@ -17,8 +17,14 @@ function plural(
 }
 
 export const TR_TR_MESSAGES = {
+    alert: {
+        dismissLabel: (title?: string) => (title ? `Kapat: ${title}` : "Uyarıyı kapat")
+    },
     autoComplete: {
         clear: "Temizle"
+    },
+    avatar: {
+        moreLabel: (count: number) => `${localizeNumber(count)} daha`
     },
     breadcrumb: {
         breadcrumb: "İçerik haritası",
@@ -613,6 +619,9 @@ export const TR_TR_MESSAGES = {
         seconds: "Saniye",
         set: "Ayarla",
         timeSelector: "Saat seçici"
+    },
+    toolbar: {
+        moreLabel: "Diğer"
     },
     treeView: {
         collapse: "Daralt",

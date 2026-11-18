@@ -1,0 +1,8 @@
+<ul class="flex max-w-sm flex-col divide-y divide-border rounded-md border border-border">
+    @for (deployment of deployments; track deployment.environment) {
+        <li class="flex items-center justify-between gap-4 px-4 py-3">
+            <span class="text-sm font-medium">{{ deployment.environment }}</span>
+            <span monaBadge fill="subtle" rounded="full" [look]="deployment.look">{{ deployment.status }}</span>
+        </li>
+    }
+</ul>

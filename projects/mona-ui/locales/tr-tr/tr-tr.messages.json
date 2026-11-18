@@ -1,6 +1,12 @@
 {
+    "alert": {
+        "dismissLabel": "{title, select, undefined {Uyarıyı kapat} other {Kapat: {title}}}"
+    },
     "autoComplete": {
         "clear": "Temizle"
+    },
+    "avatar": {
+        "moreLabel": "{count} daha"
     },
     "breadcrumb": {
         "breadcrumb": "İçerik haritası",
@@ -559,6 +565,9 @@
         "seconds": "Saniye",
         "set": "Ayarla",
         "timeSelector": "Saat seçici"
+    },
+    "toolbar": {
+        "moreLabel": "Diğer"
     },
     "treeView": {
         "collapse": "Daralt",

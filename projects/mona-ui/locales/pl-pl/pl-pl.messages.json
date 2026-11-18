@@ -1,6 +1,12 @@
 {
+    "alert": {
+        "dismissLabel": "{title, select, undefined {Zamknij alert} other {Zamknij: {title}}}"
+    },
     "autoComplete": {
         "clear": "Wyczyść"
+    },
+    "avatar": {
+        "moreLabel": "jeszcze {count}"
     },
     "breadcrumb": {
         "breadcrumb": "Ścieżka nawigacyjna",
@@ -559,6 +565,9 @@
         "seconds": "Sekundy",
         "set": "Ustaw",
         "timeSelector": "Selektor godziny"
+    },
+    "toolbar": {
+        "moreLabel": "Więcej"
     },
     "treeView": {
         "collapse": "Zwiń",

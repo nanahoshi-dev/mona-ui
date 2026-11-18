@@ -1,6 +1,12 @@
 {
+    "alert": {
+        "dismissLabel": "{title, select, undefined {Tutup peringatan} other {Tutup {title}}}"
+    },
     "autoComplete": {
         "clear": "Bersihkan"
+    },
+    "avatar": {
+        "moreLabel": "{count} lainnya"
     },
     "breadcrumb": {
         "breadcrumb": "Navigasi remah roti",
@@ -559,6 +565,9 @@
         "seconds": "Detik",
         "set": "Atur",
         "timeSelector": "Pemilih waktu"
+    },
+    "toolbar": {
+        "moreLabel": "Lainnya"
     },
     "treeView": {
         "collapse": "Ciutkan",

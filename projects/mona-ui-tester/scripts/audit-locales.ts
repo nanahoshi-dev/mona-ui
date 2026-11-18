@@ -139,7 +139,9 @@ export function isAllowedLocaleCopyException(
 }
 
 export const MONA_MESSAGE_NAMESPACES = [
+    "alert",
     "autoComplete",
+    "avatar",
     "breadcrumb",
     "buttonGroup",
     "calendar",
@@ -185,6 +187,7 @@ export const MONA_MESSAGE_NAMESPACES = [
     "textBox",
     "timePicker",
     "timeSelector",
+    "toolbar",
     "treeView",
     "window"
 ] as const;

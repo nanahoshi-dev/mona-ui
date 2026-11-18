@@ -110,6 +110,14 @@ Binding `[formField]` synchronizes `value`, `disabled`, `readonly`, `required`, 
 multi-select/forms
 ```
 
+### Adding values that aren't listed
+
+With `allowCustomValue` and `monaDropDownFilterable`, the popup's filter box doubles as a tag input. Enter on text that no option matches emits `valueAdd` with the trimmed text: add it to `data` and to `value`, and it shows as a tag. Text that names an option, in any case, selects that option instead. Either way the filter box is cleared for the next one. Say how it works near the field, as the hint here does, since nothing in the popup does.
+
+```example
+multi-select/custom-values
+```
+
 ### Closing the popup after each selection
 
 Set `autoClose` to `true` to close the popup after each selection instead of keeping it open.
@@ -167,6 +175,10 @@ Set `autoClose` to `true` to close the popup after each selection instead of kee
 
 `placeholder` shows while nothing is selected. It also names the control when neither `aria-label` nor `aria-labelledby` is set.
 
+### Enter in the filter box
+
+With nothing highlighted, such as when the filter matches no option, Enter in the filter box does nothing, and leaves the selection as it is. With `allowCustomValue`, it adds the typed text, unless an option was reached with the arrow keys since the text last changed: then it toggles that option, as it would without custom values. `allowCustomValue` without `monaDropDownFilterable` has nowhere to type, and warns in development.
+
 ### `showClearButton` clears every selection
 
 `showClearButton` renders a single clear button that removes all selected items at once, not one at a time.
@@ -194,6 +206,7 @@ Set `autoClose` to `true` to close the popup after each selection instead of kee
 | `Alt+ArrowDown`         | Open the popup.                                                                                                                                   |
 | `Alt+ArrowUp`           | Close the popup.                                                                                                                                  |
 | `Enter`                 | Open the popup when closed. When open, toggles the highlighted option's selected state; closes the popup afterward only if `autoClose` is `true`. |
+| `Enter` in the filter box | Toggles the option highlighted with the arrow keys. With `allowCustomValue`, adds the typed text instead, or selects the option it names. |
 | `Space`                 | Toggle the popup open or closed.                                                                                                                  |
 | `Backspace`             | Remove the most recently selected tag.                                                                                                            |
 | `Escape` / `Tab`        | Close the popup.                                                                                                                                  |

@@ -1,6 +1,12 @@
 {
+    "alert": {
+        "dismissLabel": "{title, select, undefined {Закрыть уведомление} other {Закрыть: {title}}}"
+    },
     "autoComplete": {
         "clear": "Очистить"
+    },
+    "avatar": {
+        "moreLabel": "ещё {count}"
     },
     "breadcrumb": {
         "breadcrumb": "Навигационная цепочка",
@@ -559,6 +565,9 @@
         "seconds": "Секунды",
         "set": "Установить",
         "timeSelector": "Выбор времени"
+    },
+    "toolbar": {
+        "moreLabel": "Ещё"
     },
     "treeView": {
         "collapse": "Свернуть",

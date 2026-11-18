@@ -1,6 +1,12 @@
 {
+    "alert": {
+        "dismissLabel": "{title, select, undefined {Fechar alerta} other {Fechar {title}}}"
+    },
     "autoComplete": {
         "clear": "Limpar"
+    },
+    "avatar": {
+        "moreLabel": "mais {count}"
     },
     "breadcrumb": {
         "breadcrumb": "Trilha de navegação",
@@ -559,6 +565,9 @@
         "seconds": "Segundos",
         "set": "Definir",
         "timeSelector": "Seletor de hora"
+    },
+    "toolbar": {
+        "moreLabel": "Mais"
     },
     "treeView": {
         "collapse": "Recolher",

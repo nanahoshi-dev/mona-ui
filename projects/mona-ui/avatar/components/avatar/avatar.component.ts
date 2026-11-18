@@ -1,4 +1,5 @@
-import { Component, computed, input, linkedSignal } from "@angular/core";
+import { Component, computed, inject, input, linkedSignal } from "@angular/core";
+import { AVATAR_GROUP } from "../../tokens/avatar-group.token";
 
 @Component({
     selector: "mona-avatar",
@@ -11,6 +12,8 @@ import { Component, computed, input, linkedSignal } from "@angular/core";
     }
 })
 export class AvatarComponent {
+    /** In a group, whether this avatar is past its `max`, and so hidden. */
+    readonly #collapsed = inject(AVATAR_GROUP, { optional: true })?.isCollapsed(this);
     readonly #imageFailed = linkedSignal({ source: () => this.image(), computation: () => false });
     protected readonly avatarLabelStyles = computed(() => {
         return {
@@ -32,7 +35,7 @@ export class AvatarComponent {
             borderStyle: "solid",
             borderRadius: this.borderRadius(),
             backgroundColor,
-            display: "inline-block",
+            display: this.#collapsed?.() ? "none" : "inline-block",
             height: this.height(),
             width: this.width(),
             ...this.customStyles()

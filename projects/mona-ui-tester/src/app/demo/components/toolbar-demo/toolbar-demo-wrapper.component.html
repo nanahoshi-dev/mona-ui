@@ -1,0 +1,67 @@
+<!-- Drag the corner to narrow the box and see items move into the More menu. -->
+<div class="w-[24rem] min-w-24 max-w-full resize-x overflow-hidden rounded-md border border-border p-1">
+    <mona-toolbar
+        [aria-label]="ariaLabel()"
+        [moreLabel]="moreLabel()"
+        [overflow]="overflow()"
+        [size]="size()"
+        [class]="userClass()">
+        <button
+            monaButton
+            monaToolbarItem
+            type="button"
+            look="ghost"
+            aria-label="Undo"
+            [size]="size()"
+            [iconOnly]="true">
+            <svg lucideUndo2 [size]="16"></svg>
+        </button>
+        <button
+            monaButton
+            monaToolbarItem
+            type="button"
+            look="ghost"
+            aria-label="Redo"
+            [size]="size()"
+            [iconOnly]="true">
+            <svg lucideRedo2 [size]="16"></svg>
+        </button>
+        <mona-separator monaToolbarItem orientation="vertical" class="h-5" />
+        <button
+            monaButton
+            monaToolbarItem
+            type="button"
+            look="ghost"
+            aria-label="Bold"
+            [size]="size()"
+            [iconOnly]="true"
+            [toggleable]="true">
+            <svg lucideBold [size]="16"></svg>
+        </button>
+        <button
+            monaButton
+            monaToolbarItem
+            type="button"
+            look="ghost"
+            aria-label="Italic"
+            [size]="size()"
+            [iconOnly]="true"
+            [toggleable]="true">
+            <svg lucideItalic [size]="16"></svg>
+        </button>
+        <button
+            monaButton
+            monaToolbarItem
+            type="button"
+            look="ghost"
+            aria-label="Underline"
+            [size]="size()"
+            [iconOnly]="true"
+            [toggleable]="true">
+            <svg lucideUnderline [size]="16"></svg>
+        </button>
+        <mona-separator monaToolbarItem orientation="vertical" class="h-5" />
+        <button monaButton monaToolbarItem type="button" look="ghost" [size]="size()">Insert table</button>
+        <button monaButton monaToolbarItem type="button" look="ghost" [size]="size()">Insert image</button>
+    </mona-toolbar>
+</div>
