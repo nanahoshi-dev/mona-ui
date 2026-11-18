@@ -16,6 +16,7 @@ import type { MonaDateRangePickerMessages } from "../message-types/date-range-pi
 import type { MonaDateTimePickerMessages } from "../message-types/datetime-picker.messages";
 import type { MonaDialogMessages } from "../message-types/dialog.messages";
 import type { MonaDropdownListMessages } from "../message-types/dropdown-list.messages";
+import type { MonaDropdownTreeMessages } from "../message-types/dropdown-tree.messages";
 import type { MonaDropdownsMessages } from "../message-types/dropdowns.messages";
 import type { MonaEditorMessages } from "../message-types/editor.messages";
 import type { MonaFileUploadMessages } from "../message-types/file-upload.messages";
@@ -27,6 +28,7 @@ import type { MonaListMessages } from "../message-types/list.messages";
 import type { MonaListBoxMessages } from "../message-types/list-box.messages";
 import type { MonaMaskedTextBoxMessages } from "../message-types/masked-text-box.messages";
 import type { MonaMultiSelectMessages } from "../message-types/multi-select.messages";
+import type { MonaMultiSelectTreeMessages } from "../message-types/multi-select-tree.messages";
 import type { MonaNotificationMessages } from "../message-types/notification.messages";
 import type { MonaNumericTextBoxMessages } from "../message-types/numeric-text-box.messages";
 import type { MonaOtpInputMessages } from "../message-types/otp-input.messages";
@@ -71,6 +73,7 @@ export interface MonaLocaleMessages {
     dateTimePicker: MonaDateTimePickerMessages;
     dialog: MonaDialogMessages;
     dropdownList: MonaDropdownListMessages;
+    dropdownTree: MonaDropdownTreeMessages;
     dropdowns: MonaDropdownsMessages;
     editor: MonaEditorMessages;
     fileUpload: MonaFileUploadMessages;
@@ -82,6 +85,7 @@ export interface MonaLocaleMessages {
     listBox: MonaListBoxMessages;
     maskedTextBox: MonaMaskedTextBoxMessages;
     multiSelect: MonaMultiSelectMessages;
+    multiSelectTree: MonaMultiSelectTreeMessages;
     notification: MonaNotificationMessages;
     numericTextBox: MonaNumericTextBoxMessages;
     otpInput: MonaOtpInputMessages;

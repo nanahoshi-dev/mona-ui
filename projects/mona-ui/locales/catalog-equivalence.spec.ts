@@ -26,6 +26,7 @@ import { DATE_RANGE_PICKER_DEFAULT_MESSAGES } from "../date-range-picker/i18n/da
 import { DATETIME_PICKER_DEFAULT_MESSAGES } from "../datetime-picker/i18n/datetime-picker.default-messages";
 import { DIALOG_DEFAULT_MESSAGES } from "../dialog/i18n/dialog.default-messages";
 import { DROPDOWN_LIST_DEFAULT_MESSAGES } from "../dropdown-list/i18n/dropdown-list.default-messages";
+import { DROPDOWN_TREE_DEFAULT_MESSAGES } from "../dropdown-tree/i18n/dropdown-tree.default-messages";
 import { DROPDOWNS_DEFAULT_MESSAGES } from "../dropdowns/i18n/dropdowns.default-messages";
 import { EDITOR_DEFAULT_MESSAGES } from "../editor/i18n/editor.default-messages";
 import { FILE_UPLOAD_DEFAULT_MESSAGES } from "../file-upload/i18n/file-upload.default-messages";
@@ -37,6 +38,7 @@ import { LIST_DEFAULT_MESSAGES } from "../internal/list/i18n/list.default-messag
 import { LABEL_DEFAULT_MESSAGES } from "../label/i18n/label.default-messages";
 import { MASKED_TEXT_BOX_DEFAULT_MESSAGES } from "../masked-text-box/i18n/masked-text-box.default-messages";
 import { MULTI_SELECT_DEFAULT_MESSAGES } from "../multi-select/i18n/multi-select.default-messages";
+import { MULTI_SELECT_TREE_DEFAULT_MESSAGES } from "../multi-select-tree/i18n/multi-select-tree.default-messages";
 import { NOTIFICATION_DEFAULT_MESSAGES } from "../notification/i18n/notification.default-messages";
 import { NUMERIC_TEXT_BOX_DEFAULT_MESSAGES } from "../numeric-text-box/i18n/numeric-text-box.default-messages";
 import { OTP_INPUT_DEFAULT_MESSAGES } from "../otp-input/i18n/otp-input.default-messages";
@@ -122,6 +124,7 @@ const ENGLISH_DEFAULTS = {
     dateTimePicker: DATETIME_PICKER_DEFAULT_MESSAGES,
     dialog: DIALOG_DEFAULT_MESSAGES,
     dropdownList: DROPDOWN_LIST_DEFAULT_MESSAGES,
+    dropdownTree: DROPDOWN_TREE_DEFAULT_MESSAGES,
     dropdowns: DROPDOWNS_DEFAULT_MESSAGES,
     editor: EDITOR_DEFAULT_MESSAGES,
     fileUpload: FILE_UPLOAD_DEFAULT_MESSAGES,
@@ -133,6 +136,7 @@ const ENGLISH_DEFAULTS = {
     list: LIST_DEFAULT_MESSAGES,
     maskedTextBox: MASKED_TEXT_BOX_DEFAULT_MESSAGES,
     multiSelect: MULTI_SELECT_DEFAULT_MESSAGES,
+    multiSelectTree: MULTI_SELECT_TREE_DEFAULT_MESSAGES,
     notification: NOTIFICATION_DEFAULT_MESSAGES,
     numericTextBox: NUMERIC_TEXT_BOX_DEFAULT_MESSAGES,
     otpInput: OTP_INPUT_DEFAULT_MESSAGES,

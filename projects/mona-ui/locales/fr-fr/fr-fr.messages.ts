@@ -259,7 +259,11 @@ export const FR_FR_MESSAGES = {
     dropdownList: {
         clear: "Effacer"
     },
+    dropdownTree: {
+        clear: "Effacer"
+    },
     dropdowns: {
+        close: "Fermer",
         itemPosition: (text: string, position: number, total: number) =>
             `${text}, ${localizeNumber(position)} sur ${localizeNumber(total)}`,
         noResultsFound: "Aucun résultat trouvé",
@@ -573,6 +577,15 @@ export const FR_FR_MESSAGES = {
                 ? `Retirer ${localizeNumber(count)} autre élément`
                 : `Retirer ${localizeNumber(count)} autres éléments`,
         selectAll: "Tout sélectionner"
+    },
+    multiSelectTree: {
+        clear: "Effacer",
+        itemsCount: (count: number) =>
+            count === 1 ? `+ ${localizeNumber(count)} élément` : `+ ${localizeNumber(count)} éléments`,
+        removeMoreItems: (count: number) =>
+            count === 1
+                ? `Retirer ${localizeNumber(count)} autre élément`
+                : `Retirer ${localizeNumber(count)} autres éléments`
     },
     notification: {
         close: "Fermer",

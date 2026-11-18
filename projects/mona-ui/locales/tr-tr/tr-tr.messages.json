@@ -210,7 +210,11 @@
     "dropdownList": {
         "clear": "Temizle"
     },
+    "dropdownTree": {
+        "clear": "Temizle"
+    },
     "dropdowns": {
+        "close": "Kapat",
         "itemPosition": "{text}, {total} öğeden {position}.",
         "noResultsFound": "Sonuç bulunamadı",
         "resultsAvailable": "{count} sonuç bulundu"
@@ -474,6 +478,11 @@
         "itemsCount": "+ {count} öğe",
         "removeMoreItems": "Diğer {count} öğeyi kaldır",
         "selectAll": "Tümünü seç"
+    },
+    "multiSelectTree": {
+        "clear": "Temizle",
+        "itemsCount": "+ {count} öğe",
+        "removeMoreItems": "Diğer {count} öğeyi kaldır"
     },
     "notification": {
         "close": "Kapat",

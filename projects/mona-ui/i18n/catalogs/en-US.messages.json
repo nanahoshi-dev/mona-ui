@@ -210,7 +210,11 @@
     "dropdownList": {
         "clear": "Clear"
     },
+    "dropdownTree": {
+        "clear": "Clear"
+    },
     "dropdowns": {
+        "close": "Close",
         "itemPosition": "{text}, {position} of {total}",
         "noResultsFound": "No results found",
         "resultsAvailable": "{count, plural, =1 {# result available} other {# results available}}"
@@ -474,6 +478,11 @@
         "itemsCount": "{count, plural, =1 {+ # item} other {+ # items}}",
         "removeMoreItems": "{count, plural, =1 {Remove # more item} other {Remove # more items}}",
         "selectAll": "Select all"
+    },
+    "multiSelectTree": {
+        "clear": "Clear",
+        "itemsCount": "{count, plural, =1 {+ # item} other {+ # items}}",
+        "removeMoreItems": "{count, plural, =1 {Remove # more item} other {Remove # more items}}"
     },
     "notification": {
         "close": "Close",

@@ -256,7 +256,11 @@ export const TR_TR_MESSAGES = {
     dropdownList: {
         clear: "Temizle"
     },
+    dropdownTree: {
+        clear: "Temizle"
+    },
     dropdowns: {
+        close: "Kapat",
         itemPosition: (text: string, position: number, total: number) =>
             `${text}, ${localizeNumber(total)} öğeden ${localizeNumber(position)}.`,
         noResultsFound: "Sonuç bulunamadı",
@@ -526,6 +530,11 @@ export const TR_TR_MESSAGES = {
         itemsCount: (count: number) => `+ ${localizeNumber(count)} öğe`,
         removeMoreItems: (count: number) => `Diğer ${localizeNumber(count)} öğeyi kaldır`,
         selectAll: "Tümünü seç"
+    },
+    multiSelectTree: {
+        clear: "Temizle",
+        itemsCount: (count: number) => `+ ${localizeNumber(count)} öğe`,
+        removeMoreItems: (count: number) => `Diğer ${localizeNumber(count)} öğeyi kaldır`
     },
     notification: {
         close: "Kapat",

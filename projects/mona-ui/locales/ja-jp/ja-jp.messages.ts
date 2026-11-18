@@ -228,7 +228,11 @@ export const JA_JP_MESSAGES = {
     dropdownList: {
         clear: "クリア"
     },
+    dropdownTree: {
+        clear: "クリア"
+    },
     dropdowns: {
+        close: "閉じる",
         itemPosition: (text: string, position: number, total: number) =>
             `${text}、${localizeNumber(total)}件中${localizeNumber(position)}件目`,
         noResultsFound: "結果が見つかりません",
@@ -498,6 +502,11 @@ export const JA_JP_MESSAGES = {
         itemsCount: (count: number) => `+ ${localizeNumber(count)}件`,
         removeMoreItems: (count: number) => `他の${localizeNumber(count)}件を削除`,
         selectAll: "すべて選択"
+    },
+    multiSelectTree: {
+        clear: "クリア",
+        itemsCount: (count: number) => `+ ${localizeNumber(count)}件`,
+        removeMoreItems: (count: number) => `他の${localizeNumber(count)}件を削除`
     },
     notification: {
         close: "閉じる",

@@ -210,7 +210,11 @@
     "dropdownList": {
         "clear": "지우기"
     },
+    "dropdownTree": {
+        "clear": "지우기"
+    },
     "dropdowns": {
+        "close": "닫기",
         "itemPosition": "{text}, {total}개 중 {position}번째",
         "noResultsFound": "결과를 찾을 수 없습니다",
         "resultsAvailable": "사용 가능한 결과 {count}개"
@@ -474,6 +478,11 @@
         "itemsCount": "+ {count}개",
         "removeMoreItems": "나머지 {count}개 삭제",
         "selectAll": "모두 선택"
+    },
+    "multiSelectTree": {
+        "clear": "지우기",
+        "itemsCount": "+ {count}개",
+        "removeMoreItems": "나머지 {count}개 삭제"
     },
     "notification": {
         "close": "닫기",

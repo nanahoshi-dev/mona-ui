@@ -292,7 +292,11 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
     dropdownList: {
         clear: null
     },
+    dropdownTree: {
+        clear: null
+    },
     dropdowns: {
+        close: null,
         itemPosition: [
             { name: "text", type: "string" },
             { name: "position", type: "number" },
@@ -588,6 +592,11 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         itemsCount: [{ name: "count", type: "number" }],
         removeMoreItems: [{ name: "count", type: "number" }],
         selectAll: null
+    },
+    multiSelectTree: {
+        clear: null,
+        itemsCount: [{ name: "count", type: "number" }],
+        removeMoreItems: [{ name: "count", type: "number" }]
     },
     notification: {
         close: null,
