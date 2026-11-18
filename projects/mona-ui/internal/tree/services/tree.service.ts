@@ -94,6 +94,8 @@ export class TreeService<T> {
         enabled: false,
         mode: "multiple"
     });
+    /** The keys of the checked nodes, whether the user checked them or they were set from code. */
+    public readonly checkedKeys = this.#checkedKeys.asReadonly();
     /**
      * The checked keys after the user checks or unchecks a node. Keys set from code, and keys the tree derives on its
      * own (parents with `checkParents`, lazily loaded children of a checked node, ancestors after a move), aren't
@@ -300,6 +302,19 @@ export class TreeService<T> {
         return (
             TreeService.flatten(this.nodeSet()).firstOrDefault(
                 candidate => candidate.data === node.data || this.getNodeIdentity(candidate) === identity
+            ) ?? null
+        );
+    }
+
+    /** The first node, in the tree's order, whose text matches the filter. `null` without a filter or a match. */
+    public findFirstMatch(): TreeNode<T> | null {
+        const filterText = this.filterText();
+        if (!filterText) {
+            return null;
+        }
+        return (
+            TreeService.flatten(this.nodeSet()).firstOrDefault(node =>
+                this.isFiltered(this.getNodeText(node), filterText)
             ) ?? null
         );
     }

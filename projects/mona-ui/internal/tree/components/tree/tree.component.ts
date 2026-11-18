@@ -17,7 +17,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
+import { setupTypeahead } from "@nanahoshi/mona-ui/internal";
 import { injectLiveAnnouncer } from "@nanahoshi/mona-ui/internal/live-announcer";
 import { asapScheduler, filter, fromEvent, merge, Subject, switchMap, takeWhile } from "rxjs";
 import { TreeNodeTemplateDirective } from "../../directives/tree-node-template.directive";
@@ -29,6 +29,7 @@ import type { TreeKeyboardMove, TreeKeyboardMoveDirection } from "../../models/T
 import { TreeNode } from "../../models/TreeNode";
 import { TreeService } from "../../services/tree.service";
 import { treeBaseThemeVariants } from "../../styles/tree.styles";
+import { handleTreeNavigationKey } from "../../utils/handleTreeNavigationKey";
 import { SubTreeComponent } from "../sub-tree/sub-tree.component";
 import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.component";
 
@@ -49,12 +50,12 @@ const MOVE_KEY_SHORTCUTS =
     host: {
         "[class]": "baseClass()",
         "[attr.role]": "'tree'",
-        "[attr.tabindex]": "0",
+        "[attr.tabindex]": "focusable() ? 0 : null",
         "[attr.aria-label]": "ariaLabel() || null",
         "[attr.aria-labelledby]": "ariaLabelledBy() || null",
         "[attr.aria-describedby]": "ariaDescribedBy() || null",
         "[attr.aria-multiselectable]": "multiselectable()",
-        "[attr.aria-activedescendant]": "activeDescendantId()",
+        "[attr.aria-activedescendant]": "focusable() ? activeDescendantId() : null",
         "[attr.aria-keyshortcuts]": "keyShortcuts()"
     }
 })
@@ -95,6 +96,11 @@ export class TreeComponent<T> {
     public readonly ariaLabel = input<string>("");
     public readonly ariaLabelledBy = input<string>("");
     public readonly data = input<Iterable<T>>();
+    /**
+     * Whether the tree takes focus itself. A dropdown's popup tree doesn't: its field keeps focus, drives the tree
+     * through the `TreeService`, and points `aria-activedescendant` at the active node.
+     */
+    public readonly focusable = input(true);
     public readonly nodeTemplate = contentChild(TreeNodeTemplateDirective, { read: TemplateRef });
     public readonly treeService: TreeService<T> = inject(TreeService);
 
@@ -106,6 +112,16 @@ export class TreeComponent<T> {
                     this.#lastNavigatedNode = node;
                 }
             });
+        });
+        // With aria-activedescendant, focus stays on the tree, so the browser doesn't scroll the active node into view.
+        effect(() => {
+            const node = this.treeService.navigatedNode();
+            if (node === null) {
+                return;
+            }
+            untracked(() =>
+                afterNextRender({ read: () => this.scrollNodeIntoView(node) }, { injector: this.#injector })
+            );
         });
         effect(() => {
             const nodeTemplate = this.nodeTemplate() ?? null;
@@ -299,6 +315,16 @@ export class TreeComponent<T> {
         }
     }
 
+    /** Scrolls the node's row, not its open subtree, into view. "nearest" leaves a row that is already visible alone. */
+    private scrollNodeIntoView(node: TreeNode<T>): void {
+        if (this.#destroyRef.destroyed) {
+            return;
+        }
+        const id = this.treeService.getNodeElementId(node.uid);
+        const row = this.#document.getElementById(id)?.firstElementChild;
+        row?.scrollIntoView({ block: "nearest" });
+    }
+
     private setFocusSubscription(): void {
         this.#focusMonitor
             .monitor(this.#hostElementRef.nativeElement, true)
@@ -351,49 +377,17 @@ export class TreeComponent<T> {
                 if (event.ctrlKey || event.metaKey || event.altKey) {
                     return;
                 }
+                if (
+                    handleTreeNavigationKey(event, {
+                        rtl: this.isRtl(),
+                        treeService: this.treeService,
+                        typeahead: key => this.#typeaheadKey$.next(key)
+                    })
+                ) {
+                    return;
+                }
                 const navigatedNode = this.treeService.navigatedNode();
-                const isRtl = this.isRtl();
-                const collapseKey = isRtl ? "ArrowRight" : "ArrowLeft";
-                const expandKey = isRtl ? "ArrowLeft" : "ArrowRight";
-                if (event.key === "ArrowUp") {
-                    event.preventDefault();
-                    this.treeService.navigate("previous");
-                } else if (event.key === "ArrowDown") {
-                    event.preventDefault();
-                    this.treeService.navigate("next");
-                } else if (event.key === collapseKey) {
-                    // WAI-ARIA tree: collapse an open node, otherwise (closed, an end node, a node that can't be
-                    // collapsed) move to the parent.
-                    event.preventDefault();
-                    if (!navigatedNode) {
-                        return;
-                    }
-                    if (this.treeService.toggleNodeExpand(navigatedNode, false)) {
-                        return;
-                    }
-                    if (navigatedNode.parent) {
-                        this.treeService.navigatedNode.set(navigatedNode.parent);
-                    }
-                } else if (event.key === expandKey) {
-                    // WAI-ARIA tree: open a closed node, otherwise move to its first child.
-                    event.preventDefault();
-                    if (!navigatedNode || !this.treeService.hasChildren(navigatedNode)) {
-                        return;
-                    }
-                    if (!this.treeService.isExpanded(navigatedNode)) {
-                        this.treeService.toggleNodeExpand(navigatedNode, true);
-                    } else if (!navigatedNode.children().isEmpty()) {
-                        this.treeService.navigate("next");
-                    }
-                } else if (event.key === "*") {
-                    event.preventDefault();
-                    if (navigatedNode) {
-                        this.treeService.expandSiblings(navigatedNode);
-                    }
-                } else if (event.key !== " " && isTypeaheadKey(event.key, event)) {
-                    event.preventDefault();
-                    this.#typeaheadKey$.next(event.key);
-                } else if (event.key === " ") {
+                if (event.key === " ") {
                     event.preventDefault();
                     if (!navigatedNode || this.treeService.isDisabled(navigatedNode)) {
                         return;
@@ -411,12 +405,6 @@ export class TreeComponent<T> {
                             checked: newCheckState
                         });
                     }
-                } else if (event.key === "Home") {
-                    event.preventDefault();
-                    this.treeService.navigate("first");
-                } else if (event.key === "End") {
-                    event.preventDefault();
-                    this.treeService.navigate("last");
                 } else if (event.key === "Enter") {
                     event.preventDefault();
                     if (!navigatedNode || this.treeService.isDisabled(navigatedNode)) {
