@@ -834,6 +834,67 @@ describe("PopupService", () => {
         expect(withPositionsSpy).toHaveBeenCalledWith(customPositions);
     });
 
+    describe("offset", () => {
+        function spyOnPositionStrategy(anchor: HTMLElement) {
+            const overlay = TestBed.inject(Overlay);
+            const builder = overlay.position().flexibleConnectedTo(anchor);
+            vi.spyOn(overlay.position(), "flexibleConnectedTo").mockReturnValue(builder);
+            return {
+                withDefaultOffsetY: vi.spyOn(builder, "withDefaultOffsetY"),
+                withPositions: vi.spyOn(builder, "withPositions")
+            };
+        }
+
+        it("negates the vertical offset on the fallback that flips the popup above the anchor", () => {
+            const anchor = createAnchor();
+            const strategy = spyOnPositionStrategy(anchor);
+
+            popupRef = service.create({
+                anchor,
+                animation: false,
+                content: PopupTestContentComponent,
+                offset: { horizontal: 0, vertical: 4 }
+            });
+
+            const positions = strategy.withPositions.mock.calls[0][0];
+            expect(positions[0]).toMatchObject({ originY: "bottom", overlayY: "top", offsetY: 4 });
+            expect(positions).toContainEqual(
+                expect.objectContaining({ originX: "start", originY: "top", overlayY: "bottom", offsetY: -4 })
+            );
+        });
+
+        it("leaves the positions the caller passes as they are, with the offset as their default", () => {
+            const anchor = createAnchor();
+            const strategy = spyOnPositionStrategy(anchor);
+            const positions = [
+                {
+                    originX: "start" as const,
+                    originY: "bottom" as const,
+                    overlayX: "start" as const,
+                    overlayY: "top" as const
+                },
+                {
+                    originX: "start" as const,
+                    originY: "top" as const,
+                    overlayX: "start" as const,
+                    overlayY: "bottom" as const
+                }
+            ];
+
+            popupRef = service.create({
+                anchor,
+                animation: false,
+                content: PopupTestContentComponent,
+                offset: { horizontal: 0, vertical: 4 },
+                positions
+            });
+
+            expect(strategy.withPositions).toHaveBeenCalledWith(positions);
+            expect(positions.every(position => !("offsetY" in position))).toBe(true);
+            expect(strategy.withDefaultOffsetY).toHaveBeenCalledWith(4);
+        });
+    });
+
     it("updates overlay direction and position when anchor direction changes dynamically while open", async () => {
         const anchor = createAnchor();
         anchor.setAttribute("dir", "ltr");

@@ -2670,6 +2670,64 @@ async function runTests(): Promise<void> {
         await popupPage.close();
         console.log("    [PASS] Dropdown popups opened as focus scrolls their field in stay open\n");
 
+        // 15. A dropdown popup with no room below its field flips above it and keeps its 4px gap there. The offset
+        // moves the popup down, away from the field below it; the flipped position needs it negated, or the popup
+        // overlaps the field by those 4px.
+        console.log("--> Testing the gap above a dropdown field when its popup flips above it");
+        const flipPage = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+        await flipPage.goto(`http://127.0.0.1:${port}/browser-test/popup-scroll`, { waitUntil: "networkidle" });
+        await flipPage.waitForSelector('[data-testid="popup-scroll-box"]');
+
+        for (const { testId, key } of [
+            { testId: "popup-scroll-multi-select", key: "Enter" },
+            { testId: "popup-scroll-dropdown-list", key: "Enter" },
+            { testId: "popup-scroll-combo-box", key: "Alt+ArrowDown" },
+            { testId: "popup-scroll-auto-complete", key: "Alt+ArrowDown" }
+        ]) {
+            const field = flipPage.locator(`[data-testid="${testId}"]`);
+            const combobox =
+                (await field.getAttribute("role")) === "combobox" ? field : field.locator('[role="combobox"]');
+            // Show the whole field near the bottom of the box, so focusing it doesn't scroll, then end the viewport
+            // 16px below it, so the popup has no room below the field and plenty above it.
+            await flipPage.setViewportSize({ width: 1280, height: 900 });
+            await field.evaluate(element => {
+                const box = document.querySelector('[data-testid="popup-scroll-box"]') as HTMLElement;
+                box.scrollTop += element.getBoundingClientRect().bottom - (box.getBoundingClientRect().bottom - 24);
+            });
+            const fieldBottom = await field.evaluate(element => element.getBoundingClientRect().bottom);
+            await flipPage.setViewportSize({ width: 1280, height: Math.ceil(fieldBottom) + 16 });
+            await flipPage.waitForTimeout(150);
+
+            await combobox.focus();
+            await flipPage.keyboard.press(key);
+            await flipPage.waitForTimeout(300);
+            const expanded = await combobox.getAttribute("aria-expanded");
+            const geometry = await field.evaluate(element => {
+                const pane = document.querySelector(".cdk-overlay-pane.mona-popup-content");
+                return {
+                    fieldTop: element.getBoundingClientRect().top,
+                    popupBottom: pane ? pane.getBoundingClientRect().bottom : null
+                };
+            });
+
+            assert(expanded === "true", `[${testId}] Popup opens (aria-expanded: ${expanded})`);
+            assert(geometry.popupBottom !== null, `[${testId}] Popup pane is in the overlay container`);
+            const gap = geometry.fieldTop - (geometry.popupBottom ?? 0);
+            assert(
+                Math.abs(gap - 4) <= 0.5,
+                `[${testId}] Popup flipped above the field ends 4px above the field's top (field top: ${geometry.fieldTop}, popup bottom: ${geometry.popupBottom}, gap: ${gap}px)`
+            );
+
+            await flipPage.keyboard.press("Escape");
+            await flipPage.waitForFunction(
+                () => document.querySelector(".cdk-overlay-pane.mona-popup-content") === null,
+                undefined,
+                { timeout: 2000 }
+            );
+        }
+        await flipPage.close();
+        console.log("    [PASS] Dropdown popups flipped above their field keep a 4px gap\n");
+
         console.log("==================================================");
         console.log("  ALL BROWSER DIRECTION GEOMETRY TESTS PASSED!");
         console.log("==================================================\n");

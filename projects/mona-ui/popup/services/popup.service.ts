@@ -19,6 +19,7 @@ import { filter, fromEvent, merge, Subject, Subscription, take, takeUntil } from
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
 import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
 import { PopupDataInjectionToken, POPUP_SETTINGS } from "../models/PopupInjectionToken";
+import type { PopupOffset } from "../models/PopupOffset";
 import { PopupRef } from "../models/PopupRef";
 import { PopupReference } from "../models/PopupReference";
 import { POPUP_REFERENCE } from "../models/PopupReferenceInjectionToken";
@@ -171,9 +172,11 @@ export class PopupService {
         }
 
         const resolvedAnchor = this.resolveAnchor(settings.anchor);
+        // The positions made from the connection points carry their own offsets, mirrored for the fallbacks on the
+        // anchor's other side. Positions the caller passes keep the default offset unless they set their own.
         const position = settings.positions?.length
             ? settings.positions
-            : this.getPosition(settings.anchorConnectionPoint, settings.popupConnectionPoint);
+            : this.getPosition(settings.anchorConnectionPoint, settings.popupConnectionPoint, settings.offset);
         const strategy = this.#overlay
             .position()
             .flexibleConnectedTo(resolvedAnchor)
@@ -235,11 +238,12 @@ export class PopupService {
 
     private getPosition(
         anchorConnectionPoint?: ConnectionPoint | null,
-        popupConnectionPoint?: ConnectionPoint | null
+        popupConnectionPoint?: ConnectionPoint | null,
+        offset?: PopupOffset
     ): ConnectionPositionPair[] {
         const anchorPoint = anchorConnectionPoint ?? "bottomleft";
         const popupPoint = popupConnectionPoint ?? "topleft";
-        return connectionPosition(anchorPoint, popupPoint);
+        return connectionPosition(anchorPoint, popupPoint, offset);
     }
 
     private getScrollableAncestorElements(anchorElement: HTMLElement): HTMLElement[] {

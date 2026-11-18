@@ -141,7 +141,9 @@ export interface PopupSettings<T = unknown, C = void> {
     minWidth?: number | string;
 
     /**
-     * Offset of the popup.
+     * Offset of the popup, in pixels, for the position the connection points give. A fallback that flips the popup
+     * to the anchor's other side, such as above it when there is no room below, gets the offset negated on that
+     * axis, so the gap stays between the popup and the anchor. Positions passed in `positions` take it as given.
      * @type {PopupOffset}
      */
     offset?: PopupOffset;
