@@ -1,4 +1,6 @@
+import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { EditorImageUploadService } from "../../services/editor-image-upload.service";
 import { EditorService } from "../../services/editor.service";
 
 import { EditorImageComponent } from "./editor-image.component";
@@ -11,6 +13,10 @@ describe("EditorImageComponent", () => {
         await TestBed.configureTestingModule({
             imports: [EditorImageComponent],
             providers: [
+                {
+                    provide: EditorImageUploadService,
+                    useValue: { options: signal({ accept: "image/*", handler: null, maxFileSize: null }) }
+                },
                 {
                     provide: EditorService,
                     useValue: {

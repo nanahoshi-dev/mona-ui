@@ -282,6 +282,10 @@ export const DE_DE_MESSAGES = {
         backgroundColor: "Hintergrundfarbe",
         bold: "Fett",
         cancel: "Abbrechen",
+        characterCount: (count: number) => `${localizeNumber(count)} Zeichen`,
+        characterLimitHint: (limit: number) => `Sie können bis zu ${localizeNumber(limit)} Zeichen eingeben.`,
+        charactersLeft: (count: number) => `${localizeNumber(count)} Zeichen übrig`,
+        charactersOver: (count: number) => `${localizeNumber(count)} Zeichen zu viel`,
         codeBlock: "Codeblock",
         color: "Farbe",
         contentLabel: "Rich-Text-Editor",
@@ -289,6 +293,7 @@ export const DE_DE_MESSAGES = {
         deleteColumn: "Spalte löschen",
         deleteRow: "Zeile löschen",
         deleteTable: "Tabelle löschen",
+        editImage: "Bild bearbeiten",
         editLink: "Link bearbeiten",
         enterUrl: "URL eingeben",
         fontSize: "Schriftgröße",
@@ -296,6 +301,12 @@ export const DE_DE_MESSAGES = {
         heading: (level: number) => `Überschrift ${localizeNumber(level)}`,
         heightPx: "Höhe (px)",
         historyGroup: "Verlauf",
+        imageFile: "Bilddatei",
+        imageInserted: (name: string) => `${name} eingefügt.`,
+        imageTooLarge: (name: string, size: string) =>
+            `${name} wurde nicht hinzugefügt. Die Datei ist größer als ${size}.`,
+        imageUploadFailed: (name: string) => `${name} konnte nicht hochgeladen werden.`,
+        imageUploading: (name: string) => `${name} wird hochgeladen`,
         imageUrl: "Bild-URL",
         indent: "Einzug vergrößern",
         indentGroup: "Einzug",
@@ -311,12 +322,21 @@ export const DE_DE_MESSAGES = {
         justify: "Blocksatz",
         linkGroup: "Verknüpfung",
         listGroup: "Listen",
+        mentionNoResults: "Keine Treffer",
+        mentionResults: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} Vorschlag`,
+                other: () => `${localizeNumber(count)} Vorschläge`
+            }),
+        mentionSearching: "Suche läuft…",
+        mentionSuggestions: "Vorschläge",
         mergeCells: "Ausgewählte Zellen verbinden",
         outdent: "Einzug verkleinern",
         paragraph: "Absatz",
         quotation: "Zitat",
         redo: "Wiederholen",
         removeLink: "Link entfernen",
+        save: "Speichern",
         selectFontFamily: "Schriftart auswählen",
         selectFontSize: "Schriftgröße auswählen",
         splitCell: "Zelle teilen",
@@ -331,7 +351,12 @@ export const DE_DE_MESSAGES = {
         toolbar: "Formatierung",
         underline: "Unterstrichen",
         undo: "Rückgängig",
-        widthPx: "Breite (px)"
+        widthPx: "Breite (px)",
+        wordCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} Wort`,
+                other: () => `${localizeNumber(count)} Wörter`
+            })
     },
     fileUpload: {
         browse: "Dateien durchsuchen",

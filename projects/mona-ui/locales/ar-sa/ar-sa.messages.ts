@@ -295,6 +295,35 @@ export const AR_SA_MESSAGES = {
         backgroundColor: "لون الخلفية",
         bold: "عريض",
         cancel: "إلغاء",
+        characterCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                zero: () => "لا أحرف",
+                one: () => "حرف واحد",
+                two: () => "حرفان",
+                few: () => `${localizeNumber(count)} أحرف`,
+                many: () => `${localizeNumber(count)} حرفًا`,
+                other: () => `${localizeNumber(count)} حرف`
+            }),
+        characterLimitHint: (limit: number) =>
+            `يمكنك إدخال ${plural(PLURAL_RULES.select(limit), { zero: () => `${localizeNumber(limit)} حرف`, one: () => "حرف واحد", two: () => "حرفين", few: () => `${localizeNumber(limit)} أحرف`, many: () => `${localizeNumber(limit)} حرفًا`, other: () => `${localizeNumber(limit)} حرف` })} كحد أقصى.`,
+        charactersLeft: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                zero: () => "لم يتبقَّ أي حرف",
+                one: () => "تبقّى حرف واحد",
+                two: () => "تبقّى حرفان",
+                few: () => `تبقّت ${localizeNumber(count)} أحرف`,
+                many: () => `تبقّى ${localizeNumber(count)} حرفًا`,
+                other: () => `تبقّى ${localizeNumber(count)} حرف`
+            }),
+        charactersOver: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                zero: () => "لا أحرف زائدة",
+                one: () => "حرف واحد زائد",
+                two: () => "حرفان زائدان",
+                few: () => `${localizeNumber(count)} أحرف زائدة`,
+                many: () => `${localizeNumber(count)} حرفًا زائدًا`,
+                other: () => `${localizeNumber(count)} حرف زائد`
+            }),
         codeBlock: "كتلة تعليمات برمجية",
         color: "لون",
         contentLabel: "محرر النص المنسق",
@@ -302,6 +331,7 @@ export const AR_SA_MESSAGES = {
         deleteColumn: "حذف العمود",
         deleteRow: "حذف الصف",
         deleteTable: "حذف الجدول",
+        editImage: "تعديل الصورة",
         editLink: "تعديل الرابط",
         enterUrl: "إدخال عنوان URL",
         fontSize: "حجم الخط",
@@ -309,6 +339,11 @@ export const AR_SA_MESSAGES = {
         heading: (level: number) => `العنوان ${localizeNumber(level)}`,
         heightPx: "الارتفاع (px)",
         historyGroup: "السجل",
+        imageFile: "ملف الصورة",
+        imageInserted: (name: string) => `تم إدراج ${name}.`,
+        imageTooLarge: (name: string, size: string) => `لم تتم إضافة ${name}. حجم الملف أكبر من ${size}.`,
+        imageUploadFailed: (name: string) => `تعذّر رفع ${name}.`,
+        imageUploading: (name: string) => `جارٍ رفع ${name}`,
         imageUrl: "عنوان URL للصورة",
         indent: "زيادة المسافة البادئة",
         indentGroup: "المسافة البادئة",
@@ -324,12 +359,25 @@ export const AR_SA_MESSAGES = {
         justify: "ضبط",
         linkGroup: "الرابط",
         listGroup: "القوائم",
+        mentionNoResults: "لا توجد نتائج مطابقة",
+        mentionResults: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                zero: () => "لا توجد اقتراحات",
+                one: () => "اقتراح واحد",
+                two: () => "اقتراحان",
+                few: () => `${localizeNumber(count)} اقتراحات`,
+                many: () => `${localizeNumber(count)} اقتراحًا`,
+                other: () => `${localizeNumber(count)} اقتراح`
+            }),
+        mentionSearching: "جارٍ البحث…",
+        mentionSuggestions: "اقتراحات",
         mergeCells: "دمج الخلايا المحددة",
         outdent: "تقليل المسافة البادئة",
         paragraph: "فقرة",
         quotation: "اقتباس",
         redo: "إعادة",
         removeLink: "إزالة الرابط",
+        save: "حفظ",
         selectFontFamily: "اختيار الخط",
         selectFontSize: "اختيار حجم الخط",
         splitCell: "تقسيم الخلية",
@@ -344,7 +392,16 @@ export const AR_SA_MESSAGES = {
         toolbar: "التنسيق",
         underline: "تسطير",
         undo: "تراجع",
-        widthPx: "العرض (px)"
+        widthPx: "العرض (px)",
+        wordCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                zero: () => "لا كلمات",
+                one: () => "كلمة واحدة",
+                two: () => "كلمتان",
+                few: () => `${localizeNumber(count)} كلمات`,
+                many: () => `${localizeNumber(count)} كلمةً`,
+                other: () => `${localizeNumber(count)} كلمة`
+            })
     },
     fileUpload: {
         browse: "استعراض الملفات",

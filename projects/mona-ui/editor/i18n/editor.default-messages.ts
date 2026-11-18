@@ -7,6 +7,15 @@ function localizeNumber(value: number, options?: Intl.NumberFormatOptions): stri
     return formatNumber(value, "en-US", options);
 }
 
+const PLURAL_RULES = new Intl.PluralRules("en-US");
+
+function plural(
+    category: Intl.LDMLPluralRule,
+    forms: Partial<Record<Intl.LDMLPluralRule, () => string>> & { readonly other: () => string }
+): string {
+    return (forms[category] ?? forms.other)();
+}
+
 export const EDITOR_DEFAULT_MESSAGES: MonaEditorMessages = {
     addColumnAfter: "Add column after",
     addColumnBefore: "Add column before",
@@ -24,6 +33,23 @@ export const EDITOR_DEFAULT_MESSAGES: MonaEditorMessages = {
     backgroundColor: "Background color",
     bold: "Bold",
     cancel: "Cancel",
+    characterCount: (count: number) =>
+        plural(PLURAL_RULES.select(count), {
+            one: () => `${localizeNumber(count)} character`,
+            other: () => `${localizeNumber(count)} characters`
+        }),
+    characterLimitHint: (limit: number) =>
+        `You can enter up to ${plural(PLURAL_RULES.select(limit), { one: () => `${localizeNumber(limit)} character`, other: () => `${localizeNumber(limit)} characters` })}.`,
+    charactersLeft: (count: number) =>
+        plural(PLURAL_RULES.select(count), {
+            one: () => `${localizeNumber(count)} character left`,
+            other: () => `${localizeNumber(count)} characters left`
+        }),
+    charactersOver: (count: number) =>
+        plural(PLURAL_RULES.select(count), {
+            one: () => `${localizeNumber(count)} character too many`,
+            other: () => `${localizeNumber(count)} characters too many`
+        }),
     codeBlock: "Code block",
     color: "Color",
     contentLabel: "Rich text editor",
@@ -31,6 +57,7 @@ export const EDITOR_DEFAULT_MESSAGES: MonaEditorMessages = {
     deleteColumn: "Delete column",
     deleteRow: "Delete row",
     deleteTable: "Delete table",
+    editImage: "Edit image",
     editLink: "Edit link",
     enterUrl: "Enter the URL",
     fontSize: "Font size",
@@ -38,6 +65,11 @@ export const EDITOR_DEFAULT_MESSAGES: MonaEditorMessages = {
     heading: (level: number) => `Heading ${localizeNumber(level)}`,
     heightPx: "Height (px)",
     historyGroup: "History",
+    imageFile: "Image file",
+    imageInserted: (name: string) => `${name} inserted.`,
+    imageTooLarge: (name: string, size: string) => `${name} wasn't added. The file is larger than ${size}.`,
+    imageUploadFailed: (name: string) => `${name} couldn't be uploaded.`,
+    imageUploading: (name: string) => `Uploading ${name}`,
     imageUrl: "Image URL",
     indent: "Indent",
     indentGroup: "Indentation",
@@ -53,12 +85,21 @@ export const EDITOR_DEFAULT_MESSAGES: MonaEditorMessages = {
     justify: "Justify",
     linkGroup: "Link",
     listGroup: "Lists",
+    mentionNoResults: "No matches",
+    mentionResults: (count: number) =>
+        plural(PLURAL_RULES.select(count), {
+            one: () => `${localizeNumber(count)} suggestion`,
+            other: () => `${localizeNumber(count)} suggestions`
+        }),
+    mentionSearching: "Searching…",
+    mentionSuggestions: "Suggestions",
     mergeCells: "Merge selected cells",
     outdent: "Outdent",
     paragraph: "Paragraph",
     quotation: "Quotation",
     redo: "Redo",
     removeLink: "Remove link",
+    save: "Save",
     selectFontFamily: "Select font family",
     selectFontSize: "Select font size",
     splitCell: "Split cell",
@@ -72,5 +113,10 @@ export const EDITOR_DEFAULT_MESSAGES: MonaEditorMessages = {
     toolbar: "Formatting",
     underline: "Underline",
     undo: "Undo",
-    widthPx: "Width (px)"
+    widthPx: "Width (px)",
+    wordCount: (count: number) =>
+        plural(PLURAL_RULES.select(count), {
+            one: () => `${localizeNumber(count)} word`,
+            other: () => `${localizeNumber(count)} words`
+        })
 };

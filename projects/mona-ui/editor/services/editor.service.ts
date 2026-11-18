@@ -9,14 +9,36 @@ import { Table, TableCell, TableHeader, TableRow } from "@tiptap/extension-table
 import { TextAlign } from "@tiptap/extension-text-align";
 import { Color, FontFamily, TextStyle } from "@tiptap/extension-text-style";
 import type { EditorState } from "@tiptap/pm/state";
+import type { EditorView } from "@tiptap/pm/view";
 import { StarterKit, type StarterKitOptions } from "@tiptap/starter-kit";
 import { Subject } from "rxjs";
 import { ExtendedImage } from "../extensions/ExtendedImage";
 import { FontSize } from "../extensions/FontSize";
+import { ImageUpload } from "../extensions/ImageUpload";
 import { Indent } from "../extensions/Indent";
+import { Mention, type MentionQuery } from "../extensions/Mention";
 import type { EditorSettings } from "../models/EditorSettings";
 
 type ExtensionTypes = Extension | Mark | Node;
+
+/**
+ * Uploads the image files pasted or dropped into the content.
+ * @internal
+ */
+export interface EditorImageUploader {
+    accepted(files: readonly File[]): File[];
+    upload(view: EditorView, files: readonly File[], position: number): void;
+}
+
+/**
+ * Offers mentions as `@` and a query are typed.
+ * @internal
+ */
+export interface EditorMentionController {
+    enabled(): boolean;
+    onKeyDown(event: KeyboardEvent): boolean;
+    onQuery(view: EditorView, query: MentionQuery | null): void;
+}
 
 /**
  * Options for creating the Tiptap editor.
@@ -80,6 +102,7 @@ const DEFAULT_SETTINGS: EditorSettings = {
     italic: true,
     link: true,
     list: true,
+    mention: true,
     strikethrough: true,
     subscript: true,
     superscript: true,
@@ -121,6 +144,7 @@ export class EditorService {
      * True while an editor exists. The toolbar renders only then, so its components can use {@link editor}.
      */
     public readonly ready = this.#ready.asReadonly();
+
     public readonly selectionUpdate$ = new Subject<void>();
 
     /**
@@ -130,6 +154,12 @@ export class EditorService {
     public readonly settings = signal<Partial<EditorSettings>>({});
     public readonly state = this.#state.asReadonly();
     public readonly update$ = new Subject<void>();
+
+    /** Set by the image upload service, which uploads pasted and dropped images. */
+    public imageUploader: EditorImageUploader | null = null;
+
+    /** Set by the mention service, which offers mentions as `@` is typed. */
+    public mentionController: EditorMentionController | null = null;
 
     public destroy(): void {
         this.#editor?.destroy();
@@ -232,6 +262,21 @@ export class EditorService {
         }
         if (settings.image) {
             extensions.add(ExtendedImage);
+            extensions.add(
+                ImageUpload.configure({
+                    accepted: files => this.imageUploader?.accepted(files) ?? [],
+                    upload: (view, files, position) => this.imageUploader?.upload(view, files, position)
+                })
+            );
+        }
+        if (settings.mention) {
+            extensions.add(
+                Mention.configure({
+                    enabled: () => this.mentionController?.enabled() ?? false,
+                    onKeyDown: event => this.mentionController?.onKeyDown(event) ?? false,
+                    onQuery: (view, query) => this.mentionController?.onQuery(view, query)
+                })
+            );
         }
         if (settings.indent) {
             extensions.add(Indent);

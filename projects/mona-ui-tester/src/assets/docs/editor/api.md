@@ -4,9 +4,10 @@
 
 Everything below is imported from `@nanahoshi/mona-ui/editor`. Each name links to its reference page, with every input, output, property and method.
 
-| Name | Kind |
-| --- | --- |
-| [`EditorComponent`](/api/editor/EditorComponent) | Component |
+| Name | Kind | Description |
+| --- | --- | --- |
+| [`EditorComponent`](/api/editor/EditorComponent) | Component |  |
+| [`countEditorText`](/api/editor/countEditorText) | Function | Counts the characters or words of the editor's HTML value, as the editor's own count does: the text people see, without the markup. |
 
 ### Types
 
@@ -14,6 +15,9 @@ Everything below is imported from `@nanahoshi/mona-ui/editor`. Each name links t
 | --- | --- | --- |
 | [`EDITOR_DEFAULT_MESSAGES`](/api/editor/EDITOR_DEFAULT_MESSAGES) | Constant |  |
 | [`ContentChangeEvent`](/api/editor/ContentChangeEvent) | Interface | The content of the editor after a user change, emitted by `EditorComponent.update`. |
+| [`EditorMention`](/api/editor/EditorMention) | Interface | Someone, or something, the content can mention. |
 | [`EditorSettings`](/api/editor/EditorSettings) | Interface | The features of an editor. |
+| [`EditorMentionSearch`](/api/editor/EditorMentionSearch) | Type alias | Finds the mentions to offer for the text typed after `@`, which is empty right after the `@`. |
+| [`EditorTextUnit`](/api/editor/EditorTextUnit) | Type alias | What `countEditorText` counts: characters as people see them, or words. |
 
-**Related types:** [`MonaEditorMessages`](/api/i18n/MonaEditorMessages)
+**Related types:** [`FileUploadHandler`](/api/file-upload/FileUploadHandler), [`MonaEditorMessages`](/api/i18n/MonaEditorMessages)

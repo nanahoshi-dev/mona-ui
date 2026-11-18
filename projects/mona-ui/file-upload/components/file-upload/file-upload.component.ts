@@ -1,5 +1,4 @@
 import { DOCUMENT } from "@angular/common";
-import { HttpEventType, HttpResponse, HttpResponseBase } from "@angular/common/http";
 import {
     afterNextRender,
     booleanAttribute,
@@ -29,12 +28,16 @@ import {
 } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { formatNumber, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { createElementControlId, injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
+import {
+    createElementControlId,
+    injectEffectiveDisabled,
+    injectLabelAssociation,
+    runUpload
+} from "@nanahoshi/mona-ui/internal";
 import { ProgressBarComponent } from "@nanahoshi/mona-ui/progress-bar";
-import { isObservable, type Subscription } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { FILE_UPLOAD_DEFAULT_MESSAGES } from "../../i18n/file-upload.default-messages";
-import type { FileUploadContext, FileUploadHandler } from "../../models/FileUploadHandler";
+import type { FileUploadHandler } from "../../models/FileUploadHandler";
 import type { FileUploadItem } from "../../models/FileUploadItem";
 import type { FileUploadRejection } from "../../models/FileUploadRejection";
 import type { FileUploadStatus } from "../../models/FileUploadStatus";
@@ -92,36 +95,6 @@ interface FileUploadRow {
     readonly status: string;
     readonly statusError: boolean;
     readonly statusId: string;
-}
-
-/** Whether a value is an HttpClient event other than the response, which carries no result of its own. */
-function isHttpEventWithoutResult(value: unknown): boolean {
-    if (value instanceof HttpResponseBase) {
-        return !(value instanceof HttpResponse);
-    }
-    if (value == null || typeof value !== "object") {
-        return false;
-    }
-    const type = (value as { readonly type?: unknown }).type;
-    if (type === HttpEventType.Sent) {
-        return Object.keys(value).length === 1;
-    }
-    return (
-        (type === HttpEventType.UploadProgress || type === HttpEventType.DownloadProgress) &&
-        typeof (value as { readonly loaded?: unknown }).loaded === "number"
-    );
-}
-
-/** The bytes sent so far and the total, when a value is HttpClient's upload progress event. */
-function httpUploadProgress(value: unknown): { readonly loaded: number; readonly total?: number } | null {
-    if (value == null || typeof value !== "object") {
-        return null;
-    }
-    const event = value as { readonly loaded?: unknown; readonly total?: unknown; readonly type?: unknown };
-    if (event.type !== HttpEventType.UploadProgress || typeof event.loaded !== "number") {
-        return null;
-    }
-    return { loaded: event.loaded, total: typeof event.total === "number" ? event.total : undefined };
 }
 
 /**
@@ -789,76 +762,27 @@ export class FileUploadComponent implements FormValueControl<File[]> {
             return;
         }
         const file = entry.item.file;
-        const controller = new AbortController();
-        let finished = false;
-        let subscription: Subscription | null = null;
-        const abort = (): void => {
-            finished = true;
-            controller.abort();
-            subscription?.unsubscribe();
-        };
-        const context: FileUploadContext = {
-            progress: (loaded: number, total: number = file.size): void => {
-                if (!finished && Number.isFinite(loaded) && total > 0) {
-                    this.#patchEntry(key, { progress: Math.min(1, Math.max(0, loaded / total)) });
+        // Marked as uploading first: an observable can complete before runUpload returns.
+        let abort: (() => void) | null = null;
+        this.#patchEntry(key, { error: null, progress: null, response: null, status: "uploading" }, () => abort?.());
+        abort = runUpload(handler, file, {
+            failure: error => {
+                const item = this.#patchEntry(key, { error, progress: null, status: "failed" }, null);
+                if (item) {
+                    this.uploadError.emit(item);
+                    this.#announce(this.messages().fileFailed(file.name));
                 }
             },
-            signal: controller.signal
-        };
-        const succeed = (response: unknown): void => {
-            if (finished) {
-                return;
-            }
-            finished = true;
-            const item = this.#patchEntry(key, { progress: 1, response, status: "uploaded" }, null);
-            this.#writeValue();
-            if (item) {
-                this.uploadSuccess.emit(item);
-                this.#announce(this.messages().fileUploaded(file.name));
-            }
-        };
-        const fail = (error: unknown): void => {
-            if (finished) {
-                return;
-            }
-            finished = true;
-            const item = this.#patchEntry(key, { error, progress: null, status: "failed" }, null);
-            if (item) {
-                this.uploadError.emit(item);
-                this.#announce(this.messages().fileFailed(file.name));
-            }
-        };
-
-        this.#patchEntry(key, { error: null, progress: null, response: null, status: "uploading" }, abort);
-        let result: ReturnType<FileUploadHandler>;
-        try {
-            result = handler(file, context);
-        } catch (error) {
-            fail(error);
-            return;
-        }
-        if (isObservable(result)) {
-            let response: unknown = undefined;
-            subscription = result.subscribe({
-                complete: () => succeed(response),
-                error: (error: unknown) => fail(error),
-                next: value => {
-                    const progress = httpUploadProgress(value);
-                    if (progress) {
-                        context.progress(progress.loaded, progress.total);
-                    } else if (value instanceof HttpResponse) {
-                        response = value.body;
-                    } else if (!isHttpEventWithoutResult(value)) {
-                        response = value;
-                    }
+            progress: fraction => this.#patchEntry(key, { progress: fraction }),
+            success: response => {
+                const item = this.#patchEntry(key, { progress: 1, response, status: "uploaded" }, null);
+                this.#writeValue();
+                if (item) {
+                    this.uploadSuccess.emit(item);
+                    this.#announce(this.messages().fileUploaded(file.name));
                 }
-            });
-            if (finished) {
-                subscription.unsubscribe();
             }
-        } else {
-            Promise.resolve(result).then(succeed, fail);
-        }
+        });
     }
 
     /** The files the value holds: the selected ones, or with an `upload` function, the uploaded ones. */

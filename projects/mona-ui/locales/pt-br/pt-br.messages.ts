@@ -283,6 +283,23 @@ export const PT_BR_MESSAGES = {
         backgroundColor: "Cor de fundo",
         bold: "Negrito",
         cancel: "Cancelar",
+        characterCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} caractere`,
+                other: () => `${localizeNumber(count)} caracteres`
+            }),
+        characterLimitHint: (limit: number) =>
+            `Você pode digitar até ${plural(PLURAL_RULES.select(limit), { one: () => `${localizeNumber(limit)} caractere`, other: () => `${localizeNumber(limit)} caracteres` })}.`,
+        charactersLeft: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Resta ${localizeNumber(count)} caractere`,
+                other: () => `Restam ${localizeNumber(count)} caracteres`
+            }),
+        charactersOver: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} caractere a mais`,
+                other: () => `${localizeNumber(count)} caracteres a mais`
+            }),
         codeBlock: "Bloco de código",
         color: "Cor",
         contentLabel: "Editor de texto formatado",
@@ -290,6 +307,7 @@ export const PT_BR_MESSAGES = {
         deleteColumn: "Excluir coluna",
         deleteRow: "Excluir linha",
         deleteTable: "Excluir tabela",
+        editImage: "Editar imagem",
         editLink: "Editar link",
         enterUrl: "Inserir a URL",
         fontSize: "Tamanho da fonte",
@@ -297,6 +315,11 @@ export const PT_BR_MESSAGES = {
         heading: (level: number) => `Título ${localizeNumber(level)}`,
         heightPx: "Altura (px)",
         historyGroup: "Histórico",
+        imageFile: "Arquivo de imagem",
+        imageInserted: (name: string) => `${name} inserido.`,
+        imageTooLarge: (name: string, size: string) => `${name} não foi adicionado. O arquivo é maior que ${size}.`,
+        imageUploadFailed: (name: string) => `Não foi possível enviar ${name}.`,
+        imageUploading: (name: string) => `Enviando ${name}`,
         imageUrl: "URL da imagem",
         indent: "Aumentar recuo",
         indentGroup: "Recuo",
@@ -312,12 +335,21 @@ export const PT_BR_MESSAGES = {
         justify: "Justificar",
         linkGroup: "Hiperlink",
         listGroup: "Listas",
+        mentionNoResults: "Nenhuma correspondência",
+        mentionResults: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} sugestão`,
+                other: () => `${localizeNumber(count)} sugestões`
+            }),
+        mentionSearching: "Pesquisando…",
+        mentionSuggestions: "Sugestões",
         mergeCells: "Mesclar células selecionadas",
         outdent: "Diminuir recuo",
         paragraph: "Parágrafo",
         quotation: "Citação",
         redo: "Refazer",
         removeLink: "Remover link",
+        save: "Salvar",
         selectFontFamily: "Selecionar família de fontes",
         selectFontSize: "Selecionar tamanho da fonte",
         splitCell: "Dividir célula",
@@ -332,7 +364,12 @@ export const PT_BR_MESSAGES = {
         toolbar: "Formatação",
         underline: "Sublinhado",
         undo: "Desfazer",
-        widthPx: "Largura (px)"
+        widthPx: "Largura (px)",
+        wordCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} palavra`,
+                other: () => `${localizeNumber(count)} palavras`
+            })
     },
     fileUpload: {
         browse: "Procurar arquivos",

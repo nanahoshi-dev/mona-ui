@@ -31,6 +31,14 @@ export interface MonaEditorMessages {
     readonly bold: string;
     /** The label of the Cancel button in the link dialog and the insert image form. */
     readonly cancel: string;
+    /** The count under the content when `showCharacterCount` is set and there's no `characterLimit`. */
+    readonly characterCount: (count: number) => string;
+    /** Describes the content when it has a `characterLimit`, given the limit. Not shown, only read with the content. */
+    readonly characterLimitHint: (limit: number) => string;
+    /** The count under the content while it is within its `characterLimit`, given the characters left. */
+    readonly charactersLeft: (count: number) => string;
+    /** The count under the content once it is over its `characterLimit`, given the characters over it. */
+    readonly charactersOver: (count: number) => string;
     /** The label of the toolbar button that toggles a code block. */
     readonly codeBlock: string;
     /** The label of the toolbar color picker that sets the text color. */
@@ -45,6 +53,8 @@ export interface MonaEditorMessages {
     readonly deleteRow: string;
     /** The label of the toolbar button that deletes the table. */
     readonly deleteTable: string;
+    /** The title of the image form's window, and the label of the image button, when an image is selected. */
+    readonly editImage: string;
     /** The title of the link dialog when the selection is already in a link. */
     readonly editLink: string;
     /** The label of the URL field in the link dialog. */
@@ -59,6 +69,16 @@ export interface MonaEditorMessages {
     readonly heightPx: string;
     /** The accessible name of the toolbar's undo and redo button group. */
     readonly historyGroup: string;
+    /** The accessible name of the file drop zone in the image form, shown when the editor has `imageUpload`. */
+    readonly imageFile: string;
+    /** Announced when a pasted or dropped image has uploaded and is in the content, given the file's name. */
+    readonly imageInserted: (name: string) => string;
+    /** Announced when a pasted or dropped image is larger than `imageMaxFileSize`, given its name and the size. */
+    readonly imageTooLarge: (name: string, size: string) => string;
+    /** Announced when a pasted or dropped image fails to upload, given the file's name. */
+    readonly imageUploadFailed: (name: string) => string;
+    /** Announced when a pasted or dropped image starts uploading, and names its placeholder, given the file's name. */
+    readonly imageUploading: (name: string) => string;
     /** The label of the image URL field in the insert image form. */
     readonly imageUrl: string;
     /** The label of the toolbar button that increases the indentation. */
@@ -89,6 +109,14 @@ export interface MonaEditorMessages {
     readonly linkGroup: string;
     /** The accessible name of the toolbar's list button group. */
     readonly listGroup: string;
+    /** Shown in the mention suggestions when the search finds no one. */
+    readonly mentionNoResults: string;
+    /** Announced when the mention suggestions change, given how many there are. */
+    readonly mentionResults: (count: number) => string;
+    /** Shown in the mention suggestions while the search runs. */
+    readonly mentionSearching: string;
+    /** The accessible name of the mention suggestions list. */
+    readonly mentionSuggestions: string;
     /** The label of the toolbar button that merges the selected cells. */
     readonly mergeCells: string;
     /** The label of the toolbar button that decreases the indentation. */
@@ -101,6 +129,8 @@ export interface MonaEditorMessages {
     readonly redo: string;
     /** The label of the toolbar button and the link dialog button that remove the link. */
     readonly removeLink: string;
+    /** The label of the image form's button that applies the changes to a selected image. */
+    readonly save: string;
     /** The label of the toolbar's font family dropdown. */
     readonly selectFontFamily: string;
     /** The label of the toolbar's font size dropdown. */
@@ -132,4 +162,6 @@ export interface MonaEditorMessages {
     readonly undo: string;
     /** The label of the width field in the insert image form. */
     readonly widthPx: string;
+    /** The count under the content when `showWordCount` is set, given the number of words. */
+    readonly wordCount: (count: number) => string;
 }

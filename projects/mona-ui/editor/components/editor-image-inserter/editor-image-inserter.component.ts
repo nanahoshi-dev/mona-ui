@@ -1,6 +1,7 @@
-import { Component, computed, inject, output, signal } from "@angular/core";
+import { Component, computed, effect, inject, input, isDevMode, output, signal, untracked } from "@angular/core";
 import { form, FormField, FormRoot, maxLength, required } from "@angular/forms/signals";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { type FileUploadHandler, type FileUploadItem, FileUploadComponent } from "@nanahoshi/mona-ui/file-upload";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
@@ -17,7 +18,7 @@ import {
 
 @Component({
     selector: "mona-editor-image-inserter",
-    imports: [TextBoxComponent, ButtonDirective, NumericTextBoxComponent, FormRoot, FormField],
+    imports: [TextBoxComponent, ButtonDirective, FileUploadComponent, NumericTextBoxComponent, FormRoot, FormField],
     templateUrl: "./editor-image-inserter.component.html"
 })
 export class EditorImageInserterComponent {
@@ -52,8 +53,28 @@ export class EditorImageInserterComponent {
         return editorImageInserterRowLabelThemeVariants();
     });
 
+    /** The image files the upload takes, as an `accept` attribute. */
+    public readonly accept = input("image/*");
+
+    /** The image the form edits, which fills it in, or null when it adds one. */
+    public readonly image = input<ImageInsertFormModel | null>(null);
     public readonly insert = output<EditorImageInsertEvent>();
     public readonly insertCancel = output();
+
+    /** The largest image file the upload takes, in bytes. */
+    public readonly maxFileSize = input<number | null>(null);
+
+    /** Uploads an image file and returns its address. Without it, the form only takes an address. */
+    public readonly upload = input<FileUploadHandler | null>(null);
+
+    public constructor() {
+        effect(() => {
+            const image = this.image();
+            if (image) {
+                untracked(() => this.#imageFormModel.set({ ...image }));
+            }
+        });
+    }
 
     protected onCancel(): void {
         this.insertCancel.emit();
@@ -66,5 +87,17 @@ export class EditorImageInserterComponent {
             link: this.iForm.link().value(),
             width: this.iForm.width().value()
         });
+    }
+
+    /** Puts the uploaded image's address in the address field. */
+    protected onUploadSuccess(item: FileUploadItem): void {
+        if (typeof item.response === "string" && item.response !== "") {
+            this.iForm.link().value.set(item.response);
+        } else if (isDevMode()) {
+            console.warn(
+                "[Mona Editor] imageUpload should return the image's address as a string, but it returned:",
+                item.response
+            );
+        }
     }
 }

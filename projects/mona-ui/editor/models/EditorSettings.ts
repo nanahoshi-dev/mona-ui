@@ -43,6 +43,11 @@ export interface EditorSettings {
     link: boolean;
     /** Whether the toolbar shows the numbered and bulleted list buttons and the editor keeps those lists. */
     list: boolean;
+    /**
+     * Whether the editor keeps mentions, and offers them as `@` is typed when it has a `mentionSearch`. It has no
+     * toolbar control. Optional, unlike the others, so settings written before it still compile.
+     */
+    mention?: boolean;
     /** Whether the toolbar shows the strikethrough button and the editor keeps struck-through text. */
     strikethrough: boolean;
     /** Whether the toolbar shows the subscript button and the editor keeps subscript text. */

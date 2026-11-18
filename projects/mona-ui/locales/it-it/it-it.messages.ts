@@ -282,6 +282,23 @@ export const IT_IT_MESSAGES = {
         backgroundColor: "Colore di sfondo",
         bold: "Grassetto",
         cancel: "Annulla",
+        characterCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} carattere`,
+                other: () => `${localizeNumber(count)} caratteri`
+            }),
+        characterLimitHint: (limit: number) =>
+            `Puoi inserire fino a ${plural(PLURAL_RULES.select(limit), { one: () => `${localizeNumber(limit)} carattere`, other: () => `${localizeNumber(limit)} caratteri` })}.`,
+        charactersLeft: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} carattere rimanente`,
+                other: () => `${localizeNumber(count)} caratteri rimanenti`
+            }),
+        charactersOver: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} carattere di troppo`,
+                other: () => `${localizeNumber(count)} caratteri di troppo`
+            }),
         codeBlock: "Blocco di codice",
         color: "Colore",
         contentLabel: "Editor di testo formattato",
@@ -289,6 +306,7 @@ export const IT_IT_MESSAGES = {
         deleteColumn: "Elimina colonna",
         deleteRow: "Elimina riga",
         deleteTable: "Elimina tabella",
+        editImage: "Modifica immagine",
         editLink: "Modifica collegamento",
         enterUrl: "Inserisci l'URL",
         fontSize: "Dimensione carattere",
@@ -296,6 +314,11 @@ export const IT_IT_MESSAGES = {
         heading: (level: number) => `Intestazione ${localizeNumber(level)}`,
         heightPx: "Altezza (px)",
         historyGroup: "Cronologia",
+        imageFile: "File immagine",
+        imageInserted: (name: string) => `${name} inserito.`,
+        imageTooLarge: (name: string, size: string) => `${name} non è stato aggiunto. Il file supera ${size}.`,
+        imageUploadFailed: (name: string) => `Impossibile caricare ${name}.`,
+        imageUploading: (name: string) => `Caricamento di ${name}`,
         imageUrl: "URL immagine",
         indent: "Aumenta rientro",
         indentGroup: "Rientro",
@@ -311,12 +334,21 @@ export const IT_IT_MESSAGES = {
         justify: "Giustifica",
         linkGroup: "Collegamento",
         listGroup: "Elenchi",
+        mentionNoResults: "Nessuna corrispondenza",
+        mentionResults: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} suggerimento`,
+                other: () => `${localizeNumber(count)} suggerimenti`
+            }),
+        mentionSearching: "Ricerca in corso…",
+        mentionSuggestions: "Suggerimenti",
         mergeCells: "Unisci celle selezionate",
         outdent: "Riduci rientro",
         paragraph: "Paragrafo",
         quotation: "Citazione",
         redo: "Ripeti",
         removeLink: "Rimuovi link",
+        save: "Salva",
         selectFontFamily: "Seleziona tipo di carattere",
         selectFontSize: "Seleziona dimensione carattere",
         splitCell: "Dividi cella",
@@ -331,7 +363,12 @@ export const IT_IT_MESSAGES = {
         toolbar: "Formattazione",
         underline: "Sottolineato",
         undo: "Annulla",
-        widthPx: "Larghezza (px)"
+        widthPx: "Larghezza (px)",
+        wordCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} parola`,
+                other: () => `${localizeNumber(count)} parole`
+            })
     },
     fileUpload: {
         browse: "Sfoglia i file",
