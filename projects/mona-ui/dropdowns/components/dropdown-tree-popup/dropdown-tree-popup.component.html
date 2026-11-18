@@ -1,0 +1,52 @@
+<div [class]="popupClass()" (pointerdown)="onPointerDown($event)">
+    @if (headerTemplate()) {
+        <ng-container [ngTemplateOutlet]="headerTemplate() ?? null"></ng-container>
+    }
+    @if (treeService.filterableOptions().enabled) {
+        <div class="p-2">
+            <mona-filter-input
+                [filter]="treeService.filterText()"
+                [debounce]="treeService.filterableOptions().debounce"
+                [placeholder]="treeService.filterPlaceholder()"
+                [ariaLabel]="filterAriaLabel()"
+                [controls]="treeId()"
+                [activeDescendant]="activeDescendant()"
+                [size]="size()"
+                (filterChange)="onFilterChange($event)"></mona-filter-input>
+        </div>
+    }
+    <!-- An empty tree keeps its named tree element, lying over the "No data" or "No matching items" text that describes it. -->
+    <div class="relative min-h-0 flex-1 overflow-auto [scrollbar-width:thin] [&>mona-tree]:text-[length:inherit]">
+        @if (empty()) {
+            @if (noDataTemplate()) {
+                <div [id]="noDataId()" class="contents">
+                    <ng-container [ngTemplateOutlet]="noDataTemplate() ?? null"></ng-container>
+                </div>
+            } @else {
+                <mona-placeholder
+                    [id]="noDataId()"
+                    [text]="emptyText()"
+                    class="flex w-full items-center justify-center py-4"></mona-placeholder>
+            }
+        }
+        <mona-tree
+            [id]="treeId()"
+            [focusable]="false"
+            [class.absolute]="empty()"
+            [class.inset-0]="empty()"
+            [ariaLabel]="ariaLabel()"
+            [ariaLabelledBy]="ariaLabelledBy()"
+            [ariaDescribedBy]="empty() ? noDataId() : ''">
+            @if (itemTemplate()) {
+                <ng-template monaTreeNodeTemplate let-dataItem>
+                    <ng-container
+                        [ngTemplateOutlet]="itemTemplate() ?? null"
+                        [ngTemplateOutletContext]="{ $implicit: dataItem }"></ng-container>
+                </ng-template>
+            }
+        </mona-tree>
+    </div>
+    @if (footerTemplate()) {
+        <ng-container [ngTemplateOutlet]="footerTemplate() ?? null"></ng-container>
+    }
+</div>

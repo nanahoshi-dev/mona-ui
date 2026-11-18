@@ -8,7 +8,9 @@ import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
 import { ColorPaletteComponent } from "@nanahoshi/mona-ui/color-palette";
 import { ComboBoxComponent } from "@nanahoshi/mona-ui/combo-box";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
+import { DropdownTreeComponent } from "@nanahoshi/mona-ui/dropdown-tree";
 import { MultiSelectComponent } from "@nanahoshi/mona-ui/multi-select";
+import { MultiSelectTreeComponent } from "@nanahoshi/mona-ui/multi-select-tree";
 import { DecimalTextBoxComponent, NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { OtpInputComponent } from "@nanahoshi/mona-ui/otp-input";
 import { RadioGroupComponent } from "@nanahoshi/mona-ui/radio-button";
@@ -32,8 +34,10 @@ import { describe, expect, it } from "vitest";
         ComboBoxComponent,
         DecimalTextBoxComponent,
         DropdownListComponent,
+        DropdownTreeComponent,
         FormsModule,
         MultiSelectComponent,
+        MultiSelectTreeComponent,
         NumericTextBoxComponent,
         OtpInputComponent,
         RadioGroupComponent,
@@ -77,6 +81,10 @@ import { describe, expect, it } from "vitest";
         <mona-combo-box aria-label="Model" [data]="items" [ngModel]="item.value"></mona-combo-box>
         <mona-auto-complete aria-label="Control" [data]="items" [formControl]="item"></mona-auto-complete>
         <mona-auto-complete aria-label="Model" [data]="items" [ngModel]="item.value"></mona-auto-complete>
+        <mona-dropdown-tree aria-label="Control" [data]="items" [formControl]="item"></mona-dropdown-tree>
+        <mona-dropdown-tree aria-label="Model" [data]="items" [ngModel]="item.value"></mona-dropdown-tree>
+        <mona-multi-select-tree aria-label="Control" [data]="items" [formControl]="list"></mona-multi-select-tree>
+        <mona-multi-select-tree aria-label="Model" [data]="items" [ngModel]="list.value"></mona-multi-select-tree>
     `
 })
 class InteropHostComponent {
@@ -122,7 +130,9 @@ describe("Form directives on controls without an accessor", () => {
         ["mona-multi-select", MultiSelectComponent, "value", ["a"]],
         ["mona-dropdown-list", DropdownListComponent, "value", "b"],
         ["mona-combo-box", ComboBoxComponent, "value", "b"],
-        ["mona-auto-complete", AutoCompleteComponent, "value", "b"]
+        ["mona-auto-complete", AutoCompleteComponent, "value", "b"],
+        ["mona-dropdown-tree", DropdownTreeComponent, "value", "b"],
+        ["mona-multi-select-tree", MultiSelectTreeComponent, "value", ["a"]]
     ] as const)("hands %s its value through both", async (_selector, type, member, expected) => {
         const fixture = await createHost();
         const instances = fixture.debugElement.queryAll(By.directive(type)).map(element => element.componentInstance);
@@ -155,6 +165,30 @@ describe("Form directives on controls without an accessor", () => {
         const [multiSelect] = fixture.debugElement.queryAll(By.directive(MultiSelectComponent));
         expect(multiSelect.componentInstance.value()).toBeNull();
         expect(multiSelect.nativeElement.querySelectorAll("mona-chip")).toHaveLength(0);
+    });
+
+    it("reads null as nothing checked in a multi-select tree", async () => {
+        const fixture = await createHost();
+
+        fixture.componentInstance.list.setValue(null);
+        await settle(fixture);
+
+        const [multiSelectTree] = fixture.debugElement.queryAll(By.directive(MultiSelectTreeComponent));
+        expect(multiSelectTree.componentInstance.value()).toBeNull();
+        expect(multiSelectTree.nativeElement.querySelectorAll("mona-chip")).toHaveLength(0);
+    });
+
+    it("shows a dropdown tree's and a multi-select tree's items from the form controls", async () => {
+        const fixture = await createHost();
+        const [dropdownTree] = fixture.debugElement.queryAll(By.directive(DropdownTreeComponent));
+        const [multiSelectTree] = fixture.debugElement.queryAll(By.directive(MultiSelectTreeComponent));
+
+        expect((dropdownTree.nativeElement as HTMLElement).textContent?.trim()).toBe("b");
+        expect(
+            Array.from((multiSelectTree.nativeElement as HTMLElement).querySelectorAll("mona-chip"), chip =>
+                chip.textContent?.trim()
+            )
+        ).toEqual(["a"]);
     });
 
     it("reports a user's change back to the form control", async () => {

@@ -3,7 +3,7 @@ import { MultiSelectService } from "../services/multi-select.service";
 import { MultiSelectSummaryTagTemplateDirective } from "./multi-select-summary-tag-template.directive";
 
 @Directive({
-    selector: "mona-multi-select[monaMultiSelectSummaryTag]"
+    selector: "mona-multi-select[monaMultiSelectSummaryTag], mona-multi-select-tree[monaMultiSelectSummaryTag]"
 })
 export class MultiSelectSummaryTagDirective {
     readonly #multiSelectService = inject(MultiSelectService);

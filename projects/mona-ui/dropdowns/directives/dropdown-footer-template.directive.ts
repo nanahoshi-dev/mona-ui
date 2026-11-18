@@ -7,7 +7,8 @@ import { Directive } from "@angular/core";
         ng-template[monaDropDownListFooterTemplate],
         ng-template[monaDropDownTreeFooterTemplate],
         ng-template[monaComboBoxFooterTemplate],
-        ng-template[monaMultiSelectFooterTemplate]
+        ng-template[monaMultiSelectFooterTemplate],
+        ng-template[monaMultiSelectTreeFooterTemplate]
     `
 })
 export class DropdownFooterTemplateDirective {}

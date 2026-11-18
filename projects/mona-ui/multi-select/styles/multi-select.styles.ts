@@ -2,6 +2,7 @@ import { cva } from "class-variance-authority";
 import { themeControlSurfaceClasses, type VariantInputs } from "@nanahoshi/mona-ui/internal";
 import type { VariantProps } from "class-variance-authority";
 
+/** @hidden Shared with the multi-select tree, which looks the same. */
 export const multiSelectBaseThemeVariants = cva(
     `
         flex items-center justify-between
@@ -51,6 +52,7 @@ export const multiSelectBaseThemeVariants = cva(
     }
 );
 
+/** @hidden Shared with the multi-select tree, which looks the same. */
 export const multiSelectItemContainerThemeVariants = cva(
     `
         flex flex-1 flex-wrap items-center gap-1 p-1
@@ -68,8 +70,10 @@ export const multiSelectItemContainerThemeVariants = cva(
     }
 );
 
+/** @hidden Shared with the multi-select tree, which looks the same. */
 export const multiSelectAffixContainerThemeVariants = cva(`flex h-full flex-none items-center justify-center`);
 
+/** @hidden Shared with the multi-select tree, which looks the same. */
 export const multiSelectIndicatorContainerThemeVariants = cva(`self-center`, {
     variants: {
         size: {
