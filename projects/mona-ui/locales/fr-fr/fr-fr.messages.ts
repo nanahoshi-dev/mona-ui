@@ -519,6 +519,14 @@ export const FR_FR_MESSAGES = {
         transferTo: "Transférer vers l’autre liste",
         transferToList: (list: string) => `Transférer vers ${list}`
     },
+    maskedTextBox: {
+        characterNotAllowed: "Ce caractère n’est pas accepté ici",
+        clear: "Effacer",
+        digitOnly: "Seul un chiffre est accepté ici",
+        digitOrSignOnly: "Seul un chiffre, plus ou moins est accepté ici",
+        letterOnly: "Seule une lettre est acceptée ici",
+        letterOrDigitOnly: "Seul un chiffre ou une lettre est accepté ici"
+    },
     multiSelect: {
         clear: "Effacer",
         itemsCount: (count: number) =>
@@ -526,7 +534,8 @@ export const FR_FR_MESSAGES = {
         removeMoreItems: (count: number) =>
             count === 1
                 ? `Retirer ${localizeNumber(count)} autre élément`
-                : `Retirer ${localizeNumber(count)} autres éléments`
+                : `Retirer ${localizeNumber(count)} autres éléments`,
+        selectAll: "Tout sélectionner"
     },
     notification: {
         close: "Fermer",

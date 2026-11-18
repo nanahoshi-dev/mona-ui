@@ -445,10 +445,19 @@
         "transferTo": "Pindahkan ke daftar lain",
         "transferToList": "Pindahkan ke {list}"
     },
+    "maskedTextBox": {
+        "characterNotAllowed": "Karakter itu tidak bisa diisi di sini",
+        "clear": "Bersihkan",
+        "digitOnly": "Hanya angka yang bisa diisi di sini",
+        "digitOrSignOnly": "Hanya angka, plus, atau minus yang bisa diisi di sini",
+        "letterOnly": "Hanya huruf yang bisa diisi di sini",
+        "letterOrDigitOnly": "Hanya huruf atau angka yang bisa diisi di sini"
+    },
     "multiSelect": {
         "clear": "Bersihkan",
         "itemsCount": "+ {count} item",
-        "removeMoreItems": "Hapus {count} item lainnya"
+        "removeMoreItems": "Hapus {count} item lainnya",
+        "selectAll": "Pilih semua"
     },
     "notification": {
         "close": "Tutup",

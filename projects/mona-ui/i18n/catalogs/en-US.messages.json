@@ -445,10 +445,19 @@
         "transferTo": "Transfer to the other list",
         "transferToList": "Transfer to {list}"
     },
+    "maskedTextBox": {
+        "characterNotAllowed": "That character doesn't fit here",
+        "clear": "Clear",
+        "digitOnly": "Only a digit fits here",
+        "digitOrSignOnly": "Only a digit, plus or minus fits here",
+        "letterOnly": "Only a letter fits here",
+        "letterOrDigitOnly": "Only a letter or a digit fits here"
+    },
     "multiSelect": {
         "clear": "Clear",
         "itemsCount": "{count, plural, =1 {+ # item} other {+ # items}}",
-        "removeMoreItems": "{count, plural, =1 {Remove # more item} other {Remove # more items}}"
+        "removeMoreItems": "{count, plural, =1 {Remove # more item} other {Remove # more items}}",
+        "selectAll": "Select all"
     },
     "notification": {
         "close": "Close",

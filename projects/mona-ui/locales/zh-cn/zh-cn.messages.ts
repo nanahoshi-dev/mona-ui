@@ -468,10 +468,19 @@ export const ZH_CN_MESSAGES = {
         transferTo: "移至另一列表",
         transferToList: (list: string) => `移至${list}`
     },
+    maskedTextBox: {
+        characterNotAllowed: "此处不能输入该字符",
+        clear: "清除",
+        digitOnly: "此处只能输入数字",
+        digitOrSignOnly: "此处只能输入数字、加号或减号",
+        letterOnly: "此处只能输入字母",
+        letterOrDigitOnly: "此处只能输入字母或数字"
+    },
     multiSelect: {
         clear: "清除",
         itemsCount: (count: number) => `+ ${localizeNumber(count)} 项`,
-        removeMoreItems: (count: number) => `删除其余 ${localizeNumber(count)} 项`
+        removeMoreItems: (count: number) => `删除其余 ${localizeNumber(count)} 项`,
+        selectAll: "全选"
     },
     notification: {
         close: "关闭",

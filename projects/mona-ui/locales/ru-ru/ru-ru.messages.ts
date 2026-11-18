@@ -534,12 +534,21 @@ export const RU_RU_MESSAGES = {
         transferTo: "Перенести в другой список",
         transferToList: (list: string) => `Перенести в список «${list}»`
     },
+    maskedTextBox: {
+        characterNotAllowed: "Этот символ здесь не подходит",
+        clear: "Очистить",
+        digitOnly: "Здесь можно ввести только цифру",
+        digitOrSignOnly: "Здесь можно ввести только цифру, плюс или минус",
+        letterOnly: "Здесь можно ввести только букву",
+        letterOrDigitOnly: "Здесь можно ввести только букву или цифру"
+    },
     multiSelect: {
         clear: "Очистить",
         itemsCount: (count: number) =>
             `+ ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} элемент`, few: () => `${localizeNumber(count)} элемента`, many: () => `${localizeNumber(count)} элементов`, other: () => `${localizeNumber(count)} элемента` })}`,
         removeMoreItems: (count: number) =>
-            `Удалить ещё ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} элемент`, few: () => `${localizeNumber(count)} элемента`, many: () => `${localizeNumber(count)} элементов`, other: () => `${localizeNumber(count)} элемента` })}`
+            `Удалить ещё ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} элемент`, few: () => `${localizeNumber(count)} элемента`, many: () => `${localizeNumber(count)} элементов`, other: () => `${localizeNumber(count)} элемента` })}`,
+        selectAll: "Выбрать все"
     },
     notification: {
         close: "Закрыть",

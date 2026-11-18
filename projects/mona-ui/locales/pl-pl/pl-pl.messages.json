@@ -445,10 +445,19 @@
         "transferTo": "Przenieś do drugiej listy",
         "transferToList": "Przenieś do listy „{list}”"
     },
+    "maskedTextBox": {
+        "characterNotAllowed": "Tego znaku nie można tu wpisać",
+        "clear": "Wyczyść",
+        "digitOnly": "Tu można wpisać tylko cyfrę",
+        "digitOrSignOnly": "Tu można wpisać tylko cyfrę, plus lub minus",
+        "letterOnly": "Tu można wpisać tylko literę",
+        "letterOrDigitOnly": "Tu można wpisać tylko literę lub cyfrę"
+    },
     "multiSelect": {
         "clear": "Wyczyść",
         "itemsCount": "+ {count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}",
-        "removeMoreItems": "Usuń jeszcze {count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}"
+        "removeMoreItems": "Usuń jeszcze {count, plural, one {# element} few {# elementy} many {# elementów} other {# elementu}}",
+        "selectAll": "Zaznacz wszystko"
     },
     "notification": {
         "close": "Zamknij",

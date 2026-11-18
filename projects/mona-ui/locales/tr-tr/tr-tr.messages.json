@@ -445,10 +445,19 @@
         "transferTo": "Diğer listeye taşı",
         "transferToList": "{list} listesine taşı"
     },
+    "maskedTextBox": {
+        "characterNotAllowed": "Bu karakter buraya girilemez",
+        "clear": "Temizle",
+        "digitOnly": "Buraya yalnızca rakam girilebilir",
+        "digitOrSignOnly": "Buraya yalnızca rakam, artı veya eksi girilebilir",
+        "letterOnly": "Buraya yalnızca harf girilebilir",
+        "letterOrDigitOnly": "Buraya yalnızca harf veya rakam girilebilir"
+    },
     "multiSelect": {
         "clear": "Temizle",
         "itemsCount": "+ {count} öğe",
-        "removeMoreItems": "Diğer {count} öğeyi kaldır"
+        "removeMoreItems": "Diğer {count} öğeyi kaldır",
+        "selectAll": "Tümünü seç"
     },
     "notification": {
         "close": "Kapat",

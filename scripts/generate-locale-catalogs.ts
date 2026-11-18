@@ -240,6 +240,13 @@ export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
         typeName: "MonaListMessages"
     },
     {
+        constName: "MASKED_TEXT_BOX_DEFAULT_MESSAGES",
+        file: "masked-text-box/i18n/masked-text-box.default-messages.ts",
+        namespace: "maskedTextBox",
+        style: "type",
+        typeName: "MonaMaskedTextBoxMessages"
+    },
+    {
         constName: "MULTI_SELECT_DEFAULT_MESSAGES",
         file: "multi-select/i18n/multi-select.default-messages.ts",
         namespace: "multiSelect",

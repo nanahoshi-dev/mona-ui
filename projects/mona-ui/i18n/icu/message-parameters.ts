@@ -556,10 +556,19 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         transferTo: null,
         transferToList: [{ name: "list", type: "string" }]
     },
+    maskedTextBox: {
+        characterNotAllowed: null,
+        clear: null,
+        digitOnly: null,
+        digitOrSignOnly: null,
+        letterOnly: null,
+        letterOrDigitOnly: null
+    },
     multiSelect: {
         clear: null,
         itemsCount: [{ name: "count", type: "number" }],
-        removeMoreItems: [{ name: "count", type: "number" }]
+        removeMoreItems: [{ name: "count", type: "number" }],
+        selectAll: null
     },
     notification: {
         close: null,

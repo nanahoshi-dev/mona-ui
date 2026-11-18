@@ -12,5 +12,6 @@ export const MULTI_SELECT_DEFAULT_MESSAGES: MonaMultiSelectMessages = {
     itemsCount: (count: number) =>
         count === 1 ? `+ ${localizeNumber(count)} item` : `+ ${localizeNumber(count)} items`,
     removeMoreItems: (count: number) =>
-        count === 1 ? `Remove ${localizeNumber(count)} more item` : `Remove ${localizeNumber(count)} more items`
+        count === 1 ? `Remove ${localizeNumber(count)} more item` : `Remove ${localizeNumber(count)} more items`,
+    selectAll: "Select all"
 };

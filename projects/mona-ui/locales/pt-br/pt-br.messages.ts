@@ -518,11 +518,20 @@ export const PT_BR_MESSAGES = {
         transferTo: "Mover para a outra lista",
         transferToList: (list: string) => `Mover para ${list}`
     },
+    maskedTextBox: {
+        characterNotAllowed: "Esse caractere não cabe aqui",
+        clear: "Limpar",
+        digitOnly: "Aqui só cabe um dígito",
+        digitOrSignOnly: "Aqui só cabe um dígito, mais ou menos",
+        letterOnly: "Aqui só cabe uma letra",
+        letterOrDigitOnly: "Aqui só cabe uma letra ou um dígito"
+    },
     multiSelect: {
         clear: "Limpar",
         itemsCount: (count: number) => (count === 1 ? "+ 1 item" : `+ ${localizeNumber(count)} itens`),
         removeMoreItems: (count: number) =>
-            count === 1 ? "Remover mais 1 item" : `Remover mais ${localizeNumber(count)} itens`
+            count === 1 ? "Remover mais 1 item" : `Remover mais ${localizeNumber(count)} itens`,
+        selectAll: "Selecionar tudo"
     },
     notification: {
         close: "Fechar",

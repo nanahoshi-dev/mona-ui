@@ -497,10 +497,19 @@ export const TR_TR_MESSAGES = {
         transferTo: "Diğer listeye taşı",
         transferToList: (list: string) => `${list} listesine taşı`
     },
+    maskedTextBox: {
+        characterNotAllowed: "Bu karakter buraya girilemez",
+        clear: "Temizle",
+        digitOnly: "Buraya yalnızca rakam girilebilir",
+        digitOrSignOnly: "Buraya yalnızca rakam, artı veya eksi girilebilir",
+        letterOnly: "Buraya yalnızca harf girilebilir",
+        letterOrDigitOnly: "Buraya yalnızca harf veya rakam girilebilir"
+    },
     multiSelect: {
         clear: "Temizle",
         itemsCount: (count: number) => `+ ${localizeNumber(count)} öğe`,
-        removeMoreItems: (count: number) => `Diğer ${localizeNumber(count)} öğeyi kaldır`
+        removeMoreItems: (count: number) => `Diğer ${localizeNumber(count)} öğeyi kaldır`,
+        selectAll: "Tümünü seç"
     },
     notification: {
         close: "Kapat",

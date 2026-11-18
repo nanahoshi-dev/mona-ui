@@ -472,10 +472,19 @@ export const ID_ID_MESSAGES = {
         transferTo: "Pindahkan ke daftar lain",
         transferToList: (list: string) => `Pindahkan ke ${list}`
     },
+    maskedTextBox: {
+        characterNotAllowed: "Karakter itu tidak bisa diisi di sini",
+        clear: "Bersihkan",
+        digitOnly: "Hanya angka yang bisa diisi di sini",
+        digitOrSignOnly: "Hanya angka, plus, atau minus yang bisa diisi di sini",
+        letterOnly: "Hanya huruf yang bisa diisi di sini",
+        letterOrDigitOnly: "Hanya huruf atau angka yang bisa diisi di sini"
+    },
     multiSelect: {
         clear: "Bersihkan",
         itemsCount: (count: number) => `+ ${localizeNumber(count)} item`,
-        removeMoreItems: (count: number) => `Hapus ${localizeNumber(count)} item lainnya`
+        removeMoreItems: (count: number) => `Hapus ${localizeNumber(count)} item lainnya`,
+        selectAll: "Pilih semua"
     },
     notification: {
         close: "Tutup",
