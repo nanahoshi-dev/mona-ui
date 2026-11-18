@@ -22,6 +22,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import {
+    type AdaptiveMode,
     DropdownDataHandlerDirective,
     type DropdownDataInput,
     DROPDOWN_DATA_INPUT_TOKEN,
@@ -39,7 +40,8 @@ import {
     DROPDOWN_POPUP_INPUT_TOKEN,
     dropdownPopupThemeVariants,
     DropdownPrefixTemplateDirective,
-    DropdownService
+    DropdownService,
+    dropdownSheetSurfaceClasses
 } from "@nanahoshi/mona-ui/dropdowns";
 import {
     createElementControlId,
@@ -214,8 +216,11 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         const variantClass = dropdownPopupThemeVariants({ rounded, size });
         // With a popupHeight, the overlay sets the limit; the default max-h-64 would cut a taller popup short.
         const heightClass = this.popupHeight() ? "max-h-none" : "";
-        return twMerge(variantClass, heightClass, userClass);
+        const sheetClass = this.sheet() ? dropdownSheetSurfaceClasses : "";
+        return twMerge(variantClass, heightClass, sheetClass, userClass);
     });
+    /** The list's size: large in a bottom sheet, for touch. */
+    protected readonly listSize = computed(() => (this.sheet() ? "large" : this.size()));
     protected readonly messages = this.#i18n.componentMessages("dropdownList", DROPDOWN_LIST_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("popupTemplate");
@@ -231,6 +236,7 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
     protected readonly selectedListItem = computed(() => {
         return this.#listService.selectedListItems().firstOrDefault();
     });
+    protected readonly sheet = this.#dropdownService.sheet.asReadonly();
     protected readonly valueContainerClass = computed(() => {
         const hasTemplate = this.valueTemplate() != null;
         return dropdownListValueContainerThemeVariants({ hasTemplate });
@@ -243,6 +249,20 @@ export class DropdownListComponent<TData = unknown, TValue = TData>
         }
         return this.#listService.getItemText(listItem);
     });
+
+    /**
+     * @description Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640
+     * pixels) with `"auto"`, so it's easy to reach with a thumb. With `"none"`, it always opens under the field.
+     * @default "none"
+     */
+    public readonly adaptiveMode = input<AdaptiveMode>("none");
+
+    /**
+     * @description Title of the bottom sheet the popup opens as with `adaptiveMode="auto"`. When empty, the sheet
+     * shows the field's name.
+     * @default ""
+     */
+    public readonly adaptiveTitle = input("");
 
     /**
      * @description ID of an element that describes the dropdown list, such as help text or an error message.

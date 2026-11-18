@@ -10,6 +10,7 @@ import {
 import axe from "axe-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import type { AdaptiveMode } from "@nanahoshi/mona-ui/dropdowns";
 
 import type { MultiSelectVariantProps } from "../../styles/multi-select.styles";
 import { MultiSelectSummaryTagDirective } from "../../directives/multi-select-summary-tag.directive";
@@ -150,6 +151,23 @@ class AttributeMultiSelectHostComponent {
 class PlaceholderMultiSelectHostComponent {
     protected readonly data = FOOD_ITEMS;
     public selectedValues: number[] = [];
+}
+
+@Component({
+    template: `
+        <mona-multi-select
+            adaptiveTitle="Cities to visit"
+            aria-label="Cities"
+            [adaptiveMode]="adaptiveMode()"
+            [data]="cities"
+            [(value)]="visits"></mona-multi-select>
+    `,
+    imports: [MultiSelectComponent]
+})
+class AdaptiveMultiSelectHostComponent {
+    protected readonly cities = ["Boston", "Newark", "New York"];
+    public readonly adaptiveMode = signal<AdaptiveMode>("auto");
+    public visits: string[] = [];
 }
 
 describe("MultiSelectComponent", () => {
@@ -780,4 +798,69 @@ interface MultiSelectFormModel {
 
 interface PrimitiveMultiSelectFormModel {
     value: number[];
+}
+
+describe("MultiSelectComponent with adaptiveMode", () => {
+    beforeEach(() => clearOverlays());
+    afterEach(() => {
+        clearOverlays();
+        vi.unstubAllGlobals();
+    });
+
+    function getPopupSurface(): HTMLElement {
+        return document.querySelector(".cdk-overlay-container mona-list")?.parentElement as HTMLElement;
+    }
+
+    it("opens its list as a bottom sheet on a small screen, titled by adaptiveTitle", async () => {
+        stubSmallScreen(true);
+        const fixture = await createObjectFixture(AdaptiveMultiSelectHostComponent);
+        await openPopup(fixture);
+
+        const sheet = document.querySelector("mona-dropdown-sheet") as HTMLElement;
+        expect(sheet.querySelector("header")?.textContent?.trim()).toBe("Cities to visit");
+        expect(sheet.querySelectorAll("[role='option']")).toHaveLength(3);
+        expect(getPopupSurface().classList).toContain("[&_[role=option]]:min-h-11");
+        const results = await axe.run(document.body, { rules: { region: { enabled: false } } });
+        expect(results.violations.map(violation => violation.id)).toEqual([]);
+    });
+
+    it("stays open while options are tapped, and closes from its close button", async () => {
+        stubSmallScreen(true);
+        const fixture = await createObjectFixture(AdaptiveMultiSelectHostComponent);
+        await openPopup(fixture);
+
+        getOption("Boston").click();
+        await waitForStable(fixture);
+        getOption("New York").click();
+        await waitForStable(fixture);
+        expect(fixture.componentInstance.visits).toEqual(["Boston", "New York"]);
+        expect(document.querySelector("mona-dropdown-sheet")).not.toBeNull();
+
+        (document.querySelector("mona-dropdown-sheet header button") as HTMLButtonElement).click();
+        await waitForStable(fixture);
+        await new Promise(resolve => setTimeout(resolve, 300));
+        await waitForStable(fixture);
+        expect(getHost(fixture).getAttribute("aria-expanded")).toBe("false");
+        expect(document.querySelector("mona-dropdown-sheet")).toBeNull();
+    });
+
+    it("opens under the field on a wide screen", async () => {
+        stubSmallScreen(false);
+        const fixture = await createObjectFixture(AdaptiveMultiSelectHostComponent);
+        await openPopup(fixture);
+        expect(document.querySelector("mona-dropdown-sheet")).toBeNull();
+        expect(getPopupSurface().classList).not.toContain("[&_[role=option]]:min-h-11");
+    });
+});
+
+function stubSmallScreen(matches: boolean): void {
+    vi.stubGlobal(
+        "matchMedia",
+        vi.fn((query: string) => ({
+            addEventListener: vi.fn(),
+            matches,
+            media: query,
+            removeEventListener: vi.fn()
+        }))
+    );
 }

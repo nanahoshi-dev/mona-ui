@@ -54,6 +54,11 @@ export class DropdownService {
      */
     public readonly restoreFocus = signal<boolean | "auto">("auto");
     /**
+     * Whether the open popup is a bottom sheet (`adaptiveMode="auto"` on a small screen). The dropdowns style their
+     * popup content for it. `false` while the popup is closed.
+     */
+    public readonly sheet = signal(false);
+    /**
      * Opens the popup with the given settings when it is closed. Does nothing while the host is disabled or read-only,
      * or when the `open` event is prevented.
      */

@@ -11,6 +11,7 @@ import {
 import axe from "axe-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import type { AdaptiveMode } from "@nanahoshi/mona-ui/dropdowns";
 
 import { DropdownListValueTemplateDirective } from "../../directives/dropdown-list-value-template.directive";
 import { DropdownListComponent } from "./dropdown-list.component";
@@ -176,6 +177,22 @@ class FunctionValueFieldHostComponent {
 class CityDropdownListHostComponent {
     protected readonly cities = ["Boston", "Newark", "New York"];
     public readonly popupHeight = signal<number | null>(null);
+    public city: string | null = null;
+}
+
+@Component({
+    template: `
+        <mona-dropdown-list
+            aria-label="City"
+            [adaptiveMode]="adaptiveMode()"
+            [data]="cities"
+            [(value)]="city"></mona-dropdown-list>
+    `,
+    imports: [DropdownListComponent]
+})
+class AdaptiveDropdownListHostComponent {
+    protected readonly cities = ["Boston", "Newark", "New York"];
+    public readonly adaptiveMode = signal<AdaptiveMode>("auto");
     public city: string | null = null;
 }
 
@@ -950,4 +967,77 @@ interface DropdownListFormModel {
 
 interface PrimitiveDropdownListFormModel {
     value: number | null;
+}
+
+describe("DropdownListComponent with adaptiveMode", () => {
+    beforeEach(() => clearOverlays());
+    afterEach(() => {
+        clearOverlays();
+        vi.unstubAllGlobals();
+    });
+
+    function getPopupSurface(): HTMLElement {
+        return document.querySelector(".cdk-overlay-container mona-list")?.parentElement as HTMLElement;
+    }
+
+    it("opens its list as a bottom sheet on a small screen, with options tall enough to tap", async () => {
+        stubSmallScreen(true);
+        const fixture = await createObjectFixture(AdaptiveDropdownListHostComponent);
+        await openPopup(fixture);
+
+        const sheet = document.querySelector("mona-dropdown-sheet") as HTMLElement;
+        expect(sheet.querySelector("header")?.textContent?.trim()).toBe("City");
+        expect(sheet.querySelectorAll("[role='option']")).toHaveLength(3);
+        expect(getPopupSurface().classList).toContain("[&_[role=option]]:min-h-11");
+        // Focus stays on the field, which controls the list in the sheet.
+        expect(getHost(fixture).getAttribute("aria-expanded")).toBe("true");
+        expect(getHost(fixture).getAttribute("aria-controls")).toBe(sheet.querySelector("[role='listbox']")?.id);
+        const results = await axe.run(document.body, { rules: { region: { enabled: false } } });
+        expect(results.violations.map(violation => violation.id)).toEqual([]);
+    });
+
+    it("selects a tapped option and closes the sheet", async () => {
+        stubSmallScreen(true);
+        const fixture = await createObjectFixture(AdaptiveDropdownListHostComponent);
+        await openPopup(fixture);
+
+        getOption("Newark").click();
+        await waitForStable(fixture);
+        await new Promise(resolve => setTimeout(resolve, 300));
+        await waitForStable(fixture);
+
+        expect(fixture.componentInstance.city).toBe("Newark");
+        expect(getHost(fixture).getAttribute("aria-expanded")).toBe("false");
+        expect(document.querySelector("mona-dropdown-sheet")).toBeNull();
+    });
+
+    it("opens under the field on a wide screen, or without adaptiveMode", async () => {
+        stubSmallScreen(false);
+        const fixture = await createObjectFixture(AdaptiveDropdownListHostComponent);
+        await openPopup(fixture);
+        expect(document.querySelector("mona-dropdown-sheet")).toBeNull();
+        expect(getPopupSurface().classList).not.toContain("[&_[role=option]]:min-h-11");
+        pressKey(fixture, "Escape");
+        await waitForStable(fixture);
+        await new Promise(resolve => setTimeout(resolve, 300));
+        await waitForStable(fixture);
+
+        stubSmallScreen(true);
+        fixture.componentInstance.adaptiveMode.set("none");
+        await waitForStable(fixture);
+        await openPopup(fixture);
+        expect(document.querySelector("mona-dropdown-sheet")).toBeNull();
+    });
+});
+
+function stubSmallScreen(matches: boolean): void {
+    vi.stubGlobal(
+        "matchMedia",
+        vi.fn((query: string) => ({
+            addEventListener: vi.fn(),
+            matches,
+            media: query,
+            removeEventListener: vi.fn()
+        }))
+    );
 }

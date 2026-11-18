@@ -24,6 +24,7 @@ import { none } from "@mirei/ts-collections";
 import { CHIP_DEFAULT_MESSAGES, ChipComponent } from "@nanahoshi/mona-ui/chip";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import {
+    type AdaptiveMode,
     DropdownDataHandlerDirective,
     type DropdownDataInput,
     DROPDOWN_DATA_INPUT_TOKEN,
@@ -41,7 +42,8 @@ import {
     dropdownPopupThemeVariants,
     type DropdownPopupVariantInput,
     DropdownPrefixTemplateDirective,
-    DropdownService
+    DropdownService,
+    dropdownSheetSurfaceClasses
 } from "@nanahoshi/mona-ui/dropdowns";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import {
@@ -217,8 +219,11 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         const variantClass = dropdownPopupThemeVariants({ rounded, size });
         // With a popupHeight, the overlay sets the limit; the default max-h-64 would cut a taller popup short.
         const heightClass = this.popupHeight() ? "max-h-none" : "";
-        return twMerge(variantClass, heightClass, userClass);
+        const sheetClass = this.sheet() ? dropdownSheetSurfaceClasses : "";
+        return twMerge(variantClass, heightClass, sheetClass, userClass);
     });
+    /** The list's size: large in a bottom sheet, for touch. */
+    protected readonly listSize = computed(() => (this.sheet() ? "large" : this.size()));
     protected readonly messages = this.#i18n.componentMessages("multiSelect", MULTI_SELECT_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("popupTemplate");
@@ -231,6 +236,7 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
     protected readonly selectedListItems = computed(() => {
         return this.#listService.selectedListItems();
     });
+    protected readonly sheet = this.#dropdownService.sheet.asReadonly();
     protected readonly summaryTagTemplate = this.#multiSelectService.summaryTagTemplate.asReadonly();
     protected readonly tagCount = this.#multiSelectService.tagCount.asReadonly();
     protected readonly tagTemplate = contentChild(MultiSelectTagTemplateDirective, { read: TemplateRef });
@@ -251,6 +257,20 @@ export class MultiSelectComponent<TData = unknown, TValue = TData>
         }
         return tagCount;
     });
+
+    /**
+     * @description Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640
+     * pixels) with `"auto"`, so it's easy to reach with a thumb. With `"none"`, it always opens under the field.
+     * @default "none"
+     */
+    public readonly adaptiveMode = input<AdaptiveMode>("none");
+
+    /**
+     * @description Title of the bottom sheet the popup opens as with `adaptiveMode="auto"`. When empty, the sheet
+     * shows the field's name.
+     * @default ""
+     */
+    public readonly adaptiveTitle = input("");
 
     /**
      * @description Lets people add values that aren't in {@link data}: Enter in the popup's filter box, on text that
