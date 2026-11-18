@@ -87,6 +87,7 @@
             "@nanahoshi/mona-ui/rating": ["./projects/mona-ui/rating/public-api.ts"],
             "@nanahoshi/mona-ui/scroll-view": ["./projects/mona-ui/scroll-view/public-api.ts"],
             "@nanahoshi/mona-ui/segmented": ["./projects/mona-ui/segmented/public-api.ts"],
+            "@nanahoshi/mona-ui/separator": ["./projects/mona-ui/separator/public-api.ts"],
             "@nanahoshi/mona-ui/sheet": ["./projects/mona-ui/sheet/public-api.ts"],
             "@nanahoshi/mona-ui/sidebar": ["./projects/mona-ui/sidebar/public-api.ts"],
             "@nanahoshi/mona-ui/skeleton": ["./projects/mona-ui/skeleton/public-api.ts"],
