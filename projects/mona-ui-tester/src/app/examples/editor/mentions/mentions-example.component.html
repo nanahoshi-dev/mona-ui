@@ -1,0 +1,17 @@
+<div class="flex flex-col gap-3">
+    <mona-form-field label="Comment" hint="Type @ and a name to mention someone.">
+        <mona-editor
+            class="h-56 w-full"
+            [mentionSearch]="search"
+            [settings]="{ image: false, table: false }"
+            [(value)]="comment" />
+    </mona-form-field>
+    <p class="text-sm text-muted-foreground">
+        Mentioned:
+        @for (name of mentioned(); track name) {
+            {{ name }}{{ $last ? "" : ", " }}
+        } @empty {
+            nobody
+        }
+    </p>
+</div>

@@ -1,0 +1,8 @@
+<mona-form-field label="Release notes" hint="Paste or drop an image, or choose one in the image tool. Up to 2 MB.">
+    <mona-editor
+        class="h-64 w-full"
+        [imageMaxFileSize]="maxFileSize"
+        [imageUpload]="upload"
+        [settings]="{ table: false }"
+        [(value)]="notes" />
+</mona-form-field>

@@ -583,10 +583,25 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./editor/basic/basic-example.component").then(module => module.EditorBasicExampleComponent),
         mainFile: "basic-example.component.ts"
     },
+    "editor/character-limit": {
+        files: ["character-limit-example.component.ts", "character-limit-example.component.html"],
+        load: () => import("./editor/character-limit/character-limit-example.component").then(module => module.EditorCharacterLimitExampleComponent),
+        mainFile: "character-limit-example.component.ts"
+    },
     "editor/forms": {
         files: ["forms-example.component.ts", "forms-example.component.html"],
         load: () => import("./editor/forms/forms-example.component").then(module => module.EditorFormsExampleComponent),
         mainFile: "forms-example.component.ts"
+    },
+    "editor/image-upload": {
+        files: ["image-upload-example.component.ts", "image-upload-example.component.html"],
+        load: () => import("./editor/image-upload/image-upload-example.component").then(module => module.EditorImageUploadExampleComponent),
+        mainFile: "image-upload-example.component.ts"
+    },
+    "editor/mentions": {
+        files: ["mentions-example.component.ts", "mentions-example.component.html"],
+        load: () => import("./editor/mentions/mentions-example.component").then(module => module.EditorMentionsExampleComponent),
+        mainFile: "mentions-example.component.ts"
     },
     "editor/toolbar": {
         files: ["toolbar-example.component.ts", "toolbar-example.component.html"],

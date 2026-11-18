@@ -11391,6 +11391,13 @@
         "type": "void"
       },
       {
+        "description": "How many characters the content should fit, counted as people see them: the text without the\nmarkup, where an emoji or a letter with an accent counts once. Under the content, a count says how many are\nleft. Typing past the limit isn't blocked, so nothing pasted is lost: the count turns into how many are over,\nand the editor shows as invalid. For a form, validate the value with `countEditorText`.",
+        "kind": "input",
+        "name": "characterLimit",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
         "description": "The initial content of the editor, as HTML or a {@link JSONContent} document. A later change\nreplaces the document, unless it is the content the editor already has.",
         "kind": "input",
         "name": "content",
@@ -11422,11 +11429,39 @@
         "type": "void"
       },
       {
+        "description": "The image files `imageUpload` takes, as an `accept` attribute: MIME types such as `image/png`,\n`image/*` for any image, and extensions such as `.png`.",
+        "kind": "input",
+        "name": "imageAccept",
+        "type": "string",
+        "defaultValue": "\"image/*\""
+      },
+      {
+        "description": "The largest image file, in bytes, that `imageUpload` takes. Null takes any size.",
+        "kind": "input",
+        "name": "imageMaxFileSize",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Uploads image files, and returns the image's address: as a promise or an observable, the same\nway as the file upload's `upload`. With it, the image form takes a file, and images pasted or dropped into the\ncontent upload in place, with a placeholder while they do. Without it, images are added by their address.",
+        "kind": "input",
+        "name": "imageUpload",
+        "type": "FileUploadHandler | null",
+        "defaultValue": "null"
+      },
+      {
         "description": "Marks the editor as invalid once it has been touched. When bound to a signal form field via\n`[formField]`, the form sets it.",
         "kind": "input",
         "name": "invalid",
         "type": "boolean",
         "defaultValue": "false"
+      },
+      {
+        "description": "Finds the mentions to offer as `@` and a query are typed. With it, a list of suggestions opens at\nthe `@`: the arrow keys move through it, Enter or Tab puts the highlighted one in the content, and Escape closes\nit. A mention is kept in the HTML as `<span data-type=\"mention\" data-id=\"…\">`.",
+        "kind": "input",
+        "name": "mentionSearch",
+        "type": "EditorMentionSearch | null",
+        "defaultValue": "null"
       },
       {
         "description": "Text shown in the empty editor, and given to assistive technology as `aria-placeholder`. It is not\na name: use a label or `aria-label` too.",
@@ -11460,6 +11495,20 @@
         "kind": "input",
         "name": "settings",
         "type": "Partial<EditorSettings>"
+      },
+      {
+        "description": "Shows how many characters the content has, under it. A `characterLimit` shows the count anyway.",
+        "kind": "input",
+        "name": "showCharacterCount",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Shows how many words the content has, under it.",
+        "kind": "input",
+        "name": "showWordCount",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "Emits when the editor loses focus.\nForm directives (`[formField]`, `ngModel`, `formControl`) listen to this to mark the field as touched.",
@@ -11503,6 +11552,20 @@
     "inputs": [
       {
         "description": "",
+        "kind": "input",
+        "name": "accept",
+        "type": "string",
+        "defaultValue": "\"image/*\""
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "image",
+        "type": "ImageInsertFormModel | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "",
         "kind": "output",
         "name": "insert",
         "type": "EditorImageInsertEvent"
@@ -11512,6 +11575,20 @@
         "kind": "output",
         "name": "insertCancel",
         "type": "void"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "maxFileSize",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "upload",
+        "type": "FileUploadHandler | null",
+        "defaultValue": "null"
       }
     ]
   },

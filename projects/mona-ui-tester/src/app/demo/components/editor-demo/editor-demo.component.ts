@@ -1,6 +1,12 @@
 import { NgComponentOutlet } from "@angular/common";
 import { booleanAttribute, Component, computed, inject, input, signal } from "@angular/core";
-import { EditorComponent, type EditorSettings } from "@nanahoshi/mona-ui/editor";
+import {
+    EditorComponent,
+    type EditorMention,
+    type EditorMentionSearch,
+    type EditorSettings
+} from "@nanahoshi/mona-ui/editor";
+import type { FileUploadHandler } from "@nanahoshi/mona-ui/file-upload";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -115,6 +121,12 @@ export class EditorDemoComponent extends AbstractDemoComponent<EditorComponent> 
             name: "List",
             type: "boolean"
         },
+        mention: {
+            active: true,
+            description: "Offer mentions as @ is typed",
+            name: "Mentions",
+            type: "boolean"
+        },
         strikethrough: {
             active: true,
             description: "Enable strikethrough button",
@@ -154,6 +166,12 @@ export class EditorDemoComponent extends AbstractDemoComponent<EditorComponent> 
     });
     protected readonly config = signal<ComponentConfig<EditorComponent>>({
         inputs: {
+            characterLimit: {
+                type: "number",
+                nullable: true,
+                min: 1,
+                value: null
+            },
             disabled: {
                 type: "boolean",
                 value: false
@@ -168,6 +186,14 @@ export class EditorDemoComponent extends AbstractDemoComponent<EditorComponent> 
             },
             settings: {
                 type: "object"
+            },
+            showCharacterCount: {
+                type: "boolean",
+                value: false
+            },
+            showWordCount: {
+                type: "boolean",
+                value: false
             }
         },
         featureHandler: this.#injector.get(FeatureConfigHandler)
@@ -177,12 +203,24 @@ export class EditorDemoComponent extends AbstractDemoComponent<EditorComponent> 
     protected readonly wrapperComponent = EditorWrapperComponent;
 }
 
+const DEMO_PEOPLE: readonly EditorMention[] = [
+    { id: "1", label: "Ana Lima" },
+    { id: "2", label: "Bo Chen" },
+    { id: "3", label: "Chidi Okafor" },
+    { id: "4", label: "Dana Weiss" }
+];
+
 @Component({
     imports: [EditorComponent],
     template: `
         <mona-editor
             [(value)]="html"
             [settings]="editorSettings()"
+            [characterLimit]="characterLimit()"
+            [imageUpload]="uploadImage"
+            [mentionSearch]="searchMentions"
+            [showCharacterCount]="showCharacterCount()"
+            [showWordCount]="showWordCount()"
             [disabled]="disabled()"
             [readonly]="readonly()"
             [required]="required()"
@@ -221,6 +259,7 @@ class EditorWrapperComponent implements ComponentInputsAsSignal<EditorComponent>
             italic: features["italic"]?.active ?? false,
             link: features["link"]?.active ?? false,
             list: features["list"]?.active ?? false,
+            mention: features["mention"]?.active ?? false,
             strikethrough: features["strikethrough"]?.active ?? false,
             subscript: features["subscript"]?.active ?? false,
             superscript: features["superscript"]?.active ?? false,
@@ -232,8 +271,31 @@ class EditorWrapperComponent implements ComponentInputsAsSignal<EditorComponent>
     });
     protected readonly editorTouched = signal(false);
     protected readonly html = signal("<p>Hello, <strong>Mona</strong>!</p>");
+    public readonly characterLimit = input<number | null>(null);
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly readonly = input(false, { transform: booleanAttribute });
     public readonly required = input(false, { transform: booleanAttribute });
     public readonly settings = input<ReturnType<EditorComponent["settings"]>>(this.editorSettings());
+    public readonly showCharacterCount = input(false, { transform: booleanAttribute });
+    public readonly showWordCount = input(false, { transform: booleanAttribute });
+
+    protected readonly searchMentions: EditorMentionSearch = query =>
+        DEMO_PEOPLE.filter(person => person.label.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
+
+    /** Stands in for a server: it takes about a second, and returns an address the page can show. */
+    protected readonly uploadImage: FileUploadHandler = (file, { progress, signal: abort }) =>
+        new Promise<string>((resolve, reject) => {
+            let step = 0;
+            const timer = setInterval(() => {
+                progress(++step, 5);
+                if (step === 5) {
+                    clearInterval(timer);
+                    resolve(URL.createObjectURL(file));
+                }
+            }, 200);
+            abort.addEventListener("abort", () => {
+                clearInterval(timer);
+                reject(abort.reason);
+            });
+        });
 }
