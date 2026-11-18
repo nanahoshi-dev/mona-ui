@@ -33,6 +33,15 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
     });
     protected readonly config = computed<ComponentConfig<TimePickerComponent>>(() => ({
         inputs: deriveInputConfig<TimePickerComponent>(this.metadata(), {
+            adaptiveMode: {
+                type: "dropdown",
+                value: ["none", "auto"],
+                defaultValue: "none"
+            },
+            adaptiveTitle: {
+                type: "string",
+                value: ""
+            },
             // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
             ariaDescribedBy: undefined,
             ariaLabel: undefined,
@@ -100,6 +109,8 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
         <span>Selected Time: {{ formValueText() }}</span>
         <mona-label for="time-picker-demo-input" text="Reminder time"></mona-label>
         <mona-time-picker
+            [adaptiveMode]="adaptiveMode()"
+            [adaptiveTitle]="adaptiveTitle()"
             inputId="time-picker-demo-input"
             [formField]="form.value"
             [format]="format()"
@@ -145,6 +156,8 @@ class TimePickerWrapperComponent implements ComponentInputsAsSignal<TimePickerCo
         }
         return dt.toFormat(format);
     });
+    public readonly adaptiveMode = input<ReturnType<TimePickerComponent["adaptiveMode"]>>("none");
+    public readonly adaptiveTitle = input("");
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly format = input<ReturnType<TimePickerComponent["format"]>>("HH:mm");
     public readonly hourFormat = input<ReturnType<TimePickerComponent["hourFormat"]>>("24");

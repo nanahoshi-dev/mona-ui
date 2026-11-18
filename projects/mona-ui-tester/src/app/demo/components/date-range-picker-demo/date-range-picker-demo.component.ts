@@ -33,6 +33,15 @@ const PRESET_LISTS: readonly { text: string; value: PresetList }[] = [
 export class DateRangePickerDemoComponent extends AbstractDemoComponent<DateRangePickerComponent> {
     protected readonly config = computed<ComponentConfig<DateRangePickerComponent>>(() => ({
         inputs: deriveInputConfig<DateRangePickerComponent>(this.metadata(), {
+            adaptiveMode: {
+                type: "dropdown",
+                value: ["none", "auto"],
+                defaultValue: "none"
+            },
+            adaptiveTitle: {
+                type: "string",
+                value: ""
+            },
             // The demo names the picker with a form field around it.
             ariaDescribedBy: undefined,
             ariaLabel: undefined,
@@ -111,6 +120,8 @@ export class DateRangePickerDemoComponent extends AbstractDemoComponent<DateRang
     template: `
         <mona-form-field label="Stay" [hint]="hint()">
             <mona-date-range-picker
+                [adaptiveMode]="adaptiveMode()"
+                [adaptiveTitle]="adaptiveTitle()"
                 [class]="userClass()"
                 [disabledDates]="disabledDates()"
                 [endPlaceholder]="endPlaceholder()"
@@ -151,6 +162,8 @@ class DateRangePickerWrapperComponent implements ComponentInputsAsSignal<DateRan
         const nights = Math.round(DateTime.fromJSDate(stay.end).diff(DateTime.fromJSDate(stay.start), "days").days);
         return nights === 1 ? "1 night" : `${nights} nights`;
     });
+    public readonly adaptiveMode = input<ReturnType<DateRangePickerComponent["adaptiveMode"]>>("none");
+    public readonly adaptiveTitle = input("");
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly disabledDates = input<ReturnType<DateRangePickerComponent["disabledDates"]>>([]);
     public readonly endPlaceholder = input<ReturnType<DateRangePickerComponent["endPlaceholder"]>>("");

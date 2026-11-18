@@ -60,6 +60,10 @@ Typed text is written to `value` on `Enter` and when the input loses focus. Text
 
 Choosing a day in the calendar sets `value` and closes the popup. Days before `min`, after `max`, or in `disabledDates` can't be chosen. `disabledDates` takes an iterable of dates or a predicate.
 
+### On a phone
+
+With `adaptiveMode="auto"`, on a screen narrower than 640 pixels, the calendar opens as a sheet along the bottom of the screen, over a dimmed page, as described for the [dropdown list](/components/dropdown-list#the-bottom-sheet). The sheet has the field's name, or `adaptiveTitle`, and a close button. The calendar spans the sheet, and its days grow to as much as 44 pixels, to be easy to tap. It keeps the height of a six-week month, so its arrows stay put from month to month. Focus moves into the calendar, as it does in the popup under the field, and goes back to the input when the sheet closes. To see it, set `adaptiveMode` to `auto` in the playground and narrow the window.
+
 ### Disabled and read-only
 
 `disabled` and `readonly` keep the popup from opening. `readonlyInput` blocks typing but keeps the calendar button working, so the date can only be picked.

@@ -65,6 +65,10 @@ The popup opens on the Date tab. Choosing a day keeps the time already chosen an
 
 A chosen date and time before `min` or after `max` is moved to that limit. On the day of `min` or `max`, the time lists are limited too. Each time the popup closes, it goes back to the Date tab and to the current value.
 
+### On a phone
+
+With `adaptiveMode="auto"`, on a screen narrower than 640 pixels, the popup opens as a sheet along the bottom of the screen, over a dimmed page, as described for the [dropdown list](/components/dropdown-list#the-bottom-sheet). The sheet has the field's name, or `adaptiveTitle`, and a close button. The calendar's days grow to as much as 44 pixels, and the time lists use the large size, to be easy to tap. The sheet keeps the height the Date tab opened with, so the tabs stay put when the Time tab shows. Focus moves into the popup, as it does under the field.
+
 ### Disabled and read-only
 
 `disabled` and `readonly` keep the popup from opening. `readonlyInput` blocks typing but keeps the popup button working, so the value can only be picked.
