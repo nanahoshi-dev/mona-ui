@@ -18,6 +18,7 @@ import { TimeSelectorComponent } from "./time-selector.component";
             [min]="min()"
             [minuteStep]="minuteStep()"
             [required]="required()"
+            [showSeconds]="showSeconds()"
             [(value)]="value"></mona-time-selector>
     `,
     imports: [TimeSelectorComponent]
@@ -29,6 +30,7 @@ class SelectorHostComponent {
     public readonly min = signal<Date | undefined>(undefined);
     public readonly minuteStep = signal(1);
     public readonly required = signal(false);
+    public readonly showSeconds = signal(false);
     public readonly value = signal<Date | null>(new Date(2025, 0, 1, 10, 0));
 }
 
@@ -107,14 +109,73 @@ describe("TimeSelectorComponent interaction", () => {
             const minutes = getList(fixture, "Minutes");
             minutes.focus();
 
-            key(minutes, "ArrowRight");
-            key(getList(fixture, "Minutes"), "ArrowDown");
+            key(minutes, "ArrowDown");
             await stable(fixture);
-            key(getList(fixture, "Minutes"), "Enter");
+            key(minutes, "Enter");
             await stable(fixture);
 
             expect(time(fixture.componentInstance.value())).toBe("10:15");
             expect(minutes.getAttribute("aria-activedescendant")).toBe(getOption(fixture, "Minutes", "15").id);
+        });
+
+        it("makes every list a Tab stop, so each scrolling list can be reached", async () => {
+            const fixture = await create(SelectorHostComponent, host => {
+                host.hourFormat.set("12");
+                host.showSeconds.set(true);
+            });
+
+            const lists = Array.from(getHost(fixture).querySelectorAll<HTMLElement>("ol[role='listbox']"));
+
+            expect(lists.map(list => list.getAttribute("aria-label"))).toEqual([
+                "Hours",
+                "Minutes",
+                "Seconds",
+                "AM/PM"
+            ]);
+            expect(lists.map(list => list.tabIndex)).toEqual([0, 0, 0, 0]);
+        });
+
+        it("moves the arrow keys to whichever list gets focus", async () => {
+            const fixture = await create(SelectorHostComponent, host => {
+                host.hourFormat.set("12");
+                host.showSeconds.set(true);
+            });
+            const seconds = getList(fixture, "Seconds");
+            const meridiem = getList(fixture, "AM/PM");
+
+            // Tab and a click focus a list without the arrow keys.
+            seconds.focus();
+            key(seconds, "ArrowDown");
+            meridiem.focus();
+            key(meridiem, "ArrowDown");
+            await stable(fixture);
+            key(meridiem, "Enter");
+            await stable(fixture);
+
+            const value = fixture.componentInstance.value();
+            expect(time(value)).toBe("22:00");
+            expect(value?.getSeconds()).toBe(1);
+        });
+
+        it("moves focus between the lists with ArrowLeft and ArrowRight, wrapping at the ends", async () => {
+            const fixture = await create(SelectorHostComponent);
+            const hours = getList(fixture, "Hours");
+            const minutes = getList(fixture, "Minutes");
+            hours.focus();
+
+            key(hours, "ArrowRight");
+            expect(document.activeElement).toBe(minutes);
+
+            key(minutes, "ArrowRight");
+            expect(document.activeElement).toBe(hours);
+
+            key(hours, "ArrowLeft");
+            expect(document.activeElement).toBe(minutes);
+            key(minutes, "ArrowDown");
+            await stable(fixture);
+            key(minutes, "Enter");
+            await stable(fixture);
+            expect(time(fixture.componentInstance.value())).toBe("10:01");
         });
 
         it("steps from a time between options to the nearest option, and points at no option meanwhile", async () => {
@@ -281,6 +342,17 @@ describe("TimeSelectorComponent interaction", () => {
             });
 
             expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+        });
+
+        it("returns focus to the list that had it last", async () => {
+            const fixture = await create(SelectorHostComponent);
+            const minutes = getList(fixture, "Minutes");
+            minutes.focus();
+            getButton(fixture, "Now").focus();
+
+            (fixture.debugElement.children[0].componentInstance as TimeSelectorComponent).focus();
+
+            expect(document.activeElement).toBe(minutes);
         });
     });
 });

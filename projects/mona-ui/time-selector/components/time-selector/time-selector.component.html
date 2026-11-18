@@ -21,7 +21,7 @@
         [attr.aria-activedescendant]="activeOptionId(hourListId, hourOptions(), navigatedDate().hour)"
         [attr.aria-readonly]="readonly() || null"
         [attr.aria-required]="required() || null"
-        [active]="focusedList() === 'hours'"
+        (focus)="onListFocus('hours')"
         [id]="hourListId"
         [popupHeight]="computedPopupHeight()"
         [size]="size()">
@@ -44,7 +44,7 @@
         [attr.aria-activedescendant]="activeOptionId(minuteListId, minuteOptions(), minute())"
         [attr.aria-readonly]="readonly() || null"
         [attr.aria-required]="required() || null"
-        [active]="focusedList() === 'minutes'"
+        (focus)="onListFocus('minutes')"
         [id]="minuteListId"
         [popupHeight]="computedPopupHeight()"
         [size]="size()">
@@ -68,7 +68,7 @@
             [attr.aria-activedescendant]="activeOptionId(secondListId, secondOptions(), second())"
             [attr.aria-readonly]="readonly() || null"
             [attr.aria-required]="required() || null"
-            [active]="focusedList() === 'seconds'"
+            (focus)="onListFocus('seconds')"
             [id]="secondListId"
             [popupHeight]="computedPopupHeight()"
             [size]="size()">
@@ -93,7 +93,7 @@
             [attr.aria-activedescendant]="`${meridiemListId}${meridiem()}`"
             [attr.aria-readonly]="readonly() || null"
             [attr.aria-required]="required() || null"
-            [active]="focusedList() === 'meridiem'"
+            (focus)="onListFocus('meridiem')"
             [id]="meridiemListId"
             [popupHeight]="computedPopupHeight()"
             [size]="size()">

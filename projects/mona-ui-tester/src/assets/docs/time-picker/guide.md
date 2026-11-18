@@ -106,6 +106,8 @@ The input is a `role="combobox"` with `aria-haspopup="dialog"`, `aria-autocomple
 
 The popup button has `tabindex="-1"`, so the picker is one Tab stop. Keyboard users open the popup with `Alt+ArrowDown`.
 
+Inside the popup, each list in the time selector is a listbox of its own and a Tab stop, as each part of a native time input is, so keyboard users can reach every list that scrolls. `Tab` moves from the Now button through the Hours, Minutes, Seconds and AM/PM lists to the Set button. The arrow keys act on the list that has focus, whether `Tab`, a click or `ArrowLeft` / `ArrowRight` put it there.
+
 **Consumer responsibilities**
 
 - Label the picker. Point a `<label for>` or `<mona-label for>` at `inputId`, or set `aria-labelledby` or `aria-label`. The placeholder is not a label.
@@ -119,6 +121,7 @@ The popup button has `tabindex="-1"`, so the picker is one Tab stop. Keyboard us
 | `Alt+ArrowUp` | Input | Closes the popup |
 | `Escape` | Input or popup | Closes the popup |
 | `Enter` | Input | Writes the typed text to `value` |
+| `Tab` / `Shift+Tab` | Popup | Moves through the Now button, each time selector list and the Set button, wrapping around at the ends |
 | `ArrowUp` / `ArrowDown` | Time selector list | Moves to the previous or next item |
 | `ArrowLeft` / `ArrowRight` | Time selector list | Moves to the list on that side, also in right-to-left layouts, wrapping around at the ends |
 | `Home` / `End` | Time selector list | Moves to the first or last item |
