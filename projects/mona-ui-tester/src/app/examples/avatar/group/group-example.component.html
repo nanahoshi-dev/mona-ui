@@ -1,0 +1,17 @@
+<div class="flex items-center gap-3">
+    <mona-avatar-group aria-label="Project members" [max]="4">
+        @for (member of members; track member.name) {
+            <mona-avatar
+                borderRadius="50%"
+                labelFontSize="0.75rem"
+                [aria-label]="member.name"
+                [backgroundColor]="member.background"
+                [borderWidth]="0"
+                [height]="36"
+                [label]="member.initials"
+                [labelColor]="member.foreground"
+                [width]="36" />
+        }
+    </mona-avatar-group>
+    <button monaButton type="button" look="link" size="small">See all {{ members.length }} members</button>
+</div>

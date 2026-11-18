@@ -119,6 +119,9 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
     });
     protected readonly config = computed<ComponentConfig<MultiSelectComponent<DropdownFoodItem>>>(() => ({
         inputs: deriveInputConfig<MultiSelectComponent<DropdownFoodItem>>(this.metadata(), {
+            // A custom value needs the page to add an item to data, which the "Adding values that aren't listed"
+            // example shows.
+            allowCustomValue: undefined,
             // The demo labels the field with visible text referenced through aria-labelledby.
             ariaDescribedBy: undefined,
             ariaLabel: undefined,

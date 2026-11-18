@@ -4,6 +4,15 @@
 
 Everything below is imported from `@nanahoshi/mona-ui/avatar`. Each name links to its reference page, with every input, output, property and method.
 
-| Name | Kind |
+| Name | Kind | Description |
+| --- | --- | --- |
+| [`AvatarComponent`](/api/avatar/AvatarComponent) | Component |  |
+| [`AvatarGroupComponent`](/api/avatar/AvatarGroupComponent) | Component | Stacks `mona-avatar`s in an overlapping row, such as the members of a project. |
+
+### Types
+
+| Type | Kind |
 | --- | --- |
-| [`AvatarComponent`](/api/avatar/AvatarComponent) | Component |
+| [`AVATAR_DEFAULT_MESSAGES`](/api/avatar/AVATAR_DEFAULT_MESSAGES) | Constant |
+
+**Related types:** [`ClassInputType`](/api/common/ClassInputType), [`MonaAvatarMessages`](/api/i18n/MonaAvatarMessages)

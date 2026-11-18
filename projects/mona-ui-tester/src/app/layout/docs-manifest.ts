@@ -123,6 +123,12 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                 "Split Button",
                 "split-button",
                 "A primary action button paired with a menu of secondary actions."
+            ),
+            component(
+                "toolbar",
+                "Toolbar",
+                "toolbar",
+                "A row of controls that is one Tab stop, moving what doesn't fit into a More menu."
             )
         ]
     },
@@ -330,8 +336,9 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                 "avatar",
                 "Avatar",
                 "avatar",
-                "Shows a person or entity as an image, text label or projected content."
+                "Shows a person or entity as an image, text label or projected content, alone or stacked in a group."
             ),
+            component("badge", "Badge", "badge", "A small filled or outlined label for a count or a status."),
             component("chip", "Chip", "chip", "A compact label that can be selected, removed or given a prefix."),
             component(
                 "list-box",
@@ -840,6 +847,12 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                 "A fixed-size carousel that pages through a collection one item at a time."
             ),
             component(
+                "separator",
+                "Separator",
+                "separator",
+                "A thin line between groups of content, across or down, with an optional label."
+            ),
+            component(
                 "splitter",
                 "Splitter",
                 "splitter",
@@ -851,6 +864,12 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
         id: "feedback",
         title: "Feedback",
         pages: [
+            component(
+                "alert",
+                "Alert",
+                "alert",
+                "A message that stays on the page, tinted for what it means, with optional actions and dismissal."
+            ),
             component(
                 "circular-progress-bar",
                 "Circular Progress Bar",

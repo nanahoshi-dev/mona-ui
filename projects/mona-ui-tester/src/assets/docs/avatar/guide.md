@@ -8,16 +8,18 @@
 - Show initials-based fallback content when a user has no profile image, or when the image fails to load
 - Represent a team or entity with a consistent, bordered shape
 - Project a custom icon into a fixed-size, bordered slot
+- Show the people on a project or in a conversation as a stack, with `mona-avatar-group`
 
 **Do not use when:**
 
 - The avatar needs to be interactive — wrap it in a `<button>` or `<a>` yourself; the component provides no built-in interaction
-- You need a stacked avatar group — compose individual `<mona-avatar>` elements manually; there is no built-in group component
 
 ## Import & Quick Start
 
 ```typescript
 import { AvatarComponent } from "@nanahoshi/mona-ui/avatar";
+// Only for a stack of avatars:
+import { AvatarGroupComponent } from "@nanahoshi/mona-ui/avatar";
 ```
 
 Add `AvatarComponent` to your standalone component's `imports` array.
@@ -55,6 +57,14 @@ Leave out `image` and `label` to project content, such as an icon, and set `aria
 
 ```example
 avatar/icon
+```
+
+### Avatar group
+
+`mona-avatar-group` overlaps its avatars, each pulled back by a quarter of its width, with a ring in the page's background color between them. With `max`, the avatars after the first `max` collapse into one item that counts them, "+2" here, in the avatars' size and shape. The hidden members aren't reachable from the group, so link to the full list nearby.
+
+```example
+avatar/group
 ```
 
 ## Appearance & Styling
@@ -119,6 +129,8 @@ The avatar has no built-in keyboard behavior and no interactive role. Accessibil
 **After an image fails to load:** the host receives `role="img"`, named by `alt` or else `aria-label`, the same name the image had. With neither, the host has no role or name of its own.
 
 If the avatar is purely decorative and already described by adjacent visible text, you may omit both `alt` and `aria-label`. Whether this is appropriate depends on context.
+
+**Avatar group:** the group has `role="group"`, named by its `aria-label`, such as "Project members", so a screen reader reads the avatars inside it as one set. Name each avatar as above. The count past `max` has `role="img"` and a name such as "2 more", in the current locale; avatars past `max` are hidden from everyone, assistive technology included. The ring between avatars is a shadow, which forced colors don't draw, so give the avatars a border if their edges need to stay apart there.
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source and component-metadata.json

@@ -59,7 +59,9 @@ const referenceRoot = "dist/docs-api";
 
 /** Each entry point this module covers, and the tester folders that document it. */
 const coveredEntryPoints: readonly (readonly [entry: string, docs: readonly string[]])[] = [
+    ["alert", ["alert"]],
     ["avatar", ["avatar"]],
+    ["badge", ["badge"]],
     ["breadcrumb", ["breadcrumb"]],
     ["button-group", ["button-group"]],
     ["card", ["card"]],
@@ -85,6 +87,7 @@ const coveredEntryPoints: readonly (readonly [entry: string, docs: readonly stri
     ["rating", ["rating"]],
     ["scroll-view", ["scroll-view"]],
     ["segmented", ["segmented"]],
+    ["separator", ["separator"]],
     ["sidebar", ["sidebar", "sidebar-menus", "sidebar-state"]],
     ["skeleton", ["skeleton"]],
     ["slider", ["slider", "range-slider"]],
@@ -94,7 +97,8 @@ const coveredEntryPoints: readonly (readonly [entry: string, docs: readonly stri
     ["switch", ["switch"]],
     ["tabs", ["tabs"]],
     ["text-area", ["textarea"]],
-    ["theme", ["theme"]]
+    ["theme", ["theme"]],
+    ["toolbar", ["toolbar"]]
 ];
 
 /** Bindings any element takes, so an example using one says nothing about the component. */

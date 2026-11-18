@@ -13,7 +13,7 @@ A sidebar's content is groups of rows. Every part below is a directive on your o
 | `[monaSidebarMenuItem]` | `li` | One row; owns the highlight and `active` |
 | `[monaSidebarMenuButton]` | `a` / `button` | The row's control; takes `tooltip`, `size`, `disabled`, `closeOnSelect` |
 | `[monaSidebarMenuAction]` | `button` | A trailing control inside the row; needs an `aria-label` |
-| `[monaSidebarMenuBadge]` | any | A trailing count or status; stands down on the rail |
+| `[monaSidebarMenuBadge]` | any | A trailing count or status, shaped like a [Badge](/components/badge); stands down on the rail |
 | `[monaSidebarMenuSub]` | `ul` | An indented submenu inside a collapsible item |
 | `[monaSidebarInput]` | `input` | A text input sized for the sidebar; stands down on the rail |
 | `mona-sidebar-menu-skeleton` | element | A loading placeholder row |

@@ -8,6 +8,16 @@ export interface ExampleEntry {
 }
 
 export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
+    "alert/form-error": {
+        files: ["form-error-example.component.ts", "form-error-example.component.html"],
+        load: () => import("./alert/form-error/form-error-example.component").then(module => module.AlertFormErrorExampleComponent),
+        mainFile: "form-error-example.component.ts"
+    },
+    "alert/looks": {
+        files: ["looks-example.component.ts", "looks-example.component.html"],
+        load: () => import("./alert/looks/looks-example.component").then(module => module.AlertLooksExampleComponent),
+        mainFile: "looks-example.component.ts"
+    },
     "auto-complete/filtering": {
         files: ["filtering-example.component.ts", "filtering-example.component.html"],
         load: () => import("./auto-complete/filtering/filtering-example.component").then(module => module.AutoCompleteFilteringExampleComponent),
@@ -28,6 +38,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./auto-complete/templates/templates-example.component").then(module => module.AutoCompleteTemplatesExampleComponent),
         mainFile: "templates-example.component.ts"
     },
+    "avatar/group": {
+        files: ["group-example.component.ts", "group-example.component.html"],
+        load: () => import("./avatar/group/group-example.component").then(module => module.AvatarGroupExampleComponent),
+        mainFile: "group-example.component.ts"
+    },
     "avatar/icon": {
         files: ["icon-example.component.ts", "icon-example.component.html"],
         load: () => import("./avatar/icon/icon-example.component").then(module => module.AvatarIconExampleComponent),
@@ -37,6 +52,16 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         files: ["initials-example.component.ts", "initials-example.component.html"],
         load: () => import("./avatar/initials/initials-example.component").then(module => module.AvatarInitialsExampleComponent),
         mainFile: "initials-example.component.ts"
+    },
+    "badge/counts": {
+        files: ["counts-example.component.ts", "counts-example.component.html"],
+        load: () => import("./badge/counts/counts-example.component").then(module => module.BadgeCountsExampleComponent),
+        mainFile: "counts-example.component.ts"
+    },
+    "badge/status": {
+        files: ["status-example.component.ts", "status-example.component.html"],
+        load: () => import("./badge/status/status-example.component").then(module => module.BadgeStatusExampleComponent),
+        mainFile: "status-example.component.ts"
     },
     "breadcrumb/buttons": {
         files: ["buttons-example.component.ts", "buttons-example.component.html"],
@@ -783,6 +808,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./multi-select/checkboxes/checkboxes-example.component").then(module => module.MultiSelectCheckboxesExampleComponent),
         mainFile: "checkboxes-example.component.ts"
     },
+    "multi-select/custom-values": {
+        files: ["custom-values-example.component.ts", "custom-values-example.component.html"],
+        load: () => import("./multi-select/custom-values/custom-values-example.component").then(module => module.MultiSelectCustomValuesExampleComponent),
+        mainFile: "custom-values-example.component.ts"
+    },
     "multi-select/forms": {
         files: ["forms-example.component.ts", "forms-example.component.html"],
         load: () => import("./multi-select/forms/forms-example.component").then(module => module.MultiSelectFormsExampleComponent),
@@ -1058,6 +1088,16 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./segmented/with-icons/with-icons-example.component").then(module => module.SegmentedWithIconsExampleComponent),
         mainFile: "with-icons-example.component.ts"
     },
+    "separator/inline": {
+        files: ["inline-example.component.ts", "inline-example.component.html"],
+        load: () => import("./separator/inline/inline-example.component").then(module => module.SeparatorInlineExampleComponent),
+        mainFile: "inline-example.component.ts"
+    },
+    "separator/sign-in": {
+        files: ["sign-in-example.component.ts", "sign-in-example.component.html"],
+        load: () => import("./separator/sign-in/sign-in-example.component").then(module => module.SeparatorSignInExampleComponent),
+        mainFile: "sign-in-example.component.ts"
+    },
     "sheet/bottom": {
         files: ["bottom-example.component.ts", "bottom-example.component.html"],
         load: () => import("./sheet/bottom/bottom-example.component").then(module => module.SheetBottomExampleComponent),
@@ -1262,6 +1302,16 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         files: ["runtime-primary-example.component.ts", "runtime-primary-example.component.html"],
         load: () => import("./theming-custom-colors/runtime-primary/runtime-primary-example.component").then(module => module.ThemingCustomColorsRuntimePrimaryExampleComponent),
         mainFile: "runtime-primary-example.component.ts"
+    },
+    "toolbar/editor": {
+        files: ["editor-example.component.ts", "editor-example.component.html"],
+        load: () => import("./toolbar/editor/editor-example.component").then(module => module.ToolbarEditorExampleComponent),
+        mainFile: "editor-example.component.ts"
+    },
+    "toolbar/wrap": {
+        files: ["wrap-example.component.ts", "wrap-example.component.html"],
+        load: () => import("./toolbar/wrap/wrap-example.component").then(module => module.ToolbarWrapExampleComponent),
+        mainFile: "wrap-example.component.ts"
     },
     "tooltip-directive/content-mode": {
         files: ["content-mode-example.component.ts", "content-mode-example.component.html"],

@@ -1,4 +1,18 @@
 {
+  "AlertActionsDirective": {
+    "name": "AlertActionsDirective",
+    "selector": "\"[monaAlertActions]\"",
+    "inputs": [
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
   "AutoCompleteComponent": {
     "name": "AutoCompleteComponent",
     "selector": "\"mona-auto-complete\"",
@@ -219,6 +233,73 @@
       }
     ]
   },
+  "BadgeDirective": {
+    "name": "BadgeDirective",
+    "selector": "\"[monaBadge]\"",
+    "inputs": [
+      {
+        "description": "How the badge is drawn: `solid` fills it with the look's color, `subtle` with a light tint of it, and\n`outline` draws only its border.",
+        "kind": "input",
+        "name": "fill",
+        "type": "BadgeVariantProps[\"fill\"]",
+        "options": [
+          "outline",
+          "solid",
+          "subtle"
+        ],
+        "defaultValue": "\"solid\""
+      },
+      {
+        "description": "The badge's color role. Pick it for what the badge means, such as `error` for a failed state, and say\nthat in its text too, since color alone doesn't reach everyone.",
+        "kind": "input",
+        "name": "look",
+        "type": "BadgeVariantProps[\"look\"]",
+        "options": [
+          "error",
+          "info",
+          "primary",
+          "secondary",
+          "success",
+          "warning"
+        ],
+        "defaultValue": "\"secondary\""
+      },
+      {
+        "description": "Border-radius preset. `full` makes a pill, and a round dot for a single digit.",
+        "kind": "input",
+        "name": "rounded",
+        "type": "BadgeVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Size preset controlling the badge's height, padding, text and icon size.",
+        "kind": "input",
+        "name": "size",
+        "type": "BadgeVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
   "BreadcrumbItemDirective": {
     "name": "BreadcrumbItemDirective",
     "selector": "\"button[monaBreadcrumbItem]\"",
@@ -302,14 +383,14 @@
         "name": "look",
         "type": "ButtonVariantProps[\"look\"]",
         "options": [
-          "default",
-          "primary",
-          "success",
-          "error",
-          "warning",
-          "info",
           "outline",
+          "error",
+          "info",
+          "primary",
           "secondary",
+          "success",
+          "warning",
+          "default",
           "ghost",
           "link",
           "clear"
@@ -662,14 +743,14 @@
         "name": "look",
         "type": "ChipVariantProps[\"look\"]",
         "options": [
-          "default",
-          "primary",
-          "success",
-          "error",
-          "warning",
-          "info",
           "outline",
+          "error",
+          "info",
+          "primary",
           "secondary",
+          "success",
+          "warning",
+          "default",
           "ghost"
         ],
         "defaultValue": "\"default\""
@@ -2232,6 +2313,37 @@
       }
     ]
   },
+  "ToolbarItemDirective": {
+    "name": "ToolbarItemDirective",
+    "selector": "\"[monaToolbarItem]\"",
+    "inputs": [
+      {
+        "description": "Whether the item can move into the More menu: `auto` when there's no room for it, `never` to keep it in\nthe toolbar, such as a search box.",
+        "kind": "input",
+        "name": "overflow",
+        "type": "ToolbarItemOverflow",
+        "alias": "monaToolbarItem",
+        "options": [
+          "auto",
+          "never"
+        ],
+        "defaultValue": "\"auto\""
+      },
+      {
+        "description": "Emitted when the item is chosen from the More menu. Unless it's prevented, the toolbar then clicks the\ncontrol, which suits a button. Handle it for a control a click doesn't operate, or keep that control in the toolbar\nwith `overflow=\"never\"`.",
+        "kind": "output",
+        "name": "overflowActivate",
+        "type": "PreventableEvent<Event>"
+      },
+      {
+        "description": "The item's text in the More menu. Without it, the menu uses the control's `aria-label`, then its text.",
+        "kind": "input",
+        "name": "overflowText",
+        "type": "string",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
   "TooltipDirective": {
     "name": "TooltipDirective",
     "selector": "\"[monaTooltip]\"",
@@ -2731,6 +2843,80 @@
       }
     ]
   },
+  "AlertComponent": {
+    "name": "AlertComponent",
+    "selector": "\"mona-alert\"",
+    "inputs": [
+      {
+        "description": "Reads the alert's title and text aloud once, when the alert is shown. Use it for an alert that appears\nbecause of something the user did, such as a failed save: `assertive` interrupts, for something that needs\nattention now, and `polite` waits for a pause. Leave it `off` for an alert that's part of the page when it loads.",
+        "kind": "input",
+        "name": "announce",
+        "type": "AlertAnnouncement",
+        "options": [
+          "assertive",
+          "off",
+          "polite"
+        ],
+        "defaultValue": "\"off\""
+      },
+      {
+        "description": "Emitted when the dismiss button is activated, with the click event. The alert doesn't hide itself:\nremove it in your handler, and move focus to where the user can carry on, since the button goes with it.",
+        "kind": "output",
+        "name": "dismiss",
+        "type": "Event"
+      },
+      {
+        "description": "Name of the dismiss button, in place of the localized \"Dismiss\", followed by the title when there is\none.",
+        "kind": "input",
+        "name": "dismissLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Shows a button in the alert's corner that emits `dismiss`.",
+        "kind": "input",
+        "name": "dismissible",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "What the alert means, which sets its tint, border and icon. Say it in the text too, since color and\nshape alone don't reach everyone.",
+        "kind": "input",
+        "name": "look",
+        "type": "AlertVariantProps[\"look\"]",
+        "options": [
+          "error",
+          "info",
+          "success",
+          "warning",
+          "neutral"
+        ],
+        "defaultValue": "\"info\""
+      },
+      {
+        "description": "Shows the look's icon before the text. A `monaAlertIconTemplate` replaces the icon.",
+        "kind": "input",
+        "name": "showIcon",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "A short heading above the text, in bold. It also names the dismiss button.",
+        "kind": "input",
+        "name": "title",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
   "AvatarComponent": {
     "name": "AvatarComponent",
     "selector": "\"mona-avatar\"",
@@ -2841,6 +3027,35 @@
         "name": "width",
         "type": "string | number",
         "defaultValue": "\"64px\""
+      }
+    ]
+  },
+  "AvatarGroupComponent": {
+    "name": "AvatarGroupComponent",
+    "selector": "\"mona-avatar-group\"",
+    "inputs": [
+      {
+        "description": "Accessible name of the group, such as \"Project members\". The group is read as one, with each avatar's\nname inside it.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "How many avatars to show. The rest collapse into one item that counts them, named such as \"3 more\".\nWithout it, every avatar shows.",
+        "kind": "input",
+        "name": "max",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
       }
     ]
   },
@@ -2960,14 +3175,14 @@
         "name": "look",
         "type": "ButtonGroupVariantProps[\"look\"]",
         "options": [
-          "default",
-          "primary",
-          "success",
-          "error",
-          "warning",
-          "info",
           "outline",
+          "error",
+          "info",
+          "primary",
           "secondary",
+          "success",
+          "warning",
+          "default",
           "ghost"
         ],
         "defaultValue": "\"outline\""
@@ -3324,8 +3539,8 @@
         "name": "fillMode",
         "type": "ChartAreaFillMode",
         "options": [
-          "gradient",
-          "solid"
+          "solid",
+          "gradient"
         ],
         "defaultValue": "\"gradient\""
       },
@@ -4517,10 +4732,10 @@
         "name": "mode",
         "type": "ChartCrosshairMode",
         "options": [
+          "auto",
           "x",
           "y",
-          "xy",
-          "auto"
+          "xy"
         ],
         "defaultValue": "\"auto\""
       },
@@ -4661,8 +4876,8 @@
         "name": "gridShape",
         "type": "ChartRadialGridShape",
         "options": [
-          "circle",
           "auto",
+          "circle",
           "polygon"
         ],
         "defaultValue": "\"auto\""
@@ -5260,8 +5475,8 @@
         "name": "type",
         "type": "ChartXAxisType",
         "options": [
-          "linear",
           "auto",
+          "linear",
           "category",
           "log",
           "symlog",
@@ -5437,8 +5652,8 @@
         "name": "type",
         "type": "ChartYAxisType",
         "options": [
-          "linear",
           "auto",
+          "linear",
           "category",
           "log",
           "symlog",
@@ -5522,8 +5737,8 @@
         "name": "fillMode",
         "type": "ChartPolarFillMode",
         "options": [
-          "gradient",
-          "solid"
+          "solid",
+          "gradient"
         ],
         "defaultValue": "\"solid\""
       },
@@ -5901,8 +6116,8 @@
         "name": "fillMode",
         "type": "ChartRadialArcFillMode",
         "options": [
-          "gradient",
-          "solid"
+          "solid",
+          "gradient"
         ],
         "defaultValue": "\"solid\""
       },
@@ -6654,8 +6869,8 @@
         "name": "fillMode",
         "type": "ChartPolarFillMode",
         "options": [
-          "gradient",
-          "solid"
+          "solid",
+          "gradient"
         ],
         "defaultValue": "\"solid\""
       },
@@ -6854,8 +7069,8 @@
         "type": "ChartRadialFillMode",
         "options": [
           "none",
-          "gradient",
-          "solid"
+          "solid",
+          "gradient"
         ],
         "defaultValue": "\"none\""
       },
@@ -6982,8 +7197,8 @@
         "type": "ChartRadialFillMode",
         "options": [
           "none",
-          "gradient",
-          "solid"
+          "solid",
+          "gradient"
         ],
         "defaultValue": "\"none\""
       },
@@ -7139,8 +7354,8 @@
         "name": "fillMode",
         "type": "ChartRadialArcFillMode",
         "options": [
-          "gradient",
-          "solid"
+          "solid",
+          "gradient"
         ],
         "defaultValue": "\"solid\""
       },
@@ -7636,8 +7851,8 @@
         "name": "fillMode",
         "type": "ChartRadialArcFillMode",
         "options": [
-          "gradient",
-          "solid"
+          "solid",
+          "gradient"
         ],
         "defaultValue": "\"solid\""
       },
@@ -10652,10 +10867,10 @@
         "name": "type",
         "type": "DialogVariantProps[\"type\"] | null",
         "options": [
-          "success",
           "error",
-          "warning",
           "info",
+          "success",
+          "warning",
           "confirm"
         ],
         "defaultValue": "\"info\""
@@ -10715,14 +10930,14 @@
         "name": "look",
         "type": "ButtonVariantProps[\"look\"]",
         "options": [
-          "default",
-          "primary",
-          "success",
-          "error",
-          "warning",
-          "info",
           "outline",
+          "error",
+          "info",
+          "primary",
           "secondary",
+          "success",
+          "warning",
+          "default",
           "ghost",
           "link",
           "clear"
@@ -13108,6 +13323,13 @@
     "selector": "\"mona-multi-select\"",
     "inputs": [
       {
+        "description": "Lets people add values that aren't in {@link data}: Enter in the popup's filter box, on text that\nmatches no item, emits {@link valueAdd} with the text, and an item whose text it matches is selected instead.\nNeeds `monaDropDownFilterable`, whose filter box is where the text is typed.",
+        "kind": "input",
+        "name": "allowCustomValue",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "ID of an element that describes the multi select, such as help text or an error message.",
         "kind": "input",
         "name": "ariaDescribedBy",
@@ -13312,6 +13534,12 @@
         "name": "value",
         "type": "Iterable<TValue>",
         "defaultValue": "[]"
+      },
+      {
+        "description": "Emitted with the trimmed text when Enter is pressed in the filter box on text that matches no item.\nOnly emitted when {@link allowCustomValue} is true. Add an item for it to {@link data} and to {@link value}; the\nfilter box is cleared for the next one.",
+        "kind": "output",
+        "name": "valueAdd",
+        "type": "string"
       },
       {
         "description": "Sets the value field of the multi select component.\nIt is used for stable item identity, matching externally supplied values, and primitive\nvalue projection when {@link valuePrimitive} is enabled.\nIt can be null, string, or a function that takes an item and returns a value.\nIf null, the item itself will be used as the value representation.\nShould resolve to a stable, unique scalar.",
@@ -15929,6 +16157,45 @@
       }
     ]
   },
+  "SeparatorComponent": {
+    "name": "SeparatorComponent",
+    "selector": "\"mona-separator\"",
+    "inputs": [
+      {
+        "description": "Marks the line as only visual, so assistive technology skips it. Use it where the line repeats a\nboundary the content already makes, such as between cards.",
+        "kind": "input",
+        "name": "decorative",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Text in the middle of a horizontal line, such as \"or\" between two ways to sign in. It's read as text,\nand the line stays out of the way, as if it were decorative.",
+        "kind": "input",
+        "name": "label",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Whether the line runs across (`horizontal`, between stacked content) or down (`vertical`, between\nitems in a row). A vertical line stretches to the row's height. A labelled line is always horizontal.",
+        "kind": "input",
+        "name": "orientation",
+        "type": "NonNullable<SeparatorVariantProps[\"orientation\"]>",
+        "options": [
+          "horizontal",
+          "vertical"
+        ],
+        "defaultValue": "\"horizontal\""
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`, such as a margin.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
   "SheetComponent": {
     "name": "SheetComponent",
     "selector": "\"mona-sheet\"",
@@ -17077,14 +17344,14 @@
         "name": "look",
         "type": "SplitButtonVariantProps[\"look\"]",
         "options": [
-          "default",
-          "primary",
-          "success",
-          "error",
-          "warning",
-          "info",
           "outline",
+          "error",
+          "info",
+          "primary",
           "secondary",
+          "success",
+          "warning",
+          "default",
           "ghost"
         ],
         "defaultValue": "\"default\""
@@ -18478,6 +18745,66 @@
       }
     ]
   },
+  "ToolbarComponent": {
+    "name": "ToolbarComponent",
+    "selector": "\"mona-toolbar\"",
+    "inputs": [
+      {
+        "description": "Accessible name of the toolbar, such as \"Formatting\". A toolbar needs a name, from this or\n`aria-labelledby`, since assistive technology announces it on the way in.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "ID of the element whose text names the toolbar, such as a visible heading.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Name of the More button, in place of the localized \"More\".",
+        "kind": "input",
+        "name": "moreLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "What happens to items that don't fit: `menu` moves the `monaToolbarItem`s into a More menu at the end,\nlast ones first, and `wrap` puts the controls on more rows.",
+        "kind": "input",
+        "name": "overflow",
+        "type": "ToolbarOverflow",
+        "options": [
+          "menu",
+          "wrap"
+        ],
+        "defaultValue": "\"menu\""
+      },
+      {
+        "description": "The space between controls and the size of the More button. Match it to the controls' size.",
+        "kind": "input",
+        "name": "size",
+        "type": "NonNullable<ToolbarVariantProps[\"size\"]>",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
   "TooltipComponent": {
     "name": "TooltipComponent",
     "selector": "\"mona-tooltip\"",
@@ -18739,8 +19066,8 @@
         "name": "look",
         "type": "WindowVariantProps[\"look\"]",
         "options": [
-          "default",
-          "primary"
+          "primary",
+          "default"
         ],
         "defaultValue": "\"default\""
       },

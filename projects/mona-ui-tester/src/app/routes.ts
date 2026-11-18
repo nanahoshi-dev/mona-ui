@@ -65,6 +65,11 @@ export const routes: Routes = [
                 loadComponent: () => import("./docs/forms-doc/forms-doc.component").then(m => m.FormsDocComponent)
             },
             {
+                path: "alert",
+                loadComponent: () =>
+                    import("./docs/components/alert-doc/alert-doc.component").then(m => m.AlertDocComponent)
+            },
+            {
                 path: "auto-complete",
                 loadComponent: () =>
                     import("./docs/components/auto-complete-doc/auto-complete-doc.component").then(
@@ -75,6 +80,11 @@ export const routes: Routes = [
                 path: "avatar",
                 loadComponent: () =>
                     import("./docs/components/avatar-doc/avatar-doc.component").then(m => m.AvatarDocComponent)
+            },
+            {
+                path: "badge",
+                loadComponent: () =>
+                    import("./docs/components/badge-doc/badge-doc.component").then(m => m.BadgeDocComponent)
             },
 
             {
@@ -495,6 +505,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "separator",
+                loadComponent: () =>
+                    import("./docs/components/separator-doc/separator-doc.component").then(m => m.SeparatorDocComponent)
+            },
+            {
                 path: "segmented",
                 loadComponent: () =>
                     import("./docs/components/segmented-doc/segmented-doc.component").then(m => m.SegmentedDocComponent)
@@ -544,6 +559,11 @@ export const routes: Routes = [
                     import("./docs/components/split-button-doc/split-button-doc.component").then(
                         m => m.SplitButtonDocComponent
                     )
+            },
+            {
+                path: "toolbar",
+                loadComponent: () =>
+                    import("./docs/components/toolbar-doc/toolbar-doc.component").then(m => m.ToolbarDocComponent)
             },
             {
                 path: "splitter",
