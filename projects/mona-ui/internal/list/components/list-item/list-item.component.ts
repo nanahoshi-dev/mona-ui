@@ -23,12 +23,17 @@ export class ListItemComponent<TData> {
         }
         return listItemBaseThemeVariants();
     });
-    protected readonly checkboxes = computed(() => {
-        return this.listService.selectableOptions().checkboxes && !this.isHeader();
-    });
+    // "Select all" always shows its checkbox, which says whether some or all of its options are selected.
+    protected readonly checkboxes = computed(
+        () => (this.listService.selectableOptions().checkboxes || this.isSelectAll()) && !this.isHeader()
+    );
     protected readonly dataItem: Signal<TData | null> = computed(() => this.item()?.data ?? null);
     protected readonly isHeader = computed(() => this.item()?.isHeader ?? false);
+    protected readonly isSelectAll = computed(() => this.item() === this.listService.selectAllItem);
     protected readonly itemChecked = computed(() => this.listService.isSelected(this.item()));
+    protected readonly itemIndeterminate = computed(
+        () => this.isSelectAll() && this.listService.selectAllState() === "some"
+    );
     protected readonly itemText = computed(() => {
         const item = this.item();
         if (item == null) {

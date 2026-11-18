@@ -25,6 +25,9 @@ export const listGroupHeaderTextThemeVariants = cva(`select-none text-muted-fore
 export const listItemBaseThemeVariants = cva(`flex h-full w-full items-center gap-2`);
 
 // Focus and the active option share the grid's ring: solid 2px, inset, at full strength.
+/** The "Select all" option, set apart from the options after it. */
+export const LIST_SELECT_ALL_ITEM_CLASSES = "mb-0.5 border-b border-border";
+
 export const listItemContentThemeVariants = cva(
     `relative flex cursor-default select-none items-center px-3 py-1 text-foreground outline-none focus-visible:outline-hidden focus-visible:inset-ring-2 focus-visible:inset-ring-focus-indicator`,
     {

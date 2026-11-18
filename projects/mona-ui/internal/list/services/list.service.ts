@@ -23,9 +23,13 @@ import type { SelectableOptions } from "../models/SelectableOptions";
 import { cycleThroughMatchedItems } from "../utils/cycleThroughMatchedItems";
 import { formatGroupHeader, toGroupKey } from "../utils/groupKey";
 
+/** The selection key of the "Select all" option, which no data item can have. */
+const SELECT_ALL_KEY = Symbol("selectAll");
+
 @Injectable()
 export class ListService<TData> {
-    readonly #arrangedItems = computed(() => {
+    /** The data items, filtered, ordered and grouped (with header rows). */
+    readonly #arrangedDataItems = computed(() => {
         const listItems = this.#listItems();
         const filterText = this.filterText();
         const groupableOptions = this.groupableOptions();
@@ -83,6 +87,11 @@ export class ListService<TData> {
             .toImmutableSet();
         this.#groupHeaders = headers;
         return items;
+    });
+    /** The arranged data items, after the "Select all" option when it's shown. */
+    readonly #arrangedItems = computed(() => {
+        const items = this.#arrangedDataItems();
+        return this.#selectAllShown() ? toImmutableSet([this.selectAllItem, ...items]) : items;
     });
     readonly #data = signal(ImmutableList.create<TData>());
     readonly #i18n = inject(MonaI18nService);
@@ -143,6 +152,22 @@ export class ListService<TData> {
             }
             return toImmutableSet(items);
         }
+    });
+    /** The keys of the options "Select all" acts on: every enabled one the filter leaves. */
+    readonly #selectAllKeys = computed(() =>
+        this.#arrangedDataItems()
+            .where(item => !item.isHeader && !this.isDisabled(item))
+            .select(item => this.getSelectionKey(item))
+            .toArray()
+    );
+    readonly #selectAllShown = computed(() => {
+        const options = this.selectableOptions();
+        return (
+            this.selectAllEnabled() &&
+            options.enabled &&
+            options.mode === "multiple" &&
+            this.#selectAllKeys().length > 0
+        );
     });
 
     /**
@@ -209,6 +234,9 @@ export class ListService<TData> {
             if (!highlighted || highlighted.isHeader) {
                 return null;
             }
+            if (highlighted === this.selectAllItem) {
+                return highlighted;
+            }
             return this.#itemsByUid().get(highlighted.uid) ?? null;
         }
     });
@@ -253,6 +281,24 @@ export class ListService<TData> {
         item: ListItem<TData>;
         focus: boolean;
     }>(1);
+    /** Whether a multiple-selection list starts with a "Select all" option. */
+    public readonly selectAllEnabled = signal(false);
+    /**
+     * The option that selects every enabled option the filter leaves, or clears them when they're all selected. It has
+     * no data item: its text is the select-all label, and it's selected while every option it covers is.
+     */
+    public readonly selectAllItem = new ListItem<TData>({ data: null as TData });
+    public readonly selectAllLabel = signal("");
+    /** How many of the options "Select all" covers are selected. */
+    public readonly selectAllState = computed<"all" | "none" | "some">(() => {
+        const keys = this.#selectAllKeys();
+        const selectedKeys = this.selectedKeys();
+        const selected = keys.filter(key => selectedKeys.contains(key)).length;
+        if (selected === 0) {
+            return "none";
+        }
+        return selected === keys.length ? "all" : "some";
+    });
     public readonly selectableOptions = signal<SelectableOptions>({
         checkboxes: false,
         enabled: false,
@@ -314,7 +360,7 @@ export class ListService<TData> {
             this.viewItems(),
             activeItem ?? null,
             item => {
-                if (item.isHeader || this.isDisabled(item)) {
+                if (item.isHeader || item === this.selectAllItem || this.isDisabled(item)) {
                     return false;
                 }
                 return this.getItemText(item).toLowerCase().startsWith(prefix);
@@ -324,8 +370,13 @@ export class ListService<TData> {
     }
 
     public deselectItems(item: Iterable<ListItem<TData>>): void {
-        const keys = from(item)
+        const items = from(item);
+        // Deselecting "Select all" deselects the options it covers.
+        const selectAllKeys = items.contains(this.selectAllItem) ? this.#selectAllKeys() : [];
+        const keys = items
+            .where(i => i !== this.selectAllItem)
             .select(i => this.getSelectionKey(i))
+            .concat(selectAllKeys)
             .toImmutableSet();
         this.selectedKeys.update(set => set.removeAll(keys));
     }
@@ -385,6 +436,9 @@ export class ListService<TData> {
      * Non-string field values (numbers, dates, …) are converted with `String()`, and nullish values become `""`.
      */
     public getItemText(item: ListItem<TData>): string {
+        if (item === this.selectAllItem) {
+            return this.selectAllLabel();
+        }
         const textField = this.textField();
         let text: unknown;
         if (!textField) {
@@ -404,7 +458,7 @@ export class ListService<TData> {
     public getMatchingFilteredItem(text: string): ListItem<TData> | null {
         const filterableOptions = this.filterableOptions();
         const caseSensitive = filterableOptions.enabled ? filterableOptions.caseSensitive : false;
-        const candidates = this.viewItems().where(i => !i.isHeader && !this.isDisabled(i));
+        const candidates = this.viewItems().where(i => !i.isHeader && i !== this.selectAllItem && !this.isDisabled(i));
         const fullMatchingItem = candidates.firstOrDefault(i => {
             const itemText = this.getItemText(i);
             return caseSensitive ? itemText === text : itemText.toLowerCase() === text.toLowerCase();
@@ -427,7 +481,7 @@ export class ListService<TData> {
     }
 
     public isDisabled(item: ListItem<TData>): boolean {
-        return !item.isHeader && this.isDataItemDisabled(item.data);
+        return !item.isHeader && item !== this.selectAllItem && this.isDataItemDisabled(item.data);
     }
 
     public isFilteringEnabled(): boolean {
@@ -444,6 +498,9 @@ export class ListService<TData> {
         const options = this.selectableOptions();
         if (!options.enabled) {
             return false;
+        }
+        if (item === this.selectAllItem) {
+            return this.selectAllState() === "all";
         }
         const selectedKeys = this.selectedKeys();
         const key = this.getSelectionKey(item);
@@ -496,7 +553,7 @@ export class ListService<TData> {
             return false;
         }
         const keys = this.viewItems()
-            .where(i => !i.isHeader && !this.isDisabled(i))
+            .where(i => !i.isHeader && i !== this.selectAllItem && !this.isDisabled(i))
             .select(i => this.getSelectionKey(i))
             .toArray();
         const selectedKeys = this.selectedKeys();
@@ -508,6 +565,13 @@ export class ListService<TData> {
     }
 
     public selectItem(item: ListItem<TData>, scroll: boolean = false, focus: boolean = false): void {
+        if (item === this.selectAllItem) {
+            this.toggleSelectAll();
+            if (scroll) {
+                this.scrollToItem(item, focus);
+            }
+            return;
+        }
         const key = this.getSelectionKey(item);
         const options = this.selectableOptions();
         if (options.mode === "single") {
@@ -601,6 +665,16 @@ export class ListService<TData> {
         this.virtualScrollOptions.update(o => ({ ...o, ...options }));
     }
 
+    /** Selects every option "Select all" covers, or deselects them when they're all selected already. */
+    public toggleSelectAll(): void {
+        const keys = this.#selectAllKeys();
+        if (this.selectAllState() === "all") {
+            this.selectedKeys.update(set => set.removeAll(keys));
+        } else {
+            this.selectedKeys.update(set => set.addAll(keys));
+        }
+    }
+
     private filterItem(item: ListItem<TData>, filterText: string): boolean {
         if (filterText === "") {
             return true;
@@ -668,7 +742,7 @@ export class ListService<TData> {
     }
 
     private getSelectionKey(item: ListItem<TData>): unknown {
-        return this.getDataItemValue(item.data);
+        return item === this.selectAllItem ? SELECT_ALL_KEY : this.getDataItemValue(item.data);
     }
 
     private navigateFirstForSingleSelection(
