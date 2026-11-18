@@ -545,6 +545,8 @@ describe("PopupService", () => {
     });
 
     describe("closeOnScroll", () => {
+        afterEach(() => vi.restoreAllMocks());
+
         it("closes on page scroll when the anchor also sits in a scrollable container", () => {
             const { anchor } = createScrollableAnchor();
             popupRef = service.create({
@@ -556,6 +558,7 @@ describe("PopupService", () => {
             let closed = false;
             popupRef.closed.subscribe(() => (closed = true));
 
+            vi.spyOn(window, "scrollY", "get").mockReturnValue(40);
             window.dispatchEvent(new Event("scroll"));
 
             expect(closed).toBe(true);
@@ -573,10 +576,32 @@ describe("PopupService", () => {
             let closed = false;
             popupRef.closed.subscribe(() => (closed = true));
 
+            scrollContainer.scrollTop = 40;
             scrollContainer.dispatchEvent(new Event("scroll"));
 
             expect(closed).toBe(true);
             popupRef = null;
+        });
+
+        // Browsers report a scroll on the next frame. Focusing a field that is partly out of view scrolls it in,
+        // and when the same task opens the popup, that scroll's event arrives once the popup is open.
+        it("stays open for the event of a scroll made before it opened", () => {
+            const { anchor, scrollContainer } = createScrollableAnchor();
+            scrollContainer.scrollTop = 40;
+            vi.spyOn(window, "scrollY", "get").mockReturnValue(40);
+            popupRef = service.create({
+                anchor,
+                animation: false,
+                closeOnScroll: true,
+                content: PopupTestContentComponent
+            });
+            let closed = false;
+            popupRef.closed.subscribe(() => (closed = true));
+
+            scrollContainer.dispatchEvent(new Event("scroll"));
+            document.dispatchEvent(new Event("scroll", { bubbles: true }));
+
+            expect(closed).toBe(false);
         });
     });
 
@@ -807,6 +832,67 @@ describe("PopupService", () => {
         });
 
         expect(withPositionsSpy).toHaveBeenCalledWith(customPositions);
+    });
+
+    describe("offset", () => {
+        function spyOnPositionStrategy(anchor: HTMLElement) {
+            const overlay = TestBed.inject(Overlay);
+            const builder = overlay.position().flexibleConnectedTo(anchor);
+            vi.spyOn(overlay.position(), "flexibleConnectedTo").mockReturnValue(builder);
+            return {
+                withDefaultOffsetY: vi.spyOn(builder, "withDefaultOffsetY"),
+                withPositions: vi.spyOn(builder, "withPositions")
+            };
+        }
+
+        it("negates the vertical offset on the fallback that flips the popup above the anchor", () => {
+            const anchor = createAnchor();
+            const strategy = spyOnPositionStrategy(anchor);
+
+            popupRef = service.create({
+                anchor,
+                animation: false,
+                content: PopupTestContentComponent,
+                offset: { horizontal: 0, vertical: 4 }
+            });
+
+            const positions = strategy.withPositions.mock.calls[0][0];
+            expect(positions[0]).toMatchObject({ originY: "bottom", overlayY: "top", offsetY: 4 });
+            expect(positions).toContainEqual(
+                expect.objectContaining({ originX: "start", originY: "top", overlayY: "bottom", offsetY: -4 })
+            );
+        });
+
+        it("leaves the positions the caller passes as they are, with the offset as their default", () => {
+            const anchor = createAnchor();
+            const strategy = spyOnPositionStrategy(anchor);
+            const positions = [
+                {
+                    originX: "start" as const,
+                    originY: "bottom" as const,
+                    overlayX: "start" as const,
+                    overlayY: "top" as const
+                },
+                {
+                    originX: "start" as const,
+                    originY: "top" as const,
+                    overlayX: "start" as const,
+                    overlayY: "bottom" as const
+                }
+            ];
+
+            popupRef = service.create({
+                anchor,
+                animation: false,
+                content: PopupTestContentComponent,
+                offset: { horizontal: 0, vertical: 4 },
+                positions
+            });
+
+            expect(strategy.withPositions).toHaveBeenCalledWith(positions);
+            expect(positions.every(position => !("offsetY" in position))).toBe(true);
+            expect(strategy.withDefaultOffsetY).toHaveBeenCalledWith(4);
+        });
     });
 
     it("updates overlay direction and position when anchor direction changes dynamically while open", async () => {

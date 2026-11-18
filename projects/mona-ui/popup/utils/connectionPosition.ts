@@ -1,4 +1,5 @@
 import { ConnectionPositionPair, OriginConnectionPosition, OverlayConnectionPosition } from "@angular/cdk/overlay";
+import type { PopupOffset } from "../models/PopupOffset";
 
 export type ConnectionPoint =
     | "topleft"
@@ -11,9 +12,15 @@ export type ConnectionPoint =
     | "bottomcenter"
     | "bottomright";
 
+/**
+ * The requested position followed by its fallbacks. With an offset, each position carries its own. A fallback that
+ * puts the popup on the anchor's other side of an axis, such as the one that flips it above the anchor, gets the
+ * offset negated on that axis, so the gap stays between the popup and the anchor instead of turning into an overlap.
+ */
 export const connectionPosition = (
     anchorConnectionPoint: ConnectionPoint,
-    popupConnectionPoint: ConnectionPoint
+    popupConnectionPoint: ConnectionPoint,
+    offset?: PopupOffset
 ): ConnectionPositionPair[] => {
     const originMap: Record<ConnectionPoint, OriginConnectionPosition> = {
         topleft: { originX: "start", originY: "top" },
@@ -43,8 +50,17 @@ export const connectionPosition = (
         ...originMap[anchorConnectionPoint],
         ...overlayMap[popupConnectionPoint]
     };
-    const fallbackPositions = generateFallbackPositions(primaryPosition);
-    return [primaryPosition, ...fallbackPositions];
+    const positions = [primaryPosition, ...generateFallbackPositions(primaryPosition)];
+    if (!offset) {
+        return positions;
+    }
+    const horizontal = offset.horizontal ?? 0;
+    const vertical = offset.vertical ?? 0;
+    return positions.map(position => ({
+        ...position,
+        offsetX: mirrorsX(primaryPosition, position) ? negate(horizontal) : horizontal,
+        offsetY: mirrorsY(primaryPosition, position) ? negate(vertical) : vertical
+    }));
 };
 
 /**
@@ -162,3 +178,18 @@ const flipX = <T extends "start" | "center" | "end">(value: T): T =>
 
 const flipY = <T extends "top" | "center" | "bottom">(value: T): T =>
     (value === "top" ? "bottom" : value === "bottom" ? "top" : value) as T;
+
+/** Whether `position` flips `primary` on the horizontal axis: both of its X sides, and not onto themselves. */
+const mirrorsX = (primary: ConnectionPositionPair, position: ConnectionPositionPair): boolean =>
+    (position.originX !== primary.originX || position.overlayX !== primary.overlayX) &&
+    position.originX === flipX(primary.originX) &&
+    position.overlayX === flipX(primary.overlayX);
+
+/** Whether `position` flips `primary` on the vertical axis: both of its Y sides, and not onto themselves. */
+const mirrorsY = (primary: ConnectionPositionPair, position: ConnectionPositionPair): boolean =>
+    (position.originY !== primary.originY || position.overlayY !== primary.overlayY) &&
+    position.originY === flipY(primary.originY) &&
+    position.overlayY === flipY(primary.overlayY);
+
+// Keeps a zero offset at +0 rather than -0.
+const negate = (value: number): number => (value === 0 ? 0 : -value);

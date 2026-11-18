@@ -15,10 +15,11 @@ import { DestroyRef, DOCUMENT, ElementRef, inject, Injectable, Injector, Templat
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MonaI18nService, observeComponentDirection, resolveComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import { createPageScrollBlockStrategy, focusCanReturn } from "@nanahoshi/mona-ui/internal";
-import { fromEvent, merge, Subject, Subscription, take, takeUntil } from "rxjs";
+import { filter, fromEvent, merge, Subject, Subscription, take, takeUntil } from "rxjs";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
 import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
 import { PopupDataInjectionToken, POPUP_SETTINGS } from "../models/PopupInjectionToken";
+import type { PopupOffset } from "../models/PopupOffset";
 import { PopupRef } from "../models/PopupRef";
 import { PopupReference } from "../models/PopupReference";
 import { POPUP_REFERENCE } from "../models/PopupReferenceInjectionToken";
@@ -171,9 +172,11 @@ export class PopupService {
         }
 
         const resolvedAnchor = this.resolveAnchor(settings.anchor);
+        // The positions made from the connection points carry their own offsets, mirrored for the fallbacks on the
+        // anchor's other side. Positions the caller passes keep the default offset unless they set their own.
         const position = settings.positions?.length
             ? settings.positions
-            : this.getPosition(settings.anchorConnectionPoint, settings.popupConnectionPoint);
+            : this.getPosition(settings.anchorConnectionPoint, settings.popupConnectionPoint, settings.offset);
         const strategy = this.#overlay
             .position()
             .flexibleConnectedTo(resolvedAnchor)
@@ -235,11 +238,12 @@ export class PopupService {
 
     private getPosition(
         anchorConnectionPoint?: ConnectionPoint | null,
-        popupConnectionPoint?: ConnectionPoint | null
+        popupConnectionPoint?: ConnectionPoint | null,
+        offset?: PopupOffset
     ): ConnectionPositionPair[] {
         const anchorPoint = anchorConnectionPoint ?? "bottomleft";
         const popupPoint = popupConnectionPoint ?? "topleft";
-        return connectionPosition(anchorPoint, popupPoint);
+        return connectionPosition(anchorPoint, popupPoint, offset);
     }
 
     private getScrollableAncestorElements(anchorElement: HTMLElement): HTMLElement[] {
@@ -653,11 +657,16 @@ export class PopupService {
             popupReference.close(closeEvent, 0);
         };
 
+        // Browsers report a scroll on the next frame, so the event for one made just before the popup opened can
+        // arrive after it: focusing a field that is partly out of view scrolls it in, and a script that focuses and
+        // opens in one task sees that event once the popup is open. Only a scroller that moved since opening closes it.
         // The page scrolls the anchor away whether or not it also sits in a scrollable container.
         const win = this.#document.defaultView!;
+        const pageStart = { left: win.scrollX, top: win.scrollY };
+        const pageMoved = () => win.scrollX !== pageStart.left || win.scrollY !== pageStart.top;
         const pageEvents = [
-            fromEvent(win, "scroll", { passive: true }),
-            fromEvent(this.#document, "scroll", { passive: true })
+            fromEvent(win, "scroll", { passive: true }).pipe(filter(pageMoved)),
+            fromEvent(this.#document, "scroll", { passive: true }).pipe(filter(pageMoved))
         ];
         if (scrollableContainers.length === 0) {
             pageEvents.push(fromEvent(win, "resize", { passive: true }));
@@ -668,9 +677,15 @@ export class PopupService {
         subscriptions.push(pageScrollSubscription);
 
         scrollableContainers.forEach(scrollable => {
+            const element = scrollable.getElementRef().nativeElement;
+            const start = { left: element.scrollLeft, top: element.scrollTop };
             const containerScrollSubscription = scrollable
                 .elementScrolled()
-                .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
+                .pipe(
+                    filter(() => element.scrollLeft !== start.left || element.scrollTop !== start.top),
+                    takeUntil(popupReference.closed),
+                    takeUntilDestroyed(this.#destroyRef)
+                )
                 .subscribe(() => handleScrollClose());
             subscriptions.push(containerScrollSubscription);
         });

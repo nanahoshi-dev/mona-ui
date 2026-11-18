@@ -1,0 +1,54 @@
+<main class="mx-auto max-w-3xl p-6">
+    <h1>Popup scroll checks</h1>
+    <p>Each field sits in a scroll box, so focusing one that is partly out of view scrolls the box.</p>
+    <div class="h-80 overflow-y-auto rounded-md border border-border p-4" data-testid="popup-scroll-box">
+        <div class="h-96"></div>
+        <div class="flex max-w-sm flex-col gap-1">
+            <label id="popup-scroll-multi-select-label" monaLabel [for]="multiSelect">Working days</label>
+            <mona-multi-select
+                #multiSelect
+                aria-labelledby="popup-scroll-multi-select-label"
+                data-testid="popup-scroll-multi-select"
+                textField="name"
+                valueField="id"
+                [data]="days"
+                [valuePrimitive]="true"
+                [(value)]="dayIds" />
+        </div>
+        <div class="h-96"></div>
+        <div class="flex max-w-sm flex-col gap-1">
+            <label id="popup-scroll-dropdown-list-label" monaLabel [for]="dropdownList">Day</label>
+            <mona-dropdown-list
+                #dropdownList
+                aria-labelledby="popup-scroll-dropdown-list-label"
+                data-testid="popup-scroll-dropdown-list"
+                textField="name"
+                valueField="id"
+                [data]="days"
+                [valuePrimitive]="true"
+                [(value)]="dayId" />
+        </div>
+        <div class="h-96"></div>
+        <div class="flex max-w-sm flex-col gap-1">
+            <label monaLabel for="popup-scroll-combo-box-input">Day</label>
+            <mona-combo-box
+                data-testid="popup-scroll-combo-box"
+                inputId="popup-scroll-combo-box-input"
+                textField="name"
+                valueField="id"
+                [data]="days"
+                [valuePrimitive]="true"
+                [(value)]="comboBoxDayId" />
+        </div>
+        <div class="h-96"></div>
+        <div class="flex max-w-sm flex-col gap-1">
+            <label monaLabel for="popup-scroll-auto-complete-input">Country</label>
+            <mona-auto-complete
+                data-testid="popup-scroll-auto-complete"
+                inputId="popup-scroll-auto-complete-input"
+                [data]="countries"
+                [(value)]="country" />
+        </div>
+        <div class="h-96"></div>
+    </div>
+</main>
