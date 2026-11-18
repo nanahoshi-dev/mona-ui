@@ -1,0 +1,64 @@
+@for (prefixTemplate of prefixTemplateList(); track $index) {
+    <span class="flex h-full flex-wrap items-center">
+        <ng-container *ngTemplateOutlet="prefixTemplate"></ng-container>
+    </span>
+}
+
+<!-- Masked values, such as phone numbers and codes, read left to right in every language. -->
+<span [class]="fieldClass" dir="ltr">
+    @if (ghostVisible()) {
+        <span [class]="ghostClass" [style.transform]="ghostTransform()" aria-hidden="true">
+            <span class="invisible">{{ display().text }}</span><span>{{ display().ghost }}</span>
+        </span>
+    }
+    <input
+        type="text"
+        spellcheck="false"
+        [id]="inputId()"
+        [class]="inputClasses()"
+        [style]="inputStyle()"
+        [disabled]="effectiveDisabled()"
+        [readonly]="readonly()"
+        [required]="required()"
+        [attr.aria-describedby]="describedBy()"
+        [attr.aria-invalid]="invalidInput() ? 'true' : null"
+        [attr.aria-label]="ariaLabel() || null"
+        [attr.aria-labelledby]="labelledBy()"
+        [attr.inputmode]="inputMode()"
+        [attr.name]="name() || null"
+        [attr.placeholder]="shownPlaceholder() || null"
+        [monaAttributeBinder]="inputAttributes()"
+        [value]="display().text"
+        (beforeinput)="onBeforeInput($event)"
+        (input)="onInput($event)"
+        (compositionstart)="onCompositionStart()"
+        (compositionend)="onCompositionEnd()"
+        (cut)="onCut($event)"
+        (paste)="onPaste($event)"
+        (keydown)="onKeydown($event)"
+        (pointerdown)="onPointerDown()"
+        (scroll)="onScroll()"
+        (select)="onScroll()"
+        (focus)="onFocus($event)"
+        (blur)="onBlur($event)"
+        #input />
+</span>
+
+@if (showClearButton()) {
+    <button
+        monaButton
+        type="button"
+        look="ghost"
+        size="small"
+        class="me-1 size-6 shrink-0 p-0 text-muted-foreground hover:text-foreground"
+        [attr.aria-label]="messages().clear"
+        (click)="onClearClick()">
+        <svg lucideX class="size-4"></svg>
+    </button>
+}
+
+@for (suffixTemplate of suffixTemplateList(); track $index) {
+    <span class="flex h-full flex-wrap items-center">
+        <ng-container *ngTemplateOutlet="suffixTemplate"></ng-container>
+    </span>
+}
