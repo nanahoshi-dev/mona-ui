@@ -42,6 +42,8 @@ From `@nanahoshi/mona-ui/dropdowns`:
 | [`DropdownDataInputToken`](/api/dropdowns/DropdownDataInputToken) | Constant | **Deprecated.** Use `DROPDOWN_DATA_INPUT_TOKEN`. |
 | [`DROPDOWNS_DEFAULT_MESSAGES`](/api/dropdowns/DROPDOWNS_DEFAULT_MESSAGES) | Constant |  |
 | [`DropdownDataInput`](/api/dropdowns/DropdownDataInput) | Interface |  |
+| [`DropdownSheetData`](/api/dropdowns/DropdownSheetData) | Interface | What a dropdown passes to the bottom sheet its popup opens as. |
+| [`AdaptiveMode`](/api/dropdowns/AdaptiveMode) | Type alias | How a dropdown's popup adapts to a small screen: `"auto"` opens it as a sheet along the bottom of the screen when the screen is narrower than 640 pixels, and `"none"` always opens it under the field. |
 | [`DropdownFieldPredicateType`](/api/dropdowns/DropdownFieldPredicateType) | Type alias |  |
 | [`DropdownFieldSelectorType`](/api/dropdowns/DropdownFieldSelectorType) | Type alias |  |
 

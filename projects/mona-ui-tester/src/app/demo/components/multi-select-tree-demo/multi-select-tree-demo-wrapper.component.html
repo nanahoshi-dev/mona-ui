@@ -1,0 +1,28 @@
+<div class="flex flex-col gap-2">
+    <span>Value: {{ valueText(value()) }}</span>
+    <span id="multi-select-tree-demo-label">Places</span>
+    <mona-multi-select-tree
+        aria-labelledby="multi-select-tree-demo-label"
+        children="places"
+        monaDropDownFilterable
+        textField="name"
+        valueField="id"
+        [adaptiveMode]="adaptiveMode()"
+        [adaptiveTitle]="adaptiveTitle()"
+        [checkChildren]="checkChildren()"
+        [checkParents]="checkParents()"
+        [data]="places"
+        [disabled]="disabled()"
+        [loading]="loading()"
+        [placeholder]="placeholder()"
+        [popupClass]="popupClass()"
+        [popupHeight]="popupHeight()"
+        [popupWidth]="popupWidth()"
+        [readonly]="readonly()"
+        [required]="required()"
+        [rounded]="rounded()"
+        [showClearButton]="showClearButton()"
+        [size]="size()"
+        [class]="userClass()"
+        [(value)]="value" />
+</div>

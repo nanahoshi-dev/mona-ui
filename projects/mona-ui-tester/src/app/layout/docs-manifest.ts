@@ -245,10 +245,24 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                 { apiAlsoFrom: ["dropdowns"] }
             ),
             component(
+                "dropdown-tree",
+                "Dropdown Tree",
+                "dropdown-tree",
+                "A closed control that opens a tree for choosing one item from a hierarchy.",
+                { apiAlsoFrom: ["dropdowns"] }
+            ),
+            component(
                 "multi-select",
                 "Multi Select",
                 "multi-select",
                 "A control that shows selected options as removable tags.",
+                { apiAlsoFrom: ["dropdowns"] }
+            ),
+            component(
+                "multi-select-tree",
+                "Multi Select Tree",
+                "multi-select-tree",
+                "A control that opens a tree with checkboxes and shows the checked items as removable tags.",
                 { apiAlsoFrom: ["dropdowns"] }
             ),
             component(

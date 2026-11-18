@@ -1,0 +1,14 @@
+<div class="flex max-w-sm flex-col gap-2">
+    <mona-form-field label="Save to">
+        <mona-dropdown-tree
+            class="w-full"
+            placeholder="Choose a folder"
+            textField="name"
+            valueField="path"
+            [children]="loadFolders"
+            [data]="roots"
+            [hasChildren]="hasFolders"
+            [(value)]="destination" />
+    </mona-form-field>
+    <span class="text-sm">Path: {{ destination()?.path ?? "none" }}</span>
+</div>
