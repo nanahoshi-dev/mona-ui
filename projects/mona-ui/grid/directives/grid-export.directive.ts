@@ -13,4 +13,12 @@ export class GridExportDirective {
     public exportCsv(filename?: string): void {
         this.#exportService.exportCsv(filename);
     }
+
+    /**
+     * Exports the same rows and columns as `exportCsv` as an Excel workbook (`.xlsx`), with column groups as merged
+     * header cells and values that keep their types. Resolves once the download has started.
+     */
+    public exportExcel(filename?: string): Promise<void> {
+        return this.#exportService.exportExcel(filename);
+    }
 }
