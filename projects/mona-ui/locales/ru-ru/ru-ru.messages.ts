@@ -288,6 +288,29 @@ export const RU_RU_MESSAGES = {
         backgroundColor: "Цвет фона",
         bold: "Полужирный",
         cancel: "Отмена",
+        characterCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} символ`,
+                few: () => `${localizeNumber(count)} символа`,
+                many: () => `${localizeNumber(count)} символов`,
+                other: () => `${localizeNumber(count)} символа`
+            }),
+        characterLimitHint: (limit: number) =>
+            `Можно ввести не более ${plural(PLURAL_RULES.select(limit), { one: () => `${localizeNumber(limit)} символа`, few: () => `${localizeNumber(limit)} символов`, many: () => `${localizeNumber(limit)} символов`, other: () => `${localizeNumber(limit)} символа` })}.`,
+        charactersLeft: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Остался ${localizeNumber(count)} символ`,
+                few: () => `Осталось ${localizeNumber(count)} символа`,
+                many: () => `Осталось ${localizeNumber(count)} символов`,
+                other: () => `Осталось ${localizeNumber(count)} символа`
+            }),
+        charactersOver: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} символ сверх лимита`,
+                few: () => `${localizeNumber(count)} символа сверх лимита`,
+                many: () => `${localizeNumber(count)} символов сверх лимита`,
+                other: () => `${localizeNumber(count)} символа сверх лимита`
+            }),
         codeBlock: "Блок кода",
         color: "Цвет",
         contentLabel: "Редактор форматированного текста",
@@ -295,6 +318,7 @@ export const RU_RU_MESSAGES = {
         deleteColumn: "Удалить столбец",
         deleteRow: "Удалить строку",
         deleteTable: "Удалить таблицу",
+        editImage: "Изменить изображение",
         editLink: "Изменить ссылку",
         enterUrl: "Введите URL",
         fontSize: "Размер шрифта",
@@ -302,6 +326,11 @@ export const RU_RU_MESSAGES = {
         heading: (level: number) => `Заголовок ${localizeNumber(level)}`,
         heightPx: "Высота (px)",
         historyGroup: "История",
+        imageFile: "Файл изображения",
+        imageInserted: (name: string) => `Изображение ${name} вставлено.`,
+        imageTooLarge: (name: string, size: string) => `Файл ${name} не добавлен. Его размер больше ${size}.`,
+        imageUploadFailed: (name: string) => `Не удалось загрузить ${name}.`,
+        imageUploading: (name: string) => `Загрузка ${name}`,
         imageUrl: "URL изображения",
         indent: "Увеличить отступ",
         indentGroup: "Отступ",
@@ -317,12 +346,23 @@ export const RU_RU_MESSAGES = {
         justify: "Выровнять по ширине",
         linkGroup: "Ссылка",
         listGroup: "Списки",
+        mentionNoResults: "Совпадений нет",
+        mentionResults: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} вариант`,
+                few: () => `${localizeNumber(count)} варианта`,
+                many: () => `${localizeNumber(count)} вариантов`,
+                other: () => `${localizeNumber(count)} варианта`
+            }),
+        mentionSearching: "Поиск…",
+        mentionSuggestions: "Варианты",
         mergeCells: "Объединить выбранные ячейки",
         outdent: "Уменьшить отступ",
         paragraph: "Абзац",
         quotation: "Цитата",
         redo: "Повторить",
         removeLink: "Удалить ссылку",
+        save: "Сохранить",
         selectFontFamily: "Выбрать шрифт",
         selectFontSize: "Выбрать размер шрифта",
         splitCell: "Разделить ячейку",
@@ -337,7 +377,14 @@ export const RU_RU_MESSAGES = {
         toolbar: "Форматирование",
         underline: "Подчёркнутый",
         undo: "Отменить",
-        widthPx: "Ширина (px)"
+        widthPx: "Ширина (px)",
+        wordCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} слово`,
+                few: () => `${localizeNumber(count)} слова`,
+                many: () => `${localizeNumber(count)} слов`,
+                other: () => `${localizeNumber(count)} слова`
+            })
     },
     fileUpload: {
         browse: "Выбрать файлы",

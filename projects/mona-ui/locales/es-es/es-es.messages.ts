@@ -281,6 +281,23 @@ export const ES_ES_MESSAGES = {
         backgroundColor: "Color de fondo",
         bold: "Negrita",
         cancel: "Cancelar",
+        characterCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} carácter`,
+                other: () => `${localizeNumber(count)} caracteres`
+            }),
+        characterLimitHint: (limit: number) =>
+            `Puede escribir hasta ${plural(PLURAL_RULES.select(limit), { one: () => `${localizeNumber(limit)} carácter`, other: () => `${localizeNumber(limit)} caracteres` })}.`,
+        charactersLeft: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Queda ${localizeNumber(count)} carácter`,
+                other: () => `Quedan ${localizeNumber(count)} caracteres`
+            }),
+        charactersOver: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} carácter de más`,
+                other: () => `${localizeNumber(count)} caracteres de más`
+            }),
         codeBlock: "Bloque de código",
         color: "Color",
         contentLabel: "Editor de texto enriquecido",
@@ -288,6 +305,7 @@ export const ES_ES_MESSAGES = {
         deleteColumn: "Eliminar columna",
         deleteRow: "Eliminar fila",
         deleteTable: "Eliminar tabla",
+        editImage: "Editar imagen",
         editLink: "Editar enlace",
         enterUrl: "Introducir la URL",
         fontSize: "Tamaño de fuente",
@@ -295,6 +313,11 @@ export const ES_ES_MESSAGES = {
         heading: (level: number) => `Encabezado ${localizeNumber(level)}`,
         heightPx: "Altura (px)",
         historyGroup: "Historial",
+        imageFile: "Archivo de imagen",
+        imageInserted: (name: string) => `Se ha insertado ${name}.`,
+        imageTooLarge: (name: string, size: string) => `No se ha añadido ${name}. El archivo supera ${size}.`,
+        imageUploadFailed: (name: string) => `No se ha podido subir ${name}.`,
+        imageUploading: (name: string) => `Subiendo ${name}`,
         imageUrl: "URL de la imagen",
         indent: "Aumentar sangría",
         indentGroup: "Sangría",
@@ -310,12 +333,21 @@ export const ES_ES_MESSAGES = {
         justify: "Justificar",
         linkGroup: "Enlace",
         listGroup: "Listas",
+        mentionNoResults: "No hay coincidencias",
+        mentionResults: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} sugerencia`,
+                other: () => `${localizeNumber(count)} sugerencias`
+            }),
+        mentionSearching: "Buscando…",
+        mentionSuggestions: "Sugerencias",
         mergeCells: "Combinar celdas seleccionadas",
         outdent: "Reducir sangría",
         paragraph: "Párrafo",
         quotation: "Cita",
         redo: "Rehacer",
         removeLink: "Quitar enlace",
+        save: "Guardar",
         selectFontFamily: "Seleccionar familia de fuentes",
         selectFontSize: "Seleccionar tamaño de fuente",
         splitCell: "Dividir celda",
@@ -330,7 +362,12 @@ export const ES_ES_MESSAGES = {
         toolbar: "Formato",
         underline: "Subrayado",
         undo: "Deshacer",
-        widthPx: "Anchura (px)"
+        widthPx: "Anchura (px)",
+        wordCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} palabra`,
+                other: () => `${localizeNumber(count)} palabras`
+            })
     },
     fileUpload: {
         browse: "Examinar archivos",

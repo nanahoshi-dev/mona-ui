@@ -300,6 +300,29 @@ export const PL_PL_MESSAGES = {
         backgroundColor: "Kolor tła",
         bold: "Pogrubienie",
         cancel: "Anuluj",
+        characterCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} znak`,
+                few: () => `${localizeNumber(count)} znaki`,
+                many: () => `${localizeNumber(count)} znaków`,
+                other: () => `${localizeNumber(count)} znaku`
+            }),
+        characterLimitHint: (limit: number) =>
+            `Możesz wpisać maksymalnie ${plural(PLURAL_RULES.select(limit), { one: () => `${localizeNumber(limit)} znak`, few: () => `${localizeNumber(limit)} znaki`, many: () => `${localizeNumber(limit)} znaków`, other: () => `${localizeNumber(limit)} znaku` })}.`,
+        charactersLeft: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `Pozostał ${localizeNumber(count)} znak`,
+                few: () => `Pozostały ${localizeNumber(count)} znaki`,
+                many: () => `Pozostało ${localizeNumber(count)} znaków`,
+                other: () => `Pozostało ${localizeNumber(count)} znaku`
+            }),
+        charactersOver: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} znak za dużo`,
+                few: () => `${localizeNumber(count)} znaki za dużo`,
+                many: () => `${localizeNumber(count)} znaków za dużo`,
+                other: () => `${localizeNumber(count)} znaku za dużo`
+            }),
         codeBlock: "Blok kodu",
         color: "Kolor",
         contentLabel: "Edytor tekstu sformatowanego",
@@ -307,6 +330,7 @@ export const PL_PL_MESSAGES = {
         deleteColumn: "Usuń kolumnę",
         deleteRow: "Usuń wiersz",
         deleteTable: "Usuń tabelę",
+        editImage: "Edytuj obraz",
         editLink: "Edytuj link",
         enterUrl: "Wprowadź adres URL",
         fontSize: "Rozmiar czcionki",
@@ -314,6 +338,11 @@ export const PL_PL_MESSAGES = {
         heading: (level: number) => `Nagłówek ${localizeNumber(level)}`,
         heightPx: "Wysokość (px)",
         historyGroup: "Historia",
+        imageFile: "Plik obrazu",
+        imageInserted: (name: string) => `Wstawiono ${name}.`,
+        imageTooLarge: (name: string, size: string) => `Nie dodano pliku ${name}. Plik jest większy niż ${size}.`,
+        imageUploadFailed: (name: string) => `Nie udało się przesłać pliku ${name}.`,
+        imageUploading: (name: string) => `Przesyłanie pliku ${name}`,
         imageUrl: "Adres URL obrazu",
         indent: "Zwiększ wcięcie",
         indentGroup: "Wcięcia",
@@ -329,12 +358,23 @@ export const PL_PL_MESSAGES = {
         justify: "Wyjustuj",
         linkGroup: "Linki",
         listGroup: "Listy",
+        mentionNoResults: "Brak wyników",
+        mentionResults: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} sugestia`,
+                few: () => `${localizeNumber(count)} sugestie`,
+                many: () => `${localizeNumber(count)} sugestii`,
+                other: () => `${localizeNumber(count)} sugestii`
+            }),
+        mentionSearching: "Wyszukiwanie…",
+        mentionSuggestions: "Sugestie",
         mergeCells: "Scal zaznaczone komórki",
         outdent: "Zmniejsz wcięcie",
         paragraph: "Akapit",
         quotation: "Cytat",
         redo: "Ponów",
         removeLink: "Usuń link",
+        save: "Zapisz",
         selectFontFamily: "Wybierz czcionkę",
         selectFontSize: "Wybierz rozmiar czcionki",
         splitCell: "Podziel komórkę",
@@ -349,7 +389,14 @@ export const PL_PL_MESSAGES = {
         toolbar: "Formatowanie",
         underline: "Podkreślenie",
         undo: "Cofnij",
-        widthPx: "Szerokość (px)"
+        widthPx: "Szerokość (px)",
+        wordCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} słowo`,
+                few: () => `${localizeNumber(count)} słowa`,
+                many: () => `${localizeNumber(count)} słów`,
+                other: () => `${localizeNumber(count)} słowa`
+            })
     },
     fileUpload: {
         browse: "Przeglądaj pliki",

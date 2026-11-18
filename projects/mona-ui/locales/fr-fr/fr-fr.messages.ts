@@ -283,6 +283,23 @@ export const FR_FR_MESSAGES = {
         backgroundColor: "Couleur d’arrière-plan",
         bold: "Gras",
         cancel: "Annuler",
+        characterCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} caractère`,
+                other: () => `${localizeNumber(count)} caractères`
+            }),
+        characterLimitHint: (limit: number) =>
+            `Vous pouvez saisir jusqu’à ${plural(PLURAL_RULES.select(limit), { one: () => `${localizeNumber(limit)} caractère`, other: () => `${localizeNumber(limit)} caractères` })}.`,
+        charactersLeft: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} caractère restant`,
+                other: () => `${localizeNumber(count)} caractères restants`
+            }),
+        charactersOver: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} caractère en trop`,
+                other: () => `${localizeNumber(count)} caractères en trop`
+            }),
         codeBlock: "Bloc de code",
         color: "Couleur",
         contentLabel: "Éditeur de texte enrichi",
@@ -290,6 +307,7 @@ export const FR_FR_MESSAGES = {
         deleteColumn: "Supprimer la colonne",
         deleteRow: "Supprimer la ligne",
         deleteTable: "Supprimer le tableau",
+        editImage: "Modifier l’image",
         editLink: "Modifier le lien",
         enterUrl: "Saisir l’URL",
         fontSize: "Taille de police",
@@ -297,6 +315,11 @@ export const FR_FR_MESSAGES = {
         heading: (level: number) => `Titre ${localizeNumber(level)}`,
         heightPx: "Hauteur (px)",
         historyGroup: "Historique",
+        imageFile: "Fichier image",
+        imageInserted: (name: string) => `${name} a été inséré.`,
+        imageTooLarge: (name: string, size: string) => `${name} n’a pas été ajouté. Le fichier dépasse ${size}.`,
+        imageUploadFailed: (name: string) => `Impossible de téléverser ${name}.`,
+        imageUploading: (name: string) => `Téléversement de ${name}`,
         imageUrl: "URL de l’image",
         indent: "Augmenter le retrait",
         indentGroup: "Retrait",
@@ -312,12 +335,21 @@ export const FR_FR_MESSAGES = {
         justify: "Justifier le texte",
         linkGroup: "Lien",
         listGroup: "Listes",
+        mentionNoResults: "Aucun résultat",
+        mentionResults: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} proposition`,
+                other: () => `${localizeNumber(count)} propositions`
+            }),
+        mentionSearching: "Recherche…",
+        mentionSuggestions: "Propositions",
         mergeCells: "Fusionner les cellules sélectionnées",
         outdent: "Diminuer le retrait",
         paragraph: "Paragraphe",
         quotation: "Citation",
         redo: "Rétablir",
         removeLink: "Supprimer le lien",
+        save: "Enregistrer",
         selectFontFamily: "Sélectionner la police",
         selectFontSize: "Sélectionner la taille de police",
         splitCell: "Scinder la cellule",
@@ -332,7 +364,12 @@ export const FR_FR_MESSAGES = {
         toolbar: "Mise en forme",
         underline: "Souligné",
         undo: "Annuler",
-        widthPx: "Largeur (px)"
+        widthPx: "Largeur (px)",
+        wordCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} mot`,
+                other: () => `${localizeNumber(count)} mots`
+            })
     },
     fileUpload: {
         browse: "Parcourir les fichiers",
