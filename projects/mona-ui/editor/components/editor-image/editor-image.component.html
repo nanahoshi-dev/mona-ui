@@ -1,9 +1,4 @@
-<button
-    monaButton
-    [size]="'small'"
-    aria-haspopup="dialog"
-    (click)="onDisplayInserterClick()"
-    [title]="messages().insertImage">
+<button monaButton [size]="'small'" aria-haspopup="dialog" (click)="onDisplayInserterClick()" [title]="label()">
     <i class="ri-image-add-line"></i>
 </button>
 
@@ -11,12 +6,16 @@
     <mona-window
         [width]="400"
         [modal]="true"
-        [title]="messages().insertImage"
+        [title]="editedImage() ? messages().editImage : messages().insertImage"
         [minimizable]="false"
         [maximizable]="false"
         (close)="onInserterClose()">
         <ng-template monaWindowContentTemplate>
             <mona-editor-image-inserter
+                [accept]="upload().accept"
+                [image]="editedImage()"
+                [maxFileSize]="upload().maxFileSize"
+                [upload]="upload().handler"
                 (insert)="onImageInsert($event)"
                 (insertCancel)="onInsertCancel()"></mona-editor-image-inserter>
         </ng-template>

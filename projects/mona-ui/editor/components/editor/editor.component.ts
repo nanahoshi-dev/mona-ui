@@ -17,25 +17,35 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
+import type { FileUploadHandler } from "@nanahoshi/mona-ui/file-upload";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import {
+    createElementControlId,
     FIELD_ASSOCIATION_BOUNDARY,
     injectEffectiveDisabled,
     injectLabelAssociation,
     RovingToolbar
 } from "@nanahoshi/mona-ui/internal";
+import { injectLiveAnnouncer } from "@nanahoshi/mona-ui/internal/live-announcer";
 import type { JSONContent } from "@tiptap/core";
+import { debounceTime } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { EDITOR_DEFAULT_MESSAGES } from "../../i18n/editor.default-messages";
 import type { ContentChangeEvent } from "../../models/ContentChangeEvent";
+import type { EditorMentionSearch } from "../../models/EditorMention";
 import type { EditorSettings } from "../../models/EditorSettings";
+import { EditorImageUploadService } from "../../services/editor-image-upload.service";
+import { EditorMentionService } from "../../services/editor-mention.service";
 import { EditorService } from "../../services/editor.service";
 import {
+    EDITOR_COUNT_OVER_CLASSES,
+    EDITOR_FOOTER_CLASSES,
     editorBaseThemeVariants,
     editorContainerThemeVariants,
     editorPlaceholderThemeVariants,
     editorToolbarThemeVariants
 } from "../../styles/editor.styles";
+import { countText, documentText } from "../../utils/textCount";
 import { EditorBasicTextStylesComponent } from "../editor-basic-text-styles/editor-basic-text-styles.component";
 import { EditorBlockquoteComponent } from "../editor-blockquote/editor-blockquote.component";
 import { EditorCodeBlockComponent } from "../editor-code-block/editor-code-block.component";
@@ -78,7 +88,7 @@ const EMPTY_DOCUMENT: JSONContent = { type: "doc", content: [] };
         EditorCodeBlockComponent
     ],
     templateUrl: "./editor.component.html",
-    providers: [EditorService],
+    providers: [EditorService, EditorImageUploadService, EditorMentionService],
     viewProviders: [...FIELD_ASSOCIATION_BOUNDARY],
     host: {
         "[class]": "baseClass()",
@@ -92,6 +102,16 @@ const EMPTY_DOCUMENT: JSONContent = { type: "doc", content: [] };
     }
 })
 export class EditorComponent implements FormValueControl<string> {
+    readonly #announcer = injectLiveAnnouncer();
+
+    /** The characters of the content, while a limit or a character count needs them. */
+    readonly #characters = computed(() => {
+        const state = this.editorService.state();
+        if (state === null || (this.characterLimit() === null && !this.showCharacterCount())) {
+            return null;
+        }
+        return countText(documentText(state.doc, "characters"), "characters", this.#i18n.localeId() ?? undefined);
+    });
     readonly #contentAttributes = computed(() => {
         // Tiptap adds the role when it creates the view, but later attribute updates replace the whole set.
         const attributes: Record<string, string> = {
@@ -105,9 +125,17 @@ export class EditorComponent implements FormValueControl<string> {
         } else {
             attributes["aria-label"] = this.ariaLabel() || this.messages().contentLabel;
         }
-        const ariaDescribedBy = this.#label.describedBy();
-        if (ariaDescribedBy) {
-            attributes["aria-describedby"] = ariaDescribedBy;
+        const describedBy = [this.#label.describedBy(), this.characterLimit() === null ? "" : this.limitHintId]
+            .filter(id => !!id)
+            .join(" ");
+        if (describedBy) {
+            attributes["aria-describedby"] = describedBy;
+        }
+        const activeDescendant = this.#mention.activeDescendant();
+        if (activeDescendant) {
+            attributes["aria-activedescendant"] = activeDescendant;
+            attributes["aria-autocomplete"] = "list";
+            attributes["aria-controls"] = this.#mention.listId;
         }
         if (this.placeholder()) {
             attributes["aria-placeholder"] = this.placeholder();
@@ -130,6 +158,7 @@ export class EditorComponent implements FormValueControl<string> {
     readonly #direction = injectComponentDirection();
     readonly #editable = computed(() => !this.effectiveDisabled() && !this.readonly());
     readonly #i18n = inject(MonaI18nService);
+    readonly #imageUpload = inject(EditorImageUploadService);
     readonly #label = injectLabelAssociation({
         activate: () => this.focus(),
         ariaDescribedBy: () => this.ariaDescribedBy(),
@@ -137,8 +166,18 @@ export class EditorComponent implements FormValueControl<string> {
         ariaLabelledBy: () => this.ariaLabelledBy(),
         focus: () => this.focus()
     });
+    readonly #mention = inject(EditorMentionService);
     readonly #rendered = signal(false);
     readonly #toolbar = new RovingToolbar(() => this.toolbarElement()?.nativeElement);
+
+    /** The words of the content, while the word count shows. */
+    readonly #words = computed(() => {
+        const state = this.editorService.state();
+        if (state === null || !this.showWordCount()) {
+            return null;
+        }
+        return countText(documentText(state.doc, "words"), "words", this.#i18n.localeId() ?? undefined);
+    });
 
     /** The last `content` applied, so a binding that echoes the editor's own output isn't applied again. */
     #appliedContent: string | JSONContent | undefined = undefined;
@@ -156,13 +195,59 @@ export class EditorComponent implements FormValueControl<string> {
     protected readonly containerClass = computed(() => {
         return editorContainerThemeVariants({ disabled: this.effectiveDisabled() });
     });
+
+    /** The counts under the content: the words, then the characters or the characters left. */
+    protected readonly countParts = computed(() => {
+        const messages = this.messages();
+        const parts: { readonly class: string; readonly text: string }[] = [];
+        const words = this.#words();
+        if (words !== null) {
+            parts.push({ class: "", text: messages.wordCount(words) });
+        }
+        const limitMessage = this.limitMessage();
+        const characters = this.#characters();
+        if (limitMessage !== null) {
+            parts.push({ class: this.overLimit() ? EDITOR_COUNT_OVER_CLASSES : "", text: limitMessage });
+        } else if (characters !== null) {
+            parts.push({ class: "", text: messages.characterCount(characters) });
+        }
+        return parts;
+    });
     protected readonly editorContainer = viewChild.required<ElementRef<HTMLDivElement>>("editorContainer");
     protected readonly editorService = inject(EditorService);
     protected readonly effectiveDisabled = injectEffectiveDisabled(() => this.disabled());
+    protected readonly footerClass = EDITOR_FOOTER_CLASSES;
     protected readonly invalidState = computed(
-        () => this.touched() && (this.invalid() || (this.required() && !this.value()))
+        () => (this.touched() && (this.invalid() || (this.required() && !this.value()))) || this.overLimit()
     );
+
+    /** Says how many characters the content can have, for assistive technology. */
+    protected readonly limitHint = computed(() => {
+        const limit = this.characterLimit();
+        return limit === null ? "" : this.messages().characterLimitHint(limit);
+    });
+    protected readonly limitHintId = createElementControlId();
+
+    /** How many characters are left, or how many are over the limit. Null without a limit. */
+    protected readonly limitMessage = computed(() => {
+        const limit = this.characterLimit();
+        const characters = this.#characters();
+        if (limit === null || characters === null) {
+            return null;
+        }
+        const messages = this.messages();
+        return characters <= limit
+            ? messages.charactersLeft(limit - characters)
+            : messages.charactersOver(characters - limit);
+    });
     protected readonly messages = this.#i18n.componentMessages("editor", EDITOR_DEFAULT_MESSAGES);
+
+    /** Whether the content has more characters than its limit. */
+    protected readonly overLimit = computed(() => {
+        const limit = this.characterLimit();
+        const characters = this.#characters();
+        return limit !== null && characters !== null && characters > limit;
+    });
     protected readonly placeholderClass = computed(() => editorPlaceholderThemeVariants());
     protected readonly toolbarClass = computed(() => {
         return editorToolbarThemeVariants({ disabled: this.effectiveDisabled() });
@@ -191,6 +276,14 @@ export class EditorComponent implements FormValueControl<string> {
      */
     // eslint-disable-next-line @angular-eslint/no-output-native -- Kept for compatibility; `editorBlur` replaces it.
     public readonly blur = output();
+
+    /**
+     * @description How many characters the content should fit, counted as people see them: the text without the
+     * markup, where an emoji or a letter with an accent counts once. Under the content, a count says how many are
+     * left. Typing past the limit isn't blocked, so nothing pasted is lost: the count turns into how many are over,
+     * and the editor shows as invalid. For a form, validate the value with `countEditorText`.
+     */
+    public readonly characterLimit = input<number | null>(null);
 
     /**
      * @description The initial content of the editor, as HTML or a {@link JSONContent} document. A later change
@@ -223,10 +316,33 @@ export class EditorComponent implements FormValueControl<string> {
     public readonly editorFocus = output();
 
     /**
+     * @description The image files `imageUpload` takes, as an `accept` attribute: MIME types such as `image/png`,
+     * `image/*` for any image, and extensions such as `.png`.
+     */
+    public readonly imageAccept = input("image/*");
+
+    /** @description The largest image file, in bytes, that `imageUpload` takes. Null takes any size. */
+    public readonly imageMaxFileSize = input<number | null>(null);
+
+    /**
+     * @description Uploads image files, and returns the image's address: as a promise or an observable, the same
+     * way as the file upload's `upload`. With it, the image form takes a file, and images pasted or dropped into the
+     * content upload in place, with a placeholder while they do. Without it, images are added by their address.
+     */
+    public readonly imageUpload = input<FileUploadHandler | null>(null);
+
+    /**
      * @description Marks the editor as invalid once it has been touched. When bound to a signal form field via
      * `[formField]`, the form sets it.
      */
     public readonly invalid = input(false, { transform: booleanAttribute });
+
+    /**
+     * @description Finds the mentions to offer as `@` and a query are typed. With it, a list of suggestions opens at
+     * the `@`: the arrow keys move through it, Enter or Tab puts the highlighted one in the content, and Escape closes
+     * it. A mention is kept in the HTML as `<span data-type="mention" data-id="…">`.
+     */
+    public readonly mentionSearch = input<EditorMentionSearch | null>(null);
 
     /**
      * @description Text shown in the empty editor, and given to assistive technology as `aria-placeholder`. It is not
@@ -254,6 +370,12 @@ export class EditorComponent implements FormValueControl<string> {
      * @description The settings of the editor. Changing them rebuilds the editor and keeps its document.
      */
     public readonly settings = input<Partial<EditorSettings>>({});
+
+    /** @description Shows how many characters the content has, under it. A `characterLimit` shows the count anyway. */
+    public readonly showCharacterCount = input(false, { transform: booleanAttribute });
+
+    /** @description Shows how many words the content has, under it. */
+    public readonly showWordCount = input(false, { transform: booleanAttribute });
 
     /**
      * @description Emits when the editor loses focus.
@@ -312,6 +434,16 @@ export class EditorComponent implements FormValueControl<string> {
                 return;
             }
             untracked(() => this.#applyContent(content));
+        });
+        effect(() => {
+            this.#imageUpload.options.set({
+                accept: this.imageAccept(),
+                handler: this.imageUpload(),
+                maxFileSize: this.imageMaxFileSize()
+            });
+        });
+        effect(() => {
+            this.#mention.search.set(this.mentionSearch());
         });
         effect(() => {
             const editable = this.#editable();
@@ -442,6 +574,13 @@ export class EditorComponent implements FormValueControl<string> {
         });
         this.editorService.selectionUpdate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.selectionUpdate.emit();
+        });
+        // How many characters are left is said once typing stops, so it doesn't talk over each key.
+        this.editorService.update$.pipe(debounceTime(1000), takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+            const message = untracked(this.limitMessage);
+            if (message !== null && this.editorService.ready() && this.editorService.editor.isFocused) {
+                void this.#announcer.announce(message, "polite");
+            }
         });
         this.editorService.update$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             const value = this.#currentValue();

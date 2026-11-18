@@ -75,6 +75,7 @@ describe("Editor documentation", () => {
             "italic",
             "link",
             "list",
+            "mention",
             "strikethrough",
             "subscript",
             "superscript",

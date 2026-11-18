@@ -1,4 +1,15 @@
 <form [formRoot]="iForm" [class]="formClass()">
+    @if (upload()) {
+        <div [class]="rowClass()">
+            <mona-file-upload
+                [accept]="accept()"
+                [aria-label]="messages().imageFile"
+                [maxFileSize]="maxFileSize()"
+                [multiple]="false"
+                [upload]="upload()"
+                (uploadSuccess)="onUploadSuccess($event)"></mona-file-upload>
+        </div>
+    }
     <div [class]="rowClass()">
         <label [class]="rowLabelClass()" [id]="labelIds.link">{{ messages().imageUrl }}</label>
         <mona-text-box [size]="'small'" [formField]="iForm.link" [aria-labelledby]="labelIds.link"></mona-text-box>
@@ -25,7 +36,7 @@
     </div>
     <div [class]="actionsClass()">
         <button monaButton [size]="'small'" [disabled]="!iForm().valid()" look="primary" (click)="onImageInsert()">
-            {{ messages().insert }}
+            {{ image() ? messages().save : messages().insert }}
         </button>
         <button monaButton [size]="'small'" [look]="'secondary'" (click)="onCancel()">{{ messages().cancel }}</button>
     </div>

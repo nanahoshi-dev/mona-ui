@@ -64,3 +64,13 @@
         <div [class]="placeholderClass()" aria-hidden="true">{{ placeholder() }}</div>
     }
 </div>
+@if (countParts().length > 0) {
+    <div [class]="footerClass">
+        @for (part of countParts(); track $index) {
+            <span [class]="part.class">{{ part.text }}</span>
+        }
+    </div>
+}
+@if (limitHint()) {
+    <span class="sr-only" [id]="limitHintId">{{ limitHint() }}</span>
+}

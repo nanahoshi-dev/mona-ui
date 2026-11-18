@@ -1,3 +1,4 @@
+import { themeOverlaySurfaceClasses } from "@nanahoshi/mona-ui/internal";
 import { cva } from "class-variance-authority";
 
 export const editorBaseThemeVariants = cva(
@@ -51,6 +52,13 @@ export const editorBaseThemeVariants = cva(
         [&_img]:h-auto
         [&_img.ProseMirror-selectednode]:outline-3
         [&_img.ProseMirror-selectednode]:outline-focus-indicator
+
+        [&_span[data-type='mention']]:rounded-sm
+        [&_span[data-type='mention']]:bg-primary-subtle
+        [&_span[data-type='mention']]:px-0.5
+        [&_span[data-type='mention']]:font-medium
+        [&_span[data-type='mention']]:text-primary-subtle-foreground
+        [&_span[data-type='mention']]:[box-decoration-break:clone]
 
         [&_pre]:bg-surface-muted
         [&_pre]:border [&_pre]:border-border-subtle
@@ -225,6 +233,45 @@ export const editorToolbarThemeVariants = cva(
         },
         defaultVariants: {
             disabled: false
+        }
+    }
+);
+
+/**
+ * A pasted or dropped image while it uploads: its preview, dimmed, with a progress bar under it. On a line of its own,
+ * as the image will be.
+ */
+export const EDITOR_IMAGE_UPLOAD_CLASSES = "relative flex w-fit max-w-full flex-col gap-1";
+export const EDITOR_IMAGE_UPLOAD_PREVIEW_CLASSES = "m-0! max-h-40 max-w-full opacity-60";
+export const EDITOR_IMAGE_UPLOAD_TRACK_CLASSES =
+    "block h-1 w-full overflow-hidden rounded-full bg-surface-muted forced-colors:border forced-colors:border-[CanvasText]";
+export const EDITOR_IMAGE_UPLOAD_BAR_CLASSES = "block h-full bg-primary forced-colors:bg-[Highlight]";
+
+/** The counts under the content. */
+export const EDITOR_FOOTER_CLASSES =
+    "not-prose flex flex-wrap justify-end gap-x-3 border-t border-border-subtle px-2 py-1 text-xs text-muted-foreground";
+/** The character count once the content is over its limit. */
+export const EDITOR_COUNT_OVER_CLASSES = "font-medium text-error";
+
+/** The mention suggestions, in their popup. */
+export const EDITOR_MENTION_LIST_CLASSES = `
+    not-prose flex max-h-60 min-w-48 flex-col overflow-auto
+    rounded-md border border-border py-1 text-sm text-foreground shadow-(--shadow-overlay)
+    [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
+    ${themeOverlaySurfaceClasses}
+`;
+export const EDITOR_MENTION_STATUS_CLASSES = "px-3 py-1 text-muted-foreground";
+export const editorMentionOptionThemeVariants = cva(
+    "flex cursor-pointer select-none items-center px-3 py-1 text-foreground hover:bg-hover",
+    {
+        variants: {
+            highlighted: {
+                true: "bg-hover inset-ring-2 inset-ring-focus-indicator forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]",
+                false: ""
+            }
+        },
+        defaultVariants: {
+            highlighted: false
         }
     }
 );
