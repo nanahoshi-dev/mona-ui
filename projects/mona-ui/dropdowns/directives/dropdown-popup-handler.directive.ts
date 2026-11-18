@@ -192,6 +192,25 @@ export class DropdownPopupHandlerDirective {
         return minWidth ?? this.#hostElementRef.nativeElement.getBoundingClientRect().width;
     }
 
+    /** An element's name as assistive technology reads it: `aria-labelledby` first, then `aria-label`, then `<label>`s. */
+    private nameOf(element: HTMLElement | null): string {
+        if (!element) {
+            return "";
+        }
+        const textOf = (node: Element | null): string => node?.textContent?.replace(/\s+/g, " ").trim() ?? "";
+        const join = (texts: Iterable<string>): string =>
+            Array.from(texts)
+                .filter(text => text.length > 0)
+                .join(" ");
+        const labelledBy = join(
+            (element.getAttribute("aria-labelledby") ?? "")
+                .split(/\s+/)
+                .map(id => (id ? textOf(this.#document.getElementById(id)) : ""))
+        );
+        const labels = element instanceof HTMLInputElement ? join(Array.from(element.labels ?? [], textOf)) : "";
+        return labelledBy || element.getAttribute("aria-label")?.trim() || labels;
+    }
+
     private openPopup(settings: Partial<PopupSettings>): void {
         let popupRef = this.#dropdownService.popupRef();
         if (popupRef || this.#host.disabled() || this.#host.readonly()) {
@@ -257,8 +276,8 @@ export class DropdownPopupHandlerDirective {
     }
 
     /**
-     * The bottom sheet's title: the host's `adaptiveTitle`, or else its accessible name (`aria-labelledby` first, as
-     * assistive technology reads it, then `aria-label`).
+     * The bottom sheet's title: the host's `adaptiveTitle`, or else the field's name. A date or time picker names its
+     * input rather than itself, so the input's name is read when the host has none.
      */
     private sheetTitle(): string {
         const title = this.#host.adaptiveTitle?.().trim();
@@ -266,13 +285,7 @@ export class DropdownPopupHandlerDirective {
             return title;
         }
         const host: HTMLElement = this.#hostElementRef.nativeElement;
-        const labelledBy = (host.getAttribute("aria-labelledby") ?? "")
-            .split(/\s+/)
-            .filter(id => id.length > 0)
-            .map(id => this.#document.getElementById(id)?.textContent?.replace(/\s+/g, " ").trim() ?? "")
-            .filter(text => text.length > 0)
-            .join(" ");
-        return labelledBy || host.getAttribute("aria-label")?.trim() || "";
+        return this.nameOf(host) || this.nameOf(host.querySelector("input"));
     }
 
     private togglePopup(settings: Partial<PopupSettings>): void {

@@ -29,10 +29,13 @@ import {
     type TypedDateInput
 } from "@nanahoshi/mona-ui/date-input";
 import {
+    type AdaptiveMode,
     DropdownPopupHandlerDirective,
+    type DropdownPopupInput,
     DROPDOWN_POPUP_INPUT_TOKEN,
     dropdownPopupThemeVariants,
-    DropdownService
+    DropdownService,
+    dropdownSheetPickerClasses
 } from "@nanahoshi/mona-ui/dropdowns";
 import { getLocaleTimeInputFormat, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import {
@@ -92,7 +95,7 @@ import {
         "(keydown)": "onKeydown($event)"
     }
 })
-export class TimePickerComponent implements FormValueControl<Date | null>, TimePickerVariantInput {
+export class TimePickerComponent implements FormValueControl<Date | null>, DropdownPopupInput, TimePickerVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
@@ -151,12 +154,32 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
         const size = this.size();
         const userClass = this.popupClass();
         const variantClass = dropdownPopupThemeVariants({ rounded, size });
-        return twMerge(variantClass, userClass);
+        // The time selector sizes its lists from its own height, so the sheet gives it one.
+        const sheetClass = this.sheet() ? `${dropdownSheetPickerClasses} [&_mona-time-selector]:h-72` : "";
+        return twMerge(variantClass, sheetClass, userClass);
     });
     protected readonly popupId = createElementControlId();
+    /** Whether the popup is open as a bottom sheet, which the popup fills. */
+    protected readonly sheet = this.#dropdownService.sheet.asReadonly();
     protected readonly timePopupTemplateRef: Signal<TemplateRef<unknown>> = viewChild.required("timePopupTemplate");
+    /** The time selector's size: large in a bottom sheet, for touch. */
+    protected readonly timeSelectorSize = computed(() => (this.sheet() ? "large" : this.size()));
     /** Set in the constructor, which runs after the `value` model it writes to exists. */
     protected readonly typedInput: TypedDateInput;
+
+    /**
+     * @description Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640
+     * pixels) with `"auto"`, so it's easy to reach with a thumb. With `"none"`, it always opens under the field.
+     * @default "none"
+     */
+    public readonly adaptiveMode = input<AdaptiveMode>("none");
+
+    /**
+     * @description Title of the bottom sheet the popup opens as with `adaptiveMode="auto"`. When empty, the sheet
+     * shows the field's name.
+     * @default ""
+     */
+    public readonly adaptiveTitle = input("");
 
     /**
      * @description Id of an element that describes the input, such as a hint or an error message.

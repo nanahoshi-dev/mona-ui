@@ -14,4 +14,4 @@ Everything below is imported from `@nanahoshi/mona-ui/time-picker`. Each name li
 | --- | --- |
 | [`TIME_PICKER_DEFAULT_MESSAGES`](/api/time-picker/TIME_PICKER_DEFAULT_MESSAGES) | Constant |
 
-**Related types:** [`HourFormat`](/api/date-input/HourFormat), [`ListSizeInputType`](/api/list/ListSizeInputType), [`ListSizeType`](/api/list/ListSizeType), [`MonaTimePickerMessages`](/api/i18n/MonaTimePickerMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`PreventableEvent`](/api/common/PreventableEvent)
+**Related types:** [`AdaptiveMode`](/api/dropdowns/AdaptiveMode), [`HourFormat`](/api/date-input/HourFormat), [`ListSizeInputType`](/api/list/ListSizeInputType), [`ListSizeType`](/api/list/ListSizeType), [`MonaTimePickerMessages`](/api/i18n/MonaTimePickerMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`PreventableEvent`](/api/common/PreventableEvent)

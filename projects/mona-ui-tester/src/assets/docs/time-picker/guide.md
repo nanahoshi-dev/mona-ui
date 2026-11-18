@@ -53,6 +53,10 @@ Typed text is written to `value` on `Enter` and when the input loses focus, on t
 
 The popup holds a `mona-time-selector`. Choosing items in its lists moves the shown time; the **Set** button, `Enter` or `Space` writes it to `value` and closes the popup. The **Now** button moves the lists to the current time. A time outside `min` and `max` is moved inside them when it is set.
 
+### On a phone
+
+With `adaptiveMode="auto"`, on a screen narrower than 640 pixels, the time lists open as a sheet along the bottom of the screen, over a dimmed page, as described for the [dropdown list](/components/dropdown-list#the-bottom-sheet). The sheet has the field's name, or `adaptiveTitle`, and a close button, and its lists use the large size, to be easy to scroll and tap. Focus moves into the lists, as it does in the popup under the field, and goes back to the input when the sheet closes.
+
 ### Disabled and read-only
 
 `disabled` and `readonly` keep the popup from opening. `readonlyInput` blocks typing but keeps the popup button working, so the time can only be picked.

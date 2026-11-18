@@ -18,4 +18,4 @@ Everything below is imported from `@nanahoshi/mona-ui/date-range-picker`. Each n
 | [`DateRangePresetRange`](/api/date-range-picker/DateRangePresetRange) | Interface | The range a preset picks. |
 | [`DateRangePresetKey`](/api/date-range-picker/DateRangePresetKey) | Type alias | A built-in quick range, named by the locale's messages. |
 
-**Related types:** [`DateDisabledType`](/api/date-input/DateDisabledType), [`FirstDayOfWeek`](/api/calendar/FirstDayOfWeek), [`ListSizeInputType`](/api/list/ListSizeInputType), [`ListSizeType`](/api/list/ListSizeType), [`MonaDateRangePickerMessages`](/api/i18n/MonaDateRangePickerMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`PreventableEvent`](/api/common/PreventableEvent)
+**Related types:** [`AdaptiveMode`](/api/dropdowns/AdaptiveMode), [`DateDisabledType`](/api/date-input/DateDisabledType), [`FirstDayOfWeek`](/api/calendar/FirstDayOfWeek), [`ListSizeInputType`](/api/list/ListSizeInputType), [`ListSizeType`](/api/list/ListSizeType), [`MonaDateRangePickerMessages`](/api/i18n/MonaDateRangePickerMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`PreventableEvent`](/api/common/PreventableEvent)

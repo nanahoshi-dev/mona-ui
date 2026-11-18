@@ -44,7 +44,6 @@
     <div
         [class]="pickerPopupClass()"
         [id]="popupId"
-        class="flex h-68 flex-col"
         aria-modal="true"
         role="dialog"
         [attr.aria-label]="messages().dateTimePicker"
@@ -89,6 +88,7 @@
             class="overflow-hidden"
             role="tabpanel"
             [id]="panelId"
+            [style.height.px]="panelHeight()"
             [attr.aria-labelledby]="activeView() === 'date' ? dateTabId : timeTabId">
             @if (activeView() === "date") {
                 <div class="flex h-full items-center justify-center">
@@ -130,7 +130,7 @@
                 </div>
             }
             @if (activeView() === "time") {
-                <div class="flex h-full max-h-64 items-center justify-center">
+                <div class="flex h-full items-center justify-center" [class.max-h-64]="!sheet()">
                     <mona-time-selector
                         [focusOnMount]="focusViewOnMount()"
                         [value]="navigatedDate()"
@@ -140,7 +140,7 @@
                         [max]="timePickerMax()"
                         [min]="timePickerMin()"
                         [footer]="false"
-                        [size]="size()"
+                        [size]="timeSelectorSize()"
                         [rounded]="rounded()"
                         [hourStep]="hourStep()"
                         [minuteStep]="minuteStep()"

@@ -77,6 +77,15 @@ export class DatePickerDemoComponent extends AbstractDemoComponent<DatePickerCom
     });
     protected readonly config = computed<ComponentConfig<DatePickerComponent>>(() => ({
         inputs: deriveInputConfig<DatePickerComponent>(this.metadata(), {
+            adaptiveMode: {
+                type: "dropdown",
+                value: ["none", "auto"],
+                defaultValue: "none"
+            },
+            adaptiveTitle: {
+                type: "string",
+                value: ""
+            },
             // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
             ariaDescribedBy: undefined,
             ariaLabel: undefined,
@@ -161,6 +170,8 @@ export class DatePickerDemoComponent extends AbstractDemoComponent<DatePickerCom
         <span>Selected Date: {{ formValueText() }}</span>
         <mona-label for="date-picker-demo-input" text="Appointment date"></mona-label>
         <mona-date-picker
+            [adaptiveMode]="adaptiveMode()"
+            [adaptiveTitle]="adaptiveTitle()"
             inputId="date-picker-demo-input"
             [disabledDates]="disabledDates()"
             [firstDay]="firstDay()"
@@ -231,6 +242,8 @@ class DatePickerWrapperComponent implements ComponentInputsAsSignal<DatePickerCo
         const isWeekend = DateTime.fromJSDate(value).weekday === 6 || DateTime.fromJSDate(value).weekday === 7;
         return isWeekend ? LucideTentTree : LucideBriefcaseBusiness;
     });
+    public readonly adaptiveMode = input<ReturnType<DatePickerComponent["adaptiveMode"]>>("none");
+    public readonly adaptiveTitle = input("");
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly disabledDates = input<ReturnType<DatePickerComponent["disabledDates"]>>([]);
     public readonly firstDay = input<ReturnType<DatePickerComponent["firstDay"]>>("monday");

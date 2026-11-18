@@ -99,7 +99,7 @@ describe("DropdownSheetComponent", () => {
         expect(getCloseButton().getAttribute("aria-label")).toBe("Kapat");
     });
 
-    it("keeps focus where it is when pressed, except on a text box", () => {
+    it("keeps focus where it is when its own parts are pressed, and leaves presses on the content to the content", () => {
         const sheet = fixture.nativeElement as HTMLElement;
         const press = (target: Element): boolean => {
             const event = new PointerEvent("pointerdown", { bubbles: true, cancelable: true });
@@ -107,9 +107,11 @@ describe("DropdownSheetComponent", () => {
             return event.defaultPrevented;
         };
 
+        expect(press(sheet.querySelector("section > span") as Element)).toBe(true);
         expect(press(sheet.querySelector("header span") as Element)).toBe(true);
-        expect(press(sheet.querySelector("[role='option']") as Element)).toBe(true);
         expect(press(getCloseButton())).toBe(true);
+        // A list keeps focus on its field itself, and a date picker's calendar takes it.
+        expect(press(sheet.querySelector("[role='option']") as Element)).toBe(false);
         expect(press(sheet.querySelector("input") as Element)).toBe(false);
     });
 

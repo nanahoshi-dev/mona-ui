@@ -136,6 +136,10 @@ Picking a quick range writes it and closes the popup. A range is kept within `mi
 
 On a phone the quick ranges sit above the calendar, in rows.
 
+### On a phone
+
+With `adaptiveMode="auto"`, on a screen narrower than 640 pixels, the popup opens as a sheet along the bottom of the screen, over a dimmed page, as described for the [dropdown list](/components/dropdown-list#the-bottom-sheet). The sheet has the field's name, or `adaptiveTitle`, and a close button. The quick ranges sit above the calendar and are 44 pixels tall, the months are below each other, and their days grow to as much as 44 pixels, to be easy to tap. The sheet scrolls when the months are taller than it. Focus moves into the calendar, as it does in the popup under the field.
+
 ### Disabled and read-only
 
 `disabled` and `readonly` keep the popup from opening. `readonlyInput` blocks typing in both inputs but keeps the calendar button working, so the range can only be picked.

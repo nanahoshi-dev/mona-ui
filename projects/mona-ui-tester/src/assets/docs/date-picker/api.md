@@ -14,4 +14,4 @@ Everything below is imported from `@nanahoshi/mona-ui/date-picker`. Each name li
 | --- | --- |
 | [`DATE_PICKER_DEFAULT_MESSAGES`](/api/date-picker/DATE_PICKER_DEFAULT_MESSAGES) | Constant |
 
-**Related types:** [`DateDisabledType`](/api/date-input/DateDisabledType), [`FirstDayOfWeek`](/api/calendar/FirstDayOfWeek), [`ListSizeInputType`](/api/list/ListSizeInputType), [`ListSizeType`](/api/list/ListSizeType), [`MonaDatePickerMessages`](/api/i18n/MonaDatePickerMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`PreventableEvent`](/api/common/PreventableEvent)
+**Related types:** [`AdaptiveMode`](/api/dropdowns/AdaptiveMode), [`DateDisabledType`](/api/date-input/DateDisabledType), [`FirstDayOfWeek`](/api/calendar/FirstDayOfWeek), [`ListSizeInputType`](/api/list/ListSizeInputType), [`ListSizeType`](/api/list/ListSizeType), [`MonaDatePickerMessages`](/api/i18n/MonaDatePickerMessages), [`PopupCloseEvent`](/api/popup/PopupCloseEvent), [`PreventableEvent`](/api/common/PreventableEvent)

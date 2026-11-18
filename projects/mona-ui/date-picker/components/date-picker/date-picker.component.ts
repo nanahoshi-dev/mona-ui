@@ -40,10 +40,12 @@ import {
     type TypedDateInput
 } from "@nanahoshi/mona-ui/date-input";
 import {
+    type AdaptiveMode,
     DropdownPopupHandlerDirective,
     type DropdownPopupInput,
     DROPDOWN_POPUP_INPUT_TOKEN,
-    DropdownService
+    DropdownService,
+    dropdownSheetPickerClasses
 } from "@nanahoshi/mona-ui/dropdowns";
 import { getLocaleDateInputFormat, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import {
@@ -166,14 +168,31 @@ export class DatePickerComponent
         const size = this.size();
         const userClass = this.popupClass();
         const variantClass = datePopupThemeVariants({ rounded, size });
-        return twMerge(variantClass, userClass);
+        const sheetClass = this.sheet() ? dropdownSheetPickerClasses : "";
+        return twMerge(variantClass, sheetClass, userClass);
     });
     protected readonly popupId = createElementControlId();
     protected readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DateInputPrefixTemplateDirective, { read: TemplateRef });
+    /** Whether the popup is open as a bottom sheet, which the popup fills. */
+    protected readonly sheet = this.#dropdownService.sheet.asReadonly();
     /** Set in the constructor, which runs after the `value` model it writes to exists. */
     protected readonly typedInput: TypedDateInput;
     protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective);
+
+    /**
+     * @description Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640
+     * pixels) with `"auto"`, so it's easy to reach with a thumb. With `"none"`, it always opens under the field.
+     * @default "none"
+     */
+    public readonly adaptiveMode = input<AdaptiveMode>("none");
+
+    /**
+     * @description Title of the bottom sheet the popup opens as with `adaptiveMode="auto"`. When empty, the sheet
+     * shows the field's name.
+     * @default ""
+     */
+    public readonly adaptiveTitle = input("");
 
     /**
      * @description Id of an element that describes the input, such as a hint or an error message.

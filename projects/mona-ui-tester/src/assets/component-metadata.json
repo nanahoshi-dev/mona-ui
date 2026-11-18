@@ -9959,6 +9959,24 @@
     "selector": "\"mona-date-picker\"",
     "inputs": [
       {
+        "description": "Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640\npixels) with `\"auto\"`, so it's easy to reach with a thumb. With `\"none\"`, it always opens under the field.",
+        "kind": "input",
+        "name": "adaptiveMode",
+        "type": "AdaptiveMode",
+        "options": [
+          "none",
+          "auto"
+        ],
+        "defaultValue": "\"none\""
+      },
+      {
+        "description": "Title of the bottom sheet the popup opens as with `adaptiveMode=\"auto\"`. When empty, the sheet\nshows the field's name.",
+        "kind": "input",
+        "name": "adaptiveTitle",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Id of an element that describes the input, such as a hint or an error message.",
         "kind": "input",
         "name": "ariaDescribedBy",
@@ -10191,6 +10209,24 @@
     "name": "DateRangePickerComponent",
     "selector": "\"mona-date-range-picker\"",
     "inputs": [
+      {
+        "description": "Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640\npixels) with `\"auto\"`, so it's easy to reach with a thumb. With `\"none\"`, it always opens under the field.",
+        "kind": "input",
+        "name": "adaptiveMode",
+        "type": "AdaptiveMode",
+        "options": [
+          "none",
+          "auto"
+        ],
+        "defaultValue": "\"none\""
+      },
+      {
+        "description": "Title of the bottom sheet the popup opens as with `adaptiveMode=\"auto\"`. When empty, the sheet\nshows the field's name.",
+        "kind": "input",
+        "name": "adaptiveTitle",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
       {
         "description": "Id of an element that describes the range, such as a hint or an error message. It describes both\ninputs.",
         "kind": "input",
@@ -10438,6 +10474,24 @@
     "name": "DateTimePickerComponent",
     "selector": "\"mona-datetime-picker\"",
     "inputs": [
+      {
+        "description": "Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640\npixels) with `\"auto\"`, so it's easy to reach with a thumb. With `\"none\"`, it always opens under the field.",
+        "kind": "input",
+        "name": "adaptiveMode",
+        "type": "AdaptiveMode",
+        "options": [
+          "none",
+          "auto"
+        ],
+        "defaultValue": "\"none\""
+      },
+      {
+        "description": "Title of the bottom sheet the popup opens as with `adaptiveMode=\"auto\"`. When empty, the sheet\nshows the field's name.",
+        "kind": "input",
+        "name": "adaptiveTitle",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
       {
         "description": "Id of an element that describes the input, such as a hint or an error message.",
         "kind": "input",
@@ -19300,6 +19354,24 @@
     "name": "TimePickerComponent",
     "selector": "\"mona-time-picker\"",
     "inputs": [
+      {
+        "description": "Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640\npixels) with `\"auto\"`, so it's easy to reach with a thumb. With `\"none\"`, it always opens under the field.",
+        "kind": "input",
+        "name": "adaptiveMode",
+        "type": "AdaptiveMode",
+        "options": [
+          "none",
+          "auto"
+        ],
+        "defaultValue": "\"none\""
+      },
+      {
+        "description": "Title of the bottom sheet the popup opens as with `adaptiveMode=\"auto\"`. When empty, the sheet\nshows the field's name.",
+        "kind": "input",
+        "name": "adaptiveTitle",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
       {
         "description": "Id of an element that describes the input, such as a hint or an error message.",
         "kind": "input",
