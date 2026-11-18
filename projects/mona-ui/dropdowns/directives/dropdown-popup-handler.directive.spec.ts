@@ -12,6 +12,7 @@ import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import type { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
+import type { AdaptiveMode } from "../models/AdaptiveMode";
 import { DROPDOWN_POPUP_INPUT_TOKEN, type DropdownPopupInput } from "../models/DropdownPopupInput";
 import { DropdownService } from "../services/dropdown.service";
 import { DropdownPopupHandlerDirective } from "./dropdown-popup-handler.directive";
@@ -211,5 +212,165 @@ describe("DropdownPopupHandlerDirective when its host is destroyed", () => {
         } finally {
             warn.mockRestore();
         }
+    });
+});
+
+/** A host that opens its popup as a bottom sheet with `adaptiveMode="auto"` on a small screen. */
+@Component({
+    template: `<ng-template #popup><input aria-label="Filter places" /></ng-template>`,
+    hostDirectives: [DropdownPopupHandlerDirective],
+    host: {
+        role: "combobox",
+        tabindex: "0",
+        "[attr.aria-label]": "label() || null",
+        "[attr.aria-labelledby]": "labelledBy() || null"
+    },
+    providers: [
+        DropdownService,
+        { provide: DROPDOWN_POPUP_INPUT_TOKEN, useExisting: forwardRef(() => TestSheetHostComponent) }
+    ]
+})
+class TestSheetHostComponent implements DropdownPopupInput {
+    public readonly adaptiveMode = input<AdaptiveMode>("auto");
+    public readonly adaptiveTitle = input("");
+    // eslint-disable-next-line @angular-eslint/no-output-native
+    public readonly close = output<PopupCloseEvent>();
+    public readonly closed = output();
+    public readonly disabled = signal(false);
+    public readonly label = signal("Destination");
+    public readonly labelledBy = signal("");
+    public readonly open = output<PreventableEvent>();
+    public readonly opened = output();
+    public readonly popupHeight = input<ListSizeInputType>();
+    public readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("popup");
+    public readonly popupWidth = input<ListSizeInputType>();
+    public readonly readonly = signal(false);
+    public readonly touch = output();
+}
+
+describe("DropdownPopupHandlerDirective as a bottom sheet", () => {
+    let dropdownService: DropdownService;
+    let fixture: ComponentFixture<TestSheetHostComponent>;
+    let labels: HTMLElement;
+    let mediaQueries: string[];
+
+    beforeEach(async () => {
+        stubScreen(true);
+        labels = document.createElement("div");
+        labels.innerHTML = `<span id="sheet-where">Where</span><span id="sheet-to">to?</span>`;
+        document.body.append(labels);
+        TestBed.configureTestingModule({ imports: [TestSheetHostComponent] });
+        fixture = TestBed.createComponent(TestSheetHostComponent);
+        document.body.append(fixture.nativeElement as HTMLElement);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        dropdownService = fixture.debugElement.injector.get(DropdownService);
+        dropdownService.popupTemplate.set(fixture.componentInstance.popupTemplate());
+    });
+
+    afterEach(async () => {
+        await closePopup();
+        vi.unstubAllGlobals();
+        fixture.destroy();
+        (fixture.nativeElement as HTMLElement).remove();
+        labels.remove();
+        document.querySelectorAll(".cdk-overlay-container").forEach(node => node.replaceChildren());
+    });
+
+    function stubScreen(small: boolean): void {
+        mediaQueries = [];
+        vi.stubGlobal(
+            "matchMedia",
+            vi.fn((query: string) => {
+                mediaQueries.push(query);
+                return { addEventListener: vi.fn(), matches: small, media: query, removeEventListener: vi.fn() };
+            })
+        );
+    }
+
+    async function openPopup(): Promise<void> {
+        fixture.detectChanges();
+        dropdownService.triggerPopupOpen$.next({});
+        await TestBed.inject(ApplicationRef).tick();
+        fixture.detectChanges();
+    }
+
+    async function closePopup(): Promise<void> {
+        dropdownService.popupRef()?.close(undefined, 0);
+        await new Promise(resolve => setTimeout(resolve, 50));
+        await TestBed.inject(ApplicationRef).tick();
+    }
+
+    function getSheet(): HTMLElement | null {
+        return document.querySelector("mona-dropdown-sheet");
+    }
+
+    function getSheetTitle(): string {
+        return getSheet()?.querySelector("header")?.textContent?.trim() ?? "";
+    }
+
+    it("opens the popup as a sheet over a backdrop on a small screen, and says so while it's open", async () => {
+        await openPopup();
+
+        expect(mediaQueries).toContain("(max-width: 639.98px)");
+        expect(getSheet()).not.toBeNull();
+        expect(getSheet()?.querySelector("input[aria-label='Filter places']")).not.toBeNull();
+        expect(document.querySelector(".cdk-overlay-backdrop")).not.toBeNull();
+        expect(dropdownService.sheet()).toBe(true);
+
+        await closePopup();
+
+        expect(dropdownService.popupRef()).toBeNull();
+        expect(dropdownService.sheet()).toBe(false);
+    });
+
+    it("opens under the field on a wide screen, and without adaptiveMode", async () => {
+        stubScreen(false);
+        await openPopup();
+        expect(getSheet()).toBeNull();
+        expect(dropdownService.popupRef()).not.toBeNull();
+        expect(dropdownService.sheet()).toBe(false);
+        await closePopup();
+
+        stubScreen(true);
+        fixture.componentRef.setInput("adaptiveMode", "none");
+        await openPopup();
+        expect(getSheet()).toBeNull();
+        expect(dropdownService.sheet()).toBe(false);
+        // The media query isn't read without adaptiveMode="auto".
+        expect(mediaQueries).toEqual([]);
+    });
+
+    it("titles the sheet with adaptiveTitle, else the field's aria-labelledby text, else its aria-label", async () => {
+        fixture.componentInstance.labelledBy.set("sheet-where sheet-to");
+        fixture.componentRef.setInput("adaptiveTitle", "Pick a place");
+        await openPopup();
+        expect(getSheetTitle()).toBe("Pick a place");
+
+        // The title follows adaptiveTitle while the sheet is open.
+        fixture.componentRef.setInput("adaptiveTitle", "  ");
+        fixture.detectChanges();
+        await TestBed.inject(ApplicationRef).tick();
+        expect(getSheetTitle()).toBe("Where to?");
+        await closePopup();
+
+        fixture.componentInstance.labelledBy.set("");
+        await openPopup();
+        expect(getSheetTitle()).toBe("Destination");
+    });
+
+    it("stays above an on-screen keyboard, which shrinks the visual viewport", async () => {
+        const viewport = Object.assign(new EventTarget(), { height: window.innerHeight, offsetTop: 0 });
+        vi.stubGlobal("visualViewport", viewport);
+        await openPopup();
+        const pane = getSheet()?.closest(".cdk-overlay-pane") as HTMLElement;
+        expect(pane.style.marginBottom).toBe("0px");
+        expect(pane.style.maxHeight).toBe(`${Math.round(window.innerHeight * 0.85)}px`);
+
+        viewport.height = window.innerHeight - 300;
+        viewport.dispatchEvent(new Event("resize"));
+
+        expect(pane.style.marginBottom).toBe("300px");
+        expect(pane.style.maxHeight).toBe(`${Math.round((window.innerHeight - 300) * 0.85)}px`);
     });
 });

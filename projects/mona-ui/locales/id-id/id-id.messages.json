@@ -210,7 +210,11 @@
     "dropdownList": {
         "clear": "Bersihkan"
     },
+    "dropdownTree": {
+        "clear": "Bersihkan"
+    },
     "dropdowns": {
+        "close": "Tutup",
         "itemPosition": "{text}, {position} dari {total}",
         "noResultsFound": "Tidak ada hasil",
         "resultsAvailable": "{count} hasil tersedia"
@@ -474,6 +478,11 @@
         "itemsCount": "+ {count} item",
         "removeMoreItems": "Hapus {count} item lainnya",
         "selectAll": "Pilih semua"
+    },
+    "multiSelectTree": {
+        "clear": "Bersihkan",
+        "itemsCount": "+ {count} item",
+        "removeMoreItems": "Hapus {count} item lainnya"
     },
     "notification": {
         "close": "Tutup",

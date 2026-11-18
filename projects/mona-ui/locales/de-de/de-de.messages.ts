@@ -258,7 +258,11 @@ export const DE_DE_MESSAGES = {
     dropdownList: {
         clear: "Leeren"
     },
+    dropdownTree: {
+        clear: "Leeren"
+    },
     dropdowns: {
+        close: "Schließen",
         itemPosition: (text: string, position: number, total: number) =>
             `${text}, ${localizeNumber(position)} von ${localizeNumber(total)}`,
         noResultsFound: "Keine Ergebnisse gefunden",
@@ -557,6 +561,15 @@ export const DE_DE_MESSAGES = {
                 ? `${localizeNumber(count)} weiteres Element entfernen`
                 : `${localizeNumber(count)} weitere Elemente entfernen`,
         selectAll: "Alle auswählen"
+    },
+    multiSelectTree: {
+        clear: "Leeren",
+        itemsCount: (count: number) =>
+            count === 1 ? `+ ${localizeNumber(count)} Element` : `+ ${localizeNumber(count)} Elemente`,
+        removeMoreItems: (count: number) =>
+            count === 1
+                ? `${localizeNumber(count)} weiteres Element entfernen`
+                : `${localizeNumber(count)} weitere Elemente entfernen`
     },
     notification: {
         close: "Schließen",

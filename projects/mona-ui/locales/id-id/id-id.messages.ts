@@ -231,7 +231,11 @@ export const ID_ID_MESSAGES = {
     dropdownList: {
         clear: "Bersihkan"
     },
+    dropdownTree: {
+        clear: "Bersihkan"
+    },
     dropdowns: {
+        close: "Tutup",
         itemPosition: (text: string, position: number, total: number) =>
             `${text}, ${localizeNumber(position)} dari ${localizeNumber(total)}`,
         noResultsFound: "Tidak ada hasil",
@@ -501,6 +505,11 @@ export const ID_ID_MESSAGES = {
         itemsCount: (count: number) => `+ ${localizeNumber(count)} item`,
         removeMoreItems: (count: number) => `Hapus ${localizeNumber(count)} item lainnya`,
         selectAll: "Pilih semua"
+    },
+    multiSelectTree: {
+        clear: "Bersihkan",
+        itemsCount: (count: number) => `+ ${localizeNumber(count)} item`,
+        removeMoreItems: (count: number) => `Hapus ${localizeNumber(count)} item lainnya`
     },
     notification: {
         close: "Tutup",

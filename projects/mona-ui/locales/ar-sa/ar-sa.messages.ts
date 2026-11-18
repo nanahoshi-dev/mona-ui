@@ -272,7 +272,11 @@ export const AR_SA_MESSAGES = {
     dropdownList: {
         clear: "مسح"
     },
+    dropdownTree: {
+        clear: "مسح"
+    },
     dropdowns: {
+        close: "إغلاق",
         itemPosition: (text: string, position: number, total: number) =>
             `${text}، العنصر ${localizeNumber(position)} من ${localizeNumber(total)}`,
         noResultsFound: "لم يتم العثور على نتائج",
@@ -595,6 +599,11 @@ export const AR_SA_MESSAGES = {
         itemsCount: (count: number) => `+ ${localizeNumber(count)}`,
         removeMoreItems: (count: number) => `حذف العناصر الإضافية (${localizeNumber(count)})`,
         selectAll: "تحديد الكل"
+    },
+    multiSelectTree: {
+        clear: "مسح",
+        itemsCount: (count: number) => `+ ${localizeNumber(count)}`,
+        removeMoreItems: (count: number) => `حذف العناصر الإضافية (${localizeNumber(count)})`
     },
     notification: {
         close: "إغلاق",

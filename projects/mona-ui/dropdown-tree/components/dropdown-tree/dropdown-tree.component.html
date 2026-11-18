@@ -1,0 +1,48 @@
+@if (prefixTemplate()) {
+    <span [class]="affixClass()">
+        <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>
+    </span>
+}
+
+<span [class]="valueContainerClass()">
+    @if (!valueTemplate()) {
+        <span>
+            @if (selectedDataItem() !== null) {
+                <span>{{ valueText() }}</span>
+            } @else {
+                <span>{{ placeholder() }}</span>
+            }
+        </span>
+    } @else {
+        <ng-container
+            [ngTemplateOutlet]="valueTemplate()"
+            [ngTemplateOutletContext]="{ $implicit: selectedDataItem() }"></ng-container>
+    }
+</span>
+
+@if (clearButtonVisible()) {
+    <mona-indicator-icon
+        preset="clear"
+        [interactive]="true"
+        [label]="messages().clear"
+        (activate)="onValueClear($event)"></mona-indicator-icon>
+}
+
+@if (loading()) {
+    <mona-indicator-icon preset="loading" [size]="12"></mona-indicator-icon>
+}
+
+<mona-indicator-icon preset="dropdown" [size]="18"></mona-indicator-icon>
+
+<ng-template #popupTemplate>
+    <mona-dropdown-tree-popup
+        [treeId]="treeId"
+        [ariaLabel]="popupAriaLabel()"
+        [ariaLabelledBy]="labelledBy() ?? ''"
+        [popupClass]="popupSurfaceClass()"
+        [size]="popupSize()"
+        [headerTemplate]="headerTemplate()"
+        [footerTemplate]="footerTemplate()"
+        [itemTemplate]="itemTemplate()"
+        [noDataTemplate]="noDataTemplate()"></mona-dropdown-tree-popup>
+</ng-template>

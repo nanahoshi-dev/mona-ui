@@ -184,6 +184,13 @@ export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
         typeName: "MonaDropdownListMessages"
     },
     {
+        constName: "DROPDOWN_TREE_DEFAULT_MESSAGES",
+        file: "dropdown-tree/i18n/dropdown-tree.default-messages.ts",
+        namespace: "dropdownTree",
+        style: "type",
+        typeName: "MonaDropdownTreeMessages"
+    },
+    {
         constName: "DROPDOWNS_DEFAULT_MESSAGES",
         file: "dropdowns/i18n/dropdowns.default-messages.ts",
         namespace: "dropdowns",
@@ -252,6 +259,13 @@ export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
         namespace: "multiSelect",
         style: "type",
         typeName: "MonaMultiSelectMessages"
+    },
+    {
+        constName: "MULTI_SELECT_TREE_DEFAULT_MESSAGES",
+        file: "multi-select-tree/i18n/multi-select-tree.default-messages.ts",
+        namespace: "multiSelectTree",
+        style: "type",
+        typeName: "MonaMultiSelectTreeMessages"
     },
     {
         constName: "NOTIFICATION_DEFAULT_MESSAGES",

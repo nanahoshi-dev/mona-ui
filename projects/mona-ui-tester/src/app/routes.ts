@@ -297,6 +297,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "dropdown-tree",
+                loadComponent: () =>
+                    import("./docs/components/dropdown-tree-doc/dropdown-tree-doc.component").then(
+                        m => m.DropdownTreeDocComponent
+                    )
+            },
+            {
                 path: "editor",
                 loadComponent: () =>
                     import("./docs/components/editor-doc/editor-doc.component").then(m => m.EditorDocComponent)
@@ -416,6 +423,13 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import("./docs/components/multi-select-doc/multi-select-doc.component").then(
                         m => m.MultiSelectDocComponent
+                    )
+            },
+            {
+                path: "multi-select-tree",
+                loadComponent: () =>
+                    import("./docs/components/multi-select-tree-doc/multi-select-tree-doc.component").then(
+                        m => m.MultiSelectTreeDocComponent
                     )
             },
             {

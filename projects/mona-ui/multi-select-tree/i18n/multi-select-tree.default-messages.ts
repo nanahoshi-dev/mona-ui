@@ -1,0 +1,16 @@
+// Generated from i18n/catalogs/en-US.messages.json by scripts/generate-locale-catalogs.ts. Do not edit.
+// Edit the JSON file and run `npm run generate:locale-catalogs`.
+
+import { formatNumber, type MonaMultiSelectTreeMessages } from "@nanahoshi/mona-ui/i18n";
+
+function localizeNumber(value: number, options?: Intl.NumberFormatOptions): string {
+    return formatNumber(value, "en-US", options);
+}
+
+export const MULTI_SELECT_TREE_DEFAULT_MESSAGES: MonaMultiSelectTreeMessages = {
+    clear: "Clear",
+    itemsCount: (count: number) =>
+        count === 1 ? `+ ${localizeNumber(count)} item` : `+ ${localizeNumber(count)} items`,
+    removeMoreItems: (count: number) =>
+        count === 1 ? `Remove ${localizeNumber(count)} more item` : `Remove ${localizeNumber(count)} more items`
+};

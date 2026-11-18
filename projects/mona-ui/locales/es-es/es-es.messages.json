@@ -210,7 +210,11 @@
     "dropdownList": {
         "clear": "Limpiar"
     },
+    "dropdownTree": {
+        "clear": "Limpiar"
+    },
     "dropdowns": {
+        "close": "Cerrar",
         "itemPosition": "{text}, {position} de {total}",
         "noResultsFound": "No se han encontrado resultados",
         "resultsAvailable": "{count, plural, =1 {1 resultado disponible} other {# resultados disponibles}}"
@@ -474,6 +478,11 @@
         "itemsCount": "{count, plural, =1 {+ # elemento} other {+ # elementos}}",
         "removeMoreItems": "{count, plural, =1 {Quitar # elemento más} other {Quitar # elementos más}}",
         "selectAll": "Seleccionar todo"
+    },
+    "multiSelectTree": {
+        "clear": "Limpiar",
+        "itemsCount": "{count, plural, =1 {+ # elemento} other {+ # elementos}}",
+        "removeMoreItems": "{count, plural, =1 {Quitar # elemento más} other {Quitar # elementos más}}"
     },
     "notification": {
         "close": "Cerrar",

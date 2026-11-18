@@ -1,0 +1,10 @@
+<mona-form-field class="max-w-md" label="Ships to" hint="Choose a region to ship to all its countries.">
+    <mona-multi-select-tree
+        children="countries"
+        textField="name"
+        valueField="code"
+        [checkParents]="false"
+        [data]="regions"
+        [formField]="shipping.countries"
+        [valuePrimitive]="true" />
+</mona-form-field>

@@ -271,7 +271,11 @@ export const PL_PL_MESSAGES = {
     dropdownList: {
         clear: "Wyczyść"
     },
+    dropdownTree: {
+        clear: "Wyczyść"
+    },
     dropdowns: {
+        close: "Zamknij",
         itemPosition: (text: string, position: number, total: number) =>
             `${text}, ${localizeNumber(position)} z ${localizeNumber(total)}`,
         noResultsFound: "Nie znaleziono wyników",
@@ -609,6 +613,13 @@ export const PL_PL_MESSAGES = {
         removeMoreItems: (count: number) =>
             `Usuń jeszcze ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} element`, few: () => `${localizeNumber(count)} elementy`, many: () => `${localizeNumber(count)} elementów`, other: () => `${localizeNumber(count)} elementu` })}`,
         selectAll: "Zaznacz wszystko"
+    },
+    multiSelectTree: {
+        clear: "Wyczyść",
+        itemsCount: (count: number) =>
+            `+ ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} element`, few: () => `${localizeNumber(count)} elementy`, many: () => `${localizeNumber(count)} elementów`, other: () => `${localizeNumber(count)} elementu` })}`,
+        removeMoreItems: (count: number) =>
+            `Usuń jeszcze ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} element`, few: () => `${localizeNumber(count)} elementy`, many: () => `${localizeNumber(count)} elementów`, other: () => `${localizeNumber(count)} elementu` })}`
     },
     notification: {
         close: "Zamknij",

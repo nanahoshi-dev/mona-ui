@@ -210,7 +210,11 @@
     "dropdownList": {
         "clear": "清除"
     },
+    "dropdownTree": {
+        "clear": "清除"
+    },
     "dropdowns": {
+        "close": "關閉",
         "itemPosition": "{text}，第 {position} 項（共 {total} 項）",
         "noResultsFound": "找不到結果",
         "resultsAvailable": "有 {count} 個可用結果"
@@ -474,6 +478,11 @@
         "itemsCount": "+ {count} 項",
         "removeMoreItems": "移除其餘 {count} 項",
         "selectAll": "全選"
+    },
+    "multiSelectTree": {
+        "clear": "清除",
+        "itemsCount": "+ {count} 項",
+        "removeMoreItems": "移除其餘 {count} 項"
     },
     "notification": {
         "close": "關閉",

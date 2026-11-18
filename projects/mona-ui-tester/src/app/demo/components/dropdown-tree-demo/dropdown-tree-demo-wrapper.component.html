@@ -1,0 +1,26 @@
+<div class="flex flex-col gap-2">
+    <span>Value: {{ value()?.name ?? "none" }}</span>
+    <span id="dropdown-tree-demo-label">Place</span>
+    <mona-dropdown-tree
+        aria-labelledby="dropdown-tree-demo-label"
+        children="places"
+        monaDropDownFilterable
+        textField="name"
+        valueField="id"
+        [adaptiveMode]="adaptiveMode()"
+        [adaptiveTitle]="adaptiveTitle()"
+        [data]="places"
+        [disabled]="disabled()"
+        [loading]="loading()"
+        [placeholder]="placeholder()"
+        [popupClass]="popupClass()"
+        [popupHeight]="popupHeight()"
+        [popupWidth]="popupWidth()"
+        [readonly]="readonly()"
+        [required]="required()"
+        [rounded]="rounded()"
+        [showClearButton]="showClearButton()"
+        [size]="size()"
+        [class]="userClass()"
+        [(value)]="value" />
+</div>

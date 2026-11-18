@@ -1,0 +1,17 @@
+<div class="flex max-w-sm flex-col gap-2">
+    <mona-form-field label="Category" hint="Pick the most specific one.">
+        <mona-dropdown-tree
+            adaptiveMode="auto"
+            children="items"
+            class="w-full"
+            monaDropDownFilterable
+            placeholder="Choose a category"
+            textField="name"
+            valueField="id"
+            [data]="categories"
+            [showClearButton]="true"
+            [valuePrimitive]="true"
+            [(value)]="category" />
+    </mona-form-field>
+    <span class="text-sm">Category id: {{ category() ?? "none" }}</span>
+</div>

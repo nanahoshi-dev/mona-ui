@@ -210,7 +210,11 @@
     "dropdownList": {
         "clear": "مسح"
     },
+    "dropdownTree": {
+        "clear": "مسح"
+    },
     "dropdowns": {
+        "close": "إغلاق",
         "itemPosition": "{text}، العنصر {position} من {total}",
         "noResultsFound": "لم يتم العثور على نتائج",
         "resultsAvailable": "عدد النتائج المتاحة: {count}"
@@ -474,6 +478,11 @@
         "itemsCount": "+ {count}",
         "removeMoreItems": "حذف العناصر الإضافية ({count})",
         "selectAll": "تحديد الكل"
+    },
+    "multiSelectTree": {
+        "clear": "مسح",
+        "itemsCount": "+ {count}",
+        "removeMoreItems": "حذف العناصر الإضافية ({count})"
     },
     "notification": {
         "close": "إغلاق",

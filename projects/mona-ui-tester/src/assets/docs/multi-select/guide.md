@@ -194,6 +194,10 @@ With nothing highlighted, such as when the filter matches no option, Enter in th
 - It's left out while the filter leaves no enabled option, and with `autoClose` the popup closes after it as after any option.
 - It counts among the options, in the position screen readers announce. Its text is the multi-select's `selectAll` message.
 
+### On a phone
+
+With `adaptiveMode="auto"`, on a screen narrower than 640 pixels, the popup opens as a bottom sheet with the field's name (or `adaptiveTitle`) and a close button, as described for the [dropdown list](/components/dropdown-list#the-bottom-sheet). The popup stays open while options are chosen, so the sheet does too.
+
 ### `showClearButton` clears every selection
 
 `showClearButton` renders a single clear button that removes all selected items at once, not one at a time.

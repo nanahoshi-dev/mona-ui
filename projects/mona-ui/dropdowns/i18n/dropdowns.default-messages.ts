@@ -8,6 +8,7 @@ function localizeNumber(value: number, options?: Intl.NumberFormatOptions): stri
 }
 
 export const DROPDOWNS_DEFAULT_MESSAGES: MonaDropdownsMessages = {
+    close: "Close",
     itemPosition: (text: string, position: number, total: number) =>
         `${text}, ${localizeNumber(position)} of ${localizeNumber(total)}`,
     noResultsFound: "No results found",

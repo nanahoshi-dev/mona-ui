@@ -229,7 +229,11 @@ export const ZH_CN_MESSAGES = {
     dropdownList: {
         clear: "清除"
     },
+    dropdownTree: {
+        clear: "清除"
+    },
     dropdowns: {
+        close: "关闭",
         itemPosition: (text: string, position: number, total: number) =>
             `${text}，第 ${localizeNumber(position)} 项（共 ${localizeNumber(total)} 项）`,
         noResultsFound: "未找到结果",
@@ -497,6 +501,11 @@ export const ZH_CN_MESSAGES = {
         itemsCount: (count: number) => `+ ${localizeNumber(count)} 项`,
         removeMoreItems: (count: number) => `删除其余 ${localizeNumber(count)} 项`,
         selectAll: "全选"
+    },
+    multiSelectTree: {
+        clear: "清除",
+        itemsCount: (count: number) => `+ ${localizeNumber(count)} 项`,
+        removeMoreItems: (count: number) => `删除其余 ${localizeNumber(count)} 项`
     },
     notification: {
         close: "关闭",

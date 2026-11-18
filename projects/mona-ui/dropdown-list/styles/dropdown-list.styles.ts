@@ -2,6 +2,7 @@ import { cva } from "class-variance-authority";
 import { themeControlSurfaceClasses, type VariantInputs } from "@nanahoshi/mona-ui/internal";
 import type { VariantProps } from "class-variance-authority";
 
+/** @hidden Shared with the dropdown tree, which looks the same. */
 export const dropdownListInputThemeVariants = cva(
     `
         inline-flex items-center
@@ -57,6 +58,7 @@ export const dropdownListInputThemeVariants = cva(
     }
 );
 
+/** @hidden Shared with the dropdown tree, which looks the same. */
 export const dropdownListValueContainerThemeVariants = cva(`flex h-full w-full items-center overflow-hidden`, {
     variants: {
         hasTemplate: {
@@ -65,6 +67,7 @@ export const dropdownListValueContainerThemeVariants = cva(`flex h-full w-full i
     }
 });
 
+/** @hidden Shared with the dropdown tree, which looks the same. */
 export const dropdownListAffixContainerThemeVariants = cva(`flex h-full flex-none items-center justify-center`);
 
 type DropdownListInputVariantProps = VariantProps<typeof dropdownListInputThemeVariants>;

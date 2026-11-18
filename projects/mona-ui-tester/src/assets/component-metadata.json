@@ -1728,7 +1728,7 @@
   },
   "MultiSelectSummaryTagDirective": {
     "name": "MultiSelectSummaryTagDirective",
-    "selector": "\"mona-multi-select[monaMultiSelectSummaryTag]\"",
+    "selector": "\"mona-multi-select[monaMultiSelectSummaryTag], mona-multi-select-tree[monaMultiSelectSummaryTag]\"",
     "inputs": [
       {
         "description": "Number of selected item tags to display before collapsing the rest into a summary tag.\nA negative value shows every selected item as its own tag and never renders the summary tag.",
@@ -11148,6 +11148,24 @@
     "selector": "\"mona-dropdown-list\"",
     "inputs": [
       {
+        "description": "Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640\npixels) with `\"auto\"`, so it's easy to reach with a thumb. With `\"none\"`, it always opens under the field.",
+        "kind": "input",
+        "name": "adaptiveMode",
+        "type": "AdaptiveMode",
+        "options": [
+          "none",
+          "auto"
+        ],
+        "defaultValue": "\"none\""
+      },
+      {
+        "description": "Title of the bottom sheet the popup opens as with `adaptiveMode=\"auto\"`. When empty, the sheet\nshows the field's name.",
+        "kind": "input",
+        "name": "adaptiveTitle",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "ID of an element that describes the dropdown list, such as help text or an error message.",
         "kind": "input",
         "name": "ariaDescribedBy",
@@ -11353,6 +11371,350 @@
         "name": "valuePrimitive",
         "type": "boolean",
         "defaultValue": "false"
+      }
+    ]
+  },
+  "DropdownTreeComponent": {
+    "name": "DropdownTreeComponent",
+    "selector": "\"mona-dropdown-tree\"",
+    "inputs": [
+      {
+        "description": "Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640\npixels) with `\"auto\"`, so it's easy to reach with a thumb. With `\"none\"`, it always opens under the field.",
+        "kind": "input",
+        "name": "adaptiveMode",
+        "type": "AdaptiveMode",
+        "options": [
+          "none",
+          "auto"
+        ],
+        "defaultValue": "\"none\""
+      },
+      {
+        "description": "Title of the bottom sheet the popup opens as with `adaptiveMode=\"auto\"`. When empty, the sheet\nshows the field's name.",
+        "kind": "input",
+        "name": "adaptiveTitle",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "ID of an element that describes the dropdown tree, such as help text or an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name of the dropdown tree. Describe what it represents. When empty, falls back to the\nplaceholder text.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "ID of an external element that provides the accessible name of the dropdown tree.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Property name or accessor that gives a node's children, for `mode=\"hierarchical\"`. An accessor\nmay return an observable, which loads the children when the node is first opened; set `hasChildren` with it.",
+        "kind": "input",
+        "name": "children",
+        "type": "ChildrenSelector<TData>",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Emitted when the popup is about to close. This event is preventable.",
+        "kind": "output",
+        "name": "close",
+        "type": "PopupCloseEvent"
+      },
+      {
+        "description": "Emitted after the popup closes.",
+        "kind": "output",
+        "name": "closed",
+        "type": "void"
+      },
+      {
+        "description": "The items of the tree: its root items for `mode=\"hierarchical\"`, or every item for `mode=\"flat\"`.",
+        "kind": "input",
+        "name": "data",
+        "type": "Iterable<TData>",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Whether an item has children, before they load. Needed when `children` returns an observable.",
+        "kind": "input",
+        "name": "hasChildren",
+        "type": "Predicate<TData> | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Property name that holds an item's unique id, for `mode=\"flat\"`.",
+        "kind": "input",
+        "name": "idField",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Marks the field as invalid. Set automatically by the `FormField` directive when bound via `[formField]`.",
+        "kind": "input",
+        "name": "invalid",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Predicate or field name that tells whether an item is disabled. A disabled item can't be selected\nor opened, and neither can its children.",
+        "kind": "input",
+        "name": "itemDisabled",
+        "type": "DropdownFieldPredicateType<TData>",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Shows a loading indicator, in place of the clear button, and marks the field busy. It doesn't\nblock interaction: the field stays usable while data loads.",
+        "kind": "input",
+        "name": "loading",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Shape of `data`: `\"hierarchical\"` for items that hold their children (see `children`), or\n`\"flat\"` for one list linked by `idField` and `parentIdField`.",
+        "kind": "input",
+        "name": "mode",
+        "type": "DataStructure",
+        "options": [
+          "flat",
+          "hierarchical"
+        ],
+        "defaultValue": "\"hierarchical\""
+      },
+      {
+        "description": "Emitted when the popup is about to open. This event is preventable.",
+        "kind": "output",
+        "name": "open",
+        "type": "PreventableEvent"
+      },
+      {
+        "description": "Emitted after the popup opens.",
+        "kind": "output",
+        "name": "opened",
+        "type": "void"
+      },
+      {
+        "description": "Property name that holds an item's parent id, for `mode=\"flat\"`. Items without one are roots.",
+        "kind": "input",
+        "name": "parentIdField",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Placeholder text shown when no value is selected. It also names the dropdown tree when neither\n`aria-label` nor `aria-labelledby` is set.",
+        "kind": "input",
+        "name": "placeholder",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Additional CSS classes applied to the popup element.",
+        "kind": "input",
+        "name": "popupClass",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Maximum height of the popup, in pixels or as a CSS length. Shorter trees shrink to fit. When\nunset, the popup is at most 200 pixels tall.",
+        "kind": "input",
+        "name": "popupHeight",
+        "type": "ListSizeInputType",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Width of the popup element. When unset, the popup is as wide as the field.",
+        "kind": "input",
+        "name": "popupWidth",
+        "type": "ListSizeInputType",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Prevents value changes while preserving the component's visual state.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Marks the field as required for form validation.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Border-radius preset applied to the component.",
+        "kind": "input",
+        "name": "rounded",
+        "type": "DropDownListVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Shows a clear button that resets the selected value when clicked.",
+        "kind": "input",
+        "name": "showClearButton",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Size preset controlling the component's dimensions.",
+        "kind": "input",
+        "name": "size",
+        "type": "DropDownListVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Property name or accessor that gives an item's text. When unset, the item itself is the text.",
+        "kind": "input",
+        "name": "textField",
+        "type": "DropdownFieldSelectorType<TData, string>",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Emitted when focus leaves the dropdown tree. Moving between it, its clear button and its popup\ndoesn't count. The `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output",
+        "name": "touch",
+        "type": "void"
+      },
+      {
+        "description": "Marks the control as touched. Set automatically by the `FormField` directive when bound via `[formField]`.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The selected item, two-way bindable and compatible with Signal Forms via `[formField]`. It's the\ndata item, or with {@link valuePrimitive}, the value {@link valueField} gives for it. `null` means nothing is\nselected.",
+        "kind": "model",
+        "name": "value",
+        "type": "TValue | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Property name or accessor that gives an item's value: what identifies the item, matches a value\nset from code to its node, and is the value with {@link valuePrimitive}. When unset, the item itself is the\nvalue. It should be a stable, unique scalar.",
+        "kind": "input",
+        "name": "valueField",
+        "type": "DropdownFieldSelectorType<TData, unknown>",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Whether the value is what {@link valueField} gives for the selected item (`true`), or the item\nitself (`false`).",
+        "kind": "input",
+        "name": "valuePrimitive",
+        "type": "boolean",
+        "defaultValue": "false"
+      }
+    ]
+  },
+  "DropdownTreePopupComponent": {
+    "name": "DropdownTreePopupComponent",
+    "selector": "\"mona-dropdown-tree-popup\"",
+    "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "footerTemplate",
+        "type": "TemplateRef<unknown> | null | undefined",
+        "defaultValue": "null"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "headerTemplate",
+        "type": "TemplateRef<unknown> | null | undefined",
+        "defaultValue": "null"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "itemTemplate",
+        "type": "TemplateRef<unknown> | null | undefined",
+        "defaultValue": "null"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "noDataTemplate",
+        "type": "TemplateRef<unknown> | null | undefined",
+        "defaultValue": "null"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "popupClass",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "size",
+        "type": "\"large\" | \"medium\" | \"small\"",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "treeId",
+        "type": "string",
+        "required": true
       }
     ]
   },
@@ -13601,6 +13963,24 @@
     "selector": "\"mona-multi-select\"",
     "inputs": [
       {
+        "description": "Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640\npixels) with `\"auto\"`, so it's easy to reach with a thumb. With `\"none\"`, it always opens under the field.",
+        "kind": "input",
+        "name": "adaptiveMode",
+        "type": "AdaptiveMode",
+        "options": [
+          "none",
+          "auto"
+        ],
+        "defaultValue": "\"none\""
+      },
+      {
+        "description": "Title of the bottom sheet the popup opens as with `adaptiveMode=\"auto\"`. When empty, the sheet\nshows the field's name.",
+        "kind": "input",
+        "name": "adaptiveTitle",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Lets people add values that aren't in {@link data}: Enter in the popup's filter box, on text that\nmatches no item, emits {@link valueAdd} with the text, and an item whose text it matches is selected instead.\nNeeds `monaDropDownFilterable`, whose filter box is where the text is typed.",
         "kind": "input",
         "name": "allowCustomValue",
@@ -13835,6 +14215,290 @@
       },
       {
         "description": "Determines whether the bound value contains complete data items\nor values extracted through {@link valueField}.\n\nWhen `false`, selecting an item writes the complete data item.\nWhen `true`, selecting an item writes the value resolved through `valueField`.",
+        "kind": "input",
+        "name": "valuePrimitive",
+        "type": "boolean",
+        "defaultValue": "false"
+      }
+    ]
+  },
+  "MultiSelectTreeComponent": {
+    "name": "MultiSelectTreeComponent",
+    "selector": "\"mona-multi-select-tree\"",
+    "inputs": [
+      {
+        "description": "Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640\npixels) with `\"auto\"`, so it's easy to reach with a thumb. With `\"none\"`, it always opens under the field.",
+        "kind": "input",
+        "name": "adaptiveMode",
+        "type": "AdaptiveMode",
+        "options": [
+          "none",
+          "auto"
+        ],
+        "defaultValue": "\"none\""
+      },
+      {
+        "description": "Title of the bottom sheet the popup opens as with `adaptiveMode=\"auto\"`. When empty, the sheet\nshows the field's name.",
+        "kind": "input",
+        "name": "adaptiveTitle",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "ID of an element that describes the multi-select tree, such as help text or an error message.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Accessible name of the multi-select tree. Describe what it represents. Falls back to\n{@link placeholder} when neither this nor `aria-labelledby` is set.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "ID of an external element that provides the accessible name of the multi-select tree.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Whether checking an item checks its children too, and unchecking it unchecks them.",
+        "kind": "input",
+        "name": "checkChildren",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Whether an item is checked when all its children are, and unchecked when one of them isn't. An\nitem with only some of its children checked shows a mixed checkbox.",
+        "kind": "input",
+        "name": "checkParents",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Property name or accessor that gives a node's children, for `mode=\"hierarchical\"`. An accessor\nmay return an observable, which loads the children when the node is first opened; set `hasChildren` with it.",
+        "kind": "input",
+        "name": "children",
+        "type": "ChildrenSelector<TData>",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Emitted when the popup is about to close. This event is preventable.",
+        "kind": "output",
+        "name": "close",
+        "type": "PopupCloseEvent"
+      },
+      {
+        "description": "Emitted after the popup closes.",
+        "kind": "output",
+        "name": "closed",
+        "type": "void"
+      },
+      {
+        "description": "The items of the tree: its root items for `mode=\"hierarchical\"`, or every item for `mode=\"flat\"`.",
+        "kind": "input",
+        "name": "data",
+        "type": "Iterable<TData>",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "Disables the component, preventing the popup from opening and blocking tag removal.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Whether an item has children, before they load. Needed when `children` returns an observable.",
+        "kind": "input",
+        "name": "hasChildren",
+        "type": "Predicate<TData> | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Property name that holds an item's unique id, for `mode=\"flat\"`.",
+        "kind": "input",
+        "name": "idField",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Marks the multi-select tree as invalid. When bound to a signal form field via `[formField]`, this\nis written by the `FormField` directive.",
+        "kind": "input",
+        "name": "invalid",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Predicate or field name that tells whether an item is disabled. A disabled item can't be checked\nor opened, and neither can its children; checking its parent leaves it as it is.",
+        "kind": "input",
+        "name": "itemDisabled",
+        "type": "DropdownFieldPredicateType<TData>",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Shows a loading indicator, in place of the clear button, and marks the field busy. It doesn't\nblock interaction: the field stays usable while data loads.",
+        "kind": "input",
+        "name": "loading",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Shape of `data`: `\"hierarchical\"` for items that hold their children (see `children`), or\n`\"flat\"` for one list linked by `idField` and `parentIdField`.",
+        "kind": "input",
+        "name": "mode",
+        "type": "DataStructure",
+        "options": [
+          "flat",
+          "hierarchical"
+        ],
+        "defaultValue": "\"hierarchical\""
+      },
+      {
+        "description": "Emitted when the popup is about to open. This event is preventable.",
+        "kind": "output",
+        "name": "open",
+        "type": "PreventableEvent"
+      },
+      {
+        "description": "Emitted after the popup opens.",
+        "kind": "output",
+        "name": "opened",
+        "type": "void"
+      },
+      {
+        "description": "Property name that holds an item's parent id, for `mode=\"flat\"`. Items without one are roots.",
+        "kind": "input",
+        "name": "parentIdField",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Text shown when nothing is checked. It also names the multi-select tree when neither `aria-label`\nnor `aria-labelledby` is set.",
+        "kind": "input",
+        "name": "placeholder",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Additional CSS classes applied to the popup element.",
+        "kind": "input",
+        "name": "popupClass",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Maximum height of the popup, in pixels or as a CSS length. Shorter trees shrink to fit. When\nunset, the popup is at most 200 pixels tall.",
+        "kind": "input",
+        "name": "popupHeight",
+        "type": "ListSizeInputType",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Width of the popup element. When unset, the popup is as wide as the field.",
+        "kind": "input",
+        "name": "popupWidth",
+        "type": "ListSizeInputType",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Prevents value changes while preserving the component's visual state.",
+        "kind": "input",
+        "name": "readonly",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Marks the field as required: at least one item has to be checked.",
+        "kind": "input",
+        "name": "required",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Border-radius preset applied to the component.",
+        "kind": "input",
+        "name": "rounded",
+        "type": "MultiSelectVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large",
+          "full"
+        ],
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Shows a button that unchecks every item when at least one is checked.",
+        "kind": "input",
+        "name": "showClearButton",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Size preset controlling the component's dimensions.",
+        "kind": "input",
+        "name": "size",
+        "type": "MultiSelectVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Property name or accessor that gives an item's text. When unset, the item itself is the text.",
+        "kind": "input",
+        "name": "textField",
+        "type": "DropdownFieldSelectorType<TData, string>",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Emitted when focus leaves the multi-select tree. Moving between it, its tags, its clear button and\nits popup doesn't count. The `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output",
+        "name": "touch",
+        "type": "void"
+      },
+      {
+        "description": "Marks the control as touched. Set automatically by the `FormField` directive when bound via `[formField]`.",
+        "kind": "input",
+        "name": "touched",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The checked items, two-way bindable and compatible with Signal Forms via `[formField]`: the data\nitems, or with {@link valuePrimitive}, the values {@link valueField} gives for them. A user's change lists them\nin the tree's order. Nothing checked is an empty array.",
+        "kind": "model",
+        "name": "value",
+        "type": "Iterable<TValue>",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "Property name or accessor that gives an item's value: what identifies the item, matches the\nvalues set from code to their nodes, and is the value with {@link valuePrimitive}. When unset, the item itself\nis the value. It should be a stable, unique scalar.",
+        "kind": "input",
+        "name": "valueField",
+        "type": "DropdownFieldSelectorType<TData, unknown>",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Whether the value holds what {@link valueField} gives for the checked items (`true`), or the items\nthemselves (`false`).",
         "kind": "input",
         "name": "valuePrimitive",
         "type": "boolean",
@@ -19815,6 +20479,13 @@
         "kind": "input",
         "name": "data",
         "type": "Iterable<T>"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "focusable",
+        "type": "boolean",
+        "defaultValue": "true"
       }
     ]
   },

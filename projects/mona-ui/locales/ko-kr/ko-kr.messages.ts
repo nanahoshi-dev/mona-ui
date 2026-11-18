@@ -232,7 +232,11 @@ export const KO_KR_MESSAGES = {
     dropdownList: {
         clear: "지우기"
     },
+    dropdownTree: {
+        clear: "지우기"
+    },
     dropdowns: {
+        close: "닫기",
         itemPosition: (text: string, position: number, total: number) =>
             `${text}, ${localizeNumber(total)}개 중 ${localizeNumber(position)}번째`,
         noResultsFound: "결과를 찾을 수 없습니다",
@@ -501,6 +505,11 @@ export const KO_KR_MESSAGES = {
         itemsCount: (count: number) => `+ ${localizeNumber(count)}개`,
         removeMoreItems: (count: number) => `나머지 ${localizeNumber(count)}개 삭제`,
         selectAll: "모두 선택"
+    },
+    multiSelectTree: {
+        clear: "지우기",
+        itemsCount: (count: number) => `+ ${localizeNumber(count)}개`,
+        removeMoreItems: (count: number) => `나머지 ${localizeNumber(count)}개 삭제`
     },
     notification: {
         close: "닫기",

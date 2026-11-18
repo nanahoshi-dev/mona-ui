@@ -31,5 +31,7 @@ export * from "./models/SelectableOptions";
 export type * from "./models/TreeKeyboardMove";
 export * from "./models/TreeSelectors";
 export * from "./services/tree.service";
+export * from "./utils/getTreeNodeElementId";
+export * from "./utils/handleTreeNavigationKey";
 export * from "./utils/moveFlatTreeNode";
 export * from "./utils/moveTreeNode";

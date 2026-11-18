@@ -1,0 +1,82 @@
+@if (prefixTemplate()) {
+    <span [class]="affixClass()">
+        <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>
+    </span>
+}
+
+<div [class]="itemContainerClass()">
+    @for (tag of visibleTags(); track tag.key) {
+        <mona-chip
+            look="default"
+            [tabindex]="-1"
+            [removable]="true"
+            [removeTabIndex]="-1"
+            [disabled]="effectiveDisabled()"
+            [removeLabel]="chipMessages().removeLabel(tag.text)"
+            [rounded]="rounded()"
+            [size]="size()"
+            (remove)="onTagRemove($event, tag)">
+            @if (tagTemplate()) {
+                <ng-container
+                    [ngTemplateOutlet]="tagTemplate()"
+                    [ngTemplateOutletContext]="{ $implicit: tag.data ?? tag.value }"></ng-container>
+            } @else {
+                {{ tag.text }}
+            }
+        </mona-chip>
+    }
+
+    @if (tags().length > visibleTags().length) {
+        @let remainingCount = tags().length - visibleTags().length;
+        <mona-chip
+            look="outline"
+            [tabindex]="-1"
+            [removable]="true"
+            [removeTabIndex]="-1"
+            [disabled]="effectiveDisabled()"
+            [removeLabel]="messages().removeMoreItems(remainingCount)"
+            [rounded]="rounded()"
+            [size]="size()"
+            (remove)="onSummaryTagRemove($event)">
+            @if (summaryTagTemplate()) {
+                <ng-container
+                    [ngTemplateOutlet]="summaryTagTemplate()"
+                    [ngTemplateOutletContext]="{ $implicit: value(), tagCount: tagCount() }"></ng-container>
+            } @else {
+                {{ messages().itemsCount(remainingCount) }}
+            }
+        </mona-chip>
+    }
+
+    @if (placeholder() && tags().length === 0) {
+        <span class="px-1.5 text-muted-foreground">{{ placeholder() }}</span>
+    }
+</div>
+
+@if (clearButtonVisible()) {
+    <mona-indicator-icon
+        preset="clear"
+        [class]="indicatorClass()"
+        [interactive]="true"
+        [label]="messages().clear"
+        (activate)="onValueClear($event)"></mona-indicator-icon>
+}
+
+@if (loading()) {
+    <mona-indicator-icon preset="loading" [class]="indicatorClass()" [size]="12"></mona-indicator-icon>
+}
+
+<mona-indicator-icon preset="dropdown" [class]="indicatorClass()" [size]="18"></mona-indicator-icon>
+
+<ng-template #popupTemplate>
+    <mona-dropdown-tree-popup
+        [treeId]="treeId"
+        [ariaLabel]="popupAriaLabel()"
+        [ariaLabelledBy]="labelledBy() ?? ''"
+        [popupClass]="popupSurfaceClass()"
+        [size]="popupSize()"
+        [headerTemplate]="headerTemplate()"
+        [footerTemplate]="footerTemplate()"
+        [itemTemplate]="itemTemplate()"
+        [noDataTemplate]="noDataTemplate()"></mona-dropdown-tree-popup>
+</ng-template>

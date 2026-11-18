@@ -120,6 +120,14 @@ Binding `[formField]` synchronizes `value`, `disabled`, `readonly`, `required`, 
 dropdown-list/forms
 ```
 
+### A bottom sheet on a phone
+
+With `adaptiveMode="auto"`, on a screen narrower than 640 pixels, the popup opens as a sheet along the bottom of the screen, where it's easy to reach with a thumb. Narrow the window to see it.
+
+```example
+dropdown-list/adaptive
+```
+
 ### Disabled, readonly, loading, and required states
 
 `disabled` renders the control with reduced visual emphasis and removes pointer interaction. `readonly` prevents value changes while preserving the visual state. `loading` shows a loading indicator in place of the clear button and marks the field busy. It doesn't block interaction: the field stays usable while data loads. `required` marks the field for form validation and affects the invalid state once the control is touched.
@@ -162,6 +170,10 @@ While the popup is open, arrow-key and typeahead navigation only stage a highlig
 ### `open` and `close` are cancelable
 
 `open` and `close` emit event objects with `preventDefault()` and `isDefaultPrevented()`. Calling `preventDefault()` in an `open` handler stops the popup from opening; calling it in a `close` handler stops the popup from closing. `close`'s event object also exposes `via`, describing what triggered the close attempt (for example `"escape"` or `"outsideClick"`).
+
+### The bottom sheet
+
+With `adaptiveMode="auto"`, the popup opens as a bottom sheet when the screen is narrower than 640 pixels as it opens; it doesn't switch while open. The sheet covers the page with a dimmed backdrop, which closes it when pressed, and has a header with the field's name (or `adaptiveTitle`) and a close button. Its options are 44 pixels tall, to be easy to tap. Focus stays where it is, as with the popup under the field: on the field, or in the filter box. While an on-screen keyboard is open, the sheet sits above it. Without `adaptiveMode`, or with `"none"`, the popup always opens under the field.
 
 ### Click-to-toggle
 

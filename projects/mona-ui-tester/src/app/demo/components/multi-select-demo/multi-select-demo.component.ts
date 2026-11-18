@@ -122,6 +122,15 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
             // A custom value needs the page to add an item to data, which the "Adding values that aren't listed"
             // example shows.
             allowCustomValue: undefined,
+            adaptiveMode: {
+                type: "dropdown",
+                value: ["none", "auto"],
+                defaultValue: "none"
+            },
+            adaptiveTitle: {
+                type: "string",
+                value: ""
+            },
             // The demo labels the field with visible text referenced through aria-labelledby.
             ariaDescribedBy: undefined,
             ariaLabel: undefined,
@@ -225,6 +234,8 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         <span id="multi-select-demo-label" class="text-sm font-medium">Favourite foods</span>
         <mona-multi-select
             aria-labelledby="multi-select-demo-label"
+            [adaptiveMode]="adaptiveMode()"
+            [adaptiveTitle]="adaptiveTitle()"
             [autoClose]="autoClose()"
             [checkboxes]="checkboxes()"
             [data]="multiSelectData()"
@@ -357,6 +368,8 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
     });
     protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
 
+    public readonly adaptiveMode = input<ReturnType<MultiSelectComponent["adaptiveMode"]>>("none");
+    public readonly adaptiveTitle = input("");
     public readonly autoClose = input(false, { transform: booleanAttribute });
     public readonly checkboxes = input(false, { transform: booleanAttribute });
     public readonly data = input<ReturnType<MultiSelectComponent["data"]>>([]);

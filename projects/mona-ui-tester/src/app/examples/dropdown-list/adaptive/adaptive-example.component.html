@@ -1,0 +1,8 @@
+<mona-form-field class="max-w-sm" label="Time zone" hint="On a phone, the list opens along the bottom of the screen.">
+    <mona-dropdown-list
+        adaptiveMode="auto"
+        class="w-full"
+        monaDropDownFilterable
+        [data]="timeZones"
+        [(value)]="timeZone" />
+</mona-form-field>

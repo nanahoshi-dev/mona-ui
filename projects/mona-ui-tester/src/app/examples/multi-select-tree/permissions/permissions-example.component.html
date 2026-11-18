@@ -1,0 +1,17 @@
+<div class="flex max-w-md flex-col gap-2">
+    <mona-form-field label="Permissions" hint="Checking a group grants everything in it.">
+        <mona-multi-select-tree
+            adaptiveMode="auto"
+            children="permissions"
+            monaDropDownFilterable
+            placeholder="Grant permissions"
+            textField="label"
+            valueField="id"
+            [data]="permissions"
+            [monaMultiSelectSummaryTag]="3"
+            [showClearButton]="true"
+            [valuePrimitive]="true"
+            [(value)]="granted" />
+    </mona-form-field>
+    <span class="text-sm">Granted: {{ granted().join(", ") || "nothing" }}</span>
+</div>

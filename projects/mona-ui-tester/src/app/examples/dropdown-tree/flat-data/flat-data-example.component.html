@@ -1,0 +1,26 @@
+<mona-form-field class="max-w-sm" label="Team" hint="Archived teams can't take new members.">
+    <mona-dropdown-tree
+        class="w-full"
+        idField="id"
+        itemDisabled="archived"
+        mode="flat"
+        parentIdField="parentId"
+        placeholder="Choose a team"
+        textField="name"
+        valueField="id"
+        [data]="teams"
+        [valuePrimitive]="true"
+        [(value)]="team">
+        <ng-template monaDropDownTreeItemTemplate let-team>
+            <span class="flex flex-wrap items-baseline gap-x-2">
+                {{ team.name }}
+                @if (team.archived) {
+                    <span class="text-xs text-muted-foreground">(archived)</span>
+                }
+            </span>
+        </ng-template>
+        <ng-template monaDropDownTreeValueTemplate let-team>
+            <span class="truncate">{{ team ? team.name + " team" : "Choose a team" }}</span>
+        </ng-template>
+    </mona-dropdown-tree>
+</mona-form-field>

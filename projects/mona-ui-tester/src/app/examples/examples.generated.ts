@@ -558,6 +558,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./dropdown-button/loading/loading-example.component").then(module => module.DropdownButtonLoadingExampleComponent),
         mainFile: "loading-example.component.ts"
     },
+    "dropdown-list/adaptive": {
+        files: ["adaptive-example.component.ts", "adaptive-example.component.html"],
+        load: () => import("./dropdown-list/adaptive/adaptive-example.component").then(module => module.DropdownListAdaptiveExampleComponent),
+        mainFile: "adaptive-example.component.ts"
+    },
     "dropdown-list/filtering": {
         files: ["filtering-example.component.ts", "filtering-example.component.html"],
         load: () => import("./dropdown-list/filtering/filtering-example.component").then(module => module.DropdownListFilteringExampleComponent),
@@ -577,6 +582,21 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         files: ["templates-example.component.ts", "templates-example.component.html"],
         load: () => import("./dropdown-list/templates/templates-example.component").then(module => module.DropdownListTemplatesExampleComponent),
         mainFile: "templates-example.component.ts"
+    },
+    "dropdown-tree/categories": {
+        files: ["categories-example.component.ts", "categories-example.component.html"],
+        load: () => import("./dropdown-tree/categories/categories-example.component").then(module => module.DropdownTreeCategoriesExampleComponent),
+        mainFile: "categories-example.component.ts"
+    },
+    "dropdown-tree/flat-data": {
+        files: ["flat-data-example.component.ts", "flat-data-example.component.html"],
+        load: () => import("./dropdown-tree/flat-data/flat-data-example.component").then(module => module.DropdownTreeFlatDataExampleComponent),
+        mainFile: "flat-data-example.component.ts"
+    },
+    "dropdown-tree/lazy-loading": {
+        files: ["lazy-loading-example.component.ts", "lazy-loading-example.component.html"],
+        load: () => import("./dropdown-tree/lazy-loading/lazy-loading-example.component").then(module => module.DropdownTreeLazyLoadingExampleComponent),
+        mainFile: "lazy-loading-example.component.ts"
     },
     "editor/basic": {
         files: ["basic-example.component.ts", "basic-example.component.html"],
@@ -832,6 +852,16 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         files: ["disabled-example.component.ts", "disabled-example.component.html"],
         load: () => import("./menubar/disabled/disabled-example.component").then(module => module.MenubarDisabledExampleComponent),
         mainFile: "disabled-example.component.ts"
+    },
+    "multi-select-tree/forms": {
+        files: ["forms-example.component.ts", "forms-example.component.html"],
+        load: () => import("./multi-select-tree/forms/forms-example.component").then(module => module.MultiSelectTreeFormsExampleComponent),
+        mainFile: "forms-example.component.ts"
+    },
+    "multi-select-tree/permissions": {
+        files: ["permissions-example.component.ts", "permissions-example.component.html"],
+        load: () => import("./multi-select-tree/permissions/permissions-example.component").then(module => module.MultiSelectTreePermissionsExampleComponent),
+        mainFile: "permissions-example.component.ts"
     },
     "multi-select/checkboxes": {
         files: ["checkboxes-example.component.ts", "checkboxes-example.component.html"],

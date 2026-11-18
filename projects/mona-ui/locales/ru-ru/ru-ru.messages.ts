@@ -265,7 +265,11 @@ export const RU_RU_MESSAGES = {
     dropdownList: {
         clear: "Очистить"
     },
+    dropdownTree: {
+        clear: "Очистить"
+    },
     dropdowns: {
+        close: "Закрыть",
         itemPosition: (text: string, position: number, total: number) =>
             `${text}, ${localizeNumber(position)} из ${localizeNumber(total)}`,
         noResultsFound: "Результаты не найдены",
@@ -596,6 +600,13 @@ export const RU_RU_MESSAGES = {
         removeMoreItems: (count: number) =>
             `Удалить ещё ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} элемент`, few: () => `${localizeNumber(count)} элемента`, many: () => `${localizeNumber(count)} элементов`, other: () => `${localizeNumber(count)} элемента` })}`,
         selectAll: "Выбрать все"
+    },
+    multiSelectTree: {
+        clear: "Очистить",
+        itemsCount: (count: number) =>
+            `+ ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} элемент`, few: () => `${localizeNumber(count)} элемента`, many: () => `${localizeNumber(count)} элементов`, other: () => `${localizeNumber(count)} элемента` })}`,
+        removeMoreItems: (count: number) =>
+            `Удалить ещё ${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} элемент`, few: () => `${localizeNumber(count)} элемента`, many: () => `${localizeNumber(count)} элементов`, other: () => `${localizeNumber(count)} элемента` })}`
     },
     notification: {
         close: "Закрыть",
