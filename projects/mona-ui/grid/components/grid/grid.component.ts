@@ -75,6 +75,7 @@ import type { GridToolbarContext, GridToolbarTemplateContext } from "../../model
 import { ResizeMethod } from "../../models/ResizeMethod";
 import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
 import { isKeyboardEntryElement, observeGridCellTabStops } from "../../services/grid-cell-tab-stops";
+import { getColumnStepTarget, getSiblingRuns } from "../../services/grid-column-groups";
 import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
 import {
@@ -88,6 +89,10 @@ import {
     gridFooterThemeVariants,
     gridGroupPanelPlaceholderThemeVariants,
     gridGroupPanelThemeVariants,
+    gridHeaderGroupCellThemeVariants,
+    gridHeaderGroupSpacerCellThemeVariants,
+    gridHeaderGroupTableRowThemeVariants,
+    gridHeaderGroupTitleThemeVariants,
     gridHeaderTableCellThemeVariants,
     gridHeaderTableColumnTitleThemeVariants,
     gridHeaderTableColumnWrapThemeVariants,
@@ -193,7 +198,10 @@ export class GridComponent<T> implements GridVariantInput {
     /** Where the active control was, for when it's removed. */
     #toolbarActiveItemIndex = 0;
 
-    private readonly columnDefinitions = contentChildren<GridColumnDefinition>(GRID_COLUMN_DEFINITION);
+    // Descendants too: columns can sit inside mona-grid-column-group elements, in document order.
+    private readonly columnDefinitions = contentChildren<GridColumnDefinition>(GRID_COLUMN_DEFINITION, {
+        descendants: true
+    });
 
     private readonly filterMenus = viewChildren(GridFilterMenuComponent);
 
@@ -308,6 +316,14 @@ export class GridComponent<T> implements GridVariantInput {
         return gridHeaderThemeVariants();
     });
 
+    protected readonly headerGroupCellClass = computed(() => gridHeaderGroupCellThemeVariants());
+
+    protected readonly headerGroupRowClass = computed(() => gridHeaderGroupTableRowThemeVariants());
+
+    protected readonly headerGroupSpacerCellClass = computed(() => gridHeaderGroupSpacerCellThemeVariants());
+
+    protected readonly headerGroupTitleClass = computed(() => gridHeaderGroupTitleThemeVariants());
+
     /** Each header's keyboard shortcuts, for `aria-keyshortcuts`. */
     protected readonly headerKeyShortcuts = computed(() => {
         const shortcuts = new Map<string, string>();
@@ -340,6 +356,11 @@ export class GridComponent<T> implements GridVariantInput {
     protected readonly headerTableClass = computed(() => {
         return gridHeaderTableThemeVariants();
     });
+
+    /** The column header row: under group rows it draws no line of its own, as the group titles have one. */
+    protected readonly headerTableColumnRowClass = computed(() =>
+        this.gridService.headerGroupDepth() === 0 ? this.headerTableRowClass() : this.headerGroupRowClass()
+    );
 
     protected readonly headerTableColumnTitleClass = computed(() => {
         return gridHeaderTableColumnTitleThemeVariants();
@@ -581,8 +602,9 @@ export class GridComponent<T> implements GridVariantInput {
                 return;
             }
             const pastMiddle = x > rect.left + rect.width / 2;
-            this.dropColumn.set(column);
-            this.dropAfter.set(pastMiddle !== rtl);
+            const target = this.#resolveColumnDropTarget(column, pastMiddle !== rtl);
+            this.dropColumn.set(target?.column ?? null);
+            this.dropAfter.set(target?.after ?? false);
             return;
         }
     }
@@ -836,23 +858,19 @@ export class GridComponent<T> implements GridVariantInput {
         return host.ownerDocument.defaultView?.getComputedStyle(host).direction === "rtl";
     }
 
-    /** Moves a column past its visible neighbor, within its pinned group. */
+    /**
+     * Moves a column past its visible neighbor, within its pinned group. In a column group, the neighbor is a column of
+     * the same group or a whole nested group.
+     */
     #moveColumnByKeyboard(column: Column, step: 1 | -1): void {
         if (column.locked || !this.gridService.reorderableOptions().enabled) {
             return;
         }
-        const columns = this.gridService.columns().toArray();
-        const bucket = this.getColumnLockBucket(column);
-        const index = columns.findIndex(candidate => candidate.id === column.id);
-        let neighbor = index + step;
-        while (neighbor >= 0 && neighbor < columns.length && columns[neighbor].hidden) {
-            neighbor += step;
-        }
-        const target = columns[neighbor];
-        if (index < 0 || target == null || this.getColumnLockBucket(target) !== bucket) {
+        const target = getColumnStepTarget(this.gridService.columns().toArray(), column, step);
+        if (target == null || this.getColumnLockBucket(target.neighbor) !== this.getColumnLockBucket(column)) {
             return;
         }
-        if (!this.gridService.reorderColumn(column, step === 1 ? neighbor + 1 : neighbor)) {
+        if (!this.gridService.reorderColumn(column, target.beforeIndex)) {
             return;
         }
         const position =
@@ -876,6 +894,36 @@ export class GridComponent<T> implements GridVariantInput {
             },
             { injector: this.#injector }
         );
+    }
+
+    /**
+     * Where a dragged column goes when it's over a header. In a column group it can only go among its siblings: over a
+     * nested group, it goes before or after the whole group; over a column outside its group, nowhere.
+     */
+    #resolveColumnDropTarget(
+        hovered: Column,
+        after: boolean
+    ): { readonly after: boolean; readonly column: Column } | null {
+        const dragColumn = this.dragColumn();
+        if (dragColumn == null) {
+            return { after, column: hovered };
+        }
+        const columns = this.gridService.columns().toArray();
+        const index = columns.findIndex(candidate => candidate.id === hovered.id);
+        const run = getSiblingRuns(columns, dragColumn).find(
+            candidate => candidate.start <= index && index < candidate.end
+        );
+        if (run == null) {
+            return null;
+        }
+        const visible = columns.slice(run.start, run.end).filter(candidate => !candidate.hidden);
+        if (visible.length <= 1) {
+            return { after, column: hovered };
+        }
+        // Over a nested group, the half of the group the pointer is in decides.
+        const position = visible.findIndex(candidate => candidate.id === hovered.id) * 2 + 1;
+        const groupAfter = position === visible.length ? after : position > visible.length;
+        return groupAfter ? { after: true, column: visible[visible.length - 1] } : { after: false, column: visible[0] };
     }
 
     private clearDragState(): void {
@@ -925,7 +973,7 @@ export class GridComponent<T> implements GridVariantInput {
         if (!headerElement) {
             return [];
         }
-        const thList = headerElement.nativeElement.querySelectorAll("thead > tr:first-child > th");
+        const thList = headerElement.nativeElement.querySelectorAll("thead > tr[data-grid-column-header-row] > th");
         const headerCells = Array.from(thList) as HTMLTableCellElement[];
         if (this.gridService.rowReorderColumnVisible()) {
             headerCells.shift();

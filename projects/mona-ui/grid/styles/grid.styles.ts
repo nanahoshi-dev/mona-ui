@@ -225,6 +225,36 @@ export const gridHeaderTableRowThemeVariants = cva(
     `relative inline-flex not-first:border-t not-first:border-t-border-subtle [&>th:last-child]:border-e-0`
 );
 
+/**
+ * A column group row, and the column header row under group rows. Group titles draw the line under them, so a column
+ * outside a group reads as one tall header.
+ */
+export const gridHeaderGroupTableRowThemeVariants = cva(`relative inline-flex [&>th:last-child]:border-e-0`);
+
+/**
+ * A group's title cell, over the columns it spans. It clips rather than hides its overflow, so it isn't a scroll
+ * container and its title can stick to the scrolling header.
+ */
+export const gridHeaderGroupCellThemeVariants = cva(
+    `
+        relative select-none
+        text-start overflow-clip
+        outline-none focus-visible:outline-hidden
+        border-e border-e-border-subtle border-b border-b-border-subtle
+        after:absolute after:inset-0 after:pointer-events-none
+        focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-focus-indicator
+    `
+);
+
+/** The space above a column that isn't in a group at that level. */
+export const gridHeaderGroupSpacerCellThemeVariants = cva(`border-e border-e-border-subtle`);
+
+/**
+ * A group's title text. It sticks next to the pinned start columns while the rest of its group is in view, so a
+ * group scrolled partly out of view keeps its title readable.
+ */
+export const gridHeaderGroupTitleThemeVariants = cva(`sticky block w-fit max-w-full px-2 py-2 truncate font-medium`);
+
 export const gridHeaderTableCellThemeVariants = cva(
     `
         relative select-none

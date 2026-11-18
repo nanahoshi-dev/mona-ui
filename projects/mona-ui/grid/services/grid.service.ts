@@ -82,6 +82,7 @@ import { SelectableOptions } from "../models/SelectableOptions";
 import { SortableOptions } from "../models/SortableOptions";
 import type { StructuralColumnDescriptor } from "../models/StructuralColumn";
 import { GRID_DEFAULT_MESSAGES } from "../i18n/grid.default-messages";
+import { buildHeaderGroupRows, orderColumnsByGroup, resolveColumnMoveIndex } from "./grid-column-groups";
 import { partitionFilters, toFilterMenuValue } from "./grid-filter-state";
 import { buildGroupKey, groupKeyHasField, groupRowsByField } from "./grid-group-key";
 import { GridRowFlattenerService } from "./grid-row-flattener.service";
@@ -367,8 +368,12 @@ export class GridService {
             this.visibleColumns().any(column => column.locked && column.lockedPosition === "left")
     );
     public readonly hasLiveScrollbarGutterWidth = computed(() => this.#scrollbarGutterMeasurementSource() === "body");
-    /** The header rows: the column headers and, when shown, the filter row. */
-    public readonly headerRowCount = computed(() => (this.filterRowEnabled() ? 2 : 1));
+    /** How many group rows sit above the column headers: the deepest `mona-grid-column-group` nesting shown. */
+    public readonly headerGroupDepth = computed(() => this.headerGroupRows().length);
+    /** The rows of column group headers, outermost first; empty without groups. */
+    public readonly headerGroupRows = computed(() => buildHeaderGroupRows(this.layout()));
+    /** The header rows: the column group rows, the column headers and, when shown, the filter row. */
+    public readonly headerRowCount = computed(() => this.headerGroupDepth() + (this.filterRowEnabled() ? 2 : 1));
     public readonly headerTableElement = signal<HTMLTableElement | null>(null);
     public readonly horizontalScrollLeft = this.#horizontalScrollLeft.asReadonly();
     public readonly isInEditMode = computed(() => this.#editSession() != null);
@@ -1247,32 +1252,32 @@ export class GridService {
 
     /**
      * Moves a column in front of the column at `beforeIndex` in `columns()`, or to the end with
-     * `columns().length`. Reports `columnReorder$`, which can cancel the move. Returns whether it moved.
+     * `columns().length`. A column in a `mona-grid-column-group` moves only among the group's columns and nested
+     * groups, and no column lands inside a group it isn't in; past hidden columns, the nearest place allowed is used.
+     * Reports `columnReorder$`, which can cancel the move. Returns whether it moved.
      */
     public reorderColumn(column: Column, beforeIndex: number): boolean {
         if (!this.reorderableOptions().enabled) {
             return false;
         }
-        const columnIds = this.columns()
-            .select(candidate => candidate.id)
-            .toArray();
+        const columns = this.columns().toArray();
+        const columnIds = columns.map(candidate => candidate.id);
         const oldIndex = columnIds.indexOf(column.id);
-        if (
-            oldIndex < 0 ||
-            beforeIndex < 0 ||
-            beforeIndex > columnIds.length ||
-            beforeIndex === oldIndex ||
-            beforeIndex === oldIndex + 1
-        ) {
+        if (oldIndex < 0 || beforeIndex < 0 || beforeIndex > columnIds.length) {
             return false;
         }
-        const event = new ColumnReorderEvent(column, oldIndex, beforeIndex);
+        // A column stays among its siblings in its group, and doesn't land inside a nested group.
+        const targetIndex = resolveColumnMoveIndex(columns, columns[oldIndex], beforeIndex);
+        if (targetIndex == null || targetIndex === oldIndex || targetIndex === oldIndex + 1) {
+            return false;
+        }
+        const event = new ColumnReorderEvent(column, oldIndex, targetIndex);
         this.columnReorder$.next(event);
         if (event.isDefaultPrevented()) {
             return false;
         }
         const [columnId] = columnIds.splice(oldIndex, 1);
-        columnIds.splice(beforeIndex > oldIndex ? beforeIndex - 1 : beforeIndex, 0, columnId);
+        columnIds.splice(targetIndex > oldIndex ? targetIndex - 1 : targetIndex, 0, columnId);
         this.setColumnOrder(columnIds);
         return true;
     }
@@ -2192,10 +2197,12 @@ export class GridService {
         return gutterWidth;
     }
 
+    /** Keeps each group's columns together, then moves left-locked columns to the start and right-locked ones to the end. */
     private orderColumnsByLockBucket(columns: readonly Column[]): Column[] {
-        const leftLockedColumns = columns.filter(column => this.getColumnLockBucket(column) === "left");
-        const unlockedColumns = columns.filter(column => this.getColumnLockBucket(column) === "unlocked");
-        const rightLockedColumns = columns.filter(column => this.getColumnLockBucket(column) === "right");
+        const groupedColumns = orderColumnsByGroup(columns);
+        const leftLockedColumns = groupedColumns.filter(column => this.getColumnLockBucket(column) === "left");
+        const unlockedColumns = groupedColumns.filter(column => this.getColumnLockBucket(column) === "unlocked");
+        const rightLockedColumns = groupedColumns.filter(column => this.getColumnLockBucket(column) === "right");
         return [...leftLockedColumns, ...unlockedColumns, ...rightLockedColumns];
     }
 

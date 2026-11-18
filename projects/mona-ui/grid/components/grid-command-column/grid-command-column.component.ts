@@ -15,6 +15,7 @@ import { GridCellTemplateDirective } from "../../directives/grid-cell-template.d
 import { Column } from "../../models/Column";
 import { GRID_COLUMN_DEFINITION, GridColumnDefinition } from "../../models/GridColumnDefinition";
 import type { GridColumnLockedPosition } from "../../models/GridColumnLockedPosition";
+import { GridColumnGroupComponent } from "../grid-column-group/grid-column-group.component";
 
 @Component({
     selector: "mona-grid-command-column",
@@ -41,6 +42,7 @@ export class GridCommandColumnComponent implements GridColumnDefinition {
             format: null,
             groupFooterTemplate: null,
             groupSortDirection: null,
+            groups: this.#group?.path() ?? [],
             headerTemplate: null,
             hidden: this.hidden(),
             id: this.#columnId,
@@ -60,6 +62,7 @@ export class GridCommandColumnComponent implements GridColumnDefinition {
         };
     });
     readonly #columnId = v4();
+    readonly #group = inject(GridColumnGroupComponent, { optional: true });
     readonly #messages = inject(MonaI18nService).componentMessages("grid", GRID_DEFAULT_MESSAGES);
     private readonly commandTemplate = contentChild(GridCellTemplateDirective, { read: TemplateRef });
 

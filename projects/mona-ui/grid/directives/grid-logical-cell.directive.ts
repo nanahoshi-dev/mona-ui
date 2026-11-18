@@ -45,6 +45,7 @@ export class GridLogicalCellDirective {
         const data: NavigationData = {
             cellKind: this.resolvedCellKind(),
             colIndex: this.colIndex(),
+            colSpan: this.columnSpan(),
             columnId: this.columnId(),
             editable: this.editable(),
             element: this.#hostElementRef.nativeElement,
@@ -106,6 +107,11 @@ export class GridLogicalCellDirective {
     public readonly cellKind = input<GridCellKind | null>(null);
     public readonly colIndex = input.required<number>();
     public readonly columnId = input<string>();
+    /**
+     * @description How many navigation columns the cell spans from `colIndex`, as a column group's title does. Arrow
+     * Up and Arrow Down reach it from any of them.
+     */
+    public readonly columnSpan = input(1);
     public readonly edit = output();
 
     /**
