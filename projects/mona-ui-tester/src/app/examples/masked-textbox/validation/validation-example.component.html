@@ -1,0 +1,11 @@
+<form class="flex max-w-xs flex-col gap-4" novalidate (submit)="onSubmit($event)">
+    <mona-form-field label="Expiry date" hint="Month and year, as on the card.">
+        <mona-masked-text-box placeholder="MM/YY" class="w-28" [mask]="mask" [formField]="card.expiry" />
+    </mona-form-field>
+    <div class="flex items-center gap-3">
+        <button monaButton look="primary" type="submit">Save card</button>
+        @if (saved()) {
+            <span class="text-sm" role="status">Saved.</span>
+        }
+    </div>
+</form>

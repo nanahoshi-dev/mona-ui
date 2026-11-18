@@ -1,0 +1,15 @@
+<div class="flex max-w-xs flex-col gap-3">
+    <mona-form-field label="Phone" hint="10 digits, such as (555) 123-4567.">
+        <mona-masked-text-box
+            [mask]="mask"
+            [clearButton]="true"
+            [inputAttributes]="phoneAttributes"
+            [(value)]="phone" />
+    </mona-form-field>
+    <dl class="grid grid-cols-[auto_1fr] gap-x-3 text-sm">
+        <dt class="text-muted-foreground">Value</dt>
+        <dd>{{ phone() || "empty" }}</dd>
+        <dt class="text-muted-foreground">Formatted</dt>
+        <dd>{{ shown() || "empty" }}</dd>
+    </dl>
+</div>

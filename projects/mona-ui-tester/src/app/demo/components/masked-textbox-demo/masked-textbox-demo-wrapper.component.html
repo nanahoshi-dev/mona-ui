@@ -1,0 +1,18 @@
+<div class="flex flex-col gap-2">
+    <span>Value: {{ value() || "empty" }}</span>
+    <mona-label for="masked-text-box-demo-input" text="Phone"></mona-label>
+    <mona-masked-text-box
+        inputId="masked-text-box-demo-input"
+        [clearButton]="clearButton()"
+        [disabled]="disabled()"
+        [includeLiterals]="includeLiterals()"
+        [mask]="mask()"
+        [placeholder]="placeholder()"
+        [prompt]="prompt()"
+        [readonly]="readonly()"
+        [required]="required()"
+        [rounded]="rounded()"
+        [size]="size()"
+        [class]="userClass()"
+        [(value)]="value" />
+</div>

@@ -788,6 +788,21 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./list-view/selection/selection-example.component").then(module => module.ListViewSelectionExampleComponent),
         mainFile: "selection-example.component.ts"
     },
+    "masked-textbox/custom-rules": {
+        files: ["custom-rules-example.component.ts", "custom-rules-example.component.html"],
+        load: () => import("./masked-textbox/custom-rules/custom-rules-example.component").then(module => module.MaskedTextboxCustomRulesExampleComponent),
+        mainFile: "custom-rules-example.component.ts"
+    },
+    "masked-textbox/phone": {
+        files: ["phone-example.component.ts", "phone-example.component.html"],
+        load: () => import("./masked-textbox/phone/phone-example.component").then(module => module.MaskedTextboxPhoneExampleComponent),
+        mainFile: "phone-example.component.ts"
+    },
+    "masked-textbox/validation": {
+        files: ["validation-example.component.ts", "validation-example.component.html"],
+        load: () => import("./masked-textbox/validation/validation-example.component").then(module => module.MaskedTextboxValidationExampleComponent),
+        mainFile: "validation-example.component.ts"
+    },
     "menubar/basic": {
         files: ["basic-example.component.ts", "basic-example.component.html"],
         load: () => import("./menubar/basic/basic-example.component").then(module => module.MenubarBasicExampleComponent),
@@ -822,6 +837,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         files: ["primitive-example.component.ts", "primitive-example.component.html"],
         load: () => import("./multi-select/primitive/primitive-example.component").then(module => module.MultiSelectPrimitiveExampleComponent),
         mainFile: "primitive-example.component.ts"
+    },
+    "multi-select/select-all": {
+        files: ["select-all-example.component.ts", "select-all-example.component.html"],
+        load: () => import("./multi-select/select-all/select-all-example.component").then(module => module.MultiSelectSelectAllExampleComponent),
+        mainFile: "select-all-example.component.ts"
     },
     "multi-select/summary": {
         files: ["summary-example.component.ts", "summary-example.component.html"],

@@ -236,6 +236,7 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
             [popupWidth]="popupWidth()"
             [rounded]="rounded()"
             [showClearButton]="showClearButton()"
+            [showSelectAll]="showSelectAll()"
             [size]="size()"
             [textField]="textField()"
             [valueField]="valueField()"
@@ -370,6 +371,7 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
     public readonly required = input(false, { transform: booleanAttribute });
     public readonly rounded = input<ReturnType<MultiSelectComponent["rounded"]>>("medium");
     public readonly showClearButton = input(true, { transform: booleanAttribute });
+    public readonly showSelectAll = input(false, { transform: booleanAttribute });
     public readonly size = input<ReturnType<MultiSelectComponent["size"]>>("medium");
     public readonly summaryTagTemplate = input<ReturnType<MultiSelectComponent["summaryTagTemplate"]>>(null);
     public readonly tagCount = input<ReturnType<MultiSelectComponent["tagCount"]>>(-1);

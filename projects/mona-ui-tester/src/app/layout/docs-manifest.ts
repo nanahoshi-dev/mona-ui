@@ -167,6 +167,12 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
             }),
             component("label", "Label", "label", "Styled, accessible labels associated with form controls."),
             component(
+                "masked-textbox",
+                "Masked Text Box",
+                "masked-text-box",
+                "A text input for values in a fixed format, such as phone numbers, that fills in the format as you type."
+            ),
+            component(
                 "numeric-textbox",
                 "Numeric Text Box",
                 "numeric-text-box",

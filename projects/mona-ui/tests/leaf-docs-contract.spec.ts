@@ -79,6 +79,7 @@ const coveredEntryPoints: readonly (readonly [entry: string, docs: readonly stri
     ["file-upload", ["file-upload"]],
     ["form-field", ["form-field"]],
     ["label", ["label"]],
+    ["masked-text-box", ["masked-textbox"]],
     ["otp-input", ["otp-input"]],
     ["placeholder", ["placeholder"]],
     ["progress-bar", ["progress-bar"]],

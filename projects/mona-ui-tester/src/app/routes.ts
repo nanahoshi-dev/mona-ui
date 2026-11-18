@@ -419,6 +419,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "masked-textbox",
+                loadComponent: () =>
+                    import("./docs/components/masked-textbox-doc/masked-textbox-doc.component").then(
+                        m => m.MaskedTextboxDocComponent
+                    )
+            },
+            {
                 path: "notification",
                 loadComponent: () =>
                     import("./docs/components/notification-doc/notification-doc.component").then(
