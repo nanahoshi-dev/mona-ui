@@ -1116,6 +1116,12 @@
         "name": "lockedCellHeader",
         "type": "boolean",
         "defaultValue": "false"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "stickyState",
+        "type": "GridStickyState | null | undefined"
       }
     ]
   },
@@ -1158,6 +1164,13 @@
         "kind": "input",
         "name": "columnId",
         "type": "string"
+      },
+      {
+        "description": "How many navigation columns the cell spans from `colIndex`, as a column group's title does. Arrow\nUp and Arrow Down reach it from any of them.",
+        "kind": "input",
+        "name": "columnSpan",
+        "type": "number",
+        "defaultValue": "1"
       },
       {
         "description": "",
@@ -12016,6 +12029,19 @@
         "kind": "output",
         "name": "cancel",
         "type": "void"
+      }
+    ]
+  },
+  "GridColumnGroupComponent": {
+    "name": "GridColumnGroupComponent",
+    "selector": "\"mona-grid-column-group\"",
+    "inputs": [
+      {
+        "description": "The text shown in the group's header, which also names it for assistive technologies.",
+        "kind": "input",
+        "name": "title",
+        "type": "string",
+        "defaultValue": "\"\""
       }
     ]
   },

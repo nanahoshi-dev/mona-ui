@@ -4,20 +4,22 @@
 
 Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to its reference page, with every input, output, property and method.
 
-| Name | Kind |
-| --- | --- |
-| [`GridReorderableDirective`](/api/grid/GridReorderableDirective) | Directive |
-| [`GridResizableDirective`](/api/grid/GridResizableDirective) | Directive |
-| [`ColumnReorderEvent`](/api/grid/ColumnReorderEvent) | Class |
+| Name | Kind | Description |
+| --- | --- | --- |
+| [`GridColumnGroupComponent`](/api/grid/GridColumnGroupComponent) | Component | Puts a header over the `mona-grid-column`s and `mona-grid-command-column`s inside it. |
+| [`GridReorderableDirective`](/api/grid/GridReorderableDirective) | Directive |  |
+| [`GridResizableDirective`](/api/grid/GridResizableDirective) | Directive |  |
+| [`ColumnReorderEvent`](/api/grid/ColumnReorderEvent) | Class |  |
 
 ### Types
 
-| Type | Kind |
-| --- | --- |
-| [`ColumnResizeEvent`](/api/grid/ColumnResizeEvent) | Interface |
-| [`ReorderableOptions`](/api/grid/ReorderableOptions) | Interface |
-| [`ResizableOptions`](/api/grid/ResizableOptions) | Interface |
-| [`GridColumnLockedPosition`](/api/grid/GridColumnLockedPosition) | Type alias |
-| [`ResizeMethod`](/api/grid/ResizeMethod) | Type alias |
+| Type | Kind | Description |
+| --- | --- | --- |
+| [`ColumnGroup`](/api/grid/ColumnGroup) | Interface | A `mona-grid-column-group`: a header over the columns inside it. |
+| [`ColumnResizeEvent`](/api/grid/ColumnResizeEvent) | Interface |  |
+| [`ReorderableOptions`](/api/grid/ReorderableOptions) | Interface |  |
+| [`ResizableOptions`](/api/grid/ResizableOptions) | Interface |  |
+| [`GridColumnLockedPosition`](/api/grid/GridColumnLockedPosition) | Type alias |  |
+| [`ResizeMethod`](/api/grid/ResizeMethod) | Type alias |  |
 
 **Related types:** [`Column`](/api/grid/Column), [`PreventableEvent`](/api/common/PreventableEvent)

@@ -453,11 +453,13 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                 "grid-columns",
                 "Columns",
                 "grid",
-                "Resize, reorder, lock and hide columns, by pointer, keyboard or the column chooser.",
+                "Group, resize, reorder, lock and hide columns, by pointer, keyboard or the column chooser.",
                 {
                     apiExports: [
+                        "ColumnGroup",
                         "ColumnReorderEvent",
                         "ColumnResizeEvent",
+                        "GridColumnGroupComponent",
                         "GridColumnLockedPosition",
                         "GridReorderableDirective",
                         "GridResizableDirective",
@@ -494,7 +496,7 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                 "grid-state-export",
                 "State & Export",
                 "grid",
-                "Save and restore the grid's columns, sort, filter, groups and page size, and export rows as CSV.",
+                "Save and restore the grid's columns, sort, filter, groups and page size, and export rows as CSV or Excel.",
                 {
                     apiExports: [
                         "GridColumnState",

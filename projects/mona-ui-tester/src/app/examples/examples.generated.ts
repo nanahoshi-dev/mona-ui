@@ -648,6 +648,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./form-field/signal-forms/signal-forms-example.component").then(module => module.FormFieldSignalFormsExampleComponent),
         mainFile: "signal-forms-example.component.ts"
     },
+    "grid-columns/column-groups": {
+        files: ["column-groups-example.component.ts", "column-groups-example.component.html"],
+        load: () => import("./grid-columns/column-groups/column-groups-example.component").then(module => module.GridColumnGroupsExampleComponent),
+        mainFile: "column-groups-example.component.ts"
+    },
     "grid-columns/locked-columns": {
         files: ["locked-columns-example.component.ts", "locked-columns-example.component.html"],
         load: () => import("./grid-columns/locked-columns/locked-columns-example.component").then(module => module.GridLockedColumnsExampleComponent),
