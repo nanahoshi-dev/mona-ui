@@ -21,6 +21,7 @@
             "@nanahoshi/mona-ui": ["./projects/mona-ui/src/lib"],
             "@nanahoshi/mona-ui/auto-complete": ["./projects/mona-ui/auto-complete/public-api.ts"],
             "@nanahoshi/mona-ui/avatar": ["./projects/mona-ui/avatar/public-api.ts"],
+            "@nanahoshi/mona-ui/badge": ["./projects/mona-ui/badge/public-api.ts"],
             "@nanahoshi/mona-ui/breadcrumb": ["./projects/mona-ui/breadcrumb/public-api.ts"],
             "@nanahoshi/mona-ui/button": ["./projects/mona-ui/button/public-api.ts"],
             "@nanahoshi/mona-ui/button-group": ["./projects/mona-ui/button-group/public-api.ts"],
