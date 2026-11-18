@@ -1,0 +1,31 @@
+<ng-content></ng-content>
+
+@if (overflow() === "menu") {
+    <button
+        #moreButton
+        monaButton
+        type="button"
+        look="ghost"
+        hidden
+        aria-haspopup="menu"
+        [id]="moreButtonId"
+        [size]="size()"
+        [iconOnly]="true"
+        [attr.aria-label]="moreLabel() || messages().moreLabel"
+        [attr.aria-expanded]="menuOpen()"
+        [attr.aria-controls]="menuOpen() ? menuId : null">
+        <svg lucideEllipsis [size]="16"></svg>
+    </button>
+    <mona-popup-menu
+        trigger="click"
+        [anchorConnectionPoint]="rightToLeft() ? 'bottomleft' : 'bottomright'"
+        [popupConnectionPoint]="rightToLeft() ? 'topleft' : 'topright'"
+        [id]="menuId"
+        [items]="menuItems()"
+        [offset]="{ horizontal: 0, vertical: 2 }"
+        [size]="size()"
+        [target]="moreButton"
+        (close)="menuOpen.set(false)"
+        (menuClick)="onMenuClick($event)"
+        (open)="onMenuOpen()"></mona-popup-menu>
+}
