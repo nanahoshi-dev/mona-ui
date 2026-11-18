@@ -215,9 +215,18 @@ describe("DropdownPopupHandlerDirective when its host is destroyed", () => {
     });
 });
 
-/** A host that opens its popup as a bottom sheet with `adaptiveMode="auto"` on a small screen. */
+/**
+ * A host that opens its popup as a bottom sheet with `adaptiveMode="auto"` on a small screen. It can name itself, or,
+ * as a date picker does, its input.
+ */
 @Component({
-    template: `<ng-template #popup><input aria-label="Filter places" /></ng-template>`,
+    template: `
+        <input
+            id="sheet-field-input"
+            [attr.aria-label]="inputLabel() || null"
+            [attr.aria-labelledby]="inputLabelledBy() || null" />
+        <ng-template #popup><input aria-label="Filter places" /></ng-template>
+    `,
     hostDirectives: [DropdownPopupHandlerDirective],
     host: {
         role: "combobox",
@@ -237,6 +246,8 @@ class TestSheetHostComponent implements DropdownPopupInput {
     public readonly close = output<PopupCloseEvent>();
     public readonly closed = output();
     public readonly disabled = signal(false);
+    public readonly inputLabel = signal("");
+    public readonly inputLabelledBy = signal("");
     public readonly label = signal("Destination");
     public readonly labelledBy = signal("");
     public readonly open = output<PreventableEvent>();
@@ -357,6 +368,25 @@ describe("DropdownPopupHandlerDirective as a bottom sheet", () => {
         fixture.componentInstance.labelledBy.set("");
         await openPopup();
         expect(getSheetTitle()).toBe("Destination");
+    });
+
+    it("titles the sheet with its input's name when the field has none, as a date picker names its input", async () => {
+        fixture.componentInstance.label.set("");
+        fixture.componentInstance.inputLabelledBy.set("sheet-where sheet-to");
+        await openPopup();
+        expect(getSheetTitle()).toBe("Where to?");
+        await closePopup();
+
+        fixture.componentInstance.inputLabelledBy.set("");
+        fixture.componentInstance.inputLabel.set("Departure");
+        await openPopup();
+        expect(getSheetTitle()).toBe("Departure");
+        await closePopup();
+
+        fixture.componentInstance.inputLabel.set("");
+        labels.insertAdjacentHTML("beforeend", `<label for="sheet-field-input">Return <b>date</b></label>`);
+        await openPopup();
+        expect(getSheetTitle()).toBe("Return date");
     });
 
     it("stays above an on-screen keyboard, which shrinks the visual viewport", async () => {

@@ -39,10 +39,12 @@ import {
     type DatePopupVariantInput
 } from "@nanahoshi/mona-ui/date-input";
 import {
+    type AdaptiveMode,
     DropdownPopupHandlerDirective,
     type DropdownPopupInput,
     DROPDOWN_POPUP_INPUT_TOKEN,
-    DropdownService
+    DropdownService,
+    dropdownSheetPickerClasses
 } from "@nanahoshi/mona-ui/dropdowns";
 import {
     getLocaleDateInputFormat,
@@ -229,11 +231,15 @@ export class DateRangePickerComponent
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly pickerPopupClass = computed(() => {
         const variantClass = datePopupThemeVariants({ rounded: this.rounded(), size: this.size() });
-        return twMerge(variantClass, dateRangePickerPopupThemeVariants(), this.popupClass());
+        const sheetClass = this.sheet() ? dropdownSheetPickerClasses : "";
+        return twMerge(variantClass, dateRangePickerPopupThemeVariants(), sheetClass, this.popupClass());
     });
     protected readonly popupId = createElementControlId();
     protected readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("popupTemplate");
-    protected readonly presetClass = computed(() => dateRangePickerPresetThemeVariants({ size: this.size() }));
+    /** A quick range: as tall as a row of the calendar, and 44 pixels tall in a bottom sheet, for touch. */
+    protected readonly presetClass = computed(() =>
+        twMerge(dateRangePickerPresetThemeVariants({ size: this.size() }), this.sheet() ? "h-11" : "")
+    );
     protected readonly presetItems = computed<readonly DateRangePresetItem[]>(() => {
         const presets = this.presets();
         if (presets.length === 0) {
@@ -251,6 +257,8 @@ export class DateRangePickerComponent
     });
     protected readonly presetListClass = dateRangePickerPresetListThemeVariants();
     protected readonly separatorClass = dateRangePickerSeparatorThemeVariants();
+    /** Whether the popup is open as a bottom sheet, which the popup fills. */
+    protected readonly sheet = this.#dropdownService.sheet.asReadonly();
     protected readonly sizerClass = computed(() =>
         dateRangePickerSizerThemeVariants({ clearButton: this.showClearButton() })
     );
@@ -262,6 +270,20 @@ export class DateRangePickerComponent
     /** Set in the constructor, which runs after the `value` model it writes to exists. */
     protected readonly typedInput: TypedDateRangeInput;
     protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective);
+
+    /**
+     * @description Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640
+     * pixels) with `"auto"`, so it's easy to reach with a thumb. With `"none"`, it always opens under the field.
+     * @default "none"
+     */
+    public readonly adaptiveMode = input<AdaptiveMode>("none");
+
+    /**
+     * @description Title of the bottom sheet the popup opens as with `adaptiveMode="auto"`. When empty, the sheet
+     * shows the field's name.
+     * @default ""
+     */
+    public readonly adaptiveTitle = input("");
 
     /**
      * @description Id of an element that describes the range, such as a hint or an error message. It describes both

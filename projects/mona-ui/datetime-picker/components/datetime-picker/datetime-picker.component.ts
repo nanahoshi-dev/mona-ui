@@ -7,6 +7,7 @@ import {
     computed,
     contentChild,
     DestroyRef,
+    DOCUMENT,
     effect,
     ElementRef,
     forwardRef,
@@ -44,10 +45,12 @@ import {
     type TypedDateInput
 } from "@nanahoshi/mona-ui/date-input";
 import {
+    type AdaptiveMode,
     DropdownPopupHandlerDirective,
     type DropdownPopupInput,
     DROPDOWN_POPUP_INPUT_TOKEN,
-    DropdownService
+    DropdownService,
+    dropdownSheetPickerClasses
 } from "@nanahoshi/mona-ui/dropdowns";
 import { getLocaleDateTimeInputFormat, injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import {
@@ -127,6 +130,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     readonly #calendarService = inject(CalendarService);
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #direction = injectComponentDirection();
+    readonly #document = inject(DOCUMENT);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
@@ -194,17 +198,28 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     protected readonly messages = this.#i18n.componentMessages("dateTimePicker", DATETIME_PICKER_DEFAULT_MESSAGES);
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly navigatedDate = linkedSignal(() => this.value() ?? this.startDate());
+    /**
+     * In a bottom sheet, the panel keeps the height the date view opened with: the sheet doesn't shrink on the time tab
+     * and move the tabs from under the finger, and the time selector, which sizes its lists from its own height, gets
+     * one. `null` under the field, where the popup has a fixed height.
+     */
+    protected readonly panelHeight = signal<number | null>(null);
     protected readonly panelId = createElementControlId();
     protected readonly pickerPopupClass = computed(() => {
         const rounded = this.rounded();
         const size = this.size();
         const userClass = this.popupClass();
         const variantClass = datePopupThemeVariants({ rounded, size });
-        return twMerge(variantClass, userClass);
+        // A fixed height keeps the popup from jumping as the date and time tabs switch; the sheet sets its own.
+        const layoutClass = "flex h-68 flex-col";
+        const sheetClass = this.sheet() ? dropdownSheetPickerClasses : "";
+        return twMerge(variantClass, layoutClass, sheetClass, userClass);
     });
     protected readonly popupId = createElementControlId();
     protected readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("datePopupTemplate");
     protected readonly prefixTemplate = contentChild(DateInputPrefixTemplateDirective, { read: TemplateRef });
+    /** Whether the popup is open as a bottom sheet, which the popup fills. */
+    protected readonly sheet = this.#dropdownService.sheet.asReadonly();
     protected readonly timePickerMax = computed(() => {
         const maxDate = this.max();
         const navigatedDate = this.navigatedDate();
@@ -231,10 +246,26 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
         }
         return null;
     });
+    /** The time selector's size: large in a bottom sheet, for touch. */
+    protected readonly timeSelectorSize = computed(() => (this.sheet() ? "large" : this.size()));
     protected readonly timeTabId = createElementControlId();
     /** Set in the constructor, which runs after the `value` model it writes to exists. */
     protected readonly typedInput: TypedDateInput;
     protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective);
+
+    /**
+     * @description Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640
+     * pixels) with `"auto"`, so it's easy to reach with a thumb. With `"none"`, it always opens under the field.
+     * @default "none"
+     */
+    public readonly adaptiveMode = input<AdaptiveMode>("none");
+
+    /**
+     * @description Title of the bottom sheet the popup opens as with `adaptiveMode="auto"`. When empty, the sheet
+     * shows the field's name.
+     * @default ""
+     */
+    public readonly adaptiveTitle = input("");
 
     /**
      * @description Id of an element that describes the input, such as a hint or an error message.
@@ -469,6 +500,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
             read: () => {
                 this.setPopupKeyboardSubscription();
                 this.setPopupCloseSubscription();
+                this.setPopupOpenSubscription();
             }
         });
     }
@@ -640,6 +672,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
             this.activeView.set("date");
             this.focusViewOnMount.set(true);
             this.navigatedDate.set(this.value() ?? this.startDate());
+            this.panelHeight.set(null);
         });
     }
 
@@ -672,6 +705,15 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
                     this.onSetDateClick();
                 }
             });
+    }
+
+    private setPopupOpenSubscription(): void {
+        this.#dropdownService.popupOpenComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+            // The popup opens on the date view, the taller one.
+            const panel = this.#dropdownService.sheet() ? this.#document.getElementById(this.panelId) : null;
+            // A panel that isn't laid out yet has no height to keep.
+            this.panelHeight.set(panel?.offsetHeight || null);
+        });
     }
 
     /** Where the popup starts without a value: now, moved into the min and max range so Set can't leave it. */

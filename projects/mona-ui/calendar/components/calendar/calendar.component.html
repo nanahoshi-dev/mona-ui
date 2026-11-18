@@ -97,7 +97,7 @@
                     <div
                         role="row"
                         [class]="monthGridHeaderClass()"
-                        [style.grid-template-columns]="`repeat(${columnCount}, 32px)`">
+                        [style.grid-template-columns]="`repeat(${columnCount}, var(--mona-calendar-cell-size, 32px))`">
                         @if (weekNumber()) {
                             <!-- Week numbers are visual only: every day is already named by its full date. -->
                             <div aria-hidden="true"></div>
@@ -113,7 +113,7 @@
                         <div
                             role="row"
                             [class]="monthGridClass()"
-                            [style.grid-template-columns]="`repeat(${columnCount}, 32px)`">
+                            [style.grid-template-columns]="`repeat(${columnCount}, var(--mona-calendar-cell-size, 32px))`">
                             @if (weekNumber()) {
                                 <div aria-hidden="true">{{ formatInteger(week.weekNumber) }}</div>
                             }

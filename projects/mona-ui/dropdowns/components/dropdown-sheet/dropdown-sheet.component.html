@@ -15,7 +15,7 @@
             <svg lucideX [size]="16" aria-hidden="true"></svg>
         </button>
     </header>
-    <div class="flex min-h-0 flex-1 flex-col">
+    <div #content class="flex min-h-0 flex-1 flex-col">
         <ng-container [ngTemplateOutlet]="data.content"></ng-container>
     </div>
 </section>
