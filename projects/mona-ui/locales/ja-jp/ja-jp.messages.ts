@@ -592,6 +592,13 @@ export const JA_JP_MESSAGES = {
         itemMovedToList: (item: string, list: string, position: number, total: number) =>
             `${item}を${list}の${localizeNumber(total)}件中${localizeNumber(position)}番目に移動しました`
     },
+    sparkline: {
+        noData: "データがありません",
+        summary: (count: number, first: string, last: string, min: string, max: string) =>
+            `${localizeNumber(count)}個の値、最初 ${first}、最後 ${last}、最小 ${min}、最大 ${max}`,
+        winLossSummary: (wins: number, losses: number, draws: number) =>
+            `${localizeNumber(wins)}勝、${localizeNumber(losses)}敗、${localizeNumber(draws)}分`
+    },
     spinner: {
         cancel: "キャンセル",
         loading: "読み込み中"

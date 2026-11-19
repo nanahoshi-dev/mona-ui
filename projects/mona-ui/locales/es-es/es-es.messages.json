@@ -562,6 +562,11 @@
         "itemMoved": "{item} ahora está en la posición {position} de {total}",
         "itemMovedToList": "{item} ahora está en {list}, posición {position} de {total}"
     },
+    "sparkline": {
+        "noData": "No hay datos",
+        "summary": "{count, plural, =1 {# valor} other {# valores}}, primero {first}, último {last}, mínimo {min}, máximo {max}",
+        "winLossSummary": "{wins, plural, =1 {# victoria} other {# victorias}}, {losses, plural, =1 {# derrota} other {# derrotas}}, {draws, plural, =1 {# empate} other {# empates}}"
+    },
     "spinner": {
         "cancel": "Cancelar",
         "loading": "Cargando"

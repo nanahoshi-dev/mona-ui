@@ -53,6 +53,7 @@ export * from "./message-types/scroll-view.messages";
 export * from "./message-types/sheet.messages";
 export * from "./message-types/slider.messages";
 export * from "./message-types/sortable.messages";
+export * from "./message-types/sparkline.messages";
 export * from "./message-types/spinner.messages";
 export * from "./message-types/split-button.messages";
 export * from "./message-types/splitter.messages";

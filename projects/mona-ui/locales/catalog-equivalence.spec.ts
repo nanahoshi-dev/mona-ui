@@ -52,6 +52,7 @@ import { SCROLL_VIEW_DEFAULT_MESSAGES } from "../scroll-view/i18n/scroll-view.de
 import { SHEET_DEFAULT_MESSAGES } from "../sheet/i18n/sheet.default-messages";
 import { SLIDER_DEFAULT_MESSAGES } from "../slider/i18n/slider.default-messages";
 import { SORTABLE_DEFAULT_MESSAGES } from "../sortable/i18n/sortable.default-messages";
+import { SPARKLINE_DEFAULT_MESSAGES } from "../sparkline/i18n/sparkline.default-messages";
 import { SPINNER_DEFAULT_MESSAGES } from "../spinner/i18n/spinner.default-messages";
 import { SPLIT_BUTTON_DEFAULT_MESSAGES } from "../split-button/i18n/split-button.default-messages";
 import { SPLITTER_DEFAULT_MESSAGES } from "../splitter/i18n/splitter.default-messages";
@@ -153,6 +154,7 @@ const ENGLISH_DEFAULTS = {
     sheet: SHEET_DEFAULT_MESSAGES,
     slider: SLIDER_DEFAULT_MESSAGES,
     sortable: SORTABLE_DEFAULT_MESSAGES,
+    sparkline: SPARKLINE_DEFAULT_MESSAGES,
     spinner: SPINNER_DEFAULT_MESSAGES,
     splitButton: SPLIT_BUTTON_DEFAULT_MESSAGES,
     splitter: SPLITTER_DEFAULT_MESSAGES,

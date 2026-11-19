@@ -699,6 +699,13 @@ export const RU_RU_MESSAGES = {
         itemMovedToList: (item: string, list: string, position: number, total: number) =>
             `«${item}» теперь в списке «${list}», позиция ${localizeNumber(position)} из ${localizeNumber(total)}`
     },
+    sparkline: {
+        noData: "Нет данных",
+        summary: (count: number, first: string, last: string, min: string, max: string) =>
+            `${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} значение`, few: () => `${localizeNumber(count)} значения`, many: () => `${localizeNumber(count)} значений`, other: () => `${localizeNumber(count)} значения` })}, первое ${first}, последнее ${last}, минимальное ${min}, максимальное ${max}`,
+        winLossSummary: (wins: number, losses: number, draws: number) =>
+            `${plural(PLURAL_RULES.select(wins), { one: () => `${localizeNumber(wins)} победа`, few: () => `${localizeNumber(wins)} победы`, many: () => `${localizeNumber(wins)} побед`, other: () => `${localizeNumber(wins)} победы` })}, ${plural(PLURAL_RULES.select(losses), { one: () => `${localizeNumber(losses)} поражение`, few: () => `${localizeNumber(losses)} поражения`, many: () => `${localizeNumber(losses)} поражений`, other: () => `${localizeNumber(losses)} поражения` })}, ${plural(PLURAL_RULES.select(draws), { one: () => `${localizeNumber(draws)} ничья`, few: () => `${localizeNumber(draws)} ничьи`, many: () => `${localizeNumber(draws)} ничьих`, other: () => `${localizeNumber(draws)} ничьи` })}`
+    },
     spinner: {
         cancel: "Отмена",
         loading: "Загрузка"

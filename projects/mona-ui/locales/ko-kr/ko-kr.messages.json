@@ -562,6 +562,11 @@
         "itemMoved": "{item}을(를) {total}개 중 {position}번째 위치로 이동했습니다",
         "itemMovedToList": "{item}을(를) {list}의 {total}개 중 {position}번째 위치로 이동했습니다"
     },
+    "sparkline": {
+        "noData": "데이터 없음",
+        "summary": "값 {count}개, 처음 {first}, 마지막 {last}, 최저 {min}, 최고 {max}",
+        "winLossSummary": "{wins}승 {losses}패 {draws}무"
+    },
     "spinner": {
         "cancel": "취소",
         "loading": "로딩 중"

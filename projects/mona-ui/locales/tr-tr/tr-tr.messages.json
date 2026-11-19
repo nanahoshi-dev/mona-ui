@@ -562,6 +562,11 @@
         "itemMoved": "{item}, {total} içinde {position}. konuma taşındı",
         "itemMovedToList": "{item}, {list} listesine taşındı; {total} içinde {position}. konum"
     },
+    "sparkline": {
+        "noData": "Veri yok",
+        "summary": "{count} değer, ilk {first}, son {last}, en düşük {min}, en yüksek {max}",
+        "winLossSummary": "{wins} galibiyet, {losses} mağlubiyet, {draws} beraberlik"
+    },
     "spinner": {
         "cancel": "İptal",
         "loading": "Yükleniyor"

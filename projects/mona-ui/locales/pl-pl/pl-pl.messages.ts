@@ -712,6 +712,13 @@ export const PL_PL_MESSAGES = {
         itemMovedToList: (item: string, list: string, position: number, total: number) =>
             `Przeniesiono „${item}” do listy „${list}”, pozycja ${localizeNumber(position)} z ${localizeNumber(total)}`
     },
+    sparkline: {
+        noData: "Brak danych",
+        summary: (count: number, first: string, last: string, min: string, max: string) =>
+            `${plural(PLURAL_RULES.select(count), { one: () => `${localizeNumber(count)} wartość`, few: () => `${localizeNumber(count)} wartości`, many: () => `${localizeNumber(count)} wartości`, other: () => `${localizeNumber(count)} wartości` })}, pierwsza ${first}, ostatnia ${last}, najniższa ${min}, najwyższa ${max}`,
+        winLossSummary: (wins: number, losses: number, draws: number) =>
+            `${plural(PLURAL_RULES.select(wins), { one: () => `${localizeNumber(wins)} wygrana`, few: () => `${localizeNumber(wins)} wygrane`, many: () => `${localizeNumber(wins)} wygranych`, other: () => `${localizeNumber(wins)} wygranej` })}, ${plural(PLURAL_RULES.select(losses), { one: () => `${localizeNumber(losses)} przegrana`, few: () => `${localizeNumber(losses)} przegrane`, many: () => `${localizeNumber(losses)} przegranych`, other: () => `${localizeNumber(losses)} przegranej` })}, ${plural(PLURAL_RULES.select(draws), { one: () => `${localizeNumber(draws)} remis`, few: () => `${localizeNumber(draws)} remisy`, many: () => `${localizeNumber(draws)} remisów`, other: () => `${localizeNumber(draws)} remisu` })}`
+    },
     spinner: {
         cancel: "Anuluj",
         loading: "Ładowanie"

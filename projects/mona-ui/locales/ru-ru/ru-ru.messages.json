@@ -562,6 +562,11 @@
         "itemMoved": "«{item}» теперь на позиции {position} из {total}",
         "itemMovedToList": "«{item}» теперь в списке «{list}», позиция {position} из {total}"
     },
+    "sparkline": {
+        "noData": "Нет данных",
+        "summary": "{count, plural, one {# значение} few {# значения} many {# значений} other {# значения}}, первое {first}, последнее {last}, минимальное {min}, максимальное {max}",
+        "winLossSummary": "{wins, plural, one {# победа} few {# победы} many {# побед} other {# победы}}, {losses, plural, one {# поражение} few {# поражения} many {# поражений} other {# поражения}}, {draws, plural, one {# ничья} few {# ничьи} many {# ничьих} other {# ничьи}}"
+    },
     "spinner": {
         "cancel": "Отмена",
         "loading": "Загрузка"

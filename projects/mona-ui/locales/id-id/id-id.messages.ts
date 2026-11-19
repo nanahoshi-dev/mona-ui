@@ -595,6 +595,13 @@ export const ID_ID_MESSAGES = {
         itemMovedToList: (item: string, list: string, position: number, total: number) =>
             `${item} dipindahkan ke ${list}, posisi ${localizeNumber(position)} dari ${localizeNumber(total)}`
     },
+    sparkline: {
+        noData: "Tidak ada data",
+        summary: (count: number, first: string, last: string, min: string, max: string) =>
+            `${localizeNumber(count)} nilai, pertama ${first}, terakhir ${last}, terendah ${min}, tertinggi ${max}`,
+        winLossSummary: (wins: number, losses: number, draws: number) =>
+            `${localizeNumber(wins)} menang, ${localizeNumber(losses)} kalah, ${localizeNumber(draws)} seri`
+    },
     spinner: {
         cancel: "Batal",
         loading: "Memuat"

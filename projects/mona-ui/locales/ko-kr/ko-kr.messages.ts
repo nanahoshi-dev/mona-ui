@@ -596,6 +596,13 @@ export const KO_KR_MESSAGES = {
         itemMovedToList: (item: string, list: string, position: number, total: number) =>
             `${item}을(를) ${list}의 ${localizeNumber(total)}개 중 ${localizeNumber(position)}번째 위치로 이동했습니다`
     },
+    sparkline: {
+        noData: "데이터 없음",
+        summary: (count: number, first: string, last: string, min: string, max: string) =>
+            `값 ${localizeNumber(count)}개, 처음 ${first}, 마지막 ${last}, 최저 ${min}, 최고 ${max}`,
+        winLossSummary: (wins: number, losses: number, draws: number) =>
+            `${localizeNumber(wins)}승 ${localizeNumber(losses)}패 ${localizeNumber(draws)}무`
+    },
     spinner: {
         cancel: "취소",
         loading: "로딩 중"

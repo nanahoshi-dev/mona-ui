@@ -562,6 +562,11 @@
         "itemMoved": "تم نقل {item} إلى الموضع {position} من {total}",
         "itemMovedToList": "تم نقل {item} إلى {list}، الموضع {position} من {total}"
     },
+    "sparkline": {
+        "noData": "لا توجد بيانات",
+        "summary": "عدد القيم: {count}، الأولى {first}، الأخيرة {last}، الأدنى {min}، الأعلى {max}",
+        "winLossSummary": "الفوز: {wins}، الخسارة: {losses}، التعادل: {draws}"
+    },
     "spinner": {
         "cancel": "إلغاء",
         "loading": "جارٍ التحميل"

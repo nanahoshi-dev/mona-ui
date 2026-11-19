@@ -701,6 +701,21 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
             { name: "total", type: "number" }
         ]
     },
+    sparkline: {
+        noData: null,
+        summary: [
+            { name: "count", type: "number" },
+            { name: "first", type: "string" },
+            { name: "last", type: "string" },
+            { name: "min", type: "string" },
+            { name: "max", type: "string" }
+        ],
+        winLossSummary: [
+            { name: "wins", type: "number" },
+            { name: "losses", type: "number" },
+            { name: "draws", type: "number" }
+        ]
+    },
     spinner: {
         cancel: null,
         loading: null

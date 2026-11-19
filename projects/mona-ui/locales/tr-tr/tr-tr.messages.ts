@@ -619,6 +619,13 @@ export const TR_TR_MESSAGES = {
         itemMovedToList: (item: string, list: string, position: number, total: number) =>
             `${item}, ${list} listesine taşındı; ${localizeNumber(total)} içinde ${localizeNumber(position)}. konum`
     },
+    sparkline: {
+        noData: "Veri yok",
+        summary: (count: number, first: string, last: string, min: string, max: string) =>
+            `${localizeNumber(count)} değer, ilk ${first}, son ${last}, en düşük ${min}, en yüksek ${max}`,
+        winLossSummary: (wins: number, losses: number, draws: number) =>
+            `${localizeNumber(wins)} galibiyet, ${localizeNumber(losses)} mağlubiyet, ${localizeNumber(draws)} beraberlik`
+    },
     spinner: {
         cancel: "İptal",
         loading: "Yükleniyor"

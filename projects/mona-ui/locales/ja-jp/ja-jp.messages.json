@@ -562,6 +562,11 @@
         "itemMoved": "{item}を{total}件中{position}番目に移動しました",
         "itemMovedToList": "{item}を{list}の{total}件中{position}番目に移動しました"
     },
+    "sparkline": {
+        "noData": "データがありません",
+        "summary": "{count}個の値、最初 {first}、最後 {last}、最小 {min}、最大 {max}",
+        "winLossSummary": "{wins}勝、{losses}敗、{draws}分"
+    },
     "spinner": {
         "cancel": "キャンセル",
         "loading": "読み込み中"

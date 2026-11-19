@@ -685,6 +685,13 @@ export const FR_FR_MESSAGES = {
         itemMovedToList: (item: string, list: string, position: number, total: number) =>
             `${item} est maintenant dans ${list}, à la position ${localizeNumber(position)} sur ${localizeNumber(total)}`
     },
+    sparkline: {
+        noData: "Aucune donnée",
+        summary: (count: number, first: string, last: string, min: string, max: string) =>
+            `${count === 1 ? `${localizeNumber(count)} valeur` : `${localizeNumber(count)} valeurs`}, première ${first}, dernière ${last}, minimum ${min}, maximum ${max}`,
+        winLossSummary: (wins: number, losses: number, draws: number) =>
+            `${wins === 1 ? `${localizeNumber(wins)} victoire` : `${localizeNumber(wins)} victoires`}, ${losses === 1 ? `${localizeNumber(losses)} défaite` : `${localizeNumber(losses)} défaites`}, ${draws === 1 ? `${localizeNumber(draws)} match nul` : `${localizeNumber(draws)} matchs nuls`}`
+    },
     spinner: {
         cancel: "Annuler",
         loading: "Chargement"

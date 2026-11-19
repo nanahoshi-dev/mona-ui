@@ -562,6 +562,11 @@
         "itemMoved": "{item} 已移至第 {position} 位，共 {total} 位",
         "itemMovedToList": "{item} 已移至{list}，第 {position} 位，共 {total} 位"
     },
+    "sparkline": {
+        "noData": "沒有資料",
+        "summary": "{count} 個值，第一個 {first}，最後一個 {last}，最低 {min}，最高 {max}",
+        "winLossSummary": "{wins} 勝，{losses} 負，{draws} 和"
+    },
     "spinner": {
         "cancel": "取消",
         "loading": "載入中"

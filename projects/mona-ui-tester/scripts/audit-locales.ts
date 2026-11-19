@@ -185,6 +185,7 @@ export const MONA_MESSAGE_NAMESPACES = [
     "sheet",
     "slider",
     "sortable",
+    "sparkline",
     "spinner",
     "splitButton",
     "splitter",

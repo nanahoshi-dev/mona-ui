@@ -61,6 +61,7 @@ describe("MONA_FR_FR_LOCALE", () => {
             "sheet",
             "slider",
             "sortable",
+            "sparkline",
             "spinner",
             "splitButton",
             "splitter",
@@ -74,7 +75,7 @@ describe("MONA_FR_FR_LOCALE", () => {
             "window"
         ] as const;
 
-        it("defines all 56 canonical message namespaces", () => {
+        it("defines all 57 canonical message namespaces", () => {
             for (const ns of expectedNamespaces) {
                 expect(MONA_FR_FR_LOCALE.messages[ns], `Namespace ${ns} must be defined`).toBeDefined();
             }
