@@ -60,18 +60,40 @@ jobs:
       - name: Test MCP server
         run: npm run test:mcp
 
+      # Each publish skips a version npm already has, so a re-run after a partial failure picks up where it stopped.
       - name: Publish
         id: publish
         working-directory: dist/mona-ui
-        run: npm publish --provenance --access public
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          if [ "$(curl -s -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/${name/\//%2f}/$version")" = 200 ]; then
+            echo "$name@$version is on npm already."
+          else
+            npm publish --provenance --access public
+          fi
 
       - name: Publish MCP server
         working-directory: dist/mona-ui-mcp
-        run: npm publish --provenance --access public
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          if [ "$(curl -s -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/${name/\//%2f}/$version")" = 200 ]; then
+            echo "$name@$version is on npm already."
+          else
+            npm publish --provenance --access public
+          fi
 
-      # Only while the library isn't on npm yet: once it is, the release stands, even if the MCP server fails to publish.
+      # Only while npm doesn't have the library's version: once it does, the release stands, whatever fails after it.
+      # It asks npm, not the step's outcome, since a publish can fail after the version is out.
       - name: Roll back GitHub release on publish failure
         if: failure() && steps.publish.outcome != 'success'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release delete "${{ github.event.release.tag_name }}" --yes --cleanup-tag --repo "${{ github.repository }}"
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [ "$(curl -s -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/@nanahoshi%2fmona-ui/${TAG#v}")" != 404 ]; then
+            echo "npm has @nanahoshi/mona-ui@${TAG#v}, or couldn't say, so the release stays."
+            exit 0
+          fi
+          gh release delete "$TAG" --yes --cleanup-tag --repo "$GITHUB_REPOSITORY"
