@@ -19,6 +19,7 @@ export * from "./utils/core/fileAccept";
 export * from "./utils/core/labelAssociation";
 export * from "./utils/core/focusCanReturn";
 export * from "./utils/core/focusElement";
+export * from "./utils/core/headingLevel";
 export * from "./utils/core/inertOutside";
 export * from "./utils/core/injectLabelledByText";
 export * from "./utils/core/pageScrollBlock";

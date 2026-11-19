@@ -22,7 +22,7 @@ import {
     type CollapsibleConfig,
     CollapsibleTriggerDirective
 } from "@nanahoshi/mona-ui/collapsible";
-import { createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, toHeadingLevel } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { ExpansionPanelActionsTemplateDirective } from "../../directives/expansion-panel-actions-template.directive";
 import { ExpansionPanelIconTemplateDirective } from "../../directives/expansion-panel-icon-template.directive";
@@ -39,15 +39,6 @@ import {
     expansionPanelIconContainerThemeVariants,
     expansionPanelTriggerThemeVariants
 } from "../../styles/expansion-panel.styles";
-
-/** A level from 1 to 6, `null` for no heading at all, and the default for anything else. */
-function toHeadingLevel(value: unknown): number | null {
-    if (value === null) {
-        return null;
-    }
-    const level = Number(value);
-    return Number.isInteger(level) && level >= 1 && level <= 6 ? level : 3;
-}
 
 /** `Node.DOCUMENT_POSITION_FOLLOWING`, written out because `Node` isn't a global on the server. */
 const DOCUMENT_POSITION_FOLLOWING = 4;
