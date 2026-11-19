@@ -33,6 +33,7 @@ import { FILE_UPLOAD_DEFAULT_MESSAGES } from "../file-upload/i18n/file-upload.de
 import { FILTER_DEFAULT_MESSAGES } from "../filter/i18n/filter.default-messages";
 import { FORM_FIELD_DEFAULT_MESSAGES } from "../form-field/i18n/form-field.default-messages";
 import { GRID_DEFAULT_MESSAGES } from "../grid/i18n/grid.default-messages";
+import { KANBAN_DEFAULT_MESSAGES } from "../kanban/i18n/kanban.default-messages";
 import { LIST_BOX_DEFAULT_MESSAGES } from "../list-box/i18n/list-box.default-messages";
 import { LIST_DEFAULT_MESSAGES } from "../internal/list/i18n/list.default-messages";
 import { LABEL_DEFAULT_MESSAGES } from "../label/i18n/label.default-messages";
@@ -50,6 +51,7 @@ import { RATING_DEFAULT_MESSAGES } from "../rating/i18n/rating.default-messages"
 import { SCROLL_VIEW_DEFAULT_MESSAGES } from "../scroll-view/i18n/scroll-view.default-messages";
 import { SHEET_DEFAULT_MESSAGES } from "../sheet/i18n/sheet.default-messages";
 import { SLIDER_DEFAULT_MESSAGES } from "../slider/i18n/slider.default-messages";
+import { SORTABLE_DEFAULT_MESSAGES } from "../sortable/i18n/sortable.default-messages";
 import { SPINNER_DEFAULT_MESSAGES } from "../spinner/i18n/spinner.default-messages";
 import { SPLIT_BUTTON_DEFAULT_MESSAGES } from "../split-button/i18n/split-button.default-messages";
 import { SPLITTER_DEFAULT_MESSAGES } from "../splitter/i18n/splitter.default-messages";
@@ -131,6 +133,7 @@ const ENGLISH_DEFAULTS = {
     filter: FILTER_DEFAULT_MESSAGES,
     formField: FORM_FIELD_DEFAULT_MESSAGES,
     grid: GRID_DEFAULT_MESSAGES,
+    kanban: KANBAN_DEFAULT_MESSAGES,
     listBox: LIST_BOX_DEFAULT_MESSAGES,
     label: LABEL_DEFAULT_MESSAGES,
     list: LIST_DEFAULT_MESSAGES,
@@ -149,6 +152,7 @@ const ENGLISH_DEFAULTS = {
     scrollView: SCROLL_VIEW_DEFAULT_MESSAGES,
     sheet: SHEET_DEFAULT_MESSAGES,
     slider: SLIDER_DEFAULT_MESSAGES,
+    sortable: SORTABLE_DEFAULT_MESSAGES,
     spinner: SPINNER_DEFAULT_MESSAGES,
     splitButton: SPLIT_BUTTON_DEFAULT_MESSAGES,
     splitter: SPLITTER_DEFAULT_MESSAGES,

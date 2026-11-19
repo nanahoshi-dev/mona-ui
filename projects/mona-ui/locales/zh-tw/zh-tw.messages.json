@@ -438,6 +438,11 @@
         "sortOrder": "排序順序 {position}",
         "toolbar": "表格工具列"
     },
+    "kanban": {
+        "cardCount": "{count} 張卡片",
+        "cardCountWithLimit": "{count}/{limit} 張卡片",
+        "emptyColumn": "沒有卡片"
+    },
     "label": {
         "optional": "選填"
     },
@@ -552,6 +557,10 @@
         "maximumValue": "最大值",
         "minimumValue": "最小值",
         "sliderValue": "滑桿數值"
+    },
+    "sortable": {
+        "itemMoved": "{item} 已移至第 {position} 位，共 {total} 位",
+        "itemMovedToList": "{item} 已移至{list}，第 {position} 位，共 {total} 位"
     },
     "spinner": {
         "cancel": "取消",

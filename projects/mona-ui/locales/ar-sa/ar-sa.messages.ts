@@ -557,6 +557,12 @@ export const AR_SA_MESSAGES = {
         sortOrder: (position: number) => `ترتيب الفرز ${localizeNumber(position)}`,
         toolbar: "شريط أدوات الجدول"
     },
+    kanban: {
+        cardCount: (count: number) => `عدد البطاقات: ${localizeNumber(count)}`,
+        cardCountWithLimit: (count: number, limit: number) =>
+            `عدد البطاقات: ${localizeNumber(count)} من ${localizeNumber(limit)}`,
+        emptyColumn: "لا توجد بطاقات"
+    },
     label: {
         optional: "اختياري"
     },
@@ -677,6 +683,12 @@ export const AR_SA_MESSAGES = {
         maximumValue: "الحد الأقصى",
         minimumValue: "الحد الأدنى",
         sliderValue: "قيمة شريط التمرير"
+    },
+    sortable: {
+        itemMoved: (item: string, position: number, total: number) =>
+            `تم نقل ${item} إلى الموضع ${localizeNumber(position)} من ${localizeNumber(total)}`,
+        itemMovedToList: (item: string, list: string, position: number, total: number) =>
+            `تم نقل ${item} إلى ${list}، الموضع ${localizeNumber(position)} من ${localizeNumber(total)}`
     },
     spinner: {
         cancel: "إلغاء",

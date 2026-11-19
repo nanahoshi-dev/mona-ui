@@ -552,6 +552,18 @@ export const PL_PL_MESSAGES = {
         sortOrder: (position: number) => `Kolejność sortowania ${localizeNumber(position)}`,
         toolbar: "Pasek narzędzi tabeli"
     },
+    kanban: {
+        cardCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} karta`,
+                few: () => `${localizeNumber(count)} karty`,
+                many: () => `${localizeNumber(count)} kart`,
+                other: () => `${localizeNumber(count)} karty`
+            }),
+        cardCountWithLimit: (count: number, limit: number) =>
+            `${localizeNumber(count)} z ${plural(PLURAL_RULES.select(limit), { one: () => `${localizeNumber(limit)} karty`, few: () => `${localizeNumber(limit)} kart`, many: () => `${localizeNumber(limit)} kart`, other: () => `${localizeNumber(limit)} karty` })}`,
+        emptyColumn: "Brak kart"
+    },
     label: {
         optional: "Opcjonalnie"
     },
@@ -693,6 +705,12 @@ export const PL_PL_MESSAGES = {
         maximumValue: "Wartość maksymalna",
         minimumValue: "Wartość minimalna",
         sliderValue: "Wartość suwaka"
+    },
+    sortable: {
+        itemMoved: (item: string, position: number, total: number) =>
+            `Przeniesiono „${item}” na pozycję ${localizeNumber(position)} z ${localizeNumber(total)}`,
+        itemMovedToList: (item: string, list: string, position: number, total: number) =>
+            `Przeniesiono „${item}” do listy „${list}”, pozycja ${localizeNumber(position)} z ${localizeNumber(total)}`
     },
     spinner: {
         cancel: "Anuluj",

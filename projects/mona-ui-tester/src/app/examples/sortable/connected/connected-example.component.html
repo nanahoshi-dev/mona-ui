@@ -1,0 +1,39 @@
+<div monaSortableGroup class="grid w-[32rem] max-w-full grid-cols-2 gap-4">
+    <section class="flex flex-col gap-2">
+        <h3 id="sortable-connected-hidden" class="text-sm font-semibold">Hidden columns</h3>
+        <ul
+            aria-labelledby="sortable-connected-hidden"
+            class="flex min-h-40 flex-col gap-1 rounded-md bg-surface-muted p-2"
+            [(monaSortable)]="hidden">
+            @for (column of hidden(); track column) {
+                <li
+                    tabindex="0"
+                    class="cursor-grab rounded-md border border-border bg-card px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator"
+                    [monaSortableItem]="column">
+                    {{ column }}
+                </li>
+            }
+        </ul>
+    </section>
+    <section class="flex flex-col gap-2">
+        <h3 id="sortable-connected-shown" class="text-sm font-semibold">Shown columns</h3>
+        <ul
+            aria-labelledby="sortable-connected-shown"
+            aria-describedby="sortable-connected-limit"
+            class="flex min-h-40 flex-col gap-1 rounded-md bg-surface-muted p-2"
+            [(monaSortable)]="shown"
+            [sortableCanEnter]="canShow">
+            @for (column of shown(); track column) {
+                <li
+                    tabindex="0"
+                    class="cursor-grab rounded-md border border-border bg-card px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator"
+                    [monaSortableItem]="column">
+                    {{ column }}
+                </li>
+            }
+        </ul>
+        <p id="sortable-connected-limit" class="text-sm text-muted-foreground">
+            {{ shown().length }} of {{ maxShown }} columns
+        </p>
+    </section>
+</div>

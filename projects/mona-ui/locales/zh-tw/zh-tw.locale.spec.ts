@@ -55,6 +55,7 @@ describe("MONA_ZH_TW_LOCALE", () => {
             "filter",
             "formField",
             "grid",
+            "kanban",
             "label",
             "list",
             "listBox",
@@ -72,6 +73,7 @@ describe("MONA_ZH_TW_LOCALE", () => {
             "scrollView",
             "sheet",
             "slider",
+            "sortable",
             "spinner",
             "splitButton",
             "splitter",
@@ -85,8 +87,8 @@ describe("MONA_ZH_TW_LOCALE", () => {
             "window"
         ] as const;
 
-        it("defines all 54 canonical message namespaces", () => {
-            expect(Object.keys(MONA_ZH_TW_LOCALE.messages)).toHaveLength(54);
+        it("defines all 56 canonical message namespaces", () => {
+            expect(Object.keys(MONA_ZH_TW_LOCALE.messages)).toHaveLength(56);
             expect(Object.keys(MONA_ZH_TW_LOCALE.messages).sort()).toEqual([...expectedNamespaces].sort());
             for (const ns of expectedNamespaces) {
                 expect(MONA_ZH_TW_LOCALE.messages[ns], `Namespace ${ns} must be defined`).toBeDefined();

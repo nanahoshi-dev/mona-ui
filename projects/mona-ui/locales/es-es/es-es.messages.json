@@ -438,6 +438,11 @@
         "sortOrder": "Orden de clasificación {position}",
         "toolbar": "Barra de herramientas de la tabla"
     },
+    "kanban": {
+        "cardCount": "{count, plural, =1 {# tarjeta} other {# tarjetas}}",
+        "cardCountWithLimit": "{count} de {limit, plural, =1 {# tarjeta} other {# tarjetas}}",
+        "emptyColumn": "No hay tarjetas"
+    },
     "label": {
         "optional": "Opcional"
     },
@@ -552,6 +557,10 @@
         "maximumValue": "Valor máximo",
         "minimumValue": "Valor mínimo",
         "sliderValue": "Valor del control deslizante"
+    },
+    "sortable": {
+        "itemMoved": "{item} ahora está en la posición {position} de {total}",
+        "itemMovedToList": "{item} ahora está en {list}, posición {position} de {total}"
     },
     "spinner": {
         "cancel": "Cancelar",

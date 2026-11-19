@@ -81,6 +81,16 @@ tabs/closable
 
 Closing a tab is entirely the consumer's responsibility — see [Tabs are removed by the consumer](#tabs-are-removed-by-the-consumer).
 
+### Reordering tabs
+
+`sortable` lets the user reorder the tabs: by dragging one along the strip, or with `Control+Shift` and the arrow keys along it, `Home` or `End` (`Command+Shift` on macOS). As with closing, the component only reports the move: `tabReorder` carries the tab's `previousIndex` and `currentIndex`, and moving it in whatever renders the `mona-tab` elements is what moves it. `moveItem` from `@nanahoshi/mona-ui/sortable` returns the reordered copy of an array.
+
+```example
+tabs/sortable
+```
+
+The selected tab stays selected wherever it moves, and `selectedIndex` follows it. A disabled tab can't be dragged or moved, but other tabs move past it. Each move is announced: "main.ts moved to position 1 of 4". On a touch screen, press and hold a tab to pick it up, so a swipe still scrolls the strip.
+
 ### Disabled tabs
 
 `disabled` on `mona-tabs` disables every tab. `disabled` on an individual `mona-tab` disables only that tab, even if the parent's `disabled` is `false`. A disabled tab cannot be selected or closed by pointer or keyboard. A tab that becomes disabled while it's selected stays selected until something else is chosen, so its panel doesn't disappear from under the user.
@@ -202,12 +212,13 @@ Not applicable. `TabsComponent` and `TabComponent` are not form controls and do 
 | `ArrowUp` / `ArrowDown` (left/right)           | Select the previous/next enabled tab, wrapping around at the ends. Disabled tabs are skipped. |
 | `Home` / `End`                                 | Select the first/last enabled tab.                                                            |
 | `Delete` / `Backspace`                         | Close the tab that has focus, if it is closable and not disabled.                             |
+| `Control+Shift` with the strip's arrow keys, `Home` or `End` (`Command+Shift` on macOS) | With `sortable`: move the focused tab one place, or to the start or end of the strip. |
 | `Tab`                                          | Moves focus from the tab strip into the selected tab's panel.                                 |
 | `Shift+Tab` (while the panel itself has focus) | Moves focus back to the selected tab.                                                         |
 
 In a right-to-left layout, `ArrowLeft` and `ArrowRight` swap, so they still follow the strip.
 
-These keys are left to the browser when `Alt`, `Ctrl` or `Meta` is held, so `Alt+ArrowLeft` still goes back, and when `Shift` is held on the arrows.
+These keys are left to the browser when `Alt`, `Ctrl` or `Meta` is held, so `Alt+ArrowLeft` still goes back, and when `Shift` is held on the arrows, except for the moves of a `sortable` strip.
 
 The close button on each tab is not a Tab stop; keyboard users close a tab with `Delete`/`Backspace` instead of activating the close button directly.
 
@@ -229,7 +240,7 @@ The selected tab is the only tab in the Tab order (`tabindex="0"`); all other ta
 | Tab      | `aria-selected`   | Always                                                         | Reflects whether the tab is the active tab                                               |
 | Tab      | `aria-disabled`   | Always                                                         | Reflects the tab's effective disabled state (own `disabled`, or the parent's `disabled`) |
 | Tab      | `aria-controls`   | Always                                                         | The corresponding panel's element id                                                     |
-| Tab      | `aria-keyshortcuts` | The tab can close and isn't disabled                         | `"Delete Backspace"`                                                                     |
+| Tab      | `aria-keyshortcuts` | The tab can close, or the strip is `sortable`, and the tab isn't disabled | `"Delete Backspace"` when it can close, then the moves, such as `"Control+Shift+ArrowLeft Control+Shift+ArrowRight Control+Shift+Home Control+Shift+End"` |
 | Panel    | `role`            | Always                                                         | `"tabpanel"`                                                                             |
 | Panel    | `aria-hidden`     | Always                                                         | `"true"` on a kept panel that isn't the active one, otherwise `"false"`                  |
 | Panel    | `aria-labelledby` | Always                                                         | The corresponding tab's element id                                                       |

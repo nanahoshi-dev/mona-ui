@@ -534,6 +534,13 @@ export const PT_BR_MESSAGES = {
         sortOrder: (position: number) => `Ordem de classificação ${localizeNumber(position)}`,
         toolbar: "Barra de ferramentas da tabela"
     },
+    kanban: {
+        cardCount: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} cartão` : `${localizeNumber(count)} cartões`,
+        cardCountWithLimit: (count: number, limit: number) =>
+            `${localizeNumber(count)} de ${limit === 1 ? `${localizeNumber(limit)} cartão` : `${localizeNumber(limit)} cartões`}`,
+        emptyColumn: "Nenhum cartão"
+    },
     label: {
         optional: "Opcional"
     },
@@ -664,6 +671,12 @@ export const PT_BR_MESSAGES = {
         maximumValue: "Valor máximo",
         minimumValue: "Valor mínimo",
         sliderValue: "Valor do controle deslizante"
+    },
+    sortable: {
+        itemMoved: (item: string, position: number, total: number) =>
+            `${item} agora está na posição ${localizeNumber(position)} de ${localizeNumber(total)}`,
+        itemMovedToList: (item: string, list: string, position: number, total: number) =>
+            `${item} agora está em ${list}, posição ${localizeNumber(position)} de ${localizeNumber(total)}`
     },
     spinner: {
         cancel: "Cancelar",

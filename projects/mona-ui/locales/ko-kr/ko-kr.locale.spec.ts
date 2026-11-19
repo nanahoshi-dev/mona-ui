@@ -50,6 +50,7 @@ describe("MONA_KO_KR_LOCALE", () => {
             "filter",
             "formField",
             "grid",
+            "kanban",
             "list",
             "listBox",
             "maskedTextBox",
@@ -64,6 +65,7 @@ describe("MONA_KO_KR_LOCALE", () => {
             "scrollView",
             "sheet",
             "slider",
+            "sortable",
             "spinner",
             "splitButton",
             "splitter",
@@ -77,7 +79,7 @@ describe("MONA_KO_KR_LOCALE", () => {
             "window"
         ] as const;
 
-        it("defines all 54 canonical message namespaces", () => {
+        it("defines all 56 canonical message namespaces", () => {
             for (const ns of expectedNamespaces) {
                 expect(MONA_KO_KR_LOCALE.messages[ns], `Namespace ${ns} must be defined`).toBeDefined();
             }

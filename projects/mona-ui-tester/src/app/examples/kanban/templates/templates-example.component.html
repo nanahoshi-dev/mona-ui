@@ -1,0 +1,26 @@
+<div class="flex flex-col gap-3">
+    <mona-kanban
+        aria-label="Issues"
+        statusField="stage"
+        [columns]="columns"
+        [(data)]="issues"
+        (cardMove)="onMove($event)">
+        <ng-template monaKanbanCardTemplate [monaKanbanCardTemplateOf]="issues()" let-issue>
+            <div class="flex flex-col gap-2">
+                <span class="font-medium">{{ issue.title }}</span>
+                <div class="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                    <span monaBadge fill="subtle" size="small" [look]="priorityLook(issue.priority)">
+                        {{ issue.priority }}
+                    </span>
+                    <span>{{ issue.assignee }}</span>
+                </div>
+            </div>
+        </ng-template>
+        <ng-template monaKanbanColumnFooterTemplate let-column>
+            <button monaButton look="link" size="small" type="button" (click)="add(column)">
+                Add to {{ column.title }}
+            </button>
+        </ng-template>
+    </mona-kanban>
+    <p class="text-sm text-muted-foreground">{{ lastMove() || "Move a card to see what changed." }}</p>
+</div>

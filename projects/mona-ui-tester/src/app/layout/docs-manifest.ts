@@ -361,6 +361,12 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
             component("badge", "Badge", "badge", "A small filled or outlined label for a count or a status."),
             component("chip", "Chip", "chip", "A compact label that can be selected, removed or given a prefix."),
             component(
+                "kanban",
+                "Kanban",
+                "kanban",
+                "A board of columns that cards move between by dragging or with the keyboard, with column limits."
+            ),
+            component(
                 "list-box",
                 "List Box",
                 "list-box",
@@ -383,6 +389,12 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                 "QR Code",
                 "qr-code",
                 "Encodes text or a URL as a scannable QR code, with logo overlays and PNG, SVG and PDF export."
+            ),
+            component(
+                "sortable",
+                "Sortable",
+                "sortable",
+                "Lets users reorder any list by dragging or with the keyboard, and move items between connected lists."
             ),
             component(
                 "tree-view",

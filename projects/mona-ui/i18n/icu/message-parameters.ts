@@ -546,6 +546,14 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         sortOrder: [{ name: "position", type: "number" }],
         toolbar: null
     },
+    kanban: {
+        cardCount: [{ name: "count", type: "number" }],
+        cardCountWithLimit: [
+            { name: "count", type: "number" },
+            { name: "limit", type: "number" }
+        ],
+        emptyColumn: null
+    },
     label: {
         optional: null
     },
@@ -679,6 +687,19 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         maximumValue: null,
         minimumValue: null,
         sliderValue: null
+    },
+    sortable: {
+        itemMoved: [
+            { name: "item", type: "string" },
+            { name: "position", type: "number" },
+            { name: "total", type: "number" }
+        ],
+        itemMovedToList: [
+            { name: "item", type: "string" },
+            { name: "list", type: "string" },
+            { name: "position", type: "number" },
+            { name: "total", type: "number" }
+        ]
     },
     spinner: {
         cancel: null,

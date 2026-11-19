@@ -23,6 +23,7 @@ import type { MonaFileUploadMessages } from "../message-types/file-upload.messag
 import type { MonaFilterMessages } from "../message-types/filter.messages";
 import type { MonaFormFieldMessages } from "../message-types/form-field.messages";
 import type { MonaGridMessages } from "../message-types/grid.messages";
+import type { MonaKanbanMessages } from "../message-types/kanban.messages";
 import type { MonaLabelMessages } from "../message-types/label.messages";
 import type { MonaListMessages } from "../message-types/list.messages";
 import type { MonaListBoxMessages } from "../message-types/list-box.messages";
@@ -41,6 +42,7 @@ import type { MonaCommandMessages } from "../message-types/command.messages";
 import type { MonaScrollViewMessages } from "../message-types/scroll-view.messages";
 import type { MonaSheetMessages } from "../message-types/sheet.messages";
 import type { MonaSliderMessages } from "../message-types/slider.messages";
+import type { MonaSortableMessages } from "../message-types/sortable.messages";
 import type { MonaSpinnerMessages } from "../message-types/spinner.messages";
 import type { MonaSplitButtonMessages } from "../message-types/split-button.messages";
 import type { MonaSplitterMessages } from "../message-types/splitter.messages";
@@ -80,6 +82,7 @@ export interface MonaLocaleMessages {
     filter: MonaFilterMessages;
     formField: MonaFormFieldMessages;
     grid: MonaGridMessages;
+    kanban: MonaKanbanMessages;
     label: MonaLabelMessages;
     list: MonaListMessages;
     listBox: MonaListBoxMessages;
@@ -97,6 +100,7 @@ export interface MonaLocaleMessages {
     sheet: MonaSheetMessages;
     sidebar: MonaSidebarMessages;
     slider: MonaSliderMessages;
+    sortable: MonaSortableMessages;
     spinner: MonaSpinnerMessages;
     splitButton: MonaSplitButtonMessages;
     splitter: MonaSplitterMessages;

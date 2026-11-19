@@ -5,10 +5,12 @@
     [disabled]="disabled()"
     [position]="position()"
     [size]="size()"
+    [sortable]="sortable()"
     [tabList]="tabList()"
     [selectedTabId]="selectedTabId()"
     (selectedTabIdChange)="selectedTabId.set($event)"
     (tabClose)="tabClose.emit($event)"
+    (tabReorder)="tabReorder.emit($event)"
     (tabSelect)="tabSelect.emit($event)"></mona-tab-list>
 <div [class]="contentClass()">
     @for (tab of tabList(); track tab.id) {

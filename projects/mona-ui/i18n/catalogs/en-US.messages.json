@@ -438,6 +438,11 @@
         "sortOrder": "Sort order {position}",
         "toolbar": "Grid toolbar"
     },
+    "kanban": {
+        "cardCount": "{count, plural, =1 {# card} other {# cards}}",
+        "cardCountWithLimit": "{count} of {limit, plural, =1 {# card} other {# cards}}",
+        "emptyColumn": "No cards"
+    },
     "label": {
         "optional": "Optional"
     },
@@ -552,6 +557,10 @@
         "maximumValue": "Maximum value",
         "minimumValue": "Minimum value",
         "sliderValue": "Slider value"
+    },
+    "sortable": {
+        "itemMoved": "{item} moved to position {position} of {total}",
+        "itemMovedToList": "{item} moved to {list}, position {position} of {total}"
     },
     "spinner": {
         "cancel": "Cancel",

@@ -1628,6 +1628,45 @@
       }
     ]
   },
+  "KanbanCardTemplateDirective": {
+    "name": "KanbanCardTemplateDirective",
+    "selector": "\"ng-template[monaKanbanCardTemplate]\"",
+    "inputs": [
+      {
+        "description": "The board's data, used only to type the template's card. Optional.",
+        "kind": "input",
+        "name": "monaKanbanCardTemplateOf",
+        "type": "Iterable<T> | null | undefined",
+        "defaultValue": "null"
+      }
+    ]
+  },
+  "KanbanColumnFooterTemplateDirective": {
+    "name": "KanbanColumnFooterTemplateDirective",
+    "selector": "\"ng-template[monaKanbanColumnFooterTemplate]\"",
+    "inputs": [
+      {
+        "description": "The board's data, used only to type the template's cards. Optional.",
+        "kind": "input",
+        "name": "monaKanbanColumnFooterTemplateOf",
+        "type": "Iterable<T> | null | undefined",
+        "defaultValue": "null"
+      }
+    ]
+  },
+  "KanbanColumnHeaderTemplateDirective": {
+    "name": "KanbanColumnHeaderTemplateDirective",
+    "selector": "\"ng-template[monaKanbanColumnHeaderTemplate]\"",
+    "inputs": [
+      {
+        "description": "The board's data, used only to type the template's cards. Optional.",
+        "kind": "input",
+        "name": "monaKanbanColumnHeaderTemplateOf",
+        "type": "Iterable<T> | null | undefined",
+        "defaultValue": "null"
+      }
+    ]
+  },
   "LabelDirective": {
     "name": "LabelDirective",
     "selector": "\"label[monaLabel]\"",
@@ -2101,6 +2140,107 @@
         "name": "for",
         "type": "string",
         "defaultValue": "\"\""
+      }
+    ]
+  },
+  "SortableItemDirective": {
+    "name": "SortableItemDirective",
+    "selector": "\"[monaSortableItem]\"",
+    "inputs": [
+      {
+        "description": "Stops this item from moving. Other items still move past it.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "alias": "sortableDisabled",
+        "defaultValue": "false"
+      },
+      {
+        "description": "The element of the list's array that this item shows.",
+        "kind": "input",
+        "name": "item",
+        "type": "T",
+        "alias": "monaSortableItem",
+        "required": true
+      },
+      {
+        "description": "The item's name in announcements of its moves. Without it, the item's `aria-label`,\n`aria-labelledby` text or own text.",
+        "kind": "input",
+        "name": "label",
+        "type": "string",
+        "alias": "sortableLabel",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
+  "SortableDirective": {
+    "name": "SortableDirective",
+    "selector": "\"[monaSortable]\"",
+    "inputs": [
+      {
+        "description": "Whether an item from another list of the group may come into this one, such as to keep a list\nunder a limit. The list's own items can always move within it. Without it, every item may come in.",
+        "kind": "input",
+        "name": "canEnter",
+        "type": "((item: T) => boolean) | null",
+        "alias": "sortableCanEnter",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Stops items from moving within the list, out of it or into it.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "alias": "sortableDisabled",
+        "defaultValue": "false"
+      },
+      {
+        "description": "The list's items, in the order they're shown. Bind it two-way, `[(monaSortable)]`, to take each\nnew order.",
+        "kind": "input",
+        "name": "items",
+        "type": "readonly T[]",
+        "alias": "monaSortable",
+        "required": true
+      },
+      {
+        "description": "The list's name in the announcement of a move into it from another list. Without it, the list's\n`aria-label` or `aria-labelledby` text.",
+        "kind": "input",
+        "name": "label",
+        "type": "string",
+        "alias": "sortableLabel",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Keeps a dragged item on the list's axis: across for a horizontal list, up and down for a vertical\none. A list whose rows wrap doesn't lock.",
+        "kind": "input",
+        "name": "lockAxis",
+        "type": "boolean",
+        "alias": "sortableLockAxis",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Emitted with the list's new items after an item moves within it, out of it or into it, unless the\nmove was refused.",
+        "kind": "output",
+        "name": "monaSortableChange",
+        "type": "T[]"
+      },
+      {
+        "description": "How the items are laid out, which sets the keys that move them: Up and Down in a column, Left and\nRight in a row, and all four in rows that wrap.",
+        "kind": "input",
+        "name": "orientation",
+        "type": "SortableOrientation",
+        "alias": "sortableOrientation",
+        "options": [
+          "horizontal",
+          "mixed",
+          "vertical"
+        ],
+        "defaultValue": "\"vertical\""
+      },
+      {
+        "description": "Emitted with a {@link SortableMoveEvent} when an item moves within this list or into it from\nanother list, before the lists emit their new items. This event is preventable.",
+        "kind": "output",
+        "name": "sortableMove",
+        "type": "SortableMoveEvent<T>"
       }
     ]
   },
@@ -13293,6 +13433,67 @@
       }
     ]
   },
+  "KanbanComponent": {
+    "name": "KanbanComponent",
+    "selector": "\"mona-kanban\"",
+    "inputs": [
+      {
+        "description": "Emitted with a {@link KanbanCardMoveEvent} when a card moves within its column or into another,\nbefore `dataChange`. This event is preventable.",
+        "kind": "output",
+        "name": "cardMove",
+        "type": "KanbanCardMoveEvent<T>"
+      },
+      {
+        "description": "The board's columns, in order. A card whose status matches no column isn't shown.",
+        "kind": "input",
+        "name": "columns",
+        "type": "readonly KanbanColumn[]",
+        "required": true
+      },
+      {
+        "description": "The cards. Each goes in the column whose `status` its status field holds, in the order of this\narray. Bind it two-way, `[(data)]`, to take each move.",
+        "kind": "input",
+        "name": "data",
+        "type": "readonly T[]",
+        "required": true
+      },
+      {
+        "description": "Emitted with the board's new cards after a move, unless the move was refused. A card that changes\ncolumn is a copy with its status field set to the column's status.",
+        "kind": "output",
+        "name": "dataChange",
+        "type": "T[]"
+      },
+      {
+        "description": "Stops cards from moving, by pointer or keyboard. Focus still moves between them, and what their\ntemplate holds still works.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "The field of each card that holds its column's `status`.",
+        "kind": "input",
+        "name": "statusField",
+        "type": "string",
+        "defaultValue": "\"status\""
+      },
+      {
+        "description": "The field of each card shown as its text when there's no card template, and used as its name in\nannouncements of its moves.",
+        "kind": "input",
+        "name": "textField",
+        "type": "string",
+        "defaultValue": "\"title\""
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
   "LabelComponent": {
     "name": "LabelComponent",
     "selector": "\"mona-label\"",
@@ -19100,6 +19301,13 @@
       },
       {
         "description": "",
+        "kind": "input",
+        "name": "sortable",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "",
         "kind": "output",
         "name": "tabClose",
         "type": "TabCloseEvent"
@@ -19110,6 +19318,12 @@
         "name": "tabList",
         "type": "Iterable<TabItem>",
         "required": true
+      },
+      {
+        "description": "",
+        "kind": "output",
+        "name": "tabReorder",
+        "type": "TabReorderEvent"
       },
       {
         "description": "",
@@ -19193,10 +19407,23 @@
         "defaultValue": "\"medium\""
       },
       {
+        "description": "Lets the user reorder the tabs: by dragging them, or with Control+Shift and the arrow keys along the\nstrip, Home or End (Command+Shift on macOS). The component emits `tabReorder` and doesn't move the tabs itself.",
+        "kind": "input",
+        "name": "sortable",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
         "description": "Emitted with a {@link TabCloseEvent} when a close is requested. The component doesn't remove the tab:\nremove it from whatever renders the `mona-tab` elements.",
         "kind": "output",
         "name": "tabClose",
         "type": "TabCloseEvent"
+      },
+      {
+        "description": "Emitted with a {@link TabReorderEvent} when a tab of a `sortable` strip is moved. The component doesn't\nreorder the tabs: move the tab in whatever renders the `mona-tab` elements. The selected tab stays selected.",
+        "kind": "output",
+        "name": "tabReorder",
+        "type": "TabReorderEvent"
       },
       {
         "description": "Emitted with a {@link TabSelectEvent} before a click or key selects a tab. This event is preventable.\nIt doesn't fire for selections made through `selectedIndex` or `selected`, or when the selected tab is removed.",

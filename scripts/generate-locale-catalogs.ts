@@ -233,6 +233,13 @@ export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
         typeName: "MonaGridMessages"
     },
     {
+        constName: "KANBAN_DEFAULT_MESSAGES",
+        file: "kanban/i18n/kanban.default-messages.ts",
+        namespace: "kanban",
+        style: "type",
+        typeName: "MonaKanbanMessages"
+    },
+    {
         constName: "LIST_BOX_DEFAULT_MESSAGES",
         file: "list-box/i18n/list-box.default-messages.ts",
         namespace: "listBox",
@@ -343,6 +350,13 @@ export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
         namespace: "slider",
         style: "type",
         typeName: "MonaSliderMessages"
+    },
+    {
+        constName: "SORTABLE_DEFAULT_MESSAGES",
+        file: "sortable/i18n/sortable.default-messages.ts",
+        namespace: "sortable",
+        style: "type",
+        typeName: "MonaSortableMessages"
     },
     {
         constName: "SPINNER_DEFAULT_MESSAGES",

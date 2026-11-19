@@ -404,6 +404,11 @@ export const routes: Routes = [
                     import("./docs/components/input-doc/input-doc.component").then(m => m.InputDocComponent)
             },
             {
+                path: "kanban",
+                loadComponent: () =>
+                    import("./docs/components/kanban-doc/kanban-doc.component").then(m => m.KanbanDocComponent)
+            },
+            {
                 path: "label",
                 loadComponent: () =>
                     import("./docs/components/label-doc/label-doc.component").then(m => m.LabelDocComponent)
@@ -573,6 +578,11 @@ export const routes: Routes = [
                 path: "slider",
                 loadComponent: () =>
                     import("./docs/components/slider-doc/slider-doc.component").then(m => m.SliderDocComponent)
+            },
+            {
+                path: "sortable",
+                loadComponent: () =>
+                    import("./docs/components/sortable-doc/sortable-doc.component").then(m => m.SortableDocComponent)
             },
             {
                 path: "spinner",

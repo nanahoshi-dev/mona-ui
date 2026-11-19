@@ -20,6 +20,7 @@ import { LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideChevron
 import { firstOrDefault } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { type SortableMoveEvent, SortableDirective, SortableItemDirective } from "@nanahoshi/mona-ui/sortable";
 import { asapScheduler, EMPTY, interval, Subject, switchMap, tap, timer } from "rxjs";
 import { TabListItemDirective } from "../../directives/tab-list-item.directive";
 import { TABS_DEFAULT_MESSAGES } from "../../i18n/tabs.default-messages";
@@ -27,6 +28,7 @@ import type { ScrollIntent, TabScrollDirection } from "../../models/ScrollIntent
 import { TabCloseEvent } from "../../models/TabCloseEvent";
 import type { TabItem } from "../../models/TabItem";
 import { getTabOrientation } from "../../models/TabOrientation";
+import { TabReorderEvent } from "../../models/TabReorderEvent";
 import { TabSelectEvent } from "../../models/TabSelectEvent";
 import type { TabListVariantInput, TabListVariantProps } from "../../styles/tabs.styles";
 import {
@@ -43,6 +45,8 @@ import {
     imports: [
         ButtonDirective,
         NgTemplateOutlet,
+        SortableDirective,
+        SortableItemDirective,
         TabListItemDirective,
         LucideChevronDown,
         LucideChevronLeft,
@@ -93,6 +97,7 @@ export class TabListComponent implements TabListVariantInput {
     protected readonly scrollButtonClass = computed(() => {
         return tabListScrollButtonThemeVariants();
     });
+    protected readonly sortableTabs = computed(() => Array.from(this.tabList()));
     protected readonly tabClass = computed(() => {
         return tabListTabThemeVariants({ position: this.position(), size: this.size() });
     });
@@ -116,8 +121,10 @@ export class TabListComponent implements TabListVariantInput {
      * @default "medium"
      */
     public readonly size = input.required<TabListVariantProps["size"]>();
+    public readonly sortable = input(false);
     public readonly tabClose = output<TabCloseEvent>();
     public readonly tabList = input.required<Iterable<TabItem>>();
+    public readonly tabReorder = output<TabReorderEvent>();
     public readonly tabSelect = output<TabSelectEvent>();
 
     public constructor() {
@@ -201,6 +208,10 @@ export class TabListComponent implements TabListVariantInput {
         this.emitTabClose(tab, event);
     }
 
+    protected onTabMove(event: SortableMoveEvent<TabItem>): void {
+        this.tabReorder.emit(new TabReorderEvent(event.previousIndex, event.currentIndex, event.originalEvent));
+    }
+
     protected startContinuousScroll(event: PointerEvent, element: HTMLElement, direction: TabScrollDirection): void {
         (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
         this.startScrolling(element, direction, "continuous");
@@ -212,6 +223,12 @@ export class TabListComponent implements TabListVariantInput {
 
     protected stopScrolling(): void {
         this.#scrollIntent$.next(null);
+    }
+
+    /** A tab's shortcuts: Delete and Backspace when it can be closed, and the sortable strip's moves. */
+    protected tabKeyShortcuts(closable: boolean, moveShortcuts: string | null): string | null {
+        const shortcuts = [closable ? "Delete Backspace" : null, moveShortcuts].filter(keys => keys != null);
+        return shortcuts.length === 0 ? null : shortcuts.join(" ");
     }
 
     /**

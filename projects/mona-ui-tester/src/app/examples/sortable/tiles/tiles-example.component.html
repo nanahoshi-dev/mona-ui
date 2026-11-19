@@ -1,0 +1,24 @@
+<ul
+    aria-label="Dashboard widgets"
+    class="flex w-[30rem] max-w-full flex-wrap gap-3"
+    [(monaSortable)]="widgets"
+    sortableOrientation="mixed">
+    @for (widget of widgets(); track widget.id) {
+        <li
+            tabindex="0"
+            class="flex w-36 flex-col gap-2 rounded-lg border border-border bg-card p-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator"
+            [monaSortableItem]="widget"
+            [sortableLabel]="widget.title">
+            <div class="flex items-center justify-between gap-2">
+                <span class="text-sm text-muted-foreground">{{ widget.title }}</span>
+                <svg
+                    monaSortableHandle
+                    lucideGripVertical
+                    aria-hidden="true"
+                    class="text-muted-foreground"
+                    [size]="16"></svg>
+            </div>
+            <span class="text-2xl font-semibold tabular-nums">{{ widget.value }}</span>
+        </li>
+    }
+</ul>

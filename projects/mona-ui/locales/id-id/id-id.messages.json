@@ -438,6 +438,11 @@
         "sortOrder": "Urutan pengurutan {position}",
         "toolbar": "Bilah alat tabel"
     },
+    "kanban": {
+        "cardCount": "{count} kartu",
+        "cardCountWithLimit": "{count} dari {limit} kartu",
+        "emptyColumn": "Tidak ada kartu"
+    },
     "label": {
         "optional": "Opsional"
     },
@@ -552,6 +557,10 @@
         "maximumValue": "Nilai maksimum",
         "minimumValue": "Nilai minimum",
         "sliderValue": "Nilai penggeser"
+    },
+    "sortable": {
+        "itemMoved": "{item} dipindahkan ke posisi {position} dari {total}",
+        "itemMovedToList": "{item} dipindahkan ke {list}, posisi {position} dari {total}"
     },
     "spinner": {
         "cancel": "Batal",

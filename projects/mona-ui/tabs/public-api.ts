@@ -3,6 +3,7 @@
  */
 
 export * from "./models/TabCloseEvent";
+export * from "./models/TabReorderEvent";
 export * from "./models/TabSelectEvent";
 export * from "./models/TabsPosition";
 export * from "./directives/tab-content-template.directive";

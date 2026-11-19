@@ -490,6 +490,11 @@ export const TR_TR_MESSAGES = {
         sortOrder: (position: number) => `Sıralama düzeni ${localizeNumber(position)}`,
         toolbar: "Tablo araç çubuğu"
     },
+    kanban: {
+        cardCount: (count: number) => `${localizeNumber(count)} kart`,
+        cardCountWithLimit: (count: number, limit: number) => `${localizeNumber(count)}/${localizeNumber(limit)} kart`,
+        emptyColumn: "Kart yok"
+    },
     label: {
         optional: "İsteğe bağlı"
     },
@@ -607,6 +612,12 @@ export const TR_TR_MESSAGES = {
         maximumValue: "Maksimum değer",
         minimumValue: "Minimum değer",
         sliderValue: "Kaydırıcı değeri"
+    },
+    sortable: {
+        itemMoved: (item: string, position: number, total: number) =>
+            `${item}, ${localizeNumber(total)} içinde ${localizeNumber(position)}. konuma taşındı`,
+        itemMovedToList: (item: string, list: string, position: number, total: number) =>
+            `${item}, ${list} listesine taşındı; ${localizeNumber(total)} içinde ${localizeNumber(position)}. konum`
     },
     spinner: {
         cancel: "İptal",

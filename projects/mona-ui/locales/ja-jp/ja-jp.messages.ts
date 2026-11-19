@@ -462,6 +462,12 @@ export const JA_JP_MESSAGES = {
         sortOrder: (position: number) => `並べ替え順 ${localizeNumber(position)}`,
         toolbar: "表のツールバー"
     },
+    kanban: {
+        cardCount: (count: number) => `カード${localizeNumber(count)}枚`,
+        cardCountWithLimit: (count: number, limit: number) =>
+            `カード${localizeNumber(limit)}枚中${localizeNumber(count)}枚`,
+        emptyColumn: "カードはありません"
+    },
     label: {
         optional: "任意"
     },
@@ -579,6 +585,12 @@ export const JA_JP_MESSAGES = {
         maximumValue: "最大値",
         minimumValue: "最小値",
         sliderValue: "スライダーの値"
+    },
+    sortable: {
+        itemMoved: (item: string, position: number, total: number) =>
+            `${item}を${localizeNumber(total)}件中${localizeNumber(position)}番目に移動しました`,
+        itemMovedToList: (item: string, list: string, position: number, total: number) =>
+            `${item}を${list}の${localizeNumber(total)}件中${localizeNumber(position)}番目に移動しました`
     },
     spinner: {
         cancel: "キャンセル",

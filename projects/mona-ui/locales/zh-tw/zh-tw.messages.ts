@@ -461,6 +461,12 @@ export const ZH_TW_MESSAGES = {
         sortOrder: (position: number) => `排序順序 ${localizeNumber(position)}`,
         toolbar: "表格工具列"
     },
+    kanban: {
+        cardCount: (count: number) => `${localizeNumber(count)} 張卡片`,
+        cardCountWithLimit: (count: number, limit: number) =>
+            `${localizeNumber(count)}/${localizeNumber(limit)} 張卡片`,
+        emptyColumn: "沒有卡片"
+    },
     label: {
         optional: "選填"
     },
@@ -578,6 +584,12 @@ export const ZH_TW_MESSAGES = {
         maximumValue: "最大值",
         minimumValue: "最小值",
         sliderValue: "滑桿數值"
+    },
+    sortable: {
+        itemMoved: (item: string, position: number, total: number) =>
+            `${item} 已移至第 ${localizeNumber(position)} 位，共 ${localizeNumber(total)} 位`,
+        itemMovedToList: (item: string, list: string, position: number, total: number) =>
+            `${item} 已移至${list}，第 ${localizeNumber(position)} 位，共 ${localizeNumber(total)} 位`
     },
     spinner: {
         cancel: "取消",

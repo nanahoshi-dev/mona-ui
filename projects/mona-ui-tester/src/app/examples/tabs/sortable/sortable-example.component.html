@@ -1,0 +1,9 @@
+<mona-tabs aria-label="Open files" class="w-[28rem] max-w-full" sortable (tabReorder)="reorder($event)">
+    @for (file of files(); track file) {
+        <mona-tab [title]="file">
+            <ng-template monaTabContentTemplate>
+                <p class="p-4 text-sm">The contents of {{ file }}.</p>
+            </ng-template>
+        </mona-tab>
+    }
+</mona-tabs>

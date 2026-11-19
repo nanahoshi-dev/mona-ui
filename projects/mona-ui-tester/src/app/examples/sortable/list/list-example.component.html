@@ -1,0 +1,14 @@
+<div class="flex w-80 max-w-full flex-col gap-3">
+    <ol aria-label="Priorities" class="flex flex-col gap-1" [(monaSortable)]="priorities" sortableLockAxis>
+        @for (priority of priorities(); track priority; let index = $index) {
+            <li
+                tabindex="0"
+                class="flex cursor-grab items-center gap-3 rounded-md border border-border bg-card px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator"
+                [monaSortableItem]="priority">
+                <span aria-hidden="true" class="w-4 text-end text-muted-foreground tabular-nums">{{ index + 1 }}</span>
+                {{ priority }}
+            </li>
+        }
+    </ol>
+    <p class="text-sm text-muted-foreground">Up first: {{ priorities()[0] }}</p>
+</div>

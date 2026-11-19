@@ -535,6 +535,13 @@ export const FR_FR_MESSAGES = {
         sortOrder: (position: number) => `Ordre de tri ${localizeNumber(position)}`,
         toolbar: "Barre d’outils du tableau"
     },
+    kanban: {
+        cardCount: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} carte` : `${localizeNumber(count)} cartes`,
+        cardCountWithLimit: (count: number, limit: number) =>
+            `${localizeNumber(count)} sur ${limit === 1 ? `${localizeNumber(limit)} carte` : `${localizeNumber(limit)} cartes`}`,
+        emptyColumn: "Aucune carte"
+    },
     label: {
         optional: "Facultatif"
     },
@@ -671,6 +678,12 @@ export const FR_FR_MESSAGES = {
         maximumValue: "Valeur maximale",
         minimumValue: "Valeur minimale",
         sliderValue: "Valeur du curseur"
+    },
+    sortable: {
+        itemMoved: (item: string, position: number, total: number) =>
+            `${item} est maintenant en position ${localizeNumber(position)} sur ${localizeNumber(total)}`,
+        itemMovedToList: (item: string, list: string, position: number, total: number) =>
+            `${item} est maintenant dans ${list}, à la position ${localizeNumber(position)} sur ${localizeNumber(total)}`
     },
     spinner: {
         cancel: "Annuler",

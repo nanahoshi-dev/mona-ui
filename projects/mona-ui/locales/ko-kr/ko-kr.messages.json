@@ -438,6 +438,11 @@
         "sortOrder": "정렬 순서 {position}",
         "toolbar": "표 도구 모음"
     },
+    "kanban": {
+        "cardCount": "카드 {count}개",
+        "cardCountWithLimit": "카드 {limit}개 중 {count}개",
+        "emptyColumn": "카드 없음"
+    },
     "label": {
         "optional": "선택 사항"
     },
@@ -552,6 +557,10 @@
         "maximumValue": "최댓값",
         "minimumValue": "최솟값",
         "sliderValue": "슬라이더 값"
+    },
+    "sortable": {
+        "itemMoved": "{item}을(를) {total}개 중 {position}번째 위치로 이동했습니다",
+        "itemMovedToList": "{item}을(를) {list}의 {total}개 중 {position}번째 위치로 이동했습니다"
     },
     "spinner": {
         "cancel": "취소",
