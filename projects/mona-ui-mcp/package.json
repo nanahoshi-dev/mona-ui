@@ -5,7 +5,7 @@
     "author": "Nanahoshi",
     "repository": {
         "type": "git",
-        "url": "https://github.com/nanahoshi-dev/mona-ui",
+        "url": "git+https://github.com/nanahoshi-dev/mona-ui.git",
         "directory": "projects/mona-ui-mcp"
     },
     "keywords": [
