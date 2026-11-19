@@ -1,0 +1,107 @@
+<ol
+    [class]="listClass()"
+    [attr.aria-label]="ariaLabel() || null"
+    [attr.aria-labelledby]="ariaLabelledBy() || null"
+    [attr.tabindex]="listTabIndex()">
+    @for (item of items(); track item.key) {
+        <!-- The date comes first, so assistive technology reads it before the card, wherever the layout puts it. -->
+        <li [class]="item.classes.item">
+            <div [class]="item.classes.date">
+                @if (dateTemplate(); as template) {
+                    <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="item.context" />
+                } @else if (item.dateTime) {
+                    <time [attr.datetime]="item.dateTime">{{ item.dateText }}</time>
+                }
+            </div>
+            <div [class]="item.classes.axis">
+                @if (item.classes.line) {
+                    <span [class]="item.classes.line"></span>
+                }
+                <span [class]="markerClass()">
+                    @if (markerTemplate(); as template) {
+                        <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="item.context" />
+                    } @else {
+                        <span [class]="dotClass"></span>
+                    }
+                </span>
+            </div>
+            <div [class]="item.classes.content">
+                @if (collapsible() && item.hasDetails) {
+                    <div
+                        monaCollapsible
+                        [class]="collapsibleCardClass"
+                        [expanded]="item.context.expanded"
+                        (expandedChange)="onExpandedChange(item, $event)">
+                        <div [attr.role]="headingRole()" [attr.aria-level]="headingLevel()">
+                            <button monaCollapsibleTrigger [class]="triggerClass">
+                                <span [class]="headerClass">
+                                    <ng-container
+                                        [ngTemplateOutlet]="header"
+                                        [ngTemplateOutletContext]="{ $implicit: item }" />
+                                </span>
+                                <svg
+                                    lucideChevronDown
+                                    aria-hidden="true"
+                                    [class]="chevronClass(item.context.expanded)"></svg>
+                            </button>
+                        </div>
+                        <div monaCollapsibleContent [class]="collapsibleBodyClass">
+                            <ng-container [ngTemplateOutlet]="body" [ngTemplateOutletContext]="{ $implicit: item }" />
+                        </div>
+                    </div>
+                } @else {
+                    <div [class]="staticCardClass">
+                        @if (headerTemplate(); as template) {
+                            <div [class]="headerClass" [attr.role]="headingRole()" [attr.aria-level]="headingLevel()">
+                                <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="item.context" />
+                            </div>
+                        } @else if (item.title || item.subtitle) {
+                            <div [class]="headerClass">
+                                @if (item.title) {
+                                    <div
+                                        [class]="titleClass"
+                                        [attr.role]="headingRole()"
+                                        [attr.aria-level]="headingLevel()">
+                                        {{ item.title }}
+                                    </div>
+                                }
+                                @if (item.subtitle) {
+                                    <div [class]="subtitleClass">{{ item.subtitle }}</div>
+                                }
+                            </div>
+                        }
+                        @if (item.hasDetails) {
+                            <div [class]="bodyClass">
+                                <ng-container
+                                    [ngTemplateOutlet]="body"
+                                    [ngTemplateOutletContext]="{ $implicit: item }" />
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </li>
+    }
+</ol>
+
+<!-- In the button that opens the details, so the default header is spans. -->
+<ng-template #header let-item>
+    @if (headerTemplate(); as template) {
+        <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="item.context" />
+    } @else {
+        @if (item.title) {
+            <span [class]="titleClass">{{ item.title }}</span>
+        }
+        @if (item.subtitle) {
+            <span [class]="subtitleClass">{{ item.subtitle }}</span>
+        }
+    }
+</ng-template>
+
+<ng-template #body let-item>
+    @if (bodyTemplate(); as template) {
+        <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="item.context" />
+    } @else {
+        <p class="m-0 whitespace-pre-line">{{ item.description }}</p>
+    }
+</ng-template>

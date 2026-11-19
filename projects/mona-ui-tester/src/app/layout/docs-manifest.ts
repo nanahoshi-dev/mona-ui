@@ -397,6 +397,12 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                 "Lets users reorder any list by dragging or with the keyboard, and move items between connected lists."
             ),
             component(
+                "timeline",
+                "Timeline",
+                "timeline",
+                "Dated events along a line, down the page or across it, with cards that can open and close."
+            ),
+            component(
                 "tree-view",
                 "Tree View",
                 "tree-view",

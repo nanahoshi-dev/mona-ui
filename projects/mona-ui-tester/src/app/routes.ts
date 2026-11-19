@@ -644,6 +644,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "timeline",
+                loadComponent: () =>
+                    import("./docs/components/timeline-doc/timeline-doc.component").then(m => m.TimelineDocComponent)
+            },
+            {
                 path: "tooltip",
                 loadComponent: () =>
                     import("./docs/components/tooltip-doc/tooltip-doc.component").then(m => m.TooltipDocComponent)
