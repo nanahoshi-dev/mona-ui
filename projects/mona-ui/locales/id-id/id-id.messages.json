@@ -562,6 +562,11 @@
         "itemMoved": "{item} dipindahkan ke posisi {position} dari {total}",
         "itemMovedToList": "{item} dipindahkan ke {list}, posisi {position} dari {total}"
     },
+    "sparkline": {
+        "noData": "Tidak ada data",
+        "summary": "{count} nilai, pertama {first}, terakhir {last}, terendah {min}, tertinggi {max}",
+        "winLossSummary": "{wins} menang, {losses} kalah, {draws} seri"
+    },
     "spinner": {
         "cancel": "Batal",
         "loading": "Memuat"

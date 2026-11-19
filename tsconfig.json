@@ -97,6 +97,7 @@
             "@nanahoshi/mona-ui/skeleton": ["./projects/mona-ui/skeleton/public-api.ts"],
             "@nanahoshi/mona-ui/slider": ["./projects/mona-ui/slider/public-api.ts"],
             "@nanahoshi/mona-ui/sortable": ["./projects/mona-ui/sortable/public-api.ts"],
+            "@nanahoshi/mona-ui/sparkline": ["./projects/mona-ui/sparkline/public-api.ts"],
             "@nanahoshi/mona-ui/spinner": ["./projects/mona-ui/spinner/public-api.ts"],
             "@nanahoshi/mona-ui/split-button": ["./projects/mona-ui/split-button/public-api.ts"],
             "@nanahoshi/mona-ui/splitter": ["./projects/mona-ui/splitter/public-api.ts"],

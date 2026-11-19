@@ -1,0 +1,18 @@
+<p class="flex flex-wrap items-center gap-2 text-sm text-foreground">
+    Daily profit, last two weeks
+    <mona-sparkline
+        aria-label="Daily profit, last two weeks"
+        [class]="userClass()"
+        [color]="color()"
+        [curve]="curve()"
+        [data]="profit"
+        [decorative]="decorative()"
+        [format]="currency"
+        [markers]="markers()"
+        [max]="max()"
+        [min]="min()"
+        [negativeColor]="negativeColor()"
+        [referenceValue]="referenceValue()"
+        [type]="type()" />
+    <span class="font-semibold tabular-nums">$1,630</span>
+</p>

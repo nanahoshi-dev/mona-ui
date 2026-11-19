@@ -110,6 +110,15 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
     });
     protected readonly config = computed<ComponentConfig<AutoCompleteComponent<DropdownFoodItem>>>(() => ({
         inputs: deriveInputConfig<AutoCompleteComponent<DropdownFoodItem>>(this.metadata(), {
+            adaptiveMode: {
+                type: "dropdown",
+                value: ["none", "auto"],
+                defaultValue: "none"
+            },
+            adaptiveTitle: {
+                type: "string",
+                value: ""
+            },
             // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
             ariaDescribedBy: undefined,
             ariaLabel: undefined,
@@ -211,6 +220,8 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
         <mona-label for="auto-complete-demo-input" text="Favourite food"></mona-label>
         <mona-auto-complete
             inputId="auto-complete-demo-input"
+            [adaptiveMode]="adaptiveMode()"
+            [adaptiveTitle]="adaptiveTitle()"
             [data]="autoCompleteData()"
             [highlightFirst]="highlightFirst()"
             [itemDisabled]="itemDisabled()"
@@ -325,6 +336,8 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
     protected readonly grouping = computed(() => buildGroupableOptions(this.features()));
     protected readonly selectedItem = signal<unknown>(null);
     protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
+    public readonly adaptiveMode = input<ReturnType<AutoCompleteComponent["adaptiveMode"]>>("none");
+    public readonly adaptiveTitle = input("");
     public readonly data = input<ReturnType<AutoCompleteComponent["data"]>>([]);
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly highlightFirst = input(true, { transform: booleanAttribute });

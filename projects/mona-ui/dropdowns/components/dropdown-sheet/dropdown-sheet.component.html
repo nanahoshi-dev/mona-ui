@@ -1,7 +1,7 @@
 <section [class]="sheetClass" (pointerdown)="onPointerDown($event)">
     <span aria-hidden="true" class="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-border"></span>
     <header class="flex shrink-0 items-center gap-3 ps-4 pe-2">
-        <span class="min-w-0 flex-1 truncate text-base font-semibold">{{ data.title() }}</span>
+        <span class="min-w-0 flex-1 truncate text-base font-semibold" [id]="data.titleId">{{ data.title() }}</span>
         <button
             monaButton
             type="button"

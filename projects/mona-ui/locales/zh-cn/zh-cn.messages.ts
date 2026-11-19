@@ -591,6 +591,13 @@ export const ZH_CN_MESSAGES = {
         itemMovedToList: (item: string, list: string, position: number, total: number) =>
             `${item} 已移至${list}，第 ${localizeNumber(position)} 位，共 ${localizeNumber(total)} 位`
     },
+    sparkline: {
+        noData: "没有数据",
+        summary: (count: number, first: string, last: string, min: string, max: string) =>
+            `${localizeNumber(count)} 个值，第一个 ${first}，最后一个 ${last}，最低 ${min}，最高 ${max}`,
+        winLossSummary: (wins: number, losses: number, draws: number) =>
+            `${localizeNumber(wins)} 胜，${localizeNumber(losses)} 负，${localizeNumber(draws)} 平`
+    },
     spinner: {
         cancel: "取消",
         loading: "加载中"

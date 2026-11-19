@@ -1,0 +1,15 @@
+<div class="flex max-w-md flex-col gap-1 rounded-lg border border-border p-4">
+    <span class="text-sm text-muted-foreground">Response time, target 200 ms</span>
+    <div class="flex items-center gap-4">
+        <span class="text-2xl font-semibold tabular-nums">186 ms</span>
+        <mona-sparkline
+            aria-label="Response time per hour, against a target of 200 ms"
+            class="h-10 w-48"
+            color="var(--color-chart-3)"
+            type="area"
+            [data]="responseTimes"
+            [format]="milliseconds"
+            [markers]="['min', 'max', 'last']"
+            [referenceValue]="200" />
+    </div>
+</div>

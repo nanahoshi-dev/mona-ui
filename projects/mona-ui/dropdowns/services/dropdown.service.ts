@@ -59,6 +59,15 @@ export class DropdownService {
      */
     public readonly sheet = signal(false);
     /**
+     * Whether the bottom sheet takes its full height however short its content is. A dropdown whose sheet has a text
+     * box sets it, so the box stays put while the list under it filters.
+     */
+    public readonly sheetFillsHeight = signal(false);
+    /**
+     * The id of the open bottom sheet's title, which names a text box in the sheet. `null` while no sheet is open.
+     */
+    public readonly sheetTitleId = signal<string | null>(null);
+    /**
      * Opens the popup with the given settings when it is closed. Does nothing while the host is disabled or read-only,
      * or when the `open` event is prevented.
      */

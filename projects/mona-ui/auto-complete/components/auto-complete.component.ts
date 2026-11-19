@@ -6,10 +6,12 @@ import {
     computed,
     contentChild,
     DestroyRef,
+    DOCUMENT,
     effect,
     ElementRef,
     forwardRef,
     inject,
+    Injector,
     input,
     linkedSignal,
     model,
@@ -43,6 +45,7 @@ import {
     type SelectionChangeEvent
 } from "@nanahoshi/mona-ui/internal/list";
 import {
+    type AdaptiveMode,
     DropdownDataHandlerDirective,
     type DropdownDataInput,
     DROPDOWN_DATA_INPUT_TOKEN,
@@ -61,7 +64,12 @@ import {
     type DropdownPopupVariantInput,
     DropdownPrefixTemplateDirective,
     DropdownService,
-    DropdownSuffixTemplateDirective
+    dropdownSheetInputClasses,
+    dropdownSheetInputContainerClasses,
+    dropdownSheetSurfaceClasses,
+    DropdownSuffixTemplateDirective,
+    injectSmallScreen,
+    matchesSmallScreen
 } from "@nanahoshi/mona-ui/dropdowns";
 import type { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
@@ -131,9 +139,11 @@ export class AutoCompleteComponent<TData = unknown>
         DropdownPopupVariantInput
 {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #i18n = inject(MonaI18nService);
+    readonly #injector = inject(Injector);
     readonly #label = injectLabelAssociation({
         ariaDescribedBy: () => this.ariaDescribedBy(),
         ariaLabel: () => this.ariaLabel(),
@@ -142,6 +152,9 @@ export class AutoCompleteComponent<TData = unknown>
     });
     readonly #listService = inject(ListService);
     readonly #popupRef = this.#dropdownService.popupRef;
+    readonly #smallScreen = injectSmallScreen();
+    /** Whether the popup that's closing is a bottom sheet, which took focus into its text box. */
+    #closingSheet = false;
 
     protected readonly activeDescendant = computed(() => {
         const highlightedItem = this.#listService.highlightedItem();
@@ -190,6 +203,13 @@ export class AutoCompleteComponent<TData = unknown>
         const rounded = this.rounded();
         return autoCompleteTextInputThemeVariants({ rounded });
     });
+    /**
+     * Where the popup opens as a bottom sheet, the field's input raises no on-screen keyboard: a press opens the sheet,
+     * whose own text box takes the typing.
+     */
+    protected readonly inputMode = computed(() =>
+        this.adaptiveMode() === "auto" && this.#smallScreen() ? "none" : null
+    );
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
@@ -204,8 +224,11 @@ export class AutoCompleteComponent<TData = unknown>
         const variantClass = dropdownPopupThemeVariants({ rounded, size });
         // With a popupHeight, the overlay sets the limit; the default max-h-64 would cut a taller popup short.
         const heightClass = this.popupHeight() ? "max-h-none" : "";
-        return twMerge(variantClass, heightClass, userClass);
+        const sheetClass = this.sheet() ? dropdownSheetSurfaceClasses : "";
+        return twMerge(variantClass, heightClass, sheetClass, userClass);
     });
+    /** The list's size: large in a bottom sheet, for touch. */
+    protected readonly listSize = computed(() => (this.sheet() ? "large" : this.size()));
     protected readonly messages = this.#i18n.componentMessages("autoComplete", AUTO_COMPLETE_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("popupTemplate");
@@ -215,7 +238,26 @@ export class AutoCompleteComponent<TData = unknown>
         mode: "single",
         toggleable: false
     };
+    protected readonly sheet = this.#dropdownService.sheet.asReadonly();
+    protected readonly sheetInputClass = dropdownSheetInputClasses;
+    protected readonly sheetInputContainerClass = dropdownSheetInputContainerClasses;
+    protected readonly sheetTitleId = this.#dropdownService.sheetTitleId.asReadonly();
     protected readonly suffixTemplate = contentChild(DropdownSuffixTemplateDirective, { read: TemplateRef });
+
+    /**
+     * @description Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640
+     * pixels), with a text box of its own at the top, where the typing happens. A press on the field opens the sheet,
+     * and the field raises no on-screen keyboard. `"none"` always opens the popup under the field.
+     * @default "none"
+     */
+    public readonly adaptiveMode = input<AdaptiveMode>("none");
+
+    /**
+     * @description Title of the bottom sheet the popup opens as with `adaptiveMode="auto"`, which also names the
+     * sheet's text box. When empty, the sheet shows the autocomplete's name, from its label or `aria-label`.
+     * @default ""
+     */
+    public readonly adaptiveTitle = input("");
 
     /**
      * @description ID of an element that provides an extended description for the input.
@@ -450,6 +492,21 @@ export class AutoCompleteComponent<TData = unknown>
         this.autoCompleteValue$.next(text);
     }
 
+    protected onInputClick(): void {
+        // A press opens the bottom sheet, with its own text box, where the field raises no keyboard. The sheet opens with
+        // the field's text, and with no text, the whole list.
+        if (this.adaptiveMode() !== "auto" || this.#popupRef() || !matchesSmallScreen(this.#document)) {
+            return;
+        }
+        const text = this.autoCompleteValue();
+        if (text) {
+            this.applyText(text);
+        }
+        if (!this.#popupRef()) {
+            this.#dropdownService.triggerPopupOpen$.next({});
+        }
+    }
+
     protected onItemSelect(event: SelectionChangeEvent<TData>): void {
         const itemText = this.#listService.getItemText(event.item);
         this.updateValue(itemText);
@@ -465,6 +522,11 @@ export class AutoCompleteComponent<TData = unknown>
         }
     }
 
+    protected onSheetKeydown(event: KeyboardEvent): void {
+        // Looked up now: the handler injects this component, so it can't be injected while this component is created.
+        this.#injector.get(DropdownListPopupHandlerDirective).handleKeyDown(event);
+    }
+
     protected onValueClear(event: MouseEvent | KeyboardEvent): void {
         if (
             this.effectiveDisabled() ||
@@ -478,6 +540,50 @@ export class AutoCompleteComponent<TData = unknown>
         this.closePopup();
     }
 
+    /**
+     * Filters the list by the text and opens the popup, highlighting the first match. Without text, the popup closes,
+     * unless it's a bottom sheet, whose text box is where the next text comes from: the sheet shows the whole list.
+     */
+    private applyText(value: string): void {
+        if (this.#listService.isFilteringEnabled()) {
+            const event = this.notifyFilterChange(value);
+            if (event.isDefaultPrevented()) {
+                return;
+            }
+            if (value) {
+                this.#listService.setFilter(value);
+            }
+        }
+
+        if (!value) {
+            const popupRef = this.#popupRef();
+            if (popupRef && this.#dropdownService.sheet()) {
+                this.clear(false);
+            } else if (popupRef) {
+                popupRef.closed.pipe(take(1)).subscribe(() => this.clear(false));
+                this.closePopup();
+            } else {
+                // Deleting the text with the popup closed still has to reach the value on blur.
+                this.clear(false);
+            }
+            return;
+        }
+
+        if (!this.#popupRef()) {
+            this.#dropdownService.triggerPopupOpen$.next({});
+        }
+
+        this.autoCompleteValue.set(value);
+        const item = this.#listService.getMatchingFilteredItem(value);
+        if (this.highlightFirst()) {
+            this.#listService.clearSelections();
+            this.#listService.highlightedItem.set(item);
+            if (item) {
+                this.#listService.scrollToItem$.next({ item, focus: false });
+            }
+        }
+    }
+
     private clear(notify: boolean): void {
         this.autoCompleteValue.set("");
         this.#listService.clearSelections();
@@ -488,6 +594,8 @@ export class AutoCompleteComponent<TData = unknown>
     }
 
     private closePopup(): void {
+        // Drops typed text still waiting for the filter's debounce, which would otherwise come back after the close.
+        this.autoCompleteValue$.next(null);
         this.#popupRef()?.close();
     }
 
@@ -496,6 +604,7 @@ export class AutoCompleteComponent<TData = unknown>
         this.#listService.setSelectableOptions(this.selectableOptions);
         this.#listService.filterInputVisible.set(false);
         this.#dropdownService.restoreFocus.set(false);
+        this.#dropdownService.sheetFillsHeight.set(true);
     }
 
     private notifyFilterChange(filter: string): FilterChangeEvent {
@@ -522,46 +631,11 @@ export class AutoCompleteComponent<TData = unknown>
         this.autoCompleteValue$
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(value => value !== null),
-                debounceDuration > 0 ? debounceTime(debounceDuration) : identity
+                // Debounced before nulls are dropped, so that a null cancels text still waiting for the debounce.
+                debounceDuration > 0 ? debounceTime(debounceDuration) : identity,
+                filter((value): value is string => value !== null)
             )
-            .subscribe((value: string) => {
-                if (this.#listService.isFilteringEnabled()) {
-                    const event = this.notifyFilterChange(value);
-                    if (event.isDefaultPrevented()) {
-                        return;
-                    }
-                    if (value) {
-                        this.#listService.setFilter(value);
-                    }
-                }
-
-                if (!value) {
-                    const popupRef = this.#popupRef();
-                    if (popupRef) {
-                        popupRef.closed.pipe(take(1)).subscribe(() => this.clear(false));
-                        this.closePopup();
-                    } else {
-                        // Deleting the text with the popup closed still has to reach the value on blur.
-                        this.clear(false);
-                    }
-                    return;
-                }
-
-                if (!this.#popupRef()) {
-                    this.#dropdownService.triggerPopupOpen$.next({});
-                }
-
-                this.autoCompleteValue.set(value);
-                const item = this.#listService.getMatchingFilteredItem(value);
-                if (this.highlightFirst()) {
-                    this.#listService.clearSelections();
-                    this.#listService.highlightedItem.set(item);
-                    if (item) {
-                        this.#listService.scrollToItem$.next({ item, focus: false });
-                    }
-                }
-            });
+            .subscribe((value: string) => this.applyText(value));
     }
 
     private setEnterKeySubscription(): void {
@@ -609,8 +683,16 @@ export class AutoCompleteComponent<TData = unknown>
     }
 
     private setPopupCloseSubscriptions(): void {
+        this.#dropdownService.popupCloseStart$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+            this.#closingSheet = this.#dropdownService.sheet();
+        });
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.autoCompleteValue$.next(null);
+            // The popup under the field leaves focus on it, but a sheet took it into its text box, so it comes back.
+            if (this.#closingSheet && this.#dropdownService.focusCanReturn()) {
+                this.focus();
+            }
+            this.#closingSheet = false;
         });
     }
 

@@ -5,17 +5,42 @@ import { themeOverlaySurfaceClasses } from "@nanahoshi/mona-ui/internal";
  * The bottom sheet a dropdown's popup opens as on a small screen. Its rounded top edge faces the page; the bottom
  * padding keeps the content above the home indicator. `overflow-clip`, not `hidden`, so content that takes focus
  * during the slide-in can't scroll the sheet and cancel the animation.
+ *
+ * A sheet that fills its height asks for the whole screen, and the popup's maximum height, which follows the space
+ * above an on-screen keyboard, cuts it down.
  * @hidden Exported for Mona UI's other entry points; applications don't need it.
  */
 export const dropdownSheetThemeVariants = cva(
     `
-        flex h-full max-h-[inherit] min-h-0 w-full flex-col overflow-clip
+        flex max-h-[inherit] min-h-0 w-full flex-col overflow-clip
         rounded-t-xl border-t border-border
         pb-[env(safe-area-inset-bottom)] ps-[env(safe-area-inset-left)] pe-[env(safe-area-inset-right)]
         rtl:ps-[env(safe-area-inset-right)] rtl:pe-[env(safe-area-inset-left)]
         ${themeOverlaySurfaceClasses} text-foreground shadow-(--shadow-overlay)
-    `
+    `,
+    {
+        variants: {
+            fillHeight: {
+                true: "h-dvh",
+                false: "h-full"
+            }
+        },
+        defaultVariants: {
+            fillHeight: false
+        }
+    }
 );
+
+/**
+ * The text box a combo box or an auto-complete shows at the top of its bottom sheet, which stands in for its own while
+ * the sheet is open, inset as a list's filter box is. It's 44 pixels tall, to be easy to tap, and its text is 16 pixels,
+ * so that iOS doesn't zoom in when it takes focus.
+ * @hidden Exported for Mona UI's other entry points; applications don't need it.
+ */
+export const dropdownSheetInputContainerClasses = "shrink-0 px-2 pt-1 pb-2";
+
+/** @hidden Exported for Mona UI's other entry points; applications don't need it. */
+export const dropdownSheetInputClasses = "h-11 w-full text-base";
 
 /**
  * A dropdown's popup surface inside the bottom sheet: the sheet draws the border, corners and shadow, and sets the

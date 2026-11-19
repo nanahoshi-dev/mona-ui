@@ -18,6 +18,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./alert/looks/looks-example.component").then(module => module.AlertLooksExampleComponent),
         mainFile: "looks-example.component.ts"
     },
+    "auto-complete/adaptive": {
+        files: ["adaptive-example.component.ts", "adaptive-example.component.html"],
+        load: () => import("./auto-complete/adaptive/adaptive-example.component").then(module => module.AutoCompleteAdaptiveExampleComponent),
+        mainFile: "adaptive-example.component.ts"
+    },
     "auto-complete/filtering": {
         files: ["filtering-example.component.ts", "filtering-example.component.html"],
         load: () => import("./auto-complete/filtering/filtering-example.component").then(module => module.AutoCompleteFilteringExampleComponent),
@@ -432,6 +437,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         files: ["value-template-example.component.ts", "value-template-example.component.html"],
         load: () => import("./color-picker/value-template/value-template-example.component").then(module => module.ColorPickerValueTemplateExampleComponent),
         mainFile: "value-template-example.component.ts"
+    },
+    "combo-box/adaptive": {
+        files: ["adaptive-example.component.ts", "adaptive-example.component.html"],
+        load: () => import("./combo-box/adaptive/adaptive-example.component").then(module => module.ComboBoxAdaptiveExampleComponent),
+        mainFile: "adaptive-example.component.ts"
     },
     "combo-box/custom-values": {
         files: ["custom-values-example.component.ts", "custom-values-example.component.html"],
@@ -1272,6 +1282,26 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         files: ["tiles-example.component.ts", "tiles-example.component.html"],
         load: () => import("./sortable/tiles/tiles-example.component").then(module => module.SortableTilesExampleComponent),
         mainFile: "tiles-example.component.ts"
+    },
+    "sparkline/curves": {
+        files: ["curves-example.component.ts", "curves-example.component.html"],
+        load: () => import("./sparkline/curves/curves-example.component").then(module => module.SparklineCurvesExampleComponent),
+        mainFile: "curves-example.component.ts"
+    },
+    "sparkline/reference": {
+        files: ["reference-example.component.ts", "reference-example.component.html"],
+        load: () => import("./sparkline/reference/reference-example.component").then(module => module.SparklineReferenceExampleComponent),
+        mainFile: "reference-example.component.ts"
+    },
+    "sparkline/table": {
+        files: ["table-example.component.ts", "table-example.component.html"],
+        load: () => import("./sparkline/table/table-example.component").then(module => module.SparklineTableExampleComponent),
+        mainFile: "table-example.component.ts"
+    },
+    "sparkline/types": {
+        files: ["types-example.component.ts", "types-example.component.html"],
+        load: () => import("./sparkline/types/types-example.component").then(module => module.SparklineTypesExampleComponent),
+        mainFile: "types-example.component.ts"
     },
     "spinner/inline": {
         files: ["inline-example.component.ts", "inline-example.component.html"],

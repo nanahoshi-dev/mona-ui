@@ -1,0 +1,44 @@
+@let shape = geometry();
+<svg aria-hidden="true" focusable="false" preserveAspectRatio="none" viewBox="0 0 100 100" [class]="svgClass">
+    @if (shape.baselineY !== null) {
+        <line
+            vector-effect="non-scaling-stroke"
+            x1="0"
+            x2="100"
+            [attr.y1]="shape.baselineY"
+            [attr.y2]="shape.baselineY"
+            [class]="baselineClass" />
+    }
+    @if (shape.referenceY !== null) {
+        <line
+            vector-effect="non-scaling-stroke"
+            x1="0"
+            x2="100"
+            [attr.y1]="shape.referenceY"
+            [attr.y2]="shape.referenceY"
+            [class]="referenceClass" />
+    }
+    @for (bar of shape.bars; track $index) {
+        <rect
+            [attr.height]="bar.height"
+            [attr.width]="bar.width"
+            [attr.x]="bar.x"
+            [attr.y]="bar.y"
+            [class]="barClasses[bar.kind]" />
+    }
+    @if (shape.areaPath) {
+        <path [attr.d]="shape.areaPath" [class]="areaClass" />
+    }
+    @if (shape.linePath) {
+        <path vector-effect="non-scaling-stroke" [attr.d]="shape.linePath" [class]="lineClass" />
+    }
+    @if (shape.dotsPath) {
+        <path vector-effect="non-scaling-stroke" [attr.d]="shape.dotsPath" [class]="dotClass" />
+    }
+    @if (shape.markersPath) {
+        <path vector-effect="non-scaling-stroke" [attr.d]="shape.markersPath" [class]="dotClass" />
+    }
+</svg>
+@if (showDescription()) {
+    <span hidden [id]="descriptionId">{{ summary() }}</span>
+}

@@ -11,8 +11,12 @@ import { dropdownSheetThemeVariants } from "../../styles/dropdown-sheet.styles";
 export interface DropdownSheetData {
     /** The dropdown's popup template, shown below the sheet's header. */
     readonly content: TemplateRef<unknown>;
+    /** Whether the sheet takes its full height however short its content is. */
+    readonly fillHeight: boolean;
     /** The sheet's title: the dropdown's `adaptiveTitle`, or else its name. */
     readonly title: Signal<string>;
+    /** The id of the title's element, which names a text box in the sheet. */
+    readonly titleId: string;
 }
 
 /**
@@ -20,8 +24,9 @@ export interface DropdownSheetData {
  * name and a close button, over the dropdown's own popup.
  *
  * Focus is where the popup under the field keeps it: on the field or in the filter box for a list or a tree, and in
- * the popup, a dialog, for a date or time picker. So the sheet's close button is for pointers; the keyboard closes the
- * sheet with Escape, or Tab for a list or a tree.
+ * the popup, a dialog, for a date or time picker. A combo box or an auto-complete puts a text box in the sheet, which
+ * takes focus. So the sheet's close button is for pointers; the keyboard closes the sheet with Escape, or Tab for a
+ * list or a tree.
  * @hidden Exported for Mona UI's other entry points; applications don't need it.
  */
 @Component({
@@ -37,7 +42,7 @@ export class DropdownSheetComponent {
     protected readonly content = viewChild.required<ElementRef<HTMLElement>>("content");
     protected readonly data = inject<DropdownSheetData>(PopupDataInjectionToken);
     protected readonly messages = inject(MonaI18nService).componentMessages("dropdowns", DROPDOWNS_DEFAULT_MESSAGES);
-    protected readonly sheetClass = dropdownSheetThemeVariants();
+    protected readonly sheetClass = dropdownSheetThemeVariants({ fillHeight: this.data.fillHeight });
 
     protected closeSheet(): void {
         this.#popupRef.close(new PopupCloseEvent({ via: PopupCloseSource.CloseButton }));

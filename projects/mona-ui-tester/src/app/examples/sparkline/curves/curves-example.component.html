@@ -1,0 +1,16 @@
+<dl class="grid max-w-md grid-cols-[8rem_auto] items-center gap-x-6 gap-y-4 text-sm">
+    <dt class="text-muted-foreground">Linear</dt>
+    <dd><mona-sparkline aria-label="Orders per day" [data]="orders" /></dd>
+
+    <dt class="text-muted-foreground">Monotone</dt>
+    <dd><mona-sparkline aria-label="Orders per day" curve="monotone-x" [data]="orders" /></dd>
+
+    <dt class="text-muted-foreground">Natural</dt>
+    <dd><mona-sparkline aria-label="Orders per day" curve="natural" [data]="orders" /></dd>
+
+    <dt class="text-muted-foreground">Step</dt>
+    <dd><mona-sparkline aria-label="Orders per day" curve="step" type="area" [data]="orders" /></dd>
+
+    <dt class="text-muted-foreground">Step after</dt>
+    <dd><mona-sparkline aria-label="Plan limit per month" curve="step-after" type="area" [data]="plan" /></dd>
+</dl>

@@ -678,6 +678,13 @@ export const IT_IT_MESSAGES = {
         itemMovedToList: (item: string, list: string, position: number, total: number) =>
             `${item} ora è in ${list}, posizione ${localizeNumber(position)} di ${localizeNumber(total)}`
     },
+    sparkline: {
+        noData: "Nessun dato disponibile",
+        summary: (count: number, first: string, last: string, min: string, max: string) =>
+            `${count === 1 ? `${localizeNumber(count)} valore` : `${localizeNumber(count)} valori`}, primo ${first}, ultimo ${last}, minimo ${min}, massimo ${max}`,
+        winLossSummary: (wins: number, losses: number, draws: number) =>
+            `${wins === 1 ? `${localizeNumber(wins)} vittoria` : `${localizeNumber(wins)} vittorie`}, ${losses === 1 ? `${localizeNumber(losses)} sconfitta` : `${localizeNumber(losses)} sconfitte`}, ${draws === 1 ? `${localizeNumber(draws)} pareggio` : `${localizeNumber(draws)} pareggi`}`
+    },
     spinner: {
         cancel: "Annulla",
         loading: "Caricamento in corso"

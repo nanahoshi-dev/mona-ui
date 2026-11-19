@@ -1,0 +1,12 @@
+<mona-form-field
+    class="max-w-sm"
+    label="City"
+    hint="On a phone, suggestions open along the bottom of the screen, with a box to type in.">
+    <mona-auto-complete
+        adaptiveMode="auto"
+        class="w-full"
+        monaDropDownFilterable
+        placeholder="Type a city"
+        [data]="cities"
+        [(value)]="city" />
+</mona-form-field>

@@ -752,6 +752,12 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                         "RoseSeriesComponent"
                     ]
                 }
+            ),
+            component(
+                "sparkline",
+                "Sparkline",
+                "sparkline",
+                "A word-sized line, area, column or win-loss chart, for a table cell or a line of text."
             )
         ]
     },

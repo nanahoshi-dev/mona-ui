@@ -87,6 +87,15 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
     });
     protected readonly config = computed<ComponentConfig<ComboBoxComponent<DropdownFoodItem>>>(() => ({
         inputs: deriveInputConfig<ComboBoxComponent<DropdownFoodItem>>(this.metadata(), {
+            adaptiveMode: {
+                type: "dropdown",
+                value: ["none", "auto"],
+                defaultValue: "none"
+            },
+            adaptiveTitle: {
+                type: "string",
+                value: ""
+            },
             // The demo labels the field with a visible <mona-label> pointed at a fixed inputId.
             ariaDescribedBy: undefined,
             ariaLabel: undefined,
@@ -181,6 +190,8 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
         <mona-label for="combo-box-demo-input" text="Favourite food"></mona-label>
         <mona-combo-box
             inputId="combo-box-demo-input"
+            [adaptiveMode]="adaptiveMode()"
+            [adaptiveTitle]="adaptiveTitle()"
             [allowCustomValue]="allowCustomValue()"
             [data]="comboBoxData()"
             [itemDisabled]="itemDisabled()"
@@ -292,6 +303,8 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
     });
     protected readonly grouping = computed(() => buildGroupableOptions(this.features()));
     protected readonly virtualization = computed(() => buildVirtualScrollOptions(this.features()));
+    public readonly adaptiveMode = input<ReturnType<ComboBoxComponent["adaptiveMode"]>>("none");
+    public readonly adaptiveTitle = input("");
     public readonly allowCustomValue = input(false, { transform: booleanAttribute });
     public readonly data = input<ReturnType<ComboBoxComponent["data"]>>([]);
     public readonly disabled = input(false, { transform: booleanAttribute });

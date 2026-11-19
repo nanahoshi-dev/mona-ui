@@ -43,6 +43,7 @@ import type { MonaScrollViewMessages } from "../message-types/scroll-view.messag
 import type { MonaSheetMessages } from "../message-types/sheet.messages";
 import type { MonaSliderMessages } from "../message-types/slider.messages";
 import type { MonaSortableMessages } from "../message-types/sortable.messages";
+import type { MonaSparklineMessages } from "../message-types/sparkline.messages";
 import type { MonaSpinnerMessages } from "../message-types/spinner.messages";
 import type { MonaSplitButtonMessages } from "../message-types/split-button.messages";
 import type { MonaSplitterMessages } from "../message-types/splitter.messages";
@@ -101,6 +102,7 @@ export interface MonaLocaleMessages {
     sidebar: MonaSidebarMessages;
     slider: MonaSliderMessages;
     sortable: MonaSortableMessages;
+    sparkline: MonaSparklineMessages;
     spinner: MonaSpinnerMessages;
     splitButton: MonaSplitButtonMessages;
     splitter: MonaSplitterMessages;

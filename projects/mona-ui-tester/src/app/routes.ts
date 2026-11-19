@@ -585,6 +585,11 @@ export const routes: Routes = [
                     import("./docs/components/sortable-doc/sortable-doc.component").then(m => m.SortableDocComponent)
             },
             {
+                path: "sparkline",
+                loadComponent: () =>
+                    import("./docs/components/sparkline-doc/sparkline-doc.component").then(m => m.SparklineDocComponent)
+            },
+            {
                 path: "spinner",
                 loadComponent: () =>
                     import("./docs/components/spinner-doc/spinner-doc.component").then(m => m.SpinnerDocComponent)

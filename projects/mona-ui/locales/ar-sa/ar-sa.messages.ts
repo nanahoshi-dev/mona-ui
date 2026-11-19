@@ -690,6 +690,13 @@ export const AR_SA_MESSAGES = {
         itemMovedToList: (item: string, list: string, position: number, total: number) =>
             `تم نقل ${item} إلى ${list}، الموضع ${localizeNumber(position)} من ${localizeNumber(total)}`
     },
+    sparkline: {
+        noData: "لا توجد بيانات",
+        summary: (count: number, first: string, last: string, min: string, max: string) =>
+            `عدد القيم: ${localizeNumber(count)}، الأولى ${first}، الأخيرة ${last}، الأدنى ${min}، الأعلى ${max}`,
+        winLossSummary: (wins: number, losses: number, draws: number) =>
+            `الفوز: ${localizeNumber(wins)}، الخسارة: ${localizeNumber(losses)}، التعادل: ${localizeNumber(draws)}`
+    },
     spinner: {
         cancel: "إلغاء",
         loading: "جارٍ التحميل"

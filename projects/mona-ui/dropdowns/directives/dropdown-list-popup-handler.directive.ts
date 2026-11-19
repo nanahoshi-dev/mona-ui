@@ -43,36 +43,12 @@ export class DropdownListPopupHandlerDirective {
         });
     }
 
-    private closePopup(): void {
-        this.#dropdownService.popupRef()?.close();
-    }
-
-    private handleArrowKeys(event: KeyboardEvent): void {
-        const navigateEvent = new PreventableEvent("beforeNavigate", event);
-        this.#dropdownService.beforeNavigate$.next(navigateEvent);
-        if (navigateEvent.isDefaultPrevented()) {
-            return;
-        }
-        event.preventDefault();
-        if (event.altKey) {
-            if (event.key === "ArrowDown") {
-                this.#dropdownService.triggerPopupOpen$.next({});
-            } else {
-                this.closePopup();
-            }
-            return;
-        }
-        const previousItem = this.#listService.selectedListItems().lastOrDefault();
-        const direction = event.key === "ArrowDown" ? "next" : "previous";
-        const mode = this.#listService.navigableOptions().mode;
-        const item = this.#listService.navigate(direction, mode, false);
-        if (!item || previousItem === item) {
-            return;
-        }
-        this.#dropdownListService?.navigate$.next({ item });
-    }
-
-    private handleKeyDown(e: KeyboardEvent): void {
+    /**
+     * Handles a key pressed in the dropdown, as when its host receives it. A text box in the popup that stands in for
+     * the host's input, as a combo box's in a bottom sheet, passes its keys here.
+     * @hidden
+     */
+    public handleKeyDown(e: KeyboardEvent): void {
         // Keys pressed while an IME is composing text (Enter to confirm a conversion, arrows to pick a candidate)
         // belong to the IME. Safari reports the confirming Enter with isComposing false but keyCode 229.
         if (e.isComposing || e.keyCode === 229) {
@@ -103,6 +79,35 @@ export class DropdownListPopupHandlerDirective {
         } else {
             this.#dropdownService.keydown$.next(e);
         }
+    }
+
+    private closePopup(): void {
+        this.#dropdownService.popupRef()?.close();
+    }
+
+    private handleArrowKeys(event: KeyboardEvent): void {
+        const navigateEvent = new PreventableEvent("beforeNavigate", event);
+        this.#dropdownService.beforeNavigate$.next(navigateEvent);
+        if (navigateEvent.isDefaultPrevented()) {
+            return;
+        }
+        event.preventDefault();
+        if (event.altKey) {
+            if (event.key === "ArrowDown") {
+                this.#dropdownService.triggerPopupOpen$.next({});
+            } else {
+                this.closePopup();
+            }
+            return;
+        }
+        const previousItem = this.#listService.selectedListItems().lastOrDefault();
+        const direction = event.key === "ArrowDown" ? "next" : "previous";
+        const mode = this.#listService.navigableOptions().mode;
+        const item = this.#listService.navigate(direction, mode, false);
+        if (!item || previousItem === item) {
+            return;
+        }
+        this.#dropdownListService?.navigate$.next({ item });
     }
 
     private handleScrollOnPopupOpen(): void {

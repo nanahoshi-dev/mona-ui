@@ -359,6 +359,13 @@ export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
         typeName: "MonaSortableMessages"
     },
     {
+        constName: "SPARKLINE_DEFAULT_MESSAGES",
+        file: "sparkline/i18n/sparkline.default-messages.ts",
+        namespace: "sparkline",
+        style: "type",
+        typeName: "MonaSparklineMessages"
+    },
+    {
         constName: "SPINNER_DEFAULT_MESSAGES",
         file: "spinner/i18n/spinner.default-messages.ts",
         namespace: "spinner",
