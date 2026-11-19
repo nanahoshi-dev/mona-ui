@@ -438,6 +438,11 @@
         "sortOrder": "Ordine di ordinamento {position}",
         "toolbar": "Barra degli strumenti della tabella"
     },
+    "kanban": {
+        "cardCount": "{count, plural, =1 {# scheda} other {# schede}}",
+        "cardCountWithLimit": "{count} di {limit, plural, =1 {# scheda} other {# schede}}",
+        "emptyColumn": "Nessuna scheda"
+    },
     "label": {
         "optional": "Facoltativo"
     },
@@ -552,6 +557,10 @@
         "maximumValue": "Valore massimo",
         "minimumValue": "Valore minimo",
         "sliderValue": "Valore del cursore"
+    },
+    "sortable": {
+        "itemMoved": "{item} ora è in posizione {position} di {total}",
+        "itemMovedToList": "{item} ora è in {list}, posizione {position} di {total}"
     },
     "spinner": {
         "cancel": "Annulla",

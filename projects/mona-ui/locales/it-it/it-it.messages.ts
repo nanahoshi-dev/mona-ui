@@ -534,6 +534,13 @@ export const IT_IT_MESSAGES = {
         sortOrder: (position: number) => `Ordine di ordinamento ${localizeNumber(position)}`,
         toolbar: "Barra degli strumenti della tabella"
     },
+    kanban: {
+        cardCount: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} scheda` : `${localizeNumber(count)} schede`,
+        cardCountWithLimit: (count: number, limit: number) =>
+            `${localizeNumber(count)} di ${limit === 1 ? `${localizeNumber(limit)} scheda` : `${localizeNumber(limit)} schede`}`,
+        emptyColumn: "Nessuna scheda"
+    },
     label: {
         optional: "Facoltativo"
     },
@@ -664,6 +671,12 @@ export const IT_IT_MESSAGES = {
         maximumValue: "Valore massimo",
         minimumValue: "Valore minimo",
         sliderValue: "Valore del cursore"
+    },
+    sortable: {
+        itemMoved: (item: string, position: number, total: number) =>
+            `${item} ora è in posizione ${localizeNumber(position)} di ${localizeNumber(total)}`,
+        itemMovedToList: (item: string, list: string, position: number, total: number) =>
+            `${item} ora è in ${list}, posizione ${localizeNumber(position)} di ${localizeNumber(total)}`
     },
     spinner: {
         cancel: "Annulla",

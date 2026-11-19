@@ -438,6 +438,11 @@
         "sortOrder": "Kolejność sortowania {position}",
         "toolbar": "Pasek narzędzi tabeli"
     },
+    "kanban": {
+        "cardCount": "{count, plural, one {# karta} few {# karty} many {# kart} other {# karty}}",
+        "cardCountWithLimit": "{count} z {limit, plural, one {# karty} few {# kart} many {# kart} other {# karty}}",
+        "emptyColumn": "Brak kart"
+    },
     "label": {
         "optional": "Opcjonalnie"
     },
@@ -552,6 +557,10 @@
         "maximumValue": "Wartość maksymalna",
         "minimumValue": "Wartość minimalna",
         "sliderValue": "Wartość suwaka"
+    },
+    "sortable": {
+        "itemMoved": "Przeniesiono „{item}” na pozycję {position} z {total}",
+        "itemMovedToList": "Przeniesiono „{item}” do listy „{list}”, pozycja {position} z {total}"
     },
     "spinner": {
         "cancel": "Anuluj",

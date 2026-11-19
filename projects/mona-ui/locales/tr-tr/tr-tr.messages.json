@@ -438,6 +438,11 @@
         "sortOrder": "Sıralama düzeni {position}",
         "toolbar": "Tablo araç çubuğu"
     },
+    "kanban": {
+        "cardCount": "{count} kart",
+        "cardCountWithLimit": "{count}/{limit} kart",
+        "emptyColumn": "Kart yok"
+    },
     "label": {
         "optional": "İsteğe bağlı"
     },
@@ -552,6 +557,10 @@
         "maximumValue": "Maksimum değer",
         "minimumValue": "Minimum değer",
         "sliderValue": "Kaydırıcı değeri"
+    },
+    "sortable": {
+        "itemMoved": "{item}, {total} içinde {position}. konuma taşındı",
+        "itemMovedToList": "{item}, {list} listesine taşındı; {total} içinde {position}. konum"
     },
     "spinner": {
         "cancel": "İptal",

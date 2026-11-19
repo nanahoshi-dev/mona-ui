@@ -438,6 +438,11 @@
         "sortOrder": "Ordre de tri {position}",
         "toolbar": "Barre d’outils du tableau"
     },
+    "kanban": {
+        "cardCount": "{count, plural, =1 {# carte} other {# cartes}}",
+        "cardCountWithLimit": "{count} sur {limit, plural, =1 {# carte} other {# cartes}}",
+        "emptyColumn": "Aucune carte"
+    },
     "label": {
         "optional": "Facultatif"
     },
@@ -552,6 +557,10 @@
         "maximumValue": "Valeur maximale",
         "minimumValue": "Valeur minimale",
         "sliderValue": "Valeur du curseur"
+    },
+    "sortable": {
+        "itemMoved": "{item} est maintenant en position {position} sur {total}",
+        "itemMovedToList": "{item} est maintenant dans {list}, à la position {position} sur {total}"
     },
     "spinner": {
         "cancel": "Annuler",

@@ -465,6 +465,12 @@ export const KO_KR_MESSAGES = {
         sortOrder: (position: number) => `정렬 순서 ${localizeNumber(position)}`,
         toolbar: "표 도구 모음"
     },
+    kanban: {
+        cardCount: (count: number) => `카드 ${localizeNumber(count)}개`,
+        cardCountWithLimit: (count: number, limit: number) =>
+            `카드 ${localizeNumber(limit)}개 중 ${localizeNumber(count)}개`,
+        emptyColumn: "카드 없음"
+    },
     label: {
         optional: "선택 사항"
     },
@@ -583,6 +589,12 @@ export const KO_KR_MESSAGES = {
         maximumValue: "최댓값",
         minimumValue: "최솟값",
         sliderValue: "슬라이더 값"
+    },
+    sortable: {
+        itemMoved: (item: string, position: number, total: number) =>
+            `${item}을(를) ${localizeNumber(total)}개 중 ${localizeNumber(position)}번째 위치로 이동했습니다`,
+        itemMovedToList: (item: string, list: string, position: number, total: number) =>
+            `${item}을(를) ${list}의 ${localizeNumber(total)}개 중 ${localizeNumber(position)}번째 위치로 이동했습니다`
     },
     spinner: {
         cancel: "취소",

@@ -465,6 +465,12 @@ export const ID_ID_MESSAGES = {
         sortOrder: (position: number) => `Urutan pengurutan ${localizeNumber(position)}`,
         toolbar: "Bilah alat tabel"
     },
+    kanban: {
+        cardCount: (count: number) => `${localizeNumber(count)} kartu`,
+        cardCountWithLimit: (count: number, limit: number) =>
+            `${localizeNumber(count)} dari ${localizeNumber(limit)} kartu`,
+        emptyColumn: "Tidak ada kartu"
+    },
     label: {
         optional: "Opsional"
     },
@@ -582,6 +588,12 @@ export const ID_ID_MESSAGES = {
         maximumValue: "Nilai maksimum",
         minimumValue: "Nilai minimum",
         sliderValue: "Nilai penggeser"
+    },
+    sortable: {
+        itemMoved: (item: string, position: number, total: number) =>
+            `${item} dipindahkan ke posisi ${localizeNumber(position)} dari ${localizeNumber(total)}`,
+        itemMovedToList: (item: string, list: string, position: number, total: number) =>
+            `${item} dipindahkan ke ${list}, posisi ${localizeNumber(position)} dari ${localizeNumber(total)}`
     },
     spinner: {
         cancel: "Batal",

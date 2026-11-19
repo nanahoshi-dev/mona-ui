@@ -438,6 +438,11 @@
         "sortOrder": "ترتيب الفرز {position}",
         "toolbar": "شريط أدوات الجدول"
     },
+    "kanban": {
+        "cardCount": "عدد البطاقات: {count}",
+        "cardCountWithLimit": "عدد البطاقات: {count} من {limit}",
+        "emptyColumn": "لا توجد بطاقات"
+    },
     "label": {
         "optional": "اختياري"
     },
@@ -552,6 +557,10 @@
         "maximumValue": "الحد الأقصى",
         "minimumValue": "الحد الأدنى",
         "sliderValue": "قيمة شريط التمرير"
+    },
+    "sortable": {
+        "itemMoved": "تم نقل {item} إلى الموضع {position} من {total}",
+        "itemMovedToList": "تم نقل {item} إلى {list}، الموضع {position} من {total}"
     },
     "spinner": {
         "cancel": "إلغاء",

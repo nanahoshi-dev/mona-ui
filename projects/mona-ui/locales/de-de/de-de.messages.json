@@ -438,6 +438,11 @@
         "sortOrder": "Sortierreihenfolge {position}",
         "toolbar": "Tabellen-Symbolleiste"
     },
+    "kanban": {
+        "cardCount": "{count, plural, =1 {# Karte} other {# Karten}}",
+        "cardCountWithLimit": "{count} von {limit, plural, =1 {# Karte} other {# Karten}}",
+        "emptyColumn": "Keine Karten"
+    },
     "label": {
         "optional": "Optional"
     },
@@ -552,6 +557,10 @@
         "maximumValue": "Maximalwert",
         "minimumValue": "Minimalwert",
         "sliderValue": "Wert des Schiebereglers"
+    },
+    "sortable": {
+        "itemMoved": "{item} an Position {position} von {total} verschoben",
+        "itemMovedToList": "{item} nach {list} verschoben, Position {position} von {total}"
     },
     "spinner": {
         "cancel": "Abbrechen",

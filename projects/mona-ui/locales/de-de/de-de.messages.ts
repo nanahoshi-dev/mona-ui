@@ -519,6 +519,13 @@ export const DE_DE_MESSAGES = {
         sortOrder: (position: number) => `Sortierreihenfolge ${localizeNumber(position)}`,
         toolbar: "Tabellen-Symbolleiste"
     },
+    kanban: {
+        cardCount: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} Karte` : `${localizeNumber(count)} Karten`,
+        cardCountWithLimit: (count: number, limit: number) =>
+            `${localizeNumber(count)} von ${limit === 1 ? `${localizeNumber(limit)} Karte` : `${localizeNumber(limit)} Karten`}`,
+        emptyColumn: "Keine Karten"
+    },
     label: {
         optional: "Optional"
     },
@@ -655,6 +662,12 @@ export const DE_DE_MESSAGES = {
         maximumValue: "Maximalwert",
         minimumValue: "Minimalwert",
         sliderValue: "Wert des Schiebereglers"
+    },
+    sortable: {
+        itemMoved: (item: string, position: number, total: number) =>
+            `${item} an Position ${localizeNumber(position)} von ${localizeNumber(total)} verschoben`,
+        itemMovedToList: (item: string, list: string, position: number, total: number) =>
+            `${item} nach ${list} verschoben, Position ${localizeNumber(position)} von ${localizeNumber(total)}`
     },
     spinner: {
         cancel: "Abbrechen",

@@ -539,6 +539,18 @@ export const RU_RU_MESSAGES = {
         sortOrder: (position: number) => `Порядок сортировки ${localizeNumber(position)}`,
         toolbar: "Панель инструментов таблицы"
     },
+    kanban: {
+        cardCount: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} карточка`,
+                few: () => `${localizeNumber(count)} карточки`,
+                many: () => `${localizeNumber(count)} карточек`,
+                other: () => `${localizeNumber(count)} карточки`
+            }),
+        cardCountWithLimit: (count: number, limit: number) =>
+            `${localizeNumber(count)} из ${plural(PLURAL_RULES.select(limit), { one: () => `${localizeNumber(limit)} карточки`, few: () => `${localizeNumber(limit)} карточек`, many: () => `${localizeNumber(limit)} карточек`, other: () => `${localizeNumber(limit)} карточки` })}`,
+        emptyColumn: "Нет карточек"
+    },
     label: {
         optional: "Необязательно"
     },
@@ -680,6 +692,12 @@ export const RU_RU_MESSAGES = {
         maximumValue: "Максимальное значение",
         minimumValue: "Минимальное значение",
         sliderValue: "Значение ползунка"
+    },
+    sortable: {
+        itemMoved: (item: string, position: number, total: number) =>
+            `«${item}» теперь на позиции ${localizeNumber(position)} из ${localizeNumber(total)}`,
+        itemMovedToList: (item: string, list: string, position: number, total: number) =>
+            `«${item}» теперь в списке «${list}», позиция ${localizeNumber(position)} из ${localizeNumber(total)}`
     },
     spinner: {
         cancel: "Отмена",
