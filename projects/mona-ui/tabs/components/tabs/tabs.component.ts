@@ -18,6 +18,7 @@ import { select } from "@mirei/ts-collections";
 import { twMerge } from "tailwind-merge";
 import type { TabCloseEvent } from "../../models/TabCloseEvent";
 import type { TabItem } from "../../models/TabItem";
+import type { TabReorderEvent } from "../../models/TabReorderEvent";
 import type { TabSelectEvent } from "../../models/TabSelectEvent";
 import type { TabsVariantInput, TabsVariantProps } from "../../styles/tabs.styles";
 import { tabContentThemeVariants, tabsBaseThemeVariants } from "../../styles/tabs.styles";
@@ -136,10 +137,23 @@ export class TabsComponent implements TabsVariantInput {
     public readonly size = input<TabsVariantProps["size"]>("medium");
 
     /**
+     * @description Lets the user reorder the tabs: by dragging them, or with Control+Shift and the arrow keys along the
+     * strip, Home or End (Command+Shift on macOS). The component emits `tabReorder` and doesn't move the tabs itself.
+     * @default false
+     */
+    public readonly sortable = input(false, { transform: booleanAttribute });
+
+    /**
      * @description Emitted with a {@link TabCloseEvent} when a close is requested. The component doesn't remove the tab:
      * remove it from whatever renders the `mona-tab` elements.
      */
     public readonly tabClose = output<TabCloseEvent>();
+
+    /**
+     * @description Emitted with a {@link TabReorderEvent} when a tab of a `sortable` strip is moved. The component doesn't
+     * reorder the tabs: move the tab in whatever renders the `mona-tab` elements. The selected tab stays selected.
+     */
+    public readonly tabReorder = output<TabReorderEvent>();
 
     /**
      * @description Emitted with a {@link TabSelectEvent} before a click or key selects a tab. This event is preventable.

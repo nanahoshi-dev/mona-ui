@@ -44,10 +44,13 @@ export const tabListListThemeVariants = cva(
     }
 );
 
+/** A tab being dragged to a new place floats as a raised copy of itself. */
 export const tabListListItemThemeVariants = cva(
     `
         relative flex shrink-0 cursor-pointer
         transition-colors duration-(--mona-motion-standard) ease-out
+        [&.cdk-drag-preview]:rounded-md [&.cdk-drag-preview]:border [&.cdk-drag-preview]:border-border
+        [&.cdk-drag-preview]:bg-surface-raised
     `,
     {
         variants: {

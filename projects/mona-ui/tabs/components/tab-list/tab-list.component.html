@@ -26,13 +26,22 @@
         role="tablist"
         [attr.aria-label]="ariaLabel() || null"
         [attr.aria-labelledby]="ariaLabelledBy() || null"
-        [attr.aria-orientation]="orientation()">
+        [attr.aria-orientation]="orientation()"
+        [monaSortable]="sortableTabs()"
+        [sortableDisabled]="!sortable() || disabled()"
+        [sortableOrientation]="orientation()"
+        sortableLockAxis
+        (sortableMove)="onTabMove($event)">
         @for (tab of tabList(); track tab.id) {
             @let selected = tab.id === selectedTabId();
             @let itemDisabled = tab.disabled || disabled();
             @let tabClosable = tab.closable || closable();
             <li
                 monaTabListItem
+                #sortItem="monaSortableItem"
+                [monaSortableItem]="tab"
+                [sortableDisabled]="itemDisabled"
+                [sortableLabel]="tab.title"
                 [active]="selected"
                 [disabled]="itemDisabled"
                 [position]="position()"
@@ -49,7 +58,7 @@
                     [attr.aria-selected]="selected"
                     [attr.aria-disabled]="itemDisabled"
                     [attr.aria-controls]="tab.id + '-panel'"
-                    [attr.aria-keyshortcuts]="tabClosable && !itemDisabled ? 'Delete Backspace' : null"
+                    [attr.aria-keyshortcuts]="tabKeyShortcuts(tabClosable && !itemDisabled, sortItem.keyShortcuts())"
                     (click)="onTabClick(tab, $event)">
                     <div>
                         @if (tab.titleTemplate) {
