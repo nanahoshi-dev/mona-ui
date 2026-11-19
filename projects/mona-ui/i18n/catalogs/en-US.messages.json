@@ -383,6 +383,8 @@
         "cancel": "Cancel",
         "cancelNewRow": "Cancel new row",
         "cancelRowEdit": "Cancel editing row {rowNumber}",
+        "cellsCopied": "{count, plural, =1 {Copied # cell} other {Copied # cells}}",
+        "cellsPasted": "{count, plural, =0 {No cells pasted} =1 {Pasted # cell} other {Pasted # cells}}",
         "clearFilter": "Clear filter for {column}",
         "collapseDetail": "Collapse details of row {rowNumber}",
         "columnGrouped": "Grouped by {column}",

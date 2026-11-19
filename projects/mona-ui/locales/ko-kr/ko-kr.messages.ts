@@ -406,6 +406,9 @@ export const KO_KR_MESSAGES = {
         cancel: "취소",
         cancelNewRow: "새 행 취소",
         cancelRowEdit: (rowNumber: number) => `${localizeNumber(rowNumber)}행 편집 취소`,
+        cellsCopied: (count: number) => `셀 ${localizeNumber(count)}개를 복사했습니다`,
+        cellsPasted: (count: number) =>
+            count === 0 ? "붙여넣은 셀이 없습니다" : `셀 ${localizeNumber(count)}개에 붙여넣었습니다`,
         clearFilter: (column: string) => `${column} 필터 지우기`,
         collapseDetail: (rowNumber: number) => `${localizeNumber(rowNumber)}행 세부 정보 접기`,
         columnGrouped: (column: string) => `${column}(으)로 그룹화했습니다`,

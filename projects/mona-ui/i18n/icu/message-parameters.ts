@@ -478,6 +478,8 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         cancel: null,
         cancelNewRow: null,
         cancelRowEdit: [{ name: "rowNumber", type: "number" }],
+        cellsCopied: [{ name: "count", type: "number" }],
+        cellsPasted: [{ name: "count", type: "number" }],
         clearFilter: [{ name: "column", type: "string" }],
         collapseDetail: [{ name: "rowNumber", type: "number" }],
         columnGrouped: [{ name: "column", type: "string" }],

@@ -383,6 +383,8 @@
         "cancel": "Отмена",
         "cancelNewRow": "Отменить новую строку",
         "cancelRowEdit": "Отменить редактирование строки {rowNumber}",
+        "cellsCopied": "Скопировано ячеек: {count}",
+        "cellsPasted": "Вставлено ячеек: {count}",
         "clearFilter": "Очистить фильтр столбца {column}",
         "collapseDetail": "Свернуть сведения строки {rowNumber}",
         "columnGrouped": "Сгруппировано по {column}",

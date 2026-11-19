@@ -403,6 +403,9 @@ export const ZH_TW_MESSAGES = {
         cancel: "取消",
         cancelNewRow: "取消新資料列",
         cancelRowEdit: (rowNumber: number) => `取消編輯第 ${localizeNumber(rowNumber)} 個資料列`,
+        cellsCopied: (count: number) => `已複製 ${localizeNumber(count)} 個儲存格`,
+        cellsPasted: (count: number) =>
+            count === 0 ? "未貼上任何儲存格" : `已貼上到 ${localizeNumber(count)} 個儲存格`,
         clearFilter: (column: string) => `清除 ${column} 的篩選`,
         collapseDetail: (rowNumber: number) => `收合第 ${localizeNumber(rowNumber)} 列的詳細資料`,
         columnGrouped: (column: string) => `已依 ${column} 分組`,

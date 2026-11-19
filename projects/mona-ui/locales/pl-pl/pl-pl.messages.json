@@ -383,6 +383,8 @@
         "cancel": "Anuluj",
         "cancelNewRow": "Anuluj nowy wiersz",
         "cancelRowEdit": "Anuluj edycję wiersza {rowNumber}",
+        "cellsCopied": "Skopiowane komórki: {count}",
+        "cellsPasted": "Wklejone komórki: {count}",
         "clearFilter": "Wyczyść filtr kolumny {column}",
         "collapseDetail": "Zwiń szczegóły wiersza {rowNumber}",
         "columnGrouped": "Pogrupowano według kolumny {column}",

@@ -383,6 +383,8 @@
         "cancel": "取消",
         "cancelNewRow": "取消新行",
         "cancelRowEdit": "取消编辑第 {rowNumber} 行",
+        "cellsCopied": "已复制 {count} 个单元格",
+        "cellsPasted": "{count, plural, =0 {未粘贴任何单元格} other {已粘贴到 # 个单元格}}",
         "clearFilter": "清除 {column} 的筛选",
         "collapseDetail": "收起第 {rowNumber} 行的详细信息",
         "columnGrouped": "已按 {column} 分组",

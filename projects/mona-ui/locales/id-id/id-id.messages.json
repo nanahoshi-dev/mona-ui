@@ -383,6 +383,8 @@
         "cancel": "Batal",
         "cancelNewRow": "Batalkan baris baru",
         "cancelRowEdit": "Batalkan pengeditan baris {rowNumber}",
+        "cellsCopied": "{count} sel disalin",
+        "cellsPasted": "{count, plural, =0 {Tidak ada sel yang ditempel} other {# sel ditempel}}",
         "clearFilter": "Bersihkan saringan kolom {column}",
         "collapseDetail": "Sembunyikan detail baris {rowNumber}",
         "columnGrouped": "Dikelompokkan menurut {column}",

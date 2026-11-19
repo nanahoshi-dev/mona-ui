@@ -481,6 +481,8 @@ export const RU_RU_MESSAGES = {
         cancel: "Отмена",
         cancelNewRow: "Отменить новую строку",
         cancelRowEdit: (rowNumber: number) => `Отменить редактирование строки ${localizeNumber(rowNumber)}`,
+        cellsCopied: (count: number) => `Скопировано ячеек: ${localizeNumber(count)}`,
+        cellsPasted: (count: number) => `Вставлено ячеек: ${localizeNumber(count)}`,
         clearFilter: (column: string) => `Очистить фильтр столбца ${column}`,
         collapseDetail: (rowNumber: number) => `Свернуть сведения строки ${localizeNumber(rowNumber)}`,
         columnGrouped: (column: string) => `Сгруппировано по ${column}`,

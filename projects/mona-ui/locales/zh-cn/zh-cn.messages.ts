@@ -403,6 +403,9 @@ export const ZH_CN_MESSAGES = {
         cancel: "取消",
         cancelNewRow: "取消新行",
         cancelRowEdit: (rowNumber: number) => `取消编辑第 ${localizeNumber(rowNumber)} 行`,
+        cellsCopied: (count: number) => `已复制 ${localizeNumber(count)} 个单元格`,
+        cellsPasted: (count: number) =>
+            count === 0 ? "未粘贴任何单元格" : `已粘贴到 ${localizeNumber(count)} 个单元格`,
         clearFilter: (column: string) => `清除 ${column} 的筛选`,
         collapseDetail: (rowNumber: number) => `收起第 ${localizeNumber(rowNumber)} 行的详细信息`,
         columnGrouped: (column: string) => `已按 ${column} 分组`,

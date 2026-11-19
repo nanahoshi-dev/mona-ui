@@ -383,6 +383,8 @@
         "cancel": "キャンセル",
         "cancelNewRow": "新しい行を破棄",
         "cancelRowEdit": "{rowNumber}行目の編集をキャンセル",
+        "cellsCopied": "{count}個のセルをコピーしました",
+        "cellsPasted": "{count, plural, =0 {セルに貼り付けられませんでした} other {#個のセルに貼り付けました}}",
         "clearFilter": "{column}のフィルターをクリア",
         "collapseDetail": "{rowNumber}行目の詳細を折りたたむ",
         "columnGrouped": "{column} でグループ化しました",

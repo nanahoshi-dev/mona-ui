@@ -403,6 +403,9 @@ export const JA_JP_MESSAGES = {
         cancel: "キャンセル",
         cancelNewRow: "新しい行を破棄",
         cancelRowEdit: (rowNumber: number) => `${localizeNumber(rowNumber)}行目の編集をキャンセル`,
+        cellsCopied: (count: number) => `${localizeNumber(count)}個のセルをコピーしました`,
+        cellsPasted: (count: number) =>
+            count === 0 ? "セルに貼り付けられませんでした" : `${localizeNumber(count)}個のセルに貼り付けました`,
         clearFilter: (column: string) => `${column}のフィルターをクリア`,
         collapseDetail: (rowNumber: number) => `${localizeNumber(rowNumber)}行目の詳細を折りたたむ`,
         columnGrouped: (column: string) => `${column} でグループ化しました`,

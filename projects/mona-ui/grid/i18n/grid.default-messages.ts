@@ -13,6 +13,14 @@ export const GRID_DEFAULT_MESSAGES = {
     cancel: "Cancel",
     cancelNewRow: "Cancel new row",
     cancelRowEdit: (rowNumber: number) => `Cancel editing row ${localizeNumber(rowNumber)}`,
+    cellsCopied: (count: number) =>
+        count === 1 ? `Copied ${localizeNumber(count)} cell` : `Copied ${localizeNumber(count)} cells`,
+    cellsPasted: (count: number) =>
+        count === 0
+            ? "No cells pasted"
+            : count === 1
+              ? `Pasted ${localizeNumber(count)} cell`
+              : `Pasted ${localizeNumber(count)} cells`,
     clearFilter: (column: string) => `Clear filter for ${column}`,
     collapseDetail: (rowNumber: number) => `Collapse details of row ${localizeNumber(rowNumber)}`,
     columnGrouped: (column: string) => `Grouped by ${column}`,
