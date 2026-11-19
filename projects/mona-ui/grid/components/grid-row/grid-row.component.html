@@ -14,7 +14,14 @@
             [firstInRow]="layoutColumn.firstInRow"
             [lastInRow]="layoutColumn.lastInRow"
             [readOnly]="editingEnabled() && layoutColumn.column.kind === 'data' ? !layoutColumn.column.editable : null"
-            (edit)="gridCell.handleLogicalCellEnter()">
+            [treeCell]="layoutColumn.column.id === gridService.treeColumnId()"
+            [expanded]="
+                layoutColumn.column.id === gridService.treeColumnId() && treeInfo()?.hasChildren
+                    ? treeInfo()!.expanded
+                    : null
+            "
+            (edit)="gridCell.handleLogicalCellEnter()"
+            (toggleExpand)="toggleTree()">
             <mona-grid-cell #gridCell [column]="layoutColumn.column" [row]="row()" />
         </td>
     } @else if (layoutColumn.kind === "group") {

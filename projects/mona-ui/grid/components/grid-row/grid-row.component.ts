@@ -35,12 +35,19 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
         "[attr.aria-selected]": "selectable() ? selected() : null",
         "[attr.aria-rowindex]": "ariaRowIndex()",
         "[attr.aria-level]": "ariaLevel()",
+        "[attr.aria-expanded]": "treeInfo()?.hasChildren ? treeInfo()!.expanded : null",
+        "[attr.aria-posinset]": "treeInfo()?.posInSet ?? null",
+        "[attr.aria-setsize]": "treeInfo()?.setSize ?? null",
         "(click)": "onClick($event)"
     }
 })
 export class GridRowComponent {
-    /** Rows under groups sit one level below the innermost group (treegrid). */
+    /** Rows under groups sit one level below the innermost group, and tree rows at their depth (treegrid). */
     protected readonly ariaLevel = computed(() => {
+        const treeLevel = this.treeInfo()?.level;
+        if (treeLevel != null) {
+            return treeLevel;
+        }
         const groupCount = this.gridService.groupColumns().length;
         return groupCount === 0 ? null : groupCount + 1;
     });
@@ -70,6 +77,8 @@ export class GridRowComponent {
     protected readonly editingEnabled = computed(() => this.gridService.editableOptions().enabled === true);
     protected readonly gridService = inject(GridService);
     protected readonly selectable = computed(() => this.gridService.selectableOptions().enabled);
+    /** The row's place in the tree, when the grid is a tree. */
+    protected readonly treeInfo = computed(() => this.gridService.getTreeRowInfo(this.row()));
 
     /** The row's `aria-rowindex`, counted by the body list across every row of the grid. */
     public readonly ariaRowIndex = input<number | null>(null);
@@ -85,5 +94,9 @@ export class GridRowComponent {
 
     protected toggleDetail(): void {
         this.gridService.setRowExpanded(this.row(), !this.expanded());
+    }
+
+    protected toggleTree(): void {
+        this.gridService.toggleTreeRow(this.row());
     }
 }

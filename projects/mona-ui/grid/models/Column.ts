@@ -38,6 +38,11 @@ export interface ColumnConfig {
     readonly editTemplate: TemplateRef<unknown> | null;
     /** Whether the column can be edited. The grid resolves it from {@link configuredEditable} when that is set. */
     readonly editable: boolean;
+    /**
+     * Whether the column shows a tree's expand toggles, indented by each row's level, when the grid has
+     * `monaGridTree`. Left out on every column, the first visible data column shows them.
+     */
+    readonly expandable?: boolean;
     /** The data property the column shows. A command column uses its `stateKey`, or `"commands"`. */
     readonly field: string;
     /** Whether the column can be filtered when the grid's filtering is enabled. */

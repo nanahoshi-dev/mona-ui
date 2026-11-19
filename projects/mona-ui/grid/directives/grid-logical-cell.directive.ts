@@ -23,6 +23,17 @@ import {
 } from "../services/grid-navigation.service";
 import { GridService } from "../services/grid.service";
 
+/** Keys that move focus between cells. */
+const NAVIGATION_KEYS: ReadonlySet<string> = new Set([
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowUp",
+    "End",
+    "Home",
+    "PageDown",
+    "PageUp"
+]);
 /** Elements that Tab can reach outside the grid. */
 const PAGE_TABBABLE_SELECTOR = `${GRID_CELL_FOCUSABLE_SELECTOR}, summary, [contenteditable]`;
 
@@ -37,7 +48,8 @@ const PAGE_TABBABLE_SELECTOR = `${GRID_CELL_FOCUSABLE_SELECTOR}, summary, [conte
     host: {
         "[attr.tabindex]": "focused() ? 0 : -1",
         "[attr.aria-colindex]": "resolvedAriaColIndex()",
-        "[attr.aria-readonly]": "readOnly()"
+        "[attr.aria-readonly]": "readOnly()",
+        "[attr.aria-selected]": "rangeSelected()"
     }
 })
 export class GridLogicalCellDirective {
@@ -75,6 +87,21 @@ export class GridLogicalCellDirective {
             return false;
         }
         return this.#gridNavigationService.isFocused(key);
+    });
+    /** With range selection on, whether a body data cell is in the selected range; `null` for other cells. */
+    protected readonly rangeSelected = computed(() => {
+        const rowUid = this.rowUid();
+        const columnId = this.columnId();
+        if (
+            !this.#gridService.rangeSelectionEnabled() ||
+            this.resolvedSection() !== "body" ||
+            this.resolvedCellKind() !== "data" ||
+            rowUid == null ||
+            columnId == null
+        ) {
+            return null;
+        }
+        return this.#gridService.isCellInRange(rowUid, columnId);
     });
     protected readonly resolvedAriaColIndex = computed(
         () => this.ariaColIndex() ?? this.colIndex() + this.#gridService.groupColumns().length + 1
@@ -119,8 +146,8 @@ export class GridLogicalCellDirective {
      */
     public readonly editable = input(false);
     /**
-     * @description Whether the cell's row or group is expanded; ArrowRight expands a collapsed group row and
-     * ArrowLeft collapses an expanded one.
+     * @description Whether the cell's row or group is expanded; ArrowRight expands a collapsed group row or tree row
+     * and ArrowLeft collapses an expanded one. `null` when there's nothing to expand.
      */
     public readonly expanded = input<boolean | null>(null);
     public readonly firstInRow = input.required<boolean>();
@@ -140,6 +167,11 @@ export class GridLogicalCellDirective {
     public readonly rowUid = input<string>();
     public readonly section = input<GridNavigationSection | null>(null);
     public readonly toggleExpand = output();
+    /**
+     * @description Whether the cell shows its row's tree toggle: ArrowRight expands the row and ArrowLeft collapses
+     * it, and ArrowLeft at the start of the row moves to the parent row.
+     */
+    public readonly treeCell = input(false);
 
     public constructor() {
         // Registering the rendered cell writes the navigation registry's signals.
@@ -209,6 +241,13 @@ export class GridLogicalCellDirective {
         if (selection != null && !selection.isCollapsed && selection.toString() !== "") {
             return;
         }
+        // A selected range copies as tab-separated text, which spreadsheets paste as cells.
+        const rangeText = this.#gridService.cellRangeBounds() == null ? null : this.#gridService.getCellRangeText();
+        if (rangeText != null) {
+            event.preventDefault();
+            this.#clipboard.copy(rangeText);
+            return;
+        }
         // The rendered text; textContent where there is no layout to give innerText.
         const host: HTMLElement = this.#hostElementRef.nativeElement;
         const text = (host.innerText ?? host.textContent ?? "").trim();
@@ -242,6 +281,17 @@ export class GridLogicalCellDirective {
         }
         targets[nextIndex].focus();
         return true;
+    }
+
+    /** Moves focus to the same cell of the row's parent in a tree; false when there's no parent shown. */
+    #focusTreeParent(): boolean {
+        const rowUid = this.rowUid();
+        const columnId = this.columnId();
+        if (!this.treeCell() || rowUid == null || columnId == null) {
+            return false;
+        }
+        const parentUid = this.#gridService.getTreeParentUid(rowUid);
+        return parentUid != null && this.#gridNavigationService.focusBodyCell(parentUid, columnId);
     }
 
     #getInnerFocusableTargets(): HTMLElement[] {
@@ -290,6 +340,48 @@ export class GridLogicalCellDirective {
             event.preventDefault();
             this.#focusNextInnerTarget(target, true, true);
         }
+    }
+
+    /**
+     * With range selection on, Shift and an arrow extend the range of cells, Ctrl+A selects every cell, and Escape
+     * clears the range. Returns whether the key was one of them.
+     */
+    #handleRangeKey(event: KeyboardEvent): boolean {
+        const rowUid = this.rowUid();
+        const columnId = this.columnId();
+        if (
+            !this.#gridService.rangeSelectionEnabled() ||
+            this.resolvedSection() !== "body" ||
+            this.resolvedCellKind() !== "data" ||
+            rowUid == null ||
+            columnId == null
+        ) {
+            return false;
+        }
+        if ((event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey && event.code === "KeyA") {
+            if (this.#gridService.selectAllCells()) {
+                event.preventDefault();
+            }
+            return true;
+        }
+        if (event.key === "Escape" && this.#gridService.cellRange() != null) {
+            event.preventDefault();
+            this.#gridService.clearCellRange();
+            return true;
+        }
+        if (!event.shiftKey || event.altKey || event.ctrlKey || event.metaKey || !event.key.startsWith("Arrow")) {
+            return false;
+        }
+        event.preventDefault();
+        const anchor = this.#gridService.cellRange()?.anchor ?? { columnId, rowUid };
+        if (!this.#navigate(this.#toLogicalArrowKey(event.key))) {
+            return true;
+        }
+        const next = this.#gridNavigationService.getFocusedCell();
+        if (next?.section === "body" && next.cellKind === "data" && next.rowUid != null && next.columnId != null) {
+            this.#gridService.setCellRange(anchor, { columnId: next.columnId, rowUid: next.rowUid });
+        }
+        return true;
     }
 
     /** Space, Shift+Space, Shift+ArrowUp/Down and Ctrl+A select rows. Returns whether the key was one of them. */
@@ -384,11 +476,15 @@ export class GridLogicalCellDirective {
         }
 
         this.#copyCellText(event);
-        if (this.#handleSelectionKey(event)) {
+        if (this.#handleRangeKey(event) || this.#handleSelectionKey(event)) {
             return;
         }
 
         const command = event.ctrlKey || event.metaKey;
+        if (NAVIGATION_KEYS.has(event.key)) {
+            // Moving on without Shift leaves the range behind, as in a spreadsheet.
+            this.#gridService.clearCellRange();
+        }
         switch (event.key) {
             case "ArrowDown":
                 event.preventDefault();
@@ -405,14 +501,14 @@ export class GridLogicalCellDirective {
             case "ArrowLeft":
             case "ArrowRight": {
                 const key = this.#toLogicalArrowKey(event.key);
-                // A group row expands with ArrowRight and collapses with ArrowLeft, as in a tree.
+                // A group row or a tree row expands with ArrowRight and collapses with ArrowLeft, as in a tree.
                 const expanded = this.expanded();
-                if (this.groupHeader() && expanded === (key === "ArrowLeft")) {
+                if ((this.groupHeader() || this.treeCell()) && expanded === (key === "ArrowLeft")) {
                     event.preventDefault();
                     this.toggleExpand.emit();
                     return;
                 }
-                if (this.#navigate(key)) {
+                if (this.#navigate(key) || (key === "ArrowLeft" && this.#focusTreeParent())) {
                     event.preventDefault();
                 }
                 return;

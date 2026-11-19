@@ -7,6 +7,8 @@ export type XlsxCellValue = boolean | Date | number | string | null;
 export type XlsxCellStyle = "group" | "header";
 
 export interface XlsxCell {
+    /** How many steps the text is indented from the cell's start, as a tree's levels are; at most 15. */
+    readonly indent?: number;
     readonly style?: XlsxCellStyle;
     readonly value: XlsxCellValue;
 }
@@ -31,6 +33,11 @@ export interface XlsxSheet {
     readonly name: string;
     /** Whether the sheet reads from right to left, with column A on the right. */
     readonly rightToLeft: boolean;
+    /**
+     * Each row's outline level, by row index, for a tree: 0 or left out for none. Rows with a higher level fold
+     * under the row above them; at most 7.
+     */
+    readonly rowOutlineLevels?: readonly number[];
     /** The rows from the top; a `null` cell, or a missing one, is empty. */
     readonly rows: readonly (readonly (XlsxCell | null | undefined)[])[];
 }
@@ -40,6 +47,8 @@ export const XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spr
 /** The most characters a cell can hold. */
 const MAX_CELL_TEXT_LENGTH = 32767;
 const MAX_SHEET_NAME_LENGTH = 31;
+const MAX_INDENT = 15;
+const MAX_OUTLINE_LEVEL = 7;
 /** The width of a digit in the default font (Calibri 11), in pixels: the unit of column widths. */
 const MAX_DIGIT_WIDTH = 7;
 const MILLISECONDS_PER_DAY = 86_400_000;
@@ -51,8 +60,9 @@ const RELATIONSHIP_NAMESPACE = "http://schemas.openxmlformats.org/officeDocument
 const PACKAGE_RELATIONSHIP_NAMESPACE = "http://schemas.openxmlformats.org/package/2006/relationships";
 const XML_DECLARATION = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n`;
 
-/** The `cellXfs` index of each look, in the order `styles.xml` lists them. */
+/** The `cellXfs` index of each look, in the order `styles.xml` lists them. Indents follow, one style per step. */
 const STYLE_INDEX = { date: 3, group: 2, header: 1 } as const;
+const FIRST_INDENT_STYLE_INDEX = 4;
 
 /** Builds an `.xlsx` workbook with one sheet. */
 export async function writeXlsx(sheet: XlsxSheet): Promise<Uint8Array> {
@@ -62,7 +72,7 @@ export async function writeXlsx(sheet: XlsxSheet): Promise<Uint8Array> {
         ["_rels/.rels", rootRelationshipsXml()],
         ["xl/workbook.xml", workbookXml(toSheetName(sheet.name))],
         ["xl/_rels/workbook.xml.rels", workbookRelationshipsXml()],
-        ["xl/styles.xml", stylesXml()],
+        ["xl/styles.xml", stylesXml(maxIndent(sheet))],
         ["xl/worksheets/sheet1.xml", worksheetXml(sheet)]
     ];
     return createZip(files.map(([name, xml]) => ({ data: encoder.encode(xml), name })));
@@ -96,7 +106,10 @@ export function toSheetName(name: string): string {
 
 function cellXml(cell: XlsxCell, reference: string): string {
     const value = cell.value;
-    const style = cell.style == null ? "" : ` s="${STYLE_INDEX[cell.style]}"`;
+    const indent = toIndent(cell.indent);
+    const styleIndex =
+        cell.style != null ? STYLE_INDEX[cell.style] : indent > 0 ? FIRST_INDENT_STYLE_INDEX + indent - 1 : null;
+    const style = styleIndex == null ? "" : ` s="${styleIndex}"`;
     if (value == null) {
         return style === "" ? "" : `<c r="${reference}"${style}/>`;
     }
@@ -144,6 +157,17 @@ function escapeXml(text: string): string {
     );
 }
 
+/** The deepest indent of any cell, which sets how many indent styles the workbook needs. */
+function maxIndent(sheet: XlsxSheet): number {
+    let deepest = 0;
+    for (const row of sheet.rows) {
+        for (const cell of row) {
+            deepest = Math.max(deepest, toIndent(cell?.indent));
+        }
+    }
+    return deepest;
+}
+
 function rootRelationshipsXml(): string {
     return (
         XML_DECLARATION +
@@ -171,8 +195,14 @@ function sheetViewXml(sheet: XlsxSheet): string {
     );
 }
 
-function stylesXml(): string {
+function stylesXml(indents: number): string {
     const font = `<sz val="11"/><name val="Calibri"/><family val="2"/>`;
+    const indentStyles = Array.from(
+        { length: indents },
+        (_, index) =>
+            `<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1">` +
+            `<alignment indent="${index + 1}"/></xf>`
+    ).join("");
     return (
         XML_DECLARATION +
         `<styleSheet xmlns="${SPREADSHEET_NAMESPACE}">` +
@@ -180,16 +210,22 @@ function stylesXml(): string {
         `<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>` +
         `<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>` +
         `<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>` +
-        `<cellXfs count="4">` +
+        `<cellXfs count="${FIRST_INDENT_STYLE_INDEX + indents}">` +
         `<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>` +
         `<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>` +
         `<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center"/></xf>` +
         // 14 is the built-in short date, which each spreadsheet shows in its user's own date format.
         `<xf numFmtId="14" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>` +
+        indentStyles +
         `</cellXfs>` +
         `<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>` +
         `</styleSheet>`
     );
+}
+
+/** An indent a cell style can have: a whole number from 0 to 15. */
+function toIndent(indent: number | undefined): number {
+    return indent == null || !Number.isFinite(indent) ? 0 : Math.min(MAX_INDENT, Math.max(0, Math.floor(indent)));
 }
 
 /** A CSS pixel width as a spreadsheet column width, in widths of a digit. */
@@ -234,9 +270,18 @@ function worksheetXml(sheet: XlsxSheet): string {
                     cell == null ? "" : cellXml(cell, `${toColumnName(columnIndex)}${rowIndex + 1}`)
                 )
                 .join("");
-            return cells === "" ? "" : `<row r="${rowIndex + 1}">${cells}</row>`;
+            if (cells === "") {
+                return "";
+            }
+            const level = Math.min(MAX_OUTLINE_LEVEL, Math.max(0, Math.floor(sheet.rowOutlineLevels?.[rowIndex] ?? 0)));
+            const outline = level > 0 ? ` outlineLevel="${level}"` : "";
+            return `<row r="${rowIndex + 1}"${outline}>${cells}</row>`;
         })
         .join("");
+    const deepestOutline = (sheet.rowOutlineLevels ?? []).reduce(
+        (deepest, level) => Math.max(deepest, Math.min(MAX_OUTLINE_LEVEL, Math.floor(level))),
+        0
+    );
     const merges =
         sheet.merges.length === 0
             ? ""
@@ -253,9 +298,11 @@ function worksheetXml(sheet: XlsxSheet): string {
     return (
         XML_DECLARATION +
         `<worksheet xmlns="${SPREADSHEET_NAMESPACE}" xmlns:r="${RELATIONSHIP_NAMESPACE}">` +
+        // A tree's parent row sits above its children, so the outline's toggle goes above them too.
+        (deepestOutline > 0 ? `<sheetPr><outlinePr summaryBelow="0"/></sheetPr>` : "") +
         `<dimension ref="${dimension}"/>` +
         sheetViewXml(sheet) +
-        `<sheetFormatPr defaultRowHeight="15"/>` +
+        `<sheetFormatPr defaultRowHeight="15"${deepestOutline > 0 ? ` outlineLevelRow="${deepestOutline}"` : ""}/>` +
         (columns === "" ? "" : `<cols>${columns}</cols>`) +
         `<sheetData>${rows}</sheetData>` +
         merges +

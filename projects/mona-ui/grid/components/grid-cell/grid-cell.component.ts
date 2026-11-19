@@ -1,9 +1,11 @@
-import { formatDate, NgTemplateOutlet } from "@angular/common";
+import { NgTemplateOutlet } from "@angular/common";
 import { afterNextRender, Component, computed, ElementRef, inject, Injector, input, LOCALE_ID } from "@angular/core";
-import { formatGregorianDateToLocaleString, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { LucideChevronDown, LucideChevronRight } from "@lucide/angular";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import { Column } from "../../models/Column";
 import { Row } from "../../models/Row";
+import { formatGridCellValue } from "../../services/grid-cell-format";
 import { GRID_CELL_FOCUSABLE_SELECTOR } from "../../services/grid-cell-tab-stops";
 import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
@@ -11,7 +13,9 @@ import {
     gridCellBaseThemeVariants,
     gridCellContainerThemeVariants,
     gridCellDirtyIndicatorThemeVariants,
-    gridCellTextThemeVariants
+    gridCellTextThemeVariants,
+    gridTreeLeafSpacerThemeVariants,
+    gridTreeToggleThemeVariants
 } from "../../styles/grid.styles";
 import { GridCommandCellComponent } from "../grid-command-cell/grid-command-cell.component";
 import { GridEditorComponent, type GridEditorCommitTrigger } from "../grid-editor/grid-editor.component";
@@ -19,7 +23,7 @@ import { GridEditorComponent, type GridEditorCommitTrigger } from "../grid-edito
 @Component({
     selector: "mona-grid-cell",
     templateUrl: "./grid-cell.component.html",
-    imports: [GridCommandCellComponent, GridEditorComponent, NgTemplateOutlet],
+    imports: [GridCommandCellComponent, GridEditorComponent, LucideChevronDown, LucideChevronRight, NgTemplateOutlet],
     host: {
         "[class]": "baseClass()"
     }
@@ -52,28 +56,12 @@ export class GridCellComponent {
         return effectiveRowData[this.column().field];
     });
     protected readonly editContextIsCellMode = computed(() => this.gridService.editContext()?.mode === "cell");
-    protected readonly formattedDisplayValue = computed(() => {
-        const column = this.column();
-        const value = this.displayValue();
-        const format = column.format;
-        if (format == null) {
-            // A date shows in the locale's numeric date format, as the date picker and the filter row show it.
-            return column.dataType === "date" && value instanceof Date && !Number.isNaN(value.getTime())
-                ? formatGregorianDateToLocaleString(value, this.#i18n.localeId(), {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric"
-                  })
-                : value;
-        }
-        if (typeof format === "function") {
-            return format(value, this.row().data, column);
-        }
-        if (column.dataType === "date") {
-            return this.formatDateValue(value, format);
-        }
-        return value;
-    });
+    protected readonly formattedDisplayValue = computed(() =>
+        formatGridCellValue(this.displayValue(), this.row().data, this.column(), {
+            angularLocale: this.#locale,
+            localeId: this.#i18n.localeId()
+        })
+    );
     protected readonly gridService = inject(GridService);
     protected readonly isCellPristine = computed(() => {
         const row = this.row();
@@ -110,6 +98,14 @@ export class GridCellComponent {
             this.column()
         );
     });
+    /** How far each tree level indents the tree column's cells, in rem. */
+    protected readonly treeIndent = 1.25;
+    /** The row's place in the tree, in the column that shows the tree's toggles. */
+    protected readonly treeInfo = computed(() =>
+        this.column().id === this.gridService.treeColumnId() ? this.gridService.getTreeRowInfo(this.row()) : null
+    );
+    protected readonly treeLeafSpacerClass = gridTreeLeafSpacerThemeVariants();
+    protected readonly treeToggleClass = gridTreeToggleThemeVariants();
     public readonly column = input.required<Column>();
     public readonly row = input.required<Row>();
 
@@ -187,6 +183,12 @@ export class GridCellComponent {
         );
     }
 
+    /** A click on a tree row's toggle expands or collapses it, without the click selecting the row. */
+    protected onTreeToggleClick(event: MouseEvent): void {
+        event.stopPropagation();
+        this.gridService.toggleTreeRow(this.row());
+    }
+
     private focusHostCell(): void {
         const cellElement = this.#elementRef.nativeElement.closest("td") as HTMLElement | null;
         cellElement?.focus();
@@ -195,20 +197,6 @@ export class GridCellComponent {
     private focusInnerEditor(): void {
         const target = this.#elementRef.nativeElement.querySelector(GRID_CELL_FOCUSABLE_SELECTOR) as HTMLElement | null;
         target?.focus();
-    }
-
-    private formatDateValue(value: unknown, format: string): unknown {
-        if (value == null) {
-            return value;
-        }
-        if (value instanceof Date || typeof value === "number" || typeof value === "string") {
-            try {
-                return formatDate(value, format, this.#locale);
-            } catch {
-                return value;
-            }
-        }
-        return value;
     }
 
     private startEdit(originalEvent?: Event): void {

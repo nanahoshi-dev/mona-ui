@@ -69,6 +69,18 @@ export class GridNavigationService {
         return true;
     }
 
+    /** Focuses a body cell by its row and column, when it's rendered. */
+    public focusBodyCell(rowUid: string, columnId: string): boolean {
+        const cell = this.#cells().firstOrDefault(
+            e => e.value.section === "body" && e.value.rowUid === rowUid && e.value.columnId === columnId
+        );
+        if (!cell) {
+            return false;
+        }
+        this.#focusCell(cell.key, cell.value);
+        return true;
+    }
+
     public focusFirstCell(): void {
         const firstCell = this.#findFirstHeaderCell() ?? this.#findFirstCell();
         if (firstCell) {
@@ -84,6 +96,15 @@ export class GridNavigationService {
         }
         this.#focusCell(cell.key, cell.value);
         return true;
+    }
+
+    /** The rendered cell an element is in, such as the target of a pointer event. */
+    public getCellAt(target: Element | null): NavigationData | null {
+        const element = target?.closest("td, th");
+        if (element == null) {
+            return null;
+        }
+        return this.#cells().firstOrDefault(e => e.value.element === element)?.value ?? null;
     }
 
     /** The cell that holds the grid's Tab stop. */

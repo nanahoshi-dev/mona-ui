@@ -11,6 +11,26 @@
         [attr.data-field]="dataKey"
         [attr.data-col-index]="column().index"
         (dblclick)="onCellDoubleClick($event)">
+        @if (treeInfo(); as tree) {
+            <!-- The row carries aria-expanded and aria-level; the arrows expand and collapse it. -->
+            <span aria-hidden="true" class="shrink-0" [style.width.rem]="(tree.level - 1) * treeIndent"></span>
+            @if (tree.hasChildren) {
+                <span
+                    aria-hidden="true"
+                    data-grid-tree-toggle
+                    [class]="treeToggleClass"
+                    (click)="onTreeToggleClick($event)"
+                    (dblclick)="$event.stopPropagation()">
+                    @if (tree.expanded) {
+                        <svg lucideChevronDown [size]="16"></svg>
+                    } @else {
+                        <svg lucideChevronRight class="rtl:-scale-x-100" [size]="16"></svg>
+                    }
+                </span>
+            } @else {
+                <span aria-hidden="true" [class]="treeLeafSpacerClass"></span>
+            }
+        }
         @if (isEditing() && gridService.editSession(); as session) {
             <mona-grid-editor
                 [column]="column()"

@@ -93,6 +93,15 @@ export const gridCellTextThemeVariants = cva(`
     truncate cursor-default select-none
 `);
 
+/** The tree toggle in a tree grid's cell: a chevron the size of a small icon button. */
+export const gridTreeToggleThemeVariants = cva(`
+    me-1 inline-flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-sm
+    hover:bg-hover
+`);
+
+/** Takes a tree toggle's room in a row without children, so sibling rows line up. */
+export const gridTreeLeafSpacerThemeVariants = cva("me-1 size-5 shrink-0");
+
 export const gridSelectAllCellThemeVariants = cva(`
     absolute inset-0 flex h-full w-full items-center justify-center
 `);
@@ -348,6 +357,9 @@ export const gridListTableCellThemeVariants = cva(
         after:content-[''] after:block
         after:absolute after:inset-0 after:pointer-events-none
         focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-focus-indicator
+        aria-selected:bg-(--color-selected) aria-selected:text-(--color-selected-foreground)
+        forced-colors:aria-selected:bg-[Highlight] forced-colors:aria-selected:text-[HighlightText]
+        forced-colors:aria-selected:forced-color-adjust-none
     `,
     {
         variants: {
