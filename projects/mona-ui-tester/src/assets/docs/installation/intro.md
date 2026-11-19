@@ -176,6 +176,14 @@ See [Export](/components/chart#export) for how to export a chart.
 
 The documentation is also available as markdown, for coding agents. Point an agent at `/llms.txt`, which lists every page with a link to its markdown, or at `node_modules/@nanahoshi/mona-ui/llms.txt`, which matches the installed version.
 
+Agents that support the Model Context Protocol (MCP), such as Claude Code, Cursor and VS Code, can use the `@nanahoshi/mona-ui-mcp` server instead. It answers from the docs of the installed version, a page section or a component's inputs at a time, so the agent doesn't read them all. It also checks a template for elements, inputs and outputs that don't exist, and lists the imports the template needs. Add it from your project's folder:
+
+```bash
+claude mcp add mona-ui -- npx -y @nanahoshi/mona-ui-mcp
+```
+
+Other clients run the command `npx` with the arguments `-y @nanahoshi/mona-ui-mcp`. The server's [README](https://github.com/nanahoshi-dev/mona-ui/tree/main/projects/mona-ui-mcp#readme) shows the setup for each client, and the tools it offers.
+
 ## Next Steps
 
 - [Theming](/components/theming): choose a theme, and match it to your brand.

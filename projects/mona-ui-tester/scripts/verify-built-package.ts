@@ -60,6 +60,47 @@ export function verifyAgentDocs(distDir: string): number {
     return links.length;
 }
 
+/**
+ * The package carries the same docs as data, which `@nanahoshi/mona-ui-mcp` reads: `docs/manifest.json`, whose every
+ * page is a file in the package, and `docs/api/index.json`, whose every entry point has its JSON beside it.
+ */
+export function verifyAgentDocsData(distDir: string): { entryPoints: number; pages: number } {
+    const readJson = <T>(file: string, what: string): T => {
+        const path = resolve(distDir, file);
+        if (!existsSync(path)) {
+            throw new Error(`${what} not found at: ${path}`);
+        }
+        return JSON.parse(readFileSync(path, "utf-8")) as T;
+    };
+    const manifest = readJson<{ pages?: { file: string }[]; version?: string }>(
+        "docs/manifest.json",
+        "Agent docs manifest"
+    );
+    const pages = manifest.pages ?? [];
+    if (pages.length === 0) {
+        throw new Error("Agent docs manifest lists no pages");
+    }
+    const missingPages = pages.filter(page => !existsSync(resolve(distDir, page.file))).map(page => page.file);
+    if (missingPages.length > 0) {
+        throw new Error(`Agent docs manifest lists pages that aren't in the package: ${missingPages.join(", ")}`);
+    }
+    const { version } = readJson<{ version?: string }>("package.json", "package.json");
+    if (manifest.version !== version) {
+        throw new Error(`Agent docs manifest describes version ${manifest.version}, but the package is ${version}`);
+    }
+    const index = readJson<{ entryPoints?: { name: string }[] }>("docs/api/index.json", "API reference index");
+    const entryPoints = index.entryPoints ?? [];
+    const missingReferences = entryPoints
+        .map(entryPoint => `docs/api/${entryPoint.name}.json`)
+        .filter(file => !existsSync(resolve(distDir, file)));
+    if (entryPoints.length === 0 || missingReferences.length > 0) {
+        throw new Error(
+            `API reference index lists entry points whose JSON isn't in the package: ${missingReferences.join(", ") || "none listed"}`
+        );
+    }
+    return { entryPoints: entryPoints.length, pages: pages.length };
+}
+
 export interface ExpectedLocaleExport {
     readonly direction?: "ltr" | "rtl";
     /** Locale folder when the locale is also its own entry point, `@nanahoshi/mona-ui/locales/<folder>`. */
@@ -897,6 +938,11 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
 
     const agentPages = verifyAgentDocs(distDir);
     console.log(`✓ Agent docs verified: llms.txt and the ${agentPages} pages it links to`);
+
+    const agentData = verifyAgentDocsData(distDir);
+    console.log(
+        `✓ Agent docs data verified: docs/manifest.json with ${agentData.pages} pages, and API JSON for ${agentData.entryPoints} entry points`
+    );
 
     const bundles = verifyLeanBundles(distDir);
     console.log(`✓ ${bundles} bundles checked: none imports what would undo tree-shaking`);

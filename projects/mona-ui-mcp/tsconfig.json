@@ -1,0 +1,22 @@
+/* Builds the server for Node. The repository's own tsconfig.json also covers these files, for linting. */
+{
+    "compilerOptions": {
+        "declaration": false,
+        "forceConsistentCasingInFileNames": true,
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "outDir": "../../dist/mona-ui-mcp",
+        "rootDir": "src",
+        "skipLibCheck": true,
+        "sourceMap": false,
+        "strict": true,
+        "target": "ES2022",
+        "types": ["node"]
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["src/**/*.spec.ts", "src/test-fixture.ts"]
+}

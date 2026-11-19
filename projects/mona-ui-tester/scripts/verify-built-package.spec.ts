@@ -8,6 +8,7 @@ import {
     resolveTypeScriptCompilerPath,
     runConsumerSmokeTest,
     verifyAgentDocs,
+    verifyAgentDocsData,
     verifyBuiltPackage,
     verifyLeanBundles,
     verifyPackageStyles,
@@ -1304,6 +1305,57 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
                 expect(() => verifyAgentDocs(tempDir)).toThrow("Agent docs index not found");
                 writeFileSync(join(tempDir, "llms.txt"), "- [Grid](docs/grid.md): A grid.\n");
                 expect(() => verifyAgentDocs(tempDir)).toThrow("docs/grid.md");
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+    });
+
+    describe("verifyAgentDocsData", () => {
+        const writeAgentData = (directory: string, manifestVersion = "1.0.0"): void => {
+            mkdirSync(join(directory, "docs", "api"), { recursive: true });
+            writeFileSync(join(directory, "package.json"), JSON.stringify({ version: "1.0.0" }));
+            writeFileSync(join(directory, "docs", "button.md"), "# Button\n");
+            writeFileSync(
+                join(directory, "docs", "manifest.json"),
+                JSON.stringify({ pages: [{ file: "docs/button.md" }], version: manifestVersion })
+            );
+            writeFileSync(
+                join(directory, "docs", "api", "index.json"),
+                JSON.stringify({ entryPoints: [{ name: "button" }] })
+            );
+            writeFileSync(join(directory, "docs", "api", "button.json"), "{}");
+        };
+
+        it("accepts a manifest and an API index whose files are all in the package", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                writeAgentData(tempDir);
+                expect(verifyAgentDocsData(tempDir)).toEqual({ entryPoints: 1, pages: 1 });
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when a page or an entry point's JSON is missing", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                expect(() => verifyAgentDocsData(tempDir)).toThrow("Agent docs manifest not found");
+                writeAgentData(tempDir);
+                rmSync(join(tempDir, "docs", "api", "button.json"));
+                expect(() => verifyAgentDocsData(tempDir)).toThrow("docs/api/button.json");
+                rmSync(join(tempDir, "docs", "button.md"));
+                expect(() => verifyAgentDocsData(tempDir)).toThrow("docs/button.md");
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("fails when the manifest describes another version than the package", () => {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            try {
+                writeAgentData(tempDir, "0.9.0");
+                expect(() => verifyAgentDocsData(tempDir)).toThrow("describes version 0.9.0, but the package is 1.0.0");
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
             }
