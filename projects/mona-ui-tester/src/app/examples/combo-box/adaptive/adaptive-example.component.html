@@ -1,0 +1,12 @@
+<mona-form-field
+    class="max-w-sm"
+    label="Country"
+    hint="On a phone, the list opens along the bottom of the screen, with a box to type in.">
+    <mona-combo-box
+        adaptiveMode="auto"
+        class="w-full"
+        monaDropDownFilterable
+        placeholder="Type a country"
+        [data]="countries"
+        [(value)]="country" />
+</mona-form-field>

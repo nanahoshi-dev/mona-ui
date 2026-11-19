@@ -1,0 +1,13 @@
+<dl class="grid max-w-md grid-cols-[8rem_auto] items-center gap-x-6 gap-y-4 text-sm">
+    <dt class="text-muted-foreground">Line</dt>
+    <dd><mona-sparkline aria-label="Visitors per day" [data]="visitors" /></dd>
+
+    <dt class="text-muted-foreground">Area</dt>
+    <dd><mona-sparkline aria-label="Sign-ups per day" type="area" [data]="signUps" /></dd>
+
+    <dt class="text-muted-foreground">Column</dt>
+    <dd><mona-sparkline aria-label="Change in revenue per month" type="column" [data]="revenueChange" /></dd>
+
+    <dt class="text-muted-foreground">Win-loss</dt>
+    <dd><mona-sparkline aria-label="Results of the last 12 matches" type="win-loss" [data]="results" /></dd>
+</dl>

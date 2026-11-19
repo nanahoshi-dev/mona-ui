@@ -18,6 +18,24 @@
     "selector": "\"mona-auto-complete\"",
     "inputs": [
       {
+        "description": "Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640\npixels), with a text box of its own at the top, where the typing happens. A press on the field opens the sheet,\nand the field raises no on-screen keyboard. `\"none\"` always opens the popup under the field.",
+        "kind": "input",
+        "name": "adaptiveMode",
+        "type": "AdaptiveMode",
+        "options": [
+          "auto",
+          "none"
+        ],
+        "defaultValue": "\"none\""
+      },
+      {
+        "description": "Title of the bottom sheet the popup opens as with `adaptiveMode=\"auto\"`, which also names the\nsheet's text box. When empty, the sheet shows the autocomplete's name, from its label or `aria-label`.",
+        "kind": "input",
+        "name": "adaptiveTitle",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "ID of an element that provides an extended description for the input.\nUse this to associate error messages or help text with the input.",
         "kind": "input",
         "name": "ariaDescribedBy",
@@ -9517,6 +9535,24 @@
     "selector": "\"mona-combo-box\"",
     "inputs": [
       {
+        "description": "Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640\npixels), with a text box of its own at the top, where the typing happens. A press on the field opens the sheet,\nand the field raises no on-screen keyboard. `\"none\"` always opens the popup under the field.",
+        "kind": "input",
+        "name": "adaptiveMode",
+        "type": "AdaptiveMode",
+        "options": [
+          "auto",
+          "none"
+        ],
+        "defaultValue": "\"none\""
+      },
+      {
+        "description": "Title of the bottom sheet the popup opens as with `adaptiveMode=\"auto\"`, which also names the\nsheet's text box. When empty, the sheet shows the combo box's name, from its label or `aria-label`.",
+        "kind": "input",
+        "name": "adaptiveTitle",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "Allows a custom value to be committed when it doesn't match any item in {@link data}.",
         "kind": "input",
         "name": "allowCustomValue",
@@ -10163,8 +10199,8 @@
         "name": "adaptiveMode",
         "type": "AdaptiveMode",
         "options": [
-          "none",
-          "auto"
+          "auto",
+          "none"
         ],
         "defaultValue": "\"none\""
       },
@@ -10414,8 +10450,8 @@
         "name": "adaptiveMode",
         "type": "AdaptiveMode",
         "options": [
-          "none",
-          "auto"
+          "auto",
+          "none"
         ],
         "defaultValue": "\"none\""
       },
@@ -10679,8 +10715,8 @@
         "name": "adaptiveMode",
         "type": "AdaptiveMode",
         "options": [
-          "none",
-          "auto"
+          "auto",
+          "none"
         ],
         "defaultValue": "\"none\""
       },
@@ -11406,8 +11442,8 @@
         "name": "adaptiveMode",
         "type": "AdaptiveMode",
         "options": [
-          "none",
-          "auto"
+          "auto",
+          "none"
         ],
         "defaultValue": "\"none\""
       },
@@ -11637,8 +11673,8 @@
         "name": "adaptiveMode",
         "type": "AdaptiveMode",
         "options": [
-          "none",
-          "auto"
+          "auto",
+          "none"
         ],
         "defaultValue": "\"none\""
       },
@@ -14289,8 +14325,8 @@
         "name": "adaptiveMode",
         "type": "AdaptiveMode",
         "options": [
-          "none",
-          "auto"
+          "auto",
+          "none"
         ],
         "defaultValue": "\"none\""
       },
@@ -14553,8 +14589,8 @@
         "name": "adaptiveMode",
         "type": "AdaptiveMode",
         "options": [
-          "none",
-          "auto"
+          "auto",
+          "none"
         ],
         "defaultValue": "\"none\""
       },
@@ -18433,6 +18469,126 @@
       }
     ]
   },
+  "SparklineComponent": {
+    "name": "SparklineComponent",
+    "selector": "\"mona-sparkline\"",
+    "inputs": [
+      {
+        "description": "Ids of elements that describe the sparkline further. The summary of its values is added after them\nwhen it has a name.",
+        "kind": "input",
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "alias": "aria-describedby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The sparkline's name, what its values are, such as \"Weekly sales\". Assistive technology reads the\nsummary of its values after it. Without a name, the summary is the name.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The color of the line, the area and the bars, as a CSS color. The first chart color when empty.\nThe `--mona-sparkline-color` custom property sets it from a style sheet.",
+        "kind": "input",
+        "name": "color",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "How a line or an area joins its values, as a chart's line series does: `\"linear\"`, `\"monotone-x\"`\n(smooth, never past the values), `\"natural\"` (smoother, but it can swing past them), `\"step\"` (changing halfway\nbetween values) or `\"step-after\"` (holding each value until the next). Columns and win-loss bars ignore it.",
+        "kind": "input",
+        "name": "curve",
+        "type": "SparklineCurve",
+        "options": [
+          "linear",
+          "monotone-x",
+          "natural",
+          "step",
+          "step-after"
+        ],
+        "defaultValue": "\"linear\""
+      },
+      {
+        "description": "The values, in order. A `null`, or anything that isn't a finite number, leaves a gap.",
+        "kind": "input",
+        "name": "data",
+        "type": "Iterable<number | null | undefined>",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "Hides the sparkline from assistive technology, for one beside text that already gives its values.",
+        "kind": "input",
+        "name": "decorative",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "How the values are formatted in the summary assistive technology reads, such as\n`{ style: \"currency\", currency: \"EUR\" }`. The locale's number format when `null`.",
+        "kind": "input",
+        "name": "format",
+        "type": "Intl.NumberFormatOptions | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Values a line or area sparkline marks with a dot: `\"first\"`, `\"last\"`, `\"min\"` and `\"max\"`.",
+        "kind": "input",
+        "name": "markers",
+        "type": "readonly SparklineMarker[]",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "The value at the top of the sparkline. Give several sparklines the same `min` and `max` to compare\nthem. When `null`, the highest value, or zero for columns, or the reference value when it's higher.",
+        "kind": "input",
+        "name": "max",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "The value at the bottom of the sparkline. When `null`, the lowest value, or zero for columns, or the\nreference value when it's lower.",
+        "kind": "input",
+        "name": "min",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "The color of column bars below zero and of losses, as a CSS color. The error color when empty. The\n`--mona-sparkline-negative-color` custom property sets it from a style sheet.",
+        "kind": "input",
+        "name": "negativeColor",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "A value to draw a dashed line at, such as a target or an average. Not drawn on a win-loss\nsparkline.",
+        "kind": "input",
+        "name": "referenceValue",
+        "type": "number | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "How the values are drawn: `\"line\"`, `\"area\"`, `\"column\"` or `\"win-loss\"`.",
+        "kind": "input",
+        "name": "type",
+        "type": "SparklineType",
+        "options": [
+          "area",
+          "column",
+          "line",
+          "win-loss"
+        ],
+        "defaultValue": "\"line\""
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`, such as a size: it's\n6rem wide and 1.5rem tall by default.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
   "SpinnerComponent": {
     "name": "SpinnerComponent",
     "selector": "\"mona-spinner\"",
@@ -19653,8 +19809,8 @@
         "name": "adaptiveMode",
         "type": "AdaptiveMode",
         "options": [
-          "none",
-          "auto"
+          "auto",
+          "none"
         ],
         "defaultValue": "\"none\""
       },

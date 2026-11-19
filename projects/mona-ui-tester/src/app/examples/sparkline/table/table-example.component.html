@@ -1,0 +1,26 @@
+<table class="w-full max-w-lg text-sm">
+    <thead class="text-muted-foreground">
+        <tr>
+            <th scope="col" class="pb-2 text-start font-medium">Product</th>
+            <th scope="col" class="pb-2 text-start font-medium">Last 12 weeks</th>
+            <th scope="col" class="pb-2 text-end font-medium">Units</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (product of products; track product.name) {
+            <tr class="border-t border-border">
+                <th scope="row" class="py-2 text-start font-medium">{{ product.name }}</th>
+                <td class="py-2">
+                    <mona-sparkline
+                        class="w-32"
+                        [aria-label]="'Weekly units of ' + product.name"
+                        [data]="product.weeks"
+                        [markers]="['last']"
+                        [max]="highest"
+                        [min]="0" />
+                </td>
+                <td class="py-2 text-end tabular-nums">{{ product.total }}</td>
+            </tr>
+        }
+    </tbody>
+</table>

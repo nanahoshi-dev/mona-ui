@@ -95,6 +95,14 @@ Binding `[formField]` synchronizes `value`, `disabled`, `readonly`, `required`, 
 auto-complete/forms
 ```
 
+### A bottom sheet on a phone
+
+With `adaptiveMode="auto"`, on a screen narrower than 640 pixels, the suggestions open as a sheet along the bottom of the screen, with a text box of its own at the top. Narrow the window to see it.
+
+```example
+auto-complete/adaptive
+```
+
 ### Highlight the first match while typing
 
 `highlightFirst` (default `true`) highlights the first option whose text matches the typed text as the consumer types, so `Enter` can commit it immediately. Set it to `false` to require the consumer to navigate to an option explicitly before `Enter` commits it.
@@ -156,6 +164,16 @@ Blurring the input while the popup is closed commits the typed text as `value`, 
 
 `open` and `close` emit event objects with `preventDefault()` and `isDefaultPrevented()`. Calling `preventDefault()` in an `open` handler stops the popup from opening; calling it in a `close` handler stops the popup from closing. `close`'s event object also exposes `via`, describing what triggered the close attempt.
 
+### The bottom sheet
+
+With `adaptiveMode="auto"`, the popup opens as a bottom sheet when the screen is narrower than 640 pixels as it opens; it doesn't switch while open. On such a screen, the field raises no on-screen keyboard. Pressing it opens the sheet, with the matches for the field's text, or the whole list when it has none. Typing into the field with a keyboard opens it too, and carries the text along.
+
+The sheet covers the page with a dimmed backdrop and has a header with the field's name (or `adaptiveTitle`) and a close button. Below it is a text box, which takes focus and is named by that header, then the list, whose options are 44 pixels tall.
+
+The text box works as the field does: typing suggests, the arrow keys highlight, `Enter` commits and `Escape` closes. Deleting its text keeps the sheet open, with the whole list. The sheet keeps its height while the list filters, so the text box stays put, and it sits above an on-screen keyboard.
+
+When the sheet closes, focus goes back to the field, with the typed text, which becomes the value when focus leaves, as usual. Without `adaptiveMode`, or with `"none"`, the popup always opens under the field.
+
 ### `DropdownFieldSelectorType`, `DropdownFieldPredicateType`, and `ListSizeInputType` are not exported
 
 `textField`, `valueField`, `itemDisabled`, `popupHeight`, and `popupWidth` are typed with these generic aliases internally, but none of the three types are re-exported from `@nanahoshi/mona-ui`. Inline values (as in the examples above) still type-check structurally; only a standalone typed variable would require an import.
@@ -182,6 +200,8 @@ Blurring the input while the popup is closed commits the typed text as `value`, 
 ### Focus
 
 The host element itself is not a Tab stop (`tabindex="-1"`); the inner `<input>` element receives focus and is the actual Tab stop. Arrow-key navigation moves an internal highlighted-option pointer, reflected through `aria-activedescendant` on the input, instead of moving DOM focus into the popup.
+
+In a bottom sheet (`adaptiveMode="auto"` on a small screen), focus moves to the sheet's text box, which has the same role and states as the input, and comes back to the input when the sheet closes.
 
 ### ARIA
 
