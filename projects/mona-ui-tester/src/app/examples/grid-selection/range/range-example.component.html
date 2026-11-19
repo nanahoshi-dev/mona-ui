@@ -1,0 +1,18 @@
+<div class="flex flex-col gap-2">
+    <mona-grid
+        aria-label="Sales forecast"
+        rowKey="id"
+        [data]="forecasts()"
+        [monaGridEditable]="{ mode: 'cell' }"
+        monaGridRangeSelectable
+        (rangeChange)="onRangeChange($event)"
+        (rangePaste)="onRangePaste($event)"
+        (save)="onSave($event)">
+        <mona-grid-column field="region" title="Region" [editable]="false" />
+        <mona-grid-column field="q1" title="Q1" type="number" />
+        <mona-grid-column field="q2" title="Q2" type="number" />
+        <mona-grid-column field="q3" title="Q3" type="number" />
+        <mona-grid-column field="q4" title="Q4" type="number" />
+    </mona-grid>
+    <span aria-live="polite" class="text-sm">{{ status() }}</span>
+</div>

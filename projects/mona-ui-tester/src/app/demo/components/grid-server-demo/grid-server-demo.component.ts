@@ -418,6 +418,7 @@ function columnOverrides(id: ColumnId): Partial<ComponentConfigInputType<GridCol
     return {
         aggregate: undefined,
         editable: undefined,
+        expandable: undefined,
         field: undefined,
         filterable: undefined,
         format: undefined,

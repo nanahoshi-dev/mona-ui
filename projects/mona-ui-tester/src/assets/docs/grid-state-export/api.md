@@ -14,12 +14,16 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to 
 | Type | Kind | Description |
 | --- | --- | --- |
 | [`GridColumnState`](/api/grid/GridColumnState) | Interface |  |
+| [`GridPdfExportOptions`](/api/grid/GridPdfExportOptions) | Interface |  |
+| [`GridPdfFont`](/api/grid/GridPdfFont) | Interface | The font a PDF export embeds for the text Helvetica can't show, such as Chinese, Japanese or Korean. |
 | [`GridState`](/api/grid/GridState) | Interface |  |
 | [`GridStateCompositeFilterDescriptor`](/api/grid/GridStateCompositeFilterDescriptor) | Interface |  |
 | [`GridStateFilterDescriptor`](/api/grid/GridStateFilterDescriptor) | Interface |  |
 | [`GridStateLoadResult`](/api/grid/GridStateLoadResult) | Interface |  |
 | [`GridStatePersistenceOptions`](/api/grid/GridStatePersistenceOptions) | Interface |  |
 | [`GridStateSortDescriptor`](/api/grid/GridStateSortDescriptor) | Interface |  |
+| [`GridPdfFontSource`](/api/grid/GridPdfFontSource) | Type alias | A TrueType font file (`.ttf` or `.ttc`): its bytes, or the URL to fetch it from. |
+| [`GridPdfPaperSize`](/api/grid/GridPdfPaperSize) | Type alias | A paper size by name, or a page's width and height in points (1/72 inch). |
 | [`GridStateFilterValue`](/api/grid/GridStateFilterValue) | Type alias |  |
 | [`GridStateLoadStatus`](/api/grid/GridStateLoadStatus) | Type alias | The outcome of loading a state. |
 | [`GridStateVersion`](/api/grid/GridStateVersion) | Type alias |  |

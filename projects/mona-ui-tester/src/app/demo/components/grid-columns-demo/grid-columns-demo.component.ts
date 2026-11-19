@@ -360,6 +360,7 @@ function columnOverrides(column: ColumnSpec): Partial<ComponentConfigInputType<G
     return {
         aggregate: undefined,
         editable: undefined,
+        expandable: undefined,
         field: undefined,
         filterable: undefined,
         format: undefined,

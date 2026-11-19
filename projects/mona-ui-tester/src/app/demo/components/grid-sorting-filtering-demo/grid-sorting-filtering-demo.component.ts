@@ -333,6 +333,7 @@ function columnOverrides(id: ColumnId): Partial<ComponentConfigInputType<GridCol
     return {
         aggregate: undefined,
         editable: undefined,
+        expandable: undefined,
         field: undefined,
         filterable: { type: "boolean", value: true, note: "Off removes the column's filter menu and filter cell." },
         format: undefined,

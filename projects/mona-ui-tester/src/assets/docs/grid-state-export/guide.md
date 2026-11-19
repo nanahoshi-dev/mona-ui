@@ -3,14 +3,14 @@
 | Directive | State you bind | Methods |
 | :--- | :--- | :--- |
 | `monaGridStatePersistence` | `[(state)]`: `GridState \| null` | `captureState()`, `loadState(state)` |
-| `monaGridExport` | — | `exportCsv(filename?)`, `exportExcel(filename?)` |
+| `monaGridExport` | — | `exportCsv(filename?)`, `exportExcel(filename?)`, `exportPdf(options?)` |
 
 A `GridState` is JSON-safe, so it can go to `localStorage`, a user profile on your server, or a URL. The grid doesn't store it anywhere itself.
 
 **Use something else when:**
 
 - You need one value back, such as the sort. Bind that feature's own model (`[(sort)]`, `[(filter)]`, `[(group)]`, `[(pageSize)]`) instead.
-- The export needs every record from a server, or a format other than CSV and Excel, such as PDF. Produce it in your application from your data.
+- The export needs every record from a server, or a document of its own, such as an invoice or a report with charts. Produce it in your application from your data.
 
 ## Import & Quick Start
 
@@ -25,6 +25,7 @@ protected readonly state = signal<GridState | null>(null);
 ```html
 <button monaButton type="button" (click)="gridExport.exportCsv('orders.csv')">Export as CSV</button>
 <button monaButton type="button" (click)="gridExport.exportExcel('orders.xlsx')">Export as Excel</button>
+<button monaButton type="button" (click)="gridExport.exportPdf('orders.pdf')">Export as PDF</button>
 <mona-grid
     #gridExport="monaGridExport"
     aria-label="Orders"
@@ -44,7 +45,39 @@ protected readonly state = signal<GridState | null>(null);
 grid-state-export/saved-state
 ```
 
-The example reads a saved state when it starts and writes every new one to `localStorage`. Sort a column, change the page size or move a column, then reload the page: the grid comes back the same. The toolbar's buttons download the rows as `orders.csv` and `orders.xlsx`. In the CSV file the customer `=Island Trading` is written as `'=Island Trading`, so a spreadsheet doesn't run it as a formula; the workbook holds it as text, so it needs no quote. The Order Date column is a real date in the workbook, shown in your spreadsheet's date format.
+The example reads a saved state when it starts and writes every new one to `localStorage`. Sort a column, change the page size or move a column, then reload the page: the grid comes back the same. The toolbar's buttons download the rows as `orders.csv`, `orders.xlsx` and `orders.pdf`. In the CSV file the customer `=Island Trading` is written as `'=Island Trading`, so a spreadsheet doesn't run it as a formula; the workbook holds it as text, so it needs no quote. The Order Date column is a real date in the workbook, shown in your spreadsheet's date format.
+
+### PDF Options and Fonts
+
+`exportPdf` takes a file name, or options:
+
+```typescript
+private readonly gridExport = viewChild.required(GridExportDirective);
+
+protected exportPdf(): Promise<void> {
+    return this.gridExport().exportPdf({
+        filename: "orders.pdf",
+        font: { regular: "/fonts/NotoSansJP-Regular.ttf", bold: "/fonts/NotoSansJP-Bold.ttf" },
+        orientation: "landscape",
+        paperSize: "Letter",
+        title: "Orders, January"
+    });
+}
+```
+
+| Option | Default | What it does |
+| :--- | :--- | :--- |
+| `filename` | `"export.pdf"` | The downloaded file's name. |
+| `title` | none | A heading above the table on the first page, and the document's title in the reader. |
+| `paperSize` | `"A4"` | `"A3"`, `"A4"`, `"Legal"`, `"Letter"`, or `[width, height]` in points (1/72 inch). |
+| `orientation` | `"portrait"` | `"portrait"` or `"landscape"`. |
+| `margin` | `36` | The space around the table, in points. |
+| `fontSize` | `9` | The text size in points, before a wide table shrinks to fit. |
+| `font` | none | A TrueType font to embed: `regular`, an optional `bold`, and `collectionIndex` for a `.ttc` collection. |
+
+Without `font`, the text is set in Helvetica, which every PDF reader has, so nothing is embedded and the file stays small. Helvetica shows Western European text only (the Windows-1252 characters); anything else, such as Chinese, Japanese, Korean, Greek or Cyrillic, prints as `?`. Give a font that has those characters, as a URL or as bytes you've loaded, and the export embeds only the glyphs the document uses, so the file grows by tens of kilobytes rather than by the font's size. Characters the font hasn't still print in Helvetica, or as `?`. Without a `bold` face, the header and title are drawn in the regular face, thickened.
+
+The font needs TrueType outlines: a `.ttf` file, or a `.ttc` collection with `collectionIndex`. The export rejects most `.otf` files, which have CFF outlines, and web fonts (`.woff`, `.woff2`), with an error that says so. A variable font prints at its default instance, often its lightest weight, so use a static font of the weight you want. A URL is fetched at each export, so serve it with caching headers, or load it once and pass the bytes.
 
 ### Applying a State from Code
 
@@ -96,7 +129,19 @@ The `state` model updates after each change people make, and a column resize is 
 | Column widths | The columns' widths. |
 | A right-to-left layout | A right-to-left sheet. |
 
-Footers, aggregates and row groups aren't exported, in either format. The workbook is built in the browser, without a dependency, and compressed where the browser supports `CompressionStream`.
+`exportPdf(options?)` prints the same rows and columns as a table, and returns a promise that resolves once the download starts, or rejects when a font can't be loaded or read.
+
+| In the grid | In the PDF |
+| :--- | :--- |
+| Cell values | The text the cells show: each column's `format`, and numbers and dates in the grid's locale. Cell templates aren't used. |
+| `number` columns | Aligned to the end of their cells. |
+| Long text | Wrapped, at spaces or between Chinese, Japanese and Korean characters. A row never splits across pages; a cell taller than a page is cut short with an ellipsis. |
+| Column groups | Header cells spanning their columns, above the column titles. |
+| Column widths | The columns' widths, at 3/4 of a point per pixel. A table wider than the page shrinks to fit, and its text with it, to 65% at most and never below 5 points. |
+| Many rows | Pages, each with the header on top and its number, such as `2 / 5`, at the bottom. |
+| A right-to-left layout | The first column on the right. The text inside a cell isn't reordered or shaped, so Arabic and Hebrew don't read correctly: export those as CSV or Excel. |
+
+Footers, aggregates and row groups aren't exported, in any format. In a [tree list](/components/grid-tree), every row is exported, collapsed or not, in tree order: the workbook groups each row's children into an outline you can collapse, and indents the tree column, as the PDF does. The workbook and the PDF are built in the browser, without a dependency, and compressed where the browser supports `CompressionStream`.
 
 ## Accessibility
 

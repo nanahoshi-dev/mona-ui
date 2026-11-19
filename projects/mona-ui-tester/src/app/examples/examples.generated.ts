@@ -733,6 +733,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./grid-rows/master-detail/master-detail-example.component").then(module => module.GridMasterDetailExampleComponent),
         mainFile: "master-detail-example.component.ts"
     },
+    "grid-selection/range": {
+        files: ["range-example.component.ts", "range-example.component.html"],
+        load: () => import("./grid-selection/range/range-example.component").then(module => module.GridRangeSelectionExampleComponent),
+        mainFile: "range-example.component.ts"
+    },
     "grid-selection/selection": {
         files: ["selection-example.component.ts", "selection-example.component.html"],
         load: () => import("./grid-selection/selection/selection-example.component").then(module => module.GridSelectionExampleComponent),
@@ -757,6 +762,16 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         files: ["saved-state-example.component.ts", "saved-state-example.component.html"],
         load: () => import("./grid-state-export/saved-state/saved-state-example.component").then(module => module.GridSavedStateExampleComponent),
         mainFile: "saved-state-example.component.ts"
+    },
+    "grid-tree/org-chart": {
+        files: ["org-chart-example.component.ts", "org-chart-example.component.html"],
+        load: () => import("./grid-tree/org-chart/org-chart-example.component").then(module => module.GridTreeOrgChartExampleComponent),
+        mainFile: "org-chart-example.component.ts"
+    },
+    "grid-tree/tasks": {
+        files: ["tasks-example.component.ts", "tasks-example.component.html"],
+        load: () => import("./grid-tree/tasks/tasks-example.component").then(module => module.GridTreeTasksExampleComponent),
+        mainFile: "tasks-example.component.ts"
     },
     "grid/cell-formatting": {
         files: ["cell-formatting-example.component.ts", "cell-formatting-example.component.html"],

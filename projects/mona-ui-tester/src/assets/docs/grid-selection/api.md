@@ -4,13 +4,17 @@
 
 Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to its reference page, with every input, output, property and method.
 
-| Name | Kind |
-| --- | --- |
-| [`GridSelectableDirective`](/api/grid/GridSelectableDirective) | Directive |
+| Name | Kind | Description |
+| --- | --- | --- |
+| [`GridRangeSelectableDirective`](/api/grid/GridRangeSelectableDirective) | Directive | Lets the user select a rectangle of cells: drag across them with the mouse, Shift+click the far corner, or extend from the focused cell with Shift and the arrow keys. |
+| [`GridSelectableDirective`](/api/grid/GridSelectableDirective) | Directive |  |
 
 ### Types
 
 | Type | Kind | Description |
 | --- | --- | --- |
+| [`GridCellRange`](/api/grid/GridCellRange) | Interface | The cells a range selection covers: the data items of its rows and the fields of its columns, each in the order the grid shows them. |
+| [`GridRangePasteChange`](/api/grid/GridRangePasteChange) | Interface | One row's pasted values: the row as it was, and as it is with the values in. |
+| [`GridRangePasteEvent`](/api/grid/GridRangePasteEvent) | Interface | What a paste into the grid's cells would change. |
 | [`SelectableOptions`](/api/grid/SelectableOptions) | Interface |  |
 | [`GridKeySelector`](/api/grid/GridKeySelector) | Type alias | The field holding a row's key, or a function returning it. |

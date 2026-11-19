@@ -1,0 +1,51 @@
+@let g = grid();
+@let t = treeBinding();
+@let c = columns();
+
+<app-parts-demo-container
+    eventsHint="Expand or collapse a task with its toggle, the arrow keys or the buttons to see treeExpandedKeysChange. Keys set from code don't emit it."
+    [eventLog]="eventLog"
+    [parts]="parts()"
+    [(values)]="values">
+    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-medium" id="grid-tree-data-shape">Data</span>
+            <mona-segmented
+                aria-labelledby="grid-tree-data-shape"
+                size="small"
+                [options]="shapeOptions"
+                [value]="shape()"
+                (valueChange)="onShapeChange($event)"></mona-segmented>
+        </div>
+        <div class="flex items-center gap-2">
+            <button monaButton size="small" type="button" (click)="onExpandAll()">Expand all</button>
+            <button monaButton size="small" type="button" (click)="onCollapseAll()">Collapse all</button>
+        </div>
+        <p class="text-sm" aria-live="polite">Expanded: {{ expandedText() }}</p>
+    </div>
+
+    @if (ready()) {
+        <mona-grid
+            class="h-112 w-full"
+            rowKey="id"
+            [aria-label]="g.ariaLabel"
+            [children]="t.children"
+            [data]="data()"
+            monaGridTree
+            [pageSize]="g.pageSize"
+            [parentKey]="t.parentKey"
+            [treeExpandedKeys]="expandedKeys()"
+            (treeExpandedKeysChange)="onExpandedKeysChange($event)">
+            <mona-grid-column field="name" [expandable]="c.name.expandable" [title]="c.name.title"></mona-grid-column>
+            <mona-grid-column
+                field="owner"
+                [expandable]="c.owner.expandable"
+                [title]="c.owner.title"></mona-grid-column>
+            <mona-grid-column
+                field="hours"
+                type="number"
+                [expandable]="c.hours.expandable"
+                [title]="c.hours.title"></mona-grid-column>
+        </mona-grid>
+    }
+</app-parts-demo-container>

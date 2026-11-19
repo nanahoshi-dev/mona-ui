@@ -436,11 +436,28 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                 }
             ),
             component(
+                "grid-tree",
+                "Tree List",
+                "grid",
+                "Show hierarchical rows in a grid, nested or linked by a parent key, with expandable levels.",
+                { apiExports: ["GridTreeChildren", "GridTreeDirective"] }
+            ),
+            component(
                 "grid-selection",
                 "Selection",
                 "grid",
-                "Select single or multiple rows by key, with checkboxes, row clicks and the keyboard.",
-                { apiExports: ["GridKeySelector", "GridSelectableDirective", "SelectableOptions"] }
+                "Select rows by key with checkboxes, clicks and the keyboard, or a range of cells to copy and paste.",
+                {
+                    apiExports: [
+                        "GridCellRange",
+                        "GridKeySelector",
+                        "GridRangePasteChange",
+                        "GridRangePasteEvent",
+                        "GridRangeSelectableDirective",
+                        "GridSelectableDirective",
+                        "SelectableOptions"
+                    ]
+                }
             ),
             component(
                 "grid-editing",
@@ -523,11 +540,15 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                 "grid-state-export",
                 "State & Export",
                 "grid",
-                "Save and restore the grid's columns, sort, filter, groups and page size, and export rows as CSV or Excel.",
+                "Save and restore the grid's columns, sort, filter, groups and page size, and export rows as CSV, Excel or PDF.",
                 {
                     apiExports: [
                         "GridColumnState",
                         "GridExportDirective",
+                        "GridPdfExportOptions",
+                        "GridPdfFont",
+                        "GridPdfFontSource",
+                        "GridPdfPaperSize",
                         "GridState",
                         "GridStateCompositeFilterDescriptor",
                         "GridStateFilterDescriptor",
