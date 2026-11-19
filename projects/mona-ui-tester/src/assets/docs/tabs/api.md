@@ -4,14 +4,15 @@
 
 Everything below is imported from `@nanahoshi/mona-ui/tabs`. Each name links to its reference page, with every input, output, property and method.
 
-| Name | Kind |
-| --- | --- |
-| [`TabsComponent`](/api/tabs/TabsComponent) | Component |
-| [`TabComponent`](/api/tabs/TabComponent) | Component |
-| [`TabContentTemplateDirective`](/api/tabs/TabContentTemplateDirective) | Directive |
-| [`TabTitleTemplateDirective`](/api/tabs/TabTitleTemplateDirective) | Directive |
-| [`TabCloseEvent`](/api/tabs/TabCloseEvent) | Class |
-| [`TabSelectEvent`](/api/tabs/TabSelectEvent) | Class |
+| Name | Kind | Description |
+| --- | --- | --- |
+| [`TabsComponent`](/api/tabs/TabsComponent) | Component |  |
+| [`TabComponent`](/api/tabs/TabComponent) | Component |  |
+| [`TabContentTemplateDirective`](/api/tabs/TabContentTemplateDirective) | Directive |  |
+| [`TabTitleTemplateDirective`](/api/tabs/TabTitleTemplateDirective) | Directive |  |
+| [`TabCloseEvent`](/api/tabs/TabCloseEvent) | Class |  |
+| [`TabReorderEvent`](/api/tabs/TabReorderEvent) | Class | A tab dragged, or moved with Control+Shift and an arrow key, Home or End, to a new place in a sortable tab strip. |
+| [`TabSelectEvent`](/api/tabs/TabSelectEvent) | Class |  |
 
 ### Types
 

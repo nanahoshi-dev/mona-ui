@@ -1,0 +1,18 @@
+<ul
+    aria-label="Reading list"
+    [class]="listClass()"
+    [(monaSortable)]="books"
+    [sortableDisabled]="disabled()"
+    [sortableLabel]="label()"
+    [sortableLockAxis]="lockAxis()"
+    [sortableOrientation]="orientation()">
+    @for (book of books(); track book) {
+        <li
+            tabindex="0"
+            class="cursor-grab whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-indicator"
+            [class]="itemClass()"
+            [monaSortableItem]="book">
+            {{ book }}
+        </li>
+    }
+</ul>

@@ -788,6 +788,16 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./input/types/types-example.component").then(module => module.InputTypesExampleComponent),
         mainFile: "types-example.component.ts"
     },
+    "kanban/board": {
+        files: ["board-example.component.ts", "board-example.component.html"],
+        load: () => import("./kanban/board/board-example.component").then(module => module.KanbanBoardExampleComponent),
+        mainFile: "board-example.component.ts"
+    },
+    "kanban/templates": {
+        files: ["templates-example.component.ts", "templates-example.component.html"],
+        load: () => import("./kanban/templates/templates-example.component").then(module => module.KanbanTemplatesExampleComponent),
+        mainFile: "templates-example.component.ts"
+    },
     "label/for": {
         files: ["for-example.component.ts", "for-example.component.html"],
         load: () => import("./label/for/for-example.component").then(module => module.LabelForExampleComponent),
@@ -1248,6 +1258,21 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./slider/vertical/vertical-example.component").then(module => module.SliderVerticalExampleComponent),
         mainFile: "vertical-example.component.ts"
     },
+    "sortable/connected": {
+        files: ["connected-example.component.ts", "connected-example.component.html"],
+        load: () => import("./sortable/connected/connected-example.component").then(module => module.SortableConnectedExampleComponent),
+        mainFile: "connected-example.component.ts"
+    },
+    "sortable/list": {
+        files: ["list-example.component.ts", "list-example.component.html"],
+        load: () => import("./sortable/list/list-example.component").then(module => module.SortableListExampleComponent),
+        mainFile: "list-example.component.ts"
+    },
+    "sortable/tiles": {
+        files: ["tiles-example.component.ts", "tiles-example.component.html"],
+        load: () => import("./sortable/tiles/tiles-example.component").then(module => module.SortableTilesExampleComponent),
+        mainFile: "tiles-example.component.ts"
+    },
     "spinner/inline": {
         files: ["inline-example.component.ts", "inline-example.component.html"],
         load: () => import("./spinner/inline/inline-example.component").then(module => module.SpinnerInlineExampleComponent),
@@ -1347,6 +1372,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         files: ["selected-index-example.component.ts", "selected-index-example.component.html"],
         load: () => import("./tabs/selected-index/selected-index-example.component").then(module => module.TabsSelectedIndexExampleComponent),
         mainFile: "selected-index-example.component.ts"
+    },
+    "tabs/sortable": {
+        files: ["sortable-example.component.ts", "sortable-example.component.html"],
+        load: () => import("./tabs/sortable/sortable-example.component").then(module => module.TabsSortableExampleComponent),
+        mainFile: "sortable-example.component.ts"
     },
     "tabs/vertical": {
         files: ["vertical-example.component.ts", "vertical-example.component.html"],
