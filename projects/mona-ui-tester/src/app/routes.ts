@@ -354,6 +354,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "grid-tree",
+                loadComponent: () =>
+                    import("./docs/components/grid-tree-doc/grid-tree-doc.component").then(m => m.GridTreeDocComponent)
+            },
+            {
                 path: "grid-selection",
                 loadComponent: () =>
                     import("./docs/components/grid-selection-doc/grid-selection-doc.component").then(

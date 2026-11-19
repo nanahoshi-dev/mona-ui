@@ -1267,7 +1267,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Whether the cell's row or group is expanded; ArrowRight expands a collapsed group row and\nArrowLeft collapses an expanded one.",
+        "description": "Whether the cell's row or group is expanded; ArrowRight expands a collapsed group row or tree row\nand ArrowLeft collapses an expanded one. `null` when there's nothing to expand.",
         "kind": "input",
         "name": "expanded",
         "type": "boolean | null",
@@ -1345,6 +1345,39 @@
         "kind": "output",
         "name": "toggleExpand",
         "type": "void"
+      },
+      {
+        "description": "Whether the cell shows its row's tree toggle: ArrowRight expands the row and ArrowLeft collapses\nit, and ArrowLeft at the start of the row moves to the parent row.",
+        "kind": "input",
+        "name": "treeCell",
+        "type": "boolean",
+        "defaultValue": "false"
+      }
+    ]
+  },
+  "GridRangeSelectableDirective": {
+    "name": "GridRangeSelectableDirective",
+    "selector": "\"mona-grid[monaGridRangeSelectable]\"",
+    "inputs": [
+      {
+        "description": "Turns range selection on; `false` turns it off.",
+        "kind": "input",
+        "name": "enabled",
+        "type": "boolean",
+        "alias": "monaGridRangeSelectable",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Emitted when the user changes the selected range, with the data items of its rows and the\nfields of its columns, and with `null` when the range is cleared.",
+        "kind": "output",
+        "name": "rangeChange",
+        "type": "GridCellRange<T> | null"
+      },
+      {
+        "description": "Emitted after a paste into the cells, with each changed row's data as it was and with the pasted\nvalues. The grid doesn't change its data: save `rowData` as you would an edit. Only editable columns take\nvalues, and only text that fits the column's type.",
+        "kind": "output",
+        "name": "rangePaste",
+        "type": "GridRangePasteEvent<T>"
       }
     ]
   },
@@ -1520,6 +1553,39 @@
         "name": "state",
         "type": "GridState | null",
         "defaultValue": "null"
+      }
+    ]
+  },
+  "GridTreeDirective": {
+    "name": "GridTreeDirective",
+    "selector": "\"mona-grid[monaGridTree]\"",
+    "inputs": [
+      {
+        "description": "The field holding a data item's child items, or a function returning them. Use it when the\ngrid's `data` holds the root items and each item holds its children.",
+        "kind": "input",
+        "name": "children",
+        "type": "GridTreeChildren<T> | \"\"",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The parent key of each data item: the field holding the `rowKey` value of its parent, or a\nfunction returning it. Use it when the grid's `data` is flat; the grid needs a `rowKey`. An item whose parent\nisn't in the data is a root.",
+        "kind": "input",
+        "name": "parentKey",
+        "type": "GridKeySelector<T>",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The keys of the expanded tree rows: their `rowKey` values, or the data items when the grid has\nno `rowKey`. Rows start collapsed. It's apart from the grid's own `expandedKeys`, which opens detail rows.",
+        "kind": "input",
+        "name": "treeExpandedKeys",
+        "type": "Iterable<unknown>",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "Emitted with every expanded tree row's key when the user expands or collapses a row, and when\nfiltering expands the rows above its matches. Not emitted for a `treeExpandedKeys` value set from code.",
+        "kind": "output",
+        "name": "treeExpandedKeysChange",
+        "type": "unknown[]"
       }
     ]
   },
@@ -12606,6 +12672,13 @@
         "name": "editable",
         "type": "boolean | null",
         "defaultValue": "null"
+      },
+      {
+        "description": "In a tree grid (`monaGridTree`), whether this column shows the expand toggles and indents its\ncells by each row's level. Without it on any column, the first visible data column does.",
+        "kind": "input",
+        "name": "expandable",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "The field name of the data property to display in this column.",

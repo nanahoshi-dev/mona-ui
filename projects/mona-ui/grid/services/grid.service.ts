@@ -8,6 +8,7 @@ import {
     Injectable,
     Injector,
     isDevMode,
+    LOCALE_ID,
     PLATFORM_ID,
     signal,
     TemplateRef
@@ -48,6 +49,7 @@ import type { FilterableOptions } from "../models/FilterableOptions";
 import { GridAddEvent } from "../models/GridAddEvent";
 import type { GridAggregateBucket, GridGroupAggregate } from "../models/GridAggregate";
 import { GridCancelEvent, type GridCancelReason } from "../models/GridCancelEvent";
+import type { GridCellAddress, GridCellRangeState } from "../models/GridCellRange";
 import type { GridDataState } from "../models/GridDataState";
 import type { GridEditContext } from "../models/GridEditContext";
 import { GridEditEvent } from "../models/GridEditEvent";
@@ -57,6 +59,7 @@ import type { GridViewRow } from "../models/GridGroup";
 import { GridKeySelector } from "../models/GridKeySelector";
 import type { GridRowClass } from "../models/GridRowClass";
 import type { GridLayoutColumn } from "../models/GridLayoutColumn";
+import type { GridRangePasteChange, GridRangePasteEvent } from "../models/GridRangePasteEvent";
 import { GridRemoveEvent } from "../models/GridRemoveEvent";
 import { GridSaveEvent } from "../models/GridSaveEvent";
 import type {
@@ -69,6 +72,7 @@ import type {
     GridStateSortDescriptor
 } from "../models/GridState";
 import type { GridStickyState } from "../models/GridStickyState";
+import type { GridTreeChildren, GridTreeOptions } from "../models/GridTreeOptions";
 import { GroupableOptions } from "../models/GroupableOptions";
 import { GroupDescriptor } from "../models/GroupDescriptor";
 import { PaginationState } from "../models/PaginationState";
@@ -82,11 +86,20 @@ import { SelectableOptions } from "../models/SelectableOptions";
 import { SortableOptions } from "../models/SortableOptions";
 import type { StructuralColumnDescriptor } from "../models/StructuralColumn";
 import { GRID_DEFAULT_MESSAGES } from "../i18n/grid.default-messages";
+import { getGridCellText } from "./grid-cell-format";
+import { parseClipboardText, parsePastedValue, toClipboardText } from "./grid-clipboard";
 import { buildHeaderGroupRows, orderColumnsByGroup, resolveColumnMoveIndex } from "./grid-column-groups";
 import { partitionFilters, toFilterMenuValue } from "./grid-filter-state";
 import { buildGroupKey, groupKeyHasField, groupRowsByField } from "./grid-group-key";
 import { GridRowFlattenerService } from "./grid-row-flattener.service";
 import { isWellFormedGridState } from "./grid-state-validation";
+import {
+    buildGridTreeStructure,
+    buildGridTreeView,
+    getGridTreeAncestorUids,
+    type GridTreeRowInfo,
+    type GridTreeView
+} from "./grid-tree";
 
 // Flat projection of a Row used as the IterablePatchStore item type.
 // $rowId is injected to carry the row identity without modifying Row.data.
@@ -202,7 +215,19 @@ export class GridService {
     readonly #i18n = inject(MonaI18nService);
     readonly #injector = inject(Injector);
     readonly #liveAnnouncer = injectLiveAnnouncer();
+    readonly #locale = inject(LOCALE_ID);
     readonly #platformId = inject(PLATFORM_ID);
+    readonly #rangeColumnIndexById = computed(
+        () => new Map(this.rangeColumns().map((column, index) => [column.id, index] as const))
+    );
+    readonly #rangeRowIndexByUid = computed(() => {
+        const indices = new Map<string, number>();
+        let index = 0;
+        for (const row of this.rangeRows()) {
+            indices.set(row.uid, index++);
+        }
+        return indices;
+    });
     readonly #reorderableOptions = signal<ReorderableOptions>({ enabled: false });
     readonly #resizableOptions = signal<ResizableOptions>({ enabled: false });
     readonly #rowFlattener = inject(GridRowFlattenerService);
@@ -222,6 +247,45 @@ export class GridService {
     readonly #sortDescriptors = signal<readonly SortDescriptor[]>([]);
     readonly #textMeasureCache = new Map<string, number>();
     /** Each row's position in the filtered and sorted rows, by uid. */
+    /** The rows that match the filter in a tree grid, or `null` without a filter. */
+    readonly #treeMatches = computed<ReadonlySet<string> | null>(() => {
+        if (this.#treeOptions() == null || this.serverBindingEnabled()) {
+            return null;
+        }
+        const filters = this.getFilterDescriptors();
+        if (filters.length === 0) {
+            return null;
+        }
+        let query = Query.from(this.rows(), { locale: this.#i18n.localeId() });
+        for (const filter of filters) {
+            query = query.filter(filter, row => row.data);
+        }
+        return new Set(Array.from(query.run(), row => row.uid));
+    });
+    readonly #treeOptions = signal<GridTreeOptions | null>(null);
+    /** Each row's parent, from the nested children of the data; empty without `children`. */
+    readonly #treeParents = signal<ReadonlyMap<string, string | null>>(new Map());
+    readonly #treeStructure = computed(() => {
+        const options = this.#treeOptions();
+        const rows = this.rows();
+        if (options?.children != null) {
+            const parents = this.#treeParents();
+            return buildGridTreeStructure(rows, row => parents.get(row.uid) ?? null);
+        }
+        const parentKey = options?.parentKey;
+        if (!parentKey) {
+            return buildGridTreeStructure(rows, () => null);
+        }
+        const rowKey = this.rowKey();
+        const uidByKey = new Map<unknown, string>();
+        for (const row of rows) {
+            uidByKey.set(this.getRowUidKey(row.data, rowKey) ?? row.data, row.uid);
+        }
+        return buildGridTreeStructure(rows, row => {
+            const key = this.getRowUidKey(row.data, parentKey);
+            return key == null ? null : (uidByKey.get(key) ?? null);
+        });
+    });
     readonly #viewRowIndexByUid = computed(() => {
         const indices = new Map<string, number>();
         let index = 0;
@@ -235,6 +299,11 @@ export class GridService {
     #groupRequest: readonly GroupDescriptor[] = [];
     /** The selection last loaded from the `selectedKeys` input, so its echo isn't reported as a user change. */
     #loadedSelectedKeys: ImmutableSet<unknown> | null = null;
+    /** The data and key last given to `setRows`, so a change to the tree options can read the data again. */
+    #rowSource: {
+        readonly data: Iterable<Record<PropertyKey, unknown>>;
+        readonly rowKey: GridKeySelector<unknown>;
+    } | null = null;
     public readonly add$ = new Subject<GridAddEvent>();
     public readonly addRowData = computed(() => {
         const session = this.#editSession();
@@ -253,13 +322,9 @@ export class GridService {
         if (!aggregateColumns.any()) {
             return ImmutableDictionary.create<string, GridAggregateBucket>();
         }
-        return this.createAggregateMap(this.viewRows().toArray(), aggregateColumns.toArray());
+        return this.createAggregateMap(this.getAggregateSourceRows(), aggregateColumns.toArray());
     });
-    public readonly aggregateRows = computed(() =>
-        this.viewRows()
-            .select(row => row.data)
-            .toArray()
-    );
+    public readonly aggregateRows = computed(() => this.getAggregateSourceRows().map(row => row.data));
     public readonly allBulkSelectionRowsSelected = computed(() => {
         const scopeSize = this.#bulkSelectionRowKeys().size;
         return scopeSize > 0 && this.#bulkSelectionSelectedCount() === scopeSize;
@@ -287,6 +352,35 @@ export class GridService {
     public readonly cancel$ = new Subject<GridCancelEvent>();
     public readonly cellEdit$ = new Subject<CellEditEvent>();
     /** Set of currently collapsed group keys (global, shared by both paginated and virtual list). */
+    /** The range of cells the user selected, while range selection is on. */
+    public readonly cellRange = signal<GridCellRangeState | null>(null);
+    /**
+     * The selected range as row and column indices into `rangeRows` and `rangeColumns`, both ends included, or
+     * `null` without a range or when its cells aren't in the view any more.
+     */
+    public readonly cellRangeBounds = computed(() => {
+        const range = this.cellRange();
+        if (range == null) {
+            return null;
+        }
+        const rowIndices = this.#rangeRowIndexByUid();
+        const columnIndices = this.#rangeColumnIndexById();
+        const anchorRow = rowIndices.get(range.anchor.rowUid);
+        const focusRow = rowIndices.get(range.focus.rowUid);
+        const anchorColumn = columnIndices.get(range.anchor.columnId);
+        const focusColumn = columnIndices.get(range.focus.columnId);
+        if (anchorRow == null || focusRow == null || anchorColumn == null || focusColumn == null) {
+            return null;
+        }
+        return {
+            firstColumn: Math.min(anchorColumn, focusColumn),
+            firstRow: Math.min(anchorRow, focusRow),
+            lastColumn: Math.max(anchorColumn, focusColumn),
+            lastRow: Math.max(anchorRow, focusRow)
+        };
+    });
+    /** Emits after the user changes the selected range, and when it's cleared. */
+    public readonly cellRangeChange$ = new Subject<void>();
     public readonly collapsedGroupKeys = signal(ImmutableSet.create<string>());
     public readonly columnReorder$ = new Subject<ColumnReorderEvent>();
     public readonly columnResize$ = new Subject<ColumnResizeEvent>();
@@ -350,6 +444,10 @@ export class GridService {
     /** The grouped columns; a width or visibility change elsewhere doesn't produce a new list. */
     public readonly groupColumns = computed(
         () => {
+            // A tree grid shows its own hierarchy, so it doesn't group.
+            if (this.#treeOptions() != null) {
+                return ImmutableList.create<Column>();
+            }
             const columnsById = new Map(this.columns().select(column => [column.id, column] as const));
             return this.#groupColumnIds()
                 .select(id => columnsById.get(id))
@@ -473,6 +571,17 @@ export class GridService {
         this.serverBindingEnabled() ? this.serverTotal() : this.viewRowCount()
     );
     public readonly paginationState = signal<PaginationState>({ page: 1, skip: 0, take: 10 });
+    /** The columns a range of cells spans: the visible data columns, in the order they're shown. */
+    public readonly rangeColumns = computed(() =>
+        this.visibleColumns()
+            .where(column => column.kind === "data")
+            .toArray()
+    );
+    /** The rows a range of cells spans: the current page's, or every row of a virtual grid's view. */
+    public readonly rangeRows = computed(() =>
+        this.virtualScrollOptions().enabled ? this.viewRows() : this.viewPageRows()
+    );
+    public readonly rangeSelectionEnabled = signal(false);
     public readonly remove$ = new Subject<GridRemoveEvent>();
     /** How many rows the body draws, detail and group rows included; the body list keeps it current. */
     public readonly renderedBodyRowCount = signal(0);
@@ -483,7 +592,9 @@ export class GridService {
     public readonly rowEdit$ = new Subject<RowEditEvent>();
     public readonly rowKey = signal<GridKeySelector<unknown> | null>(null);
     public readonly rowReorder$ = new Subject<RowReorderEvent>();
-    public readonly rowReorderColumnVisible = computed(() => this.rowReorderableOptions().enabled === true);
+    public readonly rowReorderColumnVisible = computed(
+        () => this.rowReorderableOptions().enabled === true && this.#treeOptions() == null
+    );
     public readonly rowReorderColumnWidth = 36;
     public readonly rowReorderDisabledReason = computed<RowReorderDisabledReason>(() => {
         if (!this.rowReorderableOptions().enabled) {
@@ -587,6 +698,51 @@ export class GridService {
         const dataWidth = columns.aggregate((acc, c) => acc + this.getColumnWidth(c), 0);
         return this.normalizeRenderedWidth(dataWidth + this.leadingStructuralWidth());
     });
+    /** The column that shows a tree's toggles: the first visible data column marked `expandable`, or else the first. */
+    public readonly treeColumnId = computed(() => {
+        if (this.#treeOptions() == null) {
+            return null;
+        }
+        const dataColumns = this.visibleColumns().where(column => column.kind === "data");
+        return (
+            (dataColumns.firstOrDefault(column => column.expandable === true) ?? dataColumns.firstOrDefault())?.id ??
+            null
+        );
+    });
+    public readonly treeEnabled = computed(() => this.#treeOptions() != null);
+    /** The keys of the expanded tree rows: their `rowKey` values, or the data items without a `rowKey`. */
+    public readonly treeExpandedKeys = signal(ImmutableSet.create<unknown>());
+    /** Emits the expanded tree rows' keys after the user expands or collapses a row. */
+    public readonly treeExpandedKeysChange$ = new Subject<unknown[]>();
+    /** The rows above the filter's matches, which have to be expanded for every match to show. */
+    public readonly treeMatchAncestorUids = computed(
+        () => {
+            const matches = this.#treeMatches();
+            return matches == null ? [] : getGridTreeAncestorUids(matches, this.#treeStructure().parents);
+        },
+        { equal: (left, right) => left.length === right.length && left.every((uid, index) => uid === right[index]) }
+    );
+    /** The tree grid's rows in display order with each one's place in the tree, or `null` without `monaGridTree`. */
+    public readonly treeView = computed<GridTreeView | null>(() => {
+        if (this.#treeOptions() == null) {
+            return null;
+        }
+        const locale = this.#i18n.localeId();
+        const sorts = this.serverBindingEnabled() ? [] : this.#sortDescriptors();
+        const expandedKeys = this.treeExpandedKeys();
+        return buildGridTreeView(this.#treeStructure(), {
+            isExpanded: row => expandedKeys.contains(this.getRowIdentityKey(row)),
+            matches: this.#treeMatches(),
+            sort: rows =>
+                sorts.length === 0
+                    ? rows
+                    : Array.from(
+                          Query.from(rows, { locale })
+                              .sort(sorts, row => row.data)
+                              .run()
+                      )
+        });
+    });
     public readonly viewPageRows = computed(() => {
         if (this.serverBindingEnabled()) {
             return this.viewRows();
@@ -601,6 +757,10 @@ export class GridService {
     });
     public readonly viewRowCount = computed(() => this.viewRows().size());
     public readonly viewRows = computed(() => {
+        const tree = this.treeView();
+        if (tree != null) {
+            return ImmutableList.create(tree.rows);
+        }
         const rows = this.rows();
         if (this.serverBindingEnabled()) {
             return rows;
@@ -806,6 +966,15 @@ export class GridService {
         return state;
     }
 
+    /** Clears the selected range of cells. */
+    public clearCellRange(): void {
+        if (this.cellRange() == null) {
+            return;
+        }
+        this.cellRange.set(null);
+        this.cellRangeChange$.next();
+    }
+
     public clearCollapsedGroups(predicate?: (key: string) => boolean): void {
         if (predicate) {
             this.collapsedGroupKeys.update(keys => keys.where(k => !predicate(k)).toImmutableSet());
@@ -888,6 +1057,20 @@ export class GridService {
         this.clearEditSession();
     }
 
+    /** Expands the given tree rows, as filtering does for the rows above its matches, and reports the change. */
+    public expandTreeRows(uids: Iterable<string>): void {
+        const rowsByUid = new Map(this.rows().select(row => [row.uid, row] as const));
+        const keys = Array.from(uids, uid => rowsByUid.get(uid))
+            .filter((row): row is Row => row != null)
+            .map(row => this.getRowIdentityKey(row))
+            .filter(key => !this.treeExpandedKeys().contains(key));
+        if (keys.length === 0) {
+            return;
+        }
+        this.treeExpandedKeys.update(current => current.addAll(keys));
+        this.treeExpandedKeysChange$.next(this.treeExpandedKeys().toArray());
+    }
+
     public findTextWidthOfColumn(column: Column, element: HTMLTableCellElement): number {
         if (!isPlatformBrowser(this.#platformId)) {
             return 0;
@@ -946,6 +1129,41 @@ export class GridService {
         return { count, indices };
     }
 
+    /** The selected range's rows and columns, or `null` without a range. */
+    public getCellRange(): { readonly columns: readonly Column[]; readonly rows: readonly Row[] } | null {
+        const bounds = this.cellRangeBounds();
+        if (bounds == null) {
+            return null;
+        }
+        return {
+            columns: this.rangeColumns().slice(bounds.firstColumn, bounds.lastColumn + 1),
+            rows: this.rangeRows()
+                .skip(bounds.firstRow)
+                .take(bounds.lastRow - bounds.firstRow + 1)
+                .toArray()
+        };
+    }
+
+    /**
+     * The selected range as tab-separated text, with each cell as the grid shows it, and tells assistive technology
+     * how many cells it holds. `null` without a range.
+     */
+    public getCellRangeText(): string | null {
+        const range = this.getCellRange();
+        if (range == null) {
+            return null;
+        }
+        const locales = { angularLocale: this.#locale, localeId: this.#i18n.localeId() };
+        const text = toClipboardText(
+            range.rows.map(row => range.columns.map(column => getGridCellText(row.data, column, locales)))
+        );
+        void this.#liveAnnouncer.announce(
+            this.messages().cellsCopied(range.rows.length * range.columns.length),
+            "polite"
+        );
+        return text;
+    }
+
     public getColumnStateId(column: Column): string | null {
         return column.stateKey || column.field || null;
     }
@@ -965,6 +1183,14 @@ export class GridService {
     }
 
     /** Every applied filter: the column filters, then the filters across columns. */
+    /**
+     * The rows an export writes: the view's rows, or in a tree grid every row that passes the filter, in tree order
+     * whether or not its parents are expanded.
+     */
+    public getExportRows(): readonly Row[] {
+        return this.treeView()?.allRows ?? this.viewRows().toArray();
+    }
+
     public getFilterDescriptors(): CompositeFilterDescriptor[] {
         const columnFilters = this.appliedFilters()
             .values()
@@ -1021,6 +1247,16 @@ export class GridService {
         return this.#sortDescriptors().map(sort => ({ ...sort }));
     }
 
+    /** The uid of a tree row's parent, or `null` for a root row or outside a tree grid. */
+    public getTreeParentUid(rowUid: string): string | null {
+        return this.treeView()?.info.get(rowUid)?.parentUid ?? null;
+    }
+
+    /** The row's place in the tree, or `null` when the grid isn't a tree or the row isn't in its view. */
+    public getTreeRowInfo(row: Row): GridTreeRowInfo | null {
+        return this.treeView()?.info.get(row.uid) ?? null;
+    }
+
     public handleMultipleSelection(event: GridSelectionModifiers, row: Row): void {
         if (event.shiftKey) {
             this.selectRowRange(row);
@@ -1059,6 +1295,23 @@ export class GridService {
         }
         this.deselectAllRows();
         this.selectRow(row);
+    }
+
+    public isCellInRange(rowUid: string, columnId: string): boolean {
+        const bounds = this.cellRangeBounds();
+        if (bounds == null) {
+            return false;
+        }
+        const row = this.#rangeRowIndexByUid().get(rowUid);
+        const column = this.#rangeColumnIndexById().get(columnId);
+        return (
+            row != null &&
+            column != null &&
+            row >= bounds.firstRow &&
+            row <= bounds.lastRow &&
+            column >= bounds.firstColumn &&
+            column <= bounds.lastColumn
+        );
     }
 
     public isGroupCollapsed(groupKey: string): boolean {
@@ -1190,6 +1443,15 @@ export class GridService {
         this.syncColumnSortState();
     }
 
+    /** Sets the expanded tree rows from the `expandedKeys` input, without reporting a change. */
+    public loadTreeExpandedKeys(keys: Iterable<unknown> | null | undefined): void {
+        const next = ImmutableSet.create(keys ?? []);
+        const current = this.treeExpandedKeys();
+        if (next.size() !== current.size() || !next.all(key => current.contains(key))) {
+            this.treeExpandedKeys.set(next);
+        }
+    }
+
     public moveGroupColumn(column: Column, moveAs: "prev" | "next"): void {
         const previous = this.#groupColumnIds();
         this.#groupColumnIds.update(ids => {
@@ -1217,6 +1479,76 @@ export class GridService {
     }
 
     /** Ends an update whose row left the data or the view; the cancel can't be prevented. */
+    /**
+     * Works out what pasting tab-separated text changes: from the selected range's first cell, or from `at` without a
+     * range. A single value fills the whole range. Only editable columns take values, and only text that fits the
+     * column's type. Selects the cells the text covered and tells assistive technology how many cells changed.
+     * Returns `null` when the grid doesn't take pastes: range selection or editing is off, or an editor is open.
+     */
+    public pasteIntoCells(text: string, at: GridCellAddress | null): GridRangePasteEvent | null {
+        if (!this.rangeSelectionEnabled() || this.editableOptions().enabled !== true || this.isInEditMode()) {
+            return null;
+        }
+        const values = parseClipboardText(text);
+        const rows = this.rangeRows().toArray();
+        const columns = this.rangeColumns();
+        const bounds =
+            this.cellRangeBounds() ??
+            (at == null
+                ? null
+                : {
+                      firstColumn: this.#rangeColumnIndexById().get(at.columnId) ?? -1,
+                      firstRow: this.#rangeRowIndexByUid().get(at.rowUid) ?? -1,
+                      lastColumn: this.#rangeColumnIndexById().get(at.columnId) ?? -1,
+                      lastRow: this.#rangeRowIndexByUid().get(at.rowUid) ?? -1
+                  });
+        if (values.length === 0 || bounds == null || bounds.firstRow < 0 || bounds.firstColumn < 0) {
+            return null;
+        }
+        // One value fills the range; a block of values pastes from its first cell, as far as the view goes.
+        const fill = values.length === 1 && values[0].length === 1;
+        const lastRow = fill ? bounds.lastRow : Math.min(rows.length - 1, bounds.firstRow + values.length - 1);
+        const width = fill ? 1 : Math.max(...values.map(line => line.length));
+        const lastColumn = fill ? bounds.lastColumn : Math.min(columns.length - 1, bounds.firstColumn + width - 1);
+        const localeId = this.#i18n.localeId();
+        const changes: GridRangePasteChange[] = [];
+        let skippedCells = 0;
+        let pastedCells = 0;
+        for (let rowIndex = bounds.firstRow; rowIndex <= lastRow; rowIndex++) {
+            const row = rows[rowIndex];
+            const line = fill ? values[0] : values[rowIndex - bounds.firstRow];
+            const rowData: Record<PropertyKey, unknown> = { ...row.data };
+            const fields: string[] = [];
+            for (let columnIndex = bounds.firstColumn; columnIndex <= lastColumn; columnIndex++) {
+                const column = columns[columnIndex];
+                const cellText = fill ? line[0] : line[columnIndex - bounds.firstColumn];
+                if (cellText === undefined) {
+                    continue;
+                }
+                const parsed = column.editable ? parsePastedValue(cellText, column.dataType, localeId) : null;
+                if (parsed == null) {
+                    skippedCells++;
+                    continue;
+                }
+                if (!sameCellValue(row.data[column.field], parsed.value)) {
+                    rowData[column.field] = parsed.value;
+                    fields.push(column.field);
+                }
+                pastedCells++;
+            }
+            if (fields.length > 0) {
+                changes.push({ fields, originalRowData: row.data, rowData });
+            }
+        }
+        this.cellRange.set({
+            anchor: { columnId: columns[bounds.firstColumn].id, rowUid: rows[bounds.firstRow].uid },
+            focus: { columnId: columns[lastColumn].id, rowUid: rows[lastRow].uid }
+        });
+        this.cellRangeChange$.next();
+        void this.#liveAnnouncer.announce(this.messages().cellsPasted(pastedCells), "polite");
+        return { changes, skippedCells, text };
+    }
+
     public reconcileEditSession(): void {
         const context = this.#editContext();
         const session = this.#editSession();
@@ -1395,6 +1727,20 @@ export class GridService {
     }
 
     /** Ctrl+A or Cmd+A in the body: selects every row in the select-all scope. */
+    /** Selects every cell of the view: all its rows, or the page's, and every visible data column. */
+    public selectAllCells(): boolean {
+        const rows = this.rangeRows();
+        const columns = this.rangeColumns();
+        if (!this.rangeSelectionEnabled() || !rows.any() || columns.length === 0) {
+            return false;
+        }
+        this.setCellRange(
+            { columnId: columns[0].id, rowUid: rows.first().uid },
+            { columnId: columns[columns.length - 1].id, rowUid: rows.last().uid }
+        );
+        return true;
+    }
+
     public selectAllRowsFromKeyboard(): boolean {
         const options = this.selectableOptions();
         if (!options.enabled || options.mode !== "multiple") {
@@ -1429,6 +1775,19 @@ export class GridService {
         return true;
     }
 
+    /** Expands every tree row that has children, or collapses them all, and reports the change. */
+    public setAllTreeRowsExpanded(expanded: boolean): void {
+        const tree = this.treeView();
+        if (tree == null) {
+            return;
+        }
+        const keys = expanded
+            ? tree.allRows.filter(row => tree.info.get(row.uid)?.hasChildren).map(row => this.getRowIdentityKey(row))
+            : [];
+        this.treeExpandedKeys.set(ImmutableSet.create(keys));
+        this.treeExpandedKeysChange$.next(keys);
+    }
+
     public setBulkSelection(selected: boolean): void {
         if (this.selectableOptions().mode !== "multiple") {
             return;
@@ -1458,6 +1817,16 @@ export class GridService {
                 ? { ...column, calculatedWidth: widthByColumnId.get(column.id) ?? null }
                 : column
         );
+    }
+
+    /** Selects the cells from `anchor` to `focus`, both included, and reports the change. */
+    public setCellRange(anchor: GridCellAddress, focus: GridCellAddress): void {
+        const current = this.cellRange();
+        if (current != null && sameAddress(current.anchor, anchor) && sameAddress(current.focus, focus)) {
+            return;
+        }
+        this.cellRange.set({ anchor, focus });
+        this.cellRangeChange$.next();
     }
 
     public setColumnDefinitions(configs: readonly ColumnConfig[]): void {
@@ -1575,6 +1944,14 @@ export class GridService {
         }
     }
 
+    /** Turns range selection on or off; turning it off clears the range. */
+    public setRangeSelectionEnabled(enabled: boolean): void {
+        this.rangeSelectionEnabled.set(enabled);
+        if (!enabled) {
+            this.clearCellRange();
+        }
+    }
+
     /** Replaces the column reorder options; the feature is on unless `enabled` is `false`. */
     public setReorderableOptions(options: Partial<ReorderableOptions>): void {
         this.#reorderableOptions.set({ ...options, enabled: options.enabled !== false });
@@ -1631,25 +2008,47 @@ export class GridService {
         value: Iterable<Record<PropertyKey, unknown>>,
         rowKey: GridKeySelector<unknown> | null = null
     ): void {
+        this.#rowSource = { data: value, rowKey };
         const occurrences = new Map<string, number>();
         let duplicateKey = false;
         const rows: Row[] = [];
-        for (const data of value) {
-            const uid = this.getRowUid(data, rowKey);
-            const occurrence = (occurrences.get(uid) ?? 0) + 1;
-            occurrences.set(uid, occurrence);
-            if (occurrence > 1 && rowKey) {
-                duplicateKey = true;
+        const parents = new Map<string, string | null>();
+        const children = this.#treeOptions()?.children ?? null;
+        // The items on the path from the root, so an item that contains itself can't loop forever.
+        const path = new Set<Record<PropertyKey, unknown>>();
+        const addRows = (items: Iterable<Record<PropertyKey, unknown>>, parentUid: string | null): void => {
+            for (const data of items) {
+                if (path.has(data)) {
+                    continue;
+                }
+                const uid = this.getRowUid(data, rowKey);
+                const occurrence = (occurrences.get(uid) ?? 0) + 1;
+                occurrences.set(uid, occurrence);
+                if (occurrence > 1 && rowKey) {
+                    duplicateKey = true;
+                }
+                // A repeated item or key still gets its own row identity, so rendering and editing never collide.
+                const row = new Row(data, occurrence === 1 ? uid : `${uid}#${occurrence}`);
+                rows.push(row);
+                if (children != null) {
+                    parents.set(row.uid, parentUid);
+                    const childItems = getTreeChildren(data, children);
+                    if (childItems != null) {
+                        path.add(data);
+                        addRows(childItems, row.uid);
+                        path.delete(data);
+                    }
+                }
             }
-            // A repeated item or key still gets its own row identity, so rendering and editing never collide.
-            rows.push(new Row(data, occurrence === 1 ? uid : `${uid}#${occurrence}`));
-        }
+        };
+        addRows(value, null);
         if (duplicateKey && isDevMode()) {
             console.warn(
                 "mona-grid: several rows have the same rowKey value. Selection, editing and detail rows " +
                     "follow the key, so give every row a unique key."
             );
         }
+        this.#treeParents.set(parents);
         this.rows.set(ImmutableList.create(rows));
     }
 
@@ -1700,6 +2099,32 @@ export class GridService {
             ...options,
             enabled: options.enabled !== false
         });
+    }
+
+    /** Turns the tree on with the given options, or off with `null`, and reads the data again. */
+    public setTreeOptions(options: GridTreeOptions | null): void {
+        const current = this.#treeOptions();
+        if (current === options || (current != null && options != null && deepEquals(current, options))) {
+            return;
+        }
+        this.#treeOptions.set(options);
+        const source = this.#rowSource;
+        if (source != null) {
+            this.setRows(source.data, source.rowKey);
+        }
+    }
+
+    /** Expands or collapses a tree row and reports the change; a row without children doesn't change. */
+    public setTreeRowExpanded(row: Row, expanded: boolean): void {
+        if (this.getTreeRowInfo(row)?.hasChildren !== true) {
+            return;
+        }
+        const key = this.getRowIdentityKey(row);
+        if (this.treeExpandedKeys().contains(key) === expanded) {
+            return;
+        }
+        this.treeExpandedKeys.update(keys => (expanded ? keys.add(key) : keys.remove(key)));
+        this.treeExpandedKeysChange$.next(this.treeExpandedKeys().toArray());
     }
 
     public setVirtualScrollOptions(options: VirtualScrollOptions): void {
@@ -1855,6 +2280,10 @@ export class GridService {
 
     public toggleGroupCollapse(groupKey: string): void {
         this.collapsedGroupKeys.update(keys => (keys.contains(groupKey) ? keys.remove(groupKey) : keys.add(groupKey)));
+    }
+
+    public toggleTreeRow(row: Row): void {
+        this.setTreeRowExpanded(row, this.getTreeRowInfo(row)?.expanded !== true);
     }
 
     public updateColumn(columnId: string, patch: Partial<Omit<Column, "id">>): void {
@@ -2109,6 +2538,11 @@ export class GridService {
             }
         }
         return longestValue;
+    }
+
+    /** The rows the footer aggregates count: the view's rows, or in a tree grid every row that passes the filter. */
+    private getAggregateSourceRows(): Row[] {
+        return [...(this.treeView()?.allRows ?? this.viewRows())];
     }
 
     private getColumnById(columnId: string): Column | null {
@@ -2482,6 +2916,22 @@ export class GridService {
     private withColumnIndices(columns: readonly Column[]): Column[] {
         return columns.map((column, index) => (column.index === index ? column : { ...column, index }));
     }
+}
+
+function sameAddress(left: GridCellAddress, right: GridCellAddress): boolean {
+    return left.rowUid === right.rowUid && left.columnId === right.columnId;
+}
+
+/** A data item's children in a tree grid, or `null` when it has none. */
+function getTreeChildren(
+    data: Record<PropertyKey, unknown>,
+    children: GridTreeChildren
+): Iterable<Record<PropertyKey, unknown>> | null {
+    const value: unknown = typeof children === "string" ? data[children] : children(data);
+    if (value == null || typeof value !== "object" || !(Symbol.iterator in value)) {
+        return null;
+    }
+    return value as Iterable<Record<PropertyKey, unknown>>;
 }
 
 /** The modifier keys of a click or key press that selects rows. */

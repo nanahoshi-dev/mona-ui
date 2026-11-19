@@ -463,6 +463,18 @@ export const IT_IT_MESSAGES = {
         cancel: "Annulla",
         cancelNewRow: "Annulla nuova riga",
         cancelRowEdit: (rowNumber: number) => `Annulla modifica della riga ${localizeNumber(rowNumber)}`,
+        cellsCopied: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} cella copiata`,
+                other: () => `${localizeNumber(count)} celle copiate`
+            }),
+        cellsPasted: (count: number) =>
+            count === 0
+                ? "Nessuna cella incollata"
+                : plural(PLURAL_RULES.select(count), {
+                      one: () => `${localizeNumber(count)} cella incollata`,
+                      other: () => `${localizeNumber(count)} celle incollate`
+                  }),
         clearFilter: (column: string) => `Cancella filtro di ${column}`,
         collapseDetail: (rowNumber: number) => `Nascondi i dettagli della riga ${localizeNumber(rowNumber)}`,
         columnGrouped: (column: string) => `Raggruppato per ${column}`,

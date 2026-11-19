@@ -4,6 +4,8 @@
 
 export { CellEditEvent } from "./models/CellEditEvent";
 export type { GridKeySelector } from "./models/GridKeySelector";
+export type { GridCellRange } from "./models/GridCellRange";
+export type { GridRangePasteChange, GridRangePasteEvent } from "./models/GridRangePasteEvent";
 export type { Row } from "./models/Row";
 export { RowEditEvent } from "./models/RowEditEvent";
 export { GridAddEvent } from "./models/GridAddEvent";
@@ -45,6 +47,7 @@ export * from "./directives/grid-groupable.directive";
 export * from "./directives/grid-group-footer-template.directive";
 export * from "./directives/grid-header-template.directive";
 export * from "./directives/grid-no-data-template.directive";
+export * from "./directives/grid-range-selectable.directive";
 export * from "./directives/grid-reorderable.directive";
 export * from "./directives/grid-resizable.directive";
 export * from "./directives/grid-row-reorderable.directive";
@@ -54,7 +57,15 @@ export * from "./directives/grid-server-binding.directive";
 export type { GridDataState } from "./models/GridDataState";
 export * from "./directives/grid-state-persistence.directive";
 export * from "./directives/grid-toolbar-template.directive";
+export * from "./directives/grid-tree.directive";
+export type { GridTreeChildren } from "./models/GridTreeOptions";
 export * from "./directives/grid-export.directive";
+export type {
+    GridPdfExportOptions,
+    GridPdfFont,
+    GridPdfFontSource,
+    GridPdfPaperSize
+} from "./models/GridPdfExportOptions";
 export * from "./directives/grid-virtual-scroll.directive";
 export * from "./components/grid-command-column/grid-command-column.component";
 export * from "./components/grid-column/grid-column.component";

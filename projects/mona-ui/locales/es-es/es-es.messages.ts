@@ -462,6 +462,18 @@ export const ES_ES_MESSAGES = {
         cancel: "Cancelar",
         cancelNewRow: "Descartar fila nueva",
         cancelRowEdit: (rowNumber: number) => `Cancelar edición de la fila ${localizeNumber(rowNumber)}`,
+        cellsCopied: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} celda copiada`,
+                other: () => `${localizeNumber(count)} celdas copiadas`
+            }),
+        cellsPasted: (count: number) =>
+            count === 0
+                ? "No se pegó ninguna celda"
+                : plural(PLURAL_RULES.select(count), {
+                      one: () => `${localizeNumber(count)} celda pegada`,
+                      other: () => `${localizeNumber(count)} celdas pegadas`
+                  }),
         clearFilter: (column: string) => `Limpiar filtro de ${column}`,
         collapseDetail: (rowNumber: number) => `Ocultar detalles de la fila ${localizeNumber(rowNumber)}`,
         columnGrouped: (column: string) => `Agrupado por ${column}`,

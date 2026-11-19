@@ -1,8 +1,13 @@
 import { DOCUMENT, isPlatformBrowser } from "@angular/common";
-import { inject, Injectable, PLATFORM_ID } from "@angular/core";
+import { inject, Injectable, LOCALE_ID, PLATFORM_ID } from "@angular/core";
 import type { DataType } from "@nanahoshi/mona-ui/common";
+import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import type { Column } from "../models/Column";
+import type { GridPdfExportOptions, GridPdfFontSource, GridPdfPaperSize } from "../models/GridPdfExportOptions";
+import { getGridCellText } from "./grid-cell-format";
 import { getColumnGroupDepth, getColumnGroups } from "./grid-column-groups";
+import { type PdfHeaderCell, type PdfTable, PDF_MIME_TYPE, writePdfTable } from "./grid-pdf";
+import { parseTrueTypeFont } from "./grid-pdf-truetype";
 import { GridService } from "./grid.service";
 import {
     type XlsxCell,
@@ -17,11 +22,14 @@ import {
 export class GridExportService {
     readonly #document = inject(DOCUMENT);
     readonly #gridService = inject(GridService);
+    readonly #i18n = inject(MonaI18nService);
+    readonly #locale = inject(LOCALE_ID);
     readonly #platformId = inject(PLATFORM_ID);
 
     /**
      * Downloads the grid's rows as CSV: every row of the current view (filtered and sorted, all pages) in
-     * client mode, only the loaded page with server binding. Hidden and command columns are left out.
+     * client mode, only the loaded page with server binding. A tree grid writes every row that passes the filter,
+     * collapsed or not, in tree order. Hidden and command columns are left out.
      * Text that a spreadsheet would run as a formula is prefixed with `'`.
      */
     public exportCsv(filename?: string): void {
@@ -34,7 +42,7 @@ export class GridExportService {
         }
         const header = columns.map(c => this.#escapeCsvValue(c.title)).join(",");
         const rowLines: string[] = [];
-        this.#gridService.viewRows().forEach(row => {
+        this.#gridService.getExportRows().forEach(row => {
             const line = columns.map(col => this.#formatValue(row.data[col.field], col.dataType)).join(",");
             rowLines.push(line);
         });
@@ -46,7 +54,8 @@ export class GridExportService {
      * Downloads the grid's rows as an Excel workbook (`.xlsx`): the same rows and columns as {@link exportCsv}. Column
      * groups become merged header cells above the column titles, the header rows and left-locked columns stay in view,
      * and columns keep the grid's widths. Numbers, true/false values and dates keep their types; the sheet is named
-     * after the file.
+     * after the file. A tree grid's rows become an outline, with each child folding under its parent, and the tree
+     * column's text is indented by level.
      */
     public async exportExcel(filename?: string): Promise<void> {
         if (!isPlatformBrowser(this.#platformId)) {
@@ -59,6 +68,100 @@ export class GridExportService {
         const name = filename ?? "export.xlsx";
         const workbook = await writeXlsx(this.#createSheet(columns, name.replace(/\.xlsx$/i, "")));
         this.#download(new Blob([workbook as Uint8Array<ArrayBuffer>], { type: XLSX_MIME_TYPE }), name);
+    }
+
+    /**
+     * Downloads the grid's rows as a PDF: the same rows and columns as {@link exportCsv}, as a table with the column
+     * groups and titles at the top of every page. Cells print as the grid shows them, and long text wraps. A table
+     * wider than the page shrinks to fit it. Text is set in Helvetica unless `font` gives a TrueType font, which is
+     * needed for scripts such as Chinese, Japanese or Korean. Rejects when the font can't be read.
+     */
+    public async exportPdf(options: GridPdfExportOptions | string = {}): Promise<void> {
+        if (!isPlatformBrowser(this.#platformId)) {
+            return;
+        }
+        const settings = typeof options === "string" ? { filename: options } : options;
+        const columns = this.#exportedColumns();
+        if (columns.length === 0) {
+            return;
+        }
+        const font = settings.font;
+        const [regular, bold] = await Promise.all([
+            font == null ? null : this.#loadFont(font.regular),
+            font?.bold == null ? null : this.#loadFont(font.bold)
+        ]);
+        const [width, height] = toPageSize(settings.paperSize ?? "A4");
+        const landscape = settings.orientation === "landscape";
+        const pdf = await writePdfTable(this.#createPdfTable(columns), {
+            fontSize: settings.fontSize ?? 9,
+            fonts: {
+                bold: bold == null ? null : parseTrueTypeFont(bold, font?.collectionIndex),
+                regular: regular == null ? null : parseTrueTypeFont(regular, font?.collectionIndex)
+            },
+            margin: settings.margin ?? 36,
+            modified: new Date(),
+            pageSize: landscape ? [Math.max(width, height), Math.min(width, height)] : [width, height],
+            title: settings.title ?? null
+        });
+        this.#download(
+            new Blob([pdf as Uint8Array<ArrayBuffer>], { type: PDF_MIME_TYPE }),
+            settings.filename ?? "export.pdf"
+        );
+    }
+
+    /** The table a PDF export prints: header rows with the column groups merged, and each row's cells as shown. */
+    #createPdfTable(columns: readonly Column[]): PdfTable {
+        const depth = getColumnGroupDepth(columns);
+        const header: PdfHeaderCell[][] = Array.from({ length: depth + 1 }, () => []);
+        for (let level = 0; level < depth; level++) {
+            let start = 0;
+            for (let index = 1; index <= columns.length; index++) {
+                const group = getColumnGroups(columns[start])[level];
+                if (
+                    index < columns.length &&
+                    group != null &&
+                    getColumnGroups(columns[index])[level]?.id === group.id
+                ) {
+                    continue;
+                }
+                if (group != null) {
+                    header[level].push({
+                        firstColumn: start,
+                        group: true,
+                        lastColumn: index - 1,
+                        rowSpan: 1,
+                        text: group.title
+                    });
+                }
+                start = index;
+            }
+        }
+        for (const [index, column] of columns.entries()) {
+            const titleRow = getColumnGroups(column).length;
+            header[titleRow].push({
+                firstColumn: index,
+                group: false,
+                lastColumn: index,
+                rowSpan: depth - titleRow + 1,
+                text: column.title
+            });
+        }
+        const locales = { angularLocale: this.#locale, localeId: this.#i18n.localeId() };
+        const treeColumnId = this.#gridService.treeColumnId();
+        const treeColumn = columns.findIndex(column => column.id === treeColumnId);
+        const headerTable = this.#gridService.headerTableElement();
+        const view = headerTable?.ownerDocument.defaultView;
+        return {
+            alignments: columns.map(column => (column.dataType === "number" ? "end" : "start")),
+            columnWidths: columns.map(column => column.calculatedWidth ?? column.width ?? DEFAULT_PDF_COLUMN_WIDTH),
+            header,
+            rightToLeft: headerTable != null && view?.getComputedStyle(headerTable).direction === "rtl",
+            rows: this.#gridService.getExportRows().map(row => ({
+                cells: columns.map(column => getGridCellText(row.data, column, locales)),
+                indent: (this.#gridService.getTreeRowInfo(row)?.level ?? 1) - 1
+            })),
+            treeColumn: treeColumn < 0 ? null : treeColumn
+        };
     }
 
     /** The header rows (groups, then titles), the data rows, and how the header cells merge. */
@@ -94,12 +197,15 @@ export class GridExportService {
                 merges.push({ firstColumn: index, firstRow: titleRow, lastColumn: index, lastRow: depth });
             }
         }
-        const body = this.#gridService
-            .viewRows()
-            .select(row =>
-                columns.map(column => ({ value: this.#toCellValue(row.data[column.field], column.dataType) }))
-            )
-            .toArray();
+        const treeColumnId = this.#gridService.treeColumnId();
+        const rows = this.#gridService.getExportRows();
+        const levels = rows.map(row => (this.#gridService.getTreeRowInfo(row)?.level ?? 1) - 1);
+        const body = rows.map((row, rowIndex) =>
+            columns.map(column => ({
+                indent: column.id === treeColumnId ? levels[rowIndex] : undefined,
+                value: this.#toCellValue(row.data[column.field], column.dataType)
+            }))
+        );
         const frozenColumns = columns.findIndex(column => !(column.locked && column.lockedPosition === "left"));
         const headerTable = this.#gridService.headerTableElement();
         const view = headerTable?.ownerDocument.defaultView;
@@ -110,6 +216,7 @@ export class GridExportService {
             merges,
             name,
             rightToLeft: headerTable != null && view?.getComputedStyle(headerTable).direction === "rtl",
+            rowOutlineLevels: treeColumnId == null ? undefined : [...header.map(() => 0), ...levels],
             rows: [...header, ...body]
         };
     }
@@ -143,6 +250,17 @@ export class GridExportService {
             .toArray();
     }
 
+    async #loadFont(source: GridPdfFontSource): Promise<Uint8Array> {
+        if (typeof source !== "string") {
+            return source instanceof Uint8Array ? source : new Uint8Array(source);
+        }
+        const response = await this.#document.defaultView!.fetch(source);
+        if (!response.ok) {
+            throw new Error(`The font at ${source} couldn't be loaded: ${response.status} ${response.statusText}`);
+        }
+        return new Uint8Array(await response.arrayBuffer());
+    }
+
     #formatValue(value: unknown, dataType: DataType): string {
         if (value == null) {
             return "";
@@ -173,6 +291,25 @@ export class GridExportService {
             return value;
         }
         return String(value);
+    }
+}
+
+/** The width of a PDF column whose grid column has no width yet, in CSS pixels. */
+const DEFAULT_PDF_COLUMN_WIDTH = 120;
+
+/** A paper size's width and height in points. */
+function toPageSize(size: GridPdfPaperSize): readonly [number, number] {
+    switch (size) {
+        case "A3":
+            return [841.89, 1190.55];
+        case "A4":
+            return [595.28, 841.89];
+        case "Legal":
+            return [612, 1008];
+        case "Letter":
+            return [612, 792];
+        default:
+            return size;
     }
 }
 

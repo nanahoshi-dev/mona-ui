@@ -4,6 +4,10 @@ export interface MonaGridMessages {
     readonly cancel: string;
     readonly cancelNewRow: string;
     cancelRowEdit(rowNumber: number): string;
+    /** Announced when a range of cells is copied, with how many cells it holds. */
+    cellsCopied(count: number): string;
+    /** Announced after a paste into the cells, with how many cells took a value. */
+    cellsPasted(count: number): string;
     clearFilter(column: string): string;
     /** The name of the button that closes a row's detail row. */
     collapseDetail(rowNumber: number): string;

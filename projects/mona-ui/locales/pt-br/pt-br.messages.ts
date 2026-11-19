@@ -464,6 +464,18 @@ export const PT_BR_MESSAGES = {
         cancel: "Cancelar",
         cancelNewRow: "Descartar nova linha",
         cancelRowEdit: (rowNumber: number) => `Cancelar edição da linha ${localizeNumber(rowNumber)}`,
+        cellsCopied: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} célula copiada`,
+                other: () => `${localizeNumber(count)} células copiadas`
+            }),
+        cellsPasted: (count: number) =>
+            count === 0
+                ? "Nenhuma célula colada"
+                : plural(PLURAL_RULES.select(count), {
+                      one: () => `${localizeNumber(count)} célula colada`,
+                      other: () => `${localizeNumber(count)} células coladas`
+                  }),
         clearFilter: (column: string) => `Limpar filtro de ${column}`,
         collapseDetail: (rowNumber: number) => `Recolher detalhes da linha ${localizeNumber(rowNumber)}`,
         columnGrouped: (column: string) => `Agrupado por ${column}`,

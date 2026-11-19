@@ -8,12 +8,14 @@
 | Sorting                 | `monaGridSortable`                         | `[(sort)]`                 | `columnSort`                                                     |
 | Filtering               | `monaGridFilterable`                       | `[(filter)]`               | —                                                                |
 | Grouping                | `monaGridGroupable`                        | `[(group)]`                | `groupChange`                                                    |
+| Tree list               | `monaGridTree`                             | `[(treeExpandedKeys)]`     | —                                                                |
 | Selection               | `monaGridSelectable`                       | `selectedKeys`             | `selectedKeysChange`                                             |
+| Cell ranges, copy, paste | `monaGridRangeSelectable`                 | —                          | `rangeChange`, `rangePaste`                                      |
 | Editing                 | `monaGridEditable`                         | —                          | `edit`, `cellEdit`, `save`, `rowEdit`, `cancel`, `remove`, `add` |
 | Detail rows             | `monaGridDetailTemplate`                   | `[(expandedKeys)]`         | —                                                                |
 | Server data             | `monaGridServerBinding`                    | `total`, `skip`, `loading` | `dataStateChange`                                                |
 | State persistence       | `monaGridStatePersistence`                 | `[(state)]`                | —                                                                |
-| CSV and Excel export    | `monaGridExport`                           | —                          | —                                                                |
+| CSV, Excel, PDF export  | `monaGridExport`                           | —                          | —                                                                |
 | Virtual scrolling       | `monaGridVirtualScroll`                    | `scrollEndThreshold`       | `scrollEnd`                                                      |
 | Column groups           | `<mona-grid-column-group>` around columns  | —                          | —                                                                |
 | Column resizing, moving | `monaGridResizable`, `monaGridReorderable` | —                          | `columnResize`, `columnReorder`                                  |
@@ -178,7 +180,7 @@ Set `[filterable]="false"` on a column to leave it out.
 
 ---
 
-## 4. Grouping and Aggregates
+## 4. Grouping, Aggregates and Tree Lists
 
 ```html
 <mona-grid [data]="orders()" [monaGridGroupable]="{ showFooter: true }" [(group)]="group">
@@ -202,6 +204,21 @@ protected readonly group = signal<GroupDescriptor[]>([{ field: "shipCountry", di
 - `count` counts values that aren't empty. `sum` and `avg` use numbers and numeric text; the sum of no numbers is `0`. `min` and `max` use the sort order from section 2.
 - `"custom"` computes nothing: render your value with a `monaGridFooterTemplate` (and a `monaGridGroupFooterTemplate` for groups).
 - Expanded groups always end with a group footer when a column has an aggregate. `showFooter: true` keeps that footer visible when a group is collapsed.
+
+**Tree lists.** `monaGridTree` shows rows as a tree, from the data's structure rather than its values.
+
+```html
+<mona-grid rowKey="id" [data]="tasks()" monaGridTree children="subtasks" [(treeExpandedKeys)]="expandedIds">
+    <mona-grid-column expandable field="name" title="Task" />
+</mona-grid>
+```
+
+- `children` names the field holding each item's children (or is a function returning them), for nested data. For flat data, `parentKey` names the field holding the parent's `rowKey` value instead; an item whose parent isn't in the data is a root, and rows whose parents form a loop become roots too.
+- `treeExpandedKeys` lists the expanded rows by `rowKey` value (the data item without one). Rows start collapsed. It's apart from `expandedKeys`, which opens detail rows. `treeExpandedKeysChange` reports user changes, `expandAll()` and `collapseAll()`, and rows that filtering expands.
+- The `expandable` column holds the toggles and indents by level; without one, the first visible data column does.
+- Sorting orders each row's children among themselves. Filtering keeps the matches and every row above them, and expands those. Pages count the rows that show. Grouping and row reordering are off.
+- Exports write every row in tree order, collapsed or not. The workbook outlines each row's children and indents the tree column, as the PDF does.
+- The grid's role becomes `treegrid`, and rows carry `aria-level`, `aria-setsize`, `aria-posinset` and, with children, `aria-expanded`.
 
 ---
 
@@ -253,6 +270,14 @@ protected readonly selectedKeys = signal<unknown[]>([]);
 - `selectAllScope` decides what the header checkbox and <kbd>Ctrl</kbd>+<kbd>A</kbd> select: `"page"` (the default) selects the rows on the current page, `"view"` every row that passes the filters, on all pages. With virtual scrolling there are no pages, so `"page"` acts as `"view"`. Keys outside the scope stay selected.
 - With server binding, select-all only reaches the loaded rows.
 - `rowAriaLabel` names each row's checkbox from its data, such as "Select order 10248". Without it, the checkbox is named by position ("Select row 3").
+
+**Cell ranges.** `monaGridRangeSelectable` selects a rectangle of cells: drag across them, <kbd>Shift</kbd>+click the far corner, or extend from the focused cell with <kbd>Shift</kbd> and the arrows. <kbd>Ctrl</kbd>+<kbd>A</kbd> selects every cell of the page (of the view with virtual scrolling), and <kbd>Esc</kbd> clears the range.
+
+- `rangeChange` reports the range as `{ rows, fields }`: its rows' data items and its columns' fields, in display order, or `null` once cleared. `clearRange()` and `selectAll()` do the same from code.
+- <kbd>Ctrl</kbd>+<kbd>C</kbd> copies the range as tab-separated text, each cell as the grid shows it, so spreadsheets paste it as cells. The grid announces how many cells it copied.
+- With `monaGridEditable` on and no editor open, <kbd>Ctrl</kbd>+<kbd>V</kbd> pastes: one value fills the range, and a block pastes from the focused cell, or the range's first cell, up to the last row and column. Values take each column's type (numbers in the grid's locale, `true`/`yes`/`1`, dates as ISO or in the locale's order); empty text clears a cell. Cells whose column can't be edited, or whose text doesn't fit, keep their value.
+- The grid doesn't change its data: `rangePaste` gives each changed row as `originalRowData` and `rowData`, and `skippedCells`. Save the rows, as with `save`.
+- Cells in the range carry `aria-selected`, and the grid `aria-multiselectable`. With row selection too, <kbd>Space</kbd> and the checkboxes select rows, while <kbd>Shift</kbd> with the arrows and <kbd>Ctrl</kbd>+<kbd>A</kbd> select cells.
 
 ---
 
@@ -487,17 +512,24 @@ public constructor() {
 - `schemaVersion` rejects states saved with another version, so a column change in your app doesn't restore a stale layout. `loadState(state)` (through `#ref="monaGridStatePersistence"`) returns a status such as `"applied"` or `"rejected-invalid"`; an invalid state changes nothing.
 - With server binding, restoring a state emits one `dataStateChange` at `skip: 0`. Use it to load the restored query instead of starting your own first request.
 
-### CSV and Excel export
+### CSV, Excel and PDF export
 
 ```html
 <button monaButton (click)="ordersExport.exportCsv('orders.csv')">Export as CSV</button>
 <button monaButton (click)="ordersExport.exportExcel('orders.xlsx')">Export as Excel</button>
+<button monaButton (click)="ordersExport.exportPdf('orders.pdf')">Export as PDF</button>
 <mona-grid [data]="orders()" monaGridExport #ordersExport="monaGridExport"></mona-grid>
 ```
 
 `exportCsv(filename?)` downloads the visible columns of every row in the current view: filtered and sorted, all pages. With server binding it exports the loaded page; fetch a full export through your own API. Dates are written as `YYYY-MM-DD` in local time. Text starting with `=`, `+`, `-`, `@`, a tab or a carriage return gets a leading `'`, so spreadsheets don't run it as a formula.
 
 `exportExcel(filename?)` downloads the same rows and columns as an `.xlsx` workbook, and returns a promise that resolves once the download starts. Numbers, `true`/`false` and dates keep their types, with dates in the spreadsheet's own short date format. Column groups become merged header cells, the header rows and left-locked columns stay in view as the sheet scrolls, and columns keep the grid's widths. The sheet is named after the file. Text is never read as a formula there, so it's written as it is.
+
+`exportPdf(options?)` prints the same rows and columns as a table, and returns a promise that resolves once the download starts. Cells hold the text the grid shows, formats and locale included, but not cell templates; number columns align to the end, long text wraps, and column groups span their columns. Every page repeats the header and is numbered. A table wider than the page shrinks to fit. Options: `filename` (`export.pdf`), `title`, `paperSize` (`"A4"`, `"A3"`, `"Letter"`, `"Legal"` or `[width, height]` in points), `orientation`, `margin` (36 points), `fontSize` (9 points) and `font`.
+
+- Without `font`, text is in Helvetica, which isn't embedded and shows Western European characters only; anything else prints as `?`. For Chinese, Japanese, Korean, Greek or Cyrillic, pass `font: { regular, bold? }`, each a `.ttf` or `.ttc` URL or its bytes (`collectionIndex` picks a collection's font). Only the glyphs used are embedded. Without `bold`, bold text is the regular face thickened.
+- The font needs TrueType outlines: CFF `.otf` files and `.woff`/`.woff2` web fonts are rejected with an error. A variable font prints at its default instance, often its lightest weight.
+- Right to left, the first column is on the right, but text inside cells isn't reordered or shaped, so Arabic and Hebrew don't read correctly in the PDF.
 
 ---
 
@@ -508,7 +540,7 @@ The grid is one Tab stop. <kbd>Tab</kbd> moves into the grid at the cell that la
 | Key                                                              | Action                                                                                                                                                       |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | <kbd>↓</kbd> / <kbd>↑</kbd>                                      | Same column in the next / previous row, across the header, the filter row, the add row and the body. Column group headers are reached from any column under them. |
-| <kbd>←</kbd> / <kbd>→</kbd>                                      | Previous / next cell (mirrored right to left). On a group row, collapses / expands it first.                                                                 |
+| <kbd>←</kbd> / <kbd>→</kbd>                                      | Previous / next cell (mirrored right to left). On a group row or a tree row's toggle cell, collapses / expands it first; from a tree row's first cell, <kbd>←</kbd> then moves to its parent. |
 | <kbd>Home</kbd> / <kbd>End</kbd>                                 | First / last cell in the row.                                                                                                                                |
 | <kbd>Ctrl</kbd>+<kbd>Home</kbd> / <kbd>Ctrl</kbd>+<kbd>End</kbd> | First / last cell in the grid (<kbd>Cmd</kbd> too). With virtual scrolling, scrolls to the last row first.                                                   |
 | <kbd>Page Up</kbd> / <kbd>Page Down</kbd>                        | Up / down by the number of rows that fit in the body.                                                                                                        |
@@ -516,9 +548,11 @@ The grid is one Tab stop. <kbd>Tab</kbd> moves into the grid at the cell that la
 | <kbd>F2</kbd>                                                    | Starts editing an editable cell. On any other cell, a header or a filter-row cell included, moves into its controls.                                         |
 | <kbd>Alt</kbd>+<kbd>↓</kbd>                                      | On a filterable header, opens its filter menu. On a group or detail row, expands or collapses it.                                                            |
 | <kbd>Space</kbd> / <kbd>Shift</kbd>+<kbd>Space</kbd>             | With selection, toggles the row / selects from the last selected row to this one.                                                                            |
-| <kbd>Shift</kbd>+<kbd>↓</kbd> / <kbd>Shift</kbd>+<kbd>↑</kbd>    | Moves to the next / previous row and extends the selection to it.                                                                                            |
-| <kbd>Ctrl</kbd>+<kbd>A</kbd>                                     | With multiple selection, selects every row in the select-all scope (<kbd>Cmd</kbd> too).                                                                     |
-| <kbd>Ctrl</kbd>+<kbd>C</kbd>                                     | Copies the focused body cell's text, unless text is selected or a row is being edited (<kbd>Cmd</kbd> too).                                                  |
+| <kbd>Shift</kbd>+<kbd>↓</kbd> / <kbd>Shift</kbd>+<kbd>↑</kbd>    | Moves to the next / previous row and extends the selection to it. With range selection, <kbd>Shift</kbd> and any arrow extends the range of cells instead. |
+| <kbd>Ctrl</kbd>+<kbd>A</kbd>                                     | With multiple selection, selects every row in the select-all scope; with range selection, every cell of the page (<kbd>Cmd</kbd> too). |
+| <kbd>Esc</kbd>                                                   | With range selection, clears the range. |
+| <kbd>Ctrl</kbd>+<kbd>C</kbd>                                     | Copies the range, or the focused body cell's text, unless text is selected or a row is being edited (<kbd>Cmd</kbd> too). |
+| <kbd>Ctrl</kbd>+<kbd>V</kbd>                                     | With range selection and editing on, pastes into the cells (<kbd>Cmd</kbd> too). |
 | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>←</kbd> / <kbd>→</kbd>     | With `monaGridReorderable`, moves the focused header's column one place within its column group and announces its position (<kbd>Cmd</kbd> too).             |
 | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd>                    | With `monaGridGroupable`, groups by the focused header's column and announces it (<kbd>Cmd</kbd> too).                                                       |
 | <kbd>Delete</kbd> / <kbd>Backspace</kbd>                         | On a chip in the group panel, removes that grouping.                                                                                                         |

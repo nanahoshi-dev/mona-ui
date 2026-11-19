@@ -285,12 +285,14 @@ export class GridComponent<T> implements GridVariantInput {
 
     protected readonly gridDetailTemplate = contentChild(GridDetailTemplateDirective, { read: TemplateRef });
 
-    /** A treegrid while rows are grouped, a grid otherwise. */
     protected readonly gridHeaderElement = viewChild.required<ElementRef<HTMLDivElement>>("gridHeaderElement");
 
     protected readonly gridHeaderTableElement = viewChild.required<ElementRef<HTMLTableElement>>("headerTable");
 
-    protected readonly gridRole = computed(() => (this.gridService.groupColumns().length > 0 ? "treegrid" : "grid"));
+    /** A treegrid while rows are grouped or the grid is a tree, a grid otherwise. */
+    protected readonly gridRole = computed(() =>
+        this.gridService.groupColumns().length > 0 || this.gridService.treeEnabled() ? "treegrid" : "grid"
+    );
 
     protected readonly gridService = inject(GridService);
 
@@ -378,7 +380,7 @@ export class GridComponent<T> implements GridVariantInput {
 
     protected readonly multiselectable = computed(() => {
         const options = this.gridService.selectableOptions();
-        return options.enabled && options.mode === "multiple";
+        return (options.enabled && options.mode === "multiple") || this.gridService.rangeSelectionEnabled();
     });
 
     protected readonly noDataClass = computed(() => {

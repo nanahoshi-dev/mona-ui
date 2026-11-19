@@ -383,6 +383,8 @@
         "cancel": "İptal",
         "cancelNewRow": "Yeni satırı iptal et",
         "cancelRowEdit": "{rowNumber}. satırın düzenlenmesini iptal et",
+        "cellsCopied": "{count} hücre kopyalandı",
+        "cellsPasted": "{count, plural, =0 {Hiçbir hücreye yapıştırılmadı} other {# hücreye yapıştırıldı}}",
         "clearFilter": "{column} sütununun filtresini temizle",
         "collapseDetail": "{rowNumber}. satırın ayrıntılarını daralt",
         "columnGrouped": "{column} ölçütüne göre gruplandı",

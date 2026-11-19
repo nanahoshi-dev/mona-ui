@@ -493,6 +493,8 @@ export const PL_PL_MESSAGES = {
         cancel: "Anuluj",
         cancelNewRow: "Anuluj nowy wiersz",
         cancelRowEdit: (rowNumber: number) => `Anuluj edycję wiersza ${localizeNumber(rowNumber)}`,
+        cellsCopied: (count: number) => `Skopiowane komórki: ${localizeNumber(count)}`,
+        cellsPasted: (count: number) => `Wklejone komórki: ${localizeNumber(count)}`,
         clearFilter: (column: string) => `Wyczyść filtr kolumny ${column}`,
         collapseDetail: (rowNumber: number) => `Zwiń szczegóły wiersza ${localizeNumber(rowNumber)}`,
         columnGrouped: (column: string) => `Pogrupowano według kolumny ${column}`,

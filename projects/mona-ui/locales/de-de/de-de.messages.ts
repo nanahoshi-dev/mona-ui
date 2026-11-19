@@ -449,6 +449,18 @@ export const DE_DE_MESSAGES = {
         cancel: "Abbrechen",
         cancelNewRow: "Neue Zeile verwerfen",
         cancelRowEdit: (rowNumber: number) => `Bearbeitung von Zeile ${localizeNumber(rowNumber)} abbrechen`,
+        cellsCopied: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} Zelle kopiert`,
+                other: () => `${localizeNumber(count)} Zellen kopiert`
+            }),
+        cellsPasted: (count: number) =>
+            count === 0
+                ? "Keine Zellen eingefügt"
+                : plural(PLURAL_RULES.select(count), {
+                      one: () => `${localizeNumber(count)} Zelle eingefügt`,
+                      other: () => `${localizeNumber(count)} Zellen eingefügt`
+                  }),
         clearFilter: (column: string) => `Filter für ${column} leeren`,
         collapseDetail: (rowNumber: number) => `Details von Zeile ${localizeNumber(rowNumber)} ausblenden`,
         columnGrouped: (column: string) => `Nach ${column} gruppiert`,

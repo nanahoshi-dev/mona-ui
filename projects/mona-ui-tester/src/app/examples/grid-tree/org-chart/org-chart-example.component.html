@@ -1,0 +1,12 @@
+<mona-grid
+    aria-label="Organization"
+    parentKey="managerId"
+    rowKey="id"
+    [data]="employees"
+    [monaGridFilterable]="{ enabled: true, type: 'row' }"
+    monaGridTree
+    [treeExpandedKeys]="[1]">
+    <mona-grid-column field="name" title="Name" />
+    <mona-grid-column field="title" title="Title" />
+    <mona-grid-column field="location" title="Location" />
+</mona-grid>

@@ -383,6 +383,8 @@
         "cancel": "Abbrechen",
         "cancelNewRow": "Neue Zeile verwerfen",
         "cancelRowEdit": "Bearbeitung von Zeile {rowNumber} abbrechen",
+        "cellsCopied": "{count, plural, one {# Zelle kopiert} other {# Zellen kopiert}}",
+        "cellsPasted": "{count, plural, =0 {Keine Zellen eingefügt} one {# Zelle eingefügt} other {# Zellen eingefügt}}",
         "clearFilter": "Filter für {column} leeren",
         "collapseDetail": "Details von Zeile {rowNumber} ausblenden",
         "columnGrouped": "Nach {column} gruppiert",

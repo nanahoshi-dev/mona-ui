@@ -44,6 +44,7 @@ export class GridColumnComponent implements GridColumnDefinition {
         editTemplate: this.editTemplate() ?? null,
         configuredEditable: this.editable(),
         editable: this.editable() ?? true,
+        expandable: this.expandable(),
         field: this.field(),
         filterable: this.filterable(),
         filtered: false,
@@ -89,6 +90,13 @@ export class GridColumnComponent implements GridColumnDefinition {
      * @default null
      */
     public readonly editable = input<boolean | null, unknown>(null, { transform: nullableBooleanAttribute });
+
+    /**
+     * @description In a tree grid (`monaGridTree`), whether this column shows the expand toggles and indents its
+     * cells by each row's level. Without it on any column, the first visible data column does.
+     * @default false
+     */
+    public readonly expandable = input(false, { transform: booleanAttribute });
 
     /**
      * @description The field name of the data property to display in this column.

@@ -500,6 +500,8 @@ export const AR_SA_MESSAGES = {
         cancel: "إلغاء",
         cancelNewRow: "إلغاء الصف الجديد",
         cancelRowEdit: (rowNumber: number) => `إلغاء تحرير الصف ${localizeNumber(rowNumber)}`,
+        cellsCopied: (count: number) => `الخلايا المنسوخة: ${localizeNumber(count)}`,
+        cellsPasted: (count: number) => `الخلايا التي تم اللصق فيها: ${localizeNumber(count)}`,
         clearFilter: (column: string) => `مسح تصفية ${column}`,
         collapseDetail: (rowNumber: number) => `طي تفاصيل الصف ${localizeNumber(rowNumber)}`,
         columnGrouped: (column: string) => `تم التجميع حسب ${column}`,

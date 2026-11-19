@@ -448,6 +448,7 @@ function columnOverrides(id: ColumnId): Partial<ComponentConfigInputType<GridCol
                     ? "Automatic leaves the rowKey column read-only. Turn it on to type the number of a new order."
                     : "Automatic makes every column editable except the rowKey one."
         },
+        expandable: undefined,
         field: undefined,
         filterable: undefined,
         format: undefined,

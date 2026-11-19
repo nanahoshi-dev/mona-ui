@@ -9,6 +9,8 @@ Selection state always lives in `selectedKeys`. Checkboxes, row clicks, keys and
 - People pick one value to fill a field. Use a [Dropdown List](/components/dropdown-list) or [List Box](/components/list-box).
 - The selection drives actions on the rows, such as deleting them: keep the selection, and put the actions in a [toolbar](/components/grid#toolbar-and-the-columns-button) that reads `selectedKeys`.
 
+**Use `monaGridRangeSelectable` when** people work with values rather than records: copying a block of numbers into a spreadsheet, or pasting one from it to fill many cells at once.
+
 ## Import & Quick Start
 
 ```typescript
@@ -62,7 +64,31 @@ protected selectOverdue(): void {
 }
 ```
 
+### Cell Ranges, Copy and Paste
+
+```example
+grid-selection/range
+```
+
+Drag across cells, Shift+click the far corner, or hold Shift and use the arrow keys, then press Ctrl+C and paste into a spreadsheet. Copy a block of cells from a spreadsheet, focus a quarter's cell and press Ctrl+V to paste it there, or select a range and paste one value to fill it. The Region column isn't editable, so pasting over it keeps its values.
+
+`rangeChange` reports the selected range as the data items of its rows and the fields of its columns, in the order the grid shows them, or `null` once it's cleared. `clearRange()` and `selectAll()` do the same from code. `[monaGridRangeSelectable]="false"` turns the directive off.
+
 ## Behavior
+
+### Copying and pasting cells
+
+Ctrl+C copies the range as tab-separated text, with each cell's text as the grid shows it, so a spreadsheet pastes it as cells; a cell holding a tab, a line break or a quote is quoted, as spreadsheets do. The grid says how many cells it copied.
+
+Pasting needs editing on (`monaGridEditable`) and no editor open, and never changes the grid's data. The grid reads the pasted text, works out the new values and emits `rangePaste` with each changed row's data as it was (`originalRowData`) and with the new values in (`rowData`), for you to save, and with `skippedCells`, the cells that kept their value. Then it says how many cells it pasted.
+
+- **One value** fills every cell of the range. **A block** of rows and columns pastes from the focused cell, or the range's first cell, and stops at the last row and column the view has: it never adds rows.
+- **Values** take each column's type: numbers as written in the grid's locale, `true`/`false`, `yes`/`no` or `1`/`0` for booleans, and dates as `2024-03-15` or in the locale's own order. Empty text clears the cell.
+- **A cell keeps its value** when its column can't be edited, or when the text doesn't fit the column's type, such as a word in a number column.
+
+### Ranges with row selection
+
+The two directives work together. Space, the checkboxes and row clicks select rows, while Shift with the arrows, dragging and Ctrl+A select cells. Without `monaGridRangeSelectable`, Shift+ArrowUp and Shift+ArrowDown extend the row selection instead.
 
 ### Row clicks
 
@@ -78,7 +104,7 @@ Provide a stable `rowKey` or `selectBy` when the selection must survive data rel
 
 ## Accessibility
 
-Selected rows carry `aria-selected`, and the grid says it allows several with `aria-multiselectable`. Name the checkboxes with `rowAriaLabel` when the position alone wouldn't tell people which row they're on.
+Selected rows carry `aria-selected`, and the grid says it allows several with `aria-multiselectable`. With range selection, the cells in the range carry `aria-selected` instead, and the grid announces what Ctrl+C copied and Ctrl+V pasted. Name the checkboxes with `rowAriaLabel` when the position alone wouldn't tell people which row they're on.
 
 ### Keyboard
 
@@ -87,7 +113,11 @@ Selected rows carry `aria-selected`, and the grid says it allows several with `a
 | `Space` | Toggles the focused row's selection. |
 | `Shift+Space` | Selects the rows from the last selected row to this one. |
 | `Shift+ArrowDown` / `Shift+ArrowUp` | Moves to the next/previous row and extends the selection to it. |
-| `Ctrl+A` / `Cmd+A` | In multiple mode, selects every row in the select-all scope. |
+| `Ctrl+A` / `Cmd+A` | In multiple mode, selects every row in the select-all scope. With range selection, selects every cell of the page, or of the whole view with virtual scrolling. |
+| `Shift+Arrow keys` | With range selection, extends the range of cells from where it started. Moving without Shift leaves it. |
+| `Escape` | With range selection, clears the range. |
+| `Ctrl+C` / `Cmd+C` | Copies the range, or the focused cell. |
+| `Ctrl+V` / `Cmd+V` | With range selection and editing on, pastes into the cells. |
 
 The rest of the grid's keys are on [Grid Overview](/components/grid#keyboard).
 
@@ -95,6 +125,7 @@ The rest of the grid's keys are on [Grid Overview](/components/grid#keyboard).
 
 | Attribute | When present | Value |
 | --- | --- | --- |
-| `aria-multiselectable` | On the tabular content region | `"true"` with multiple selection |
+| `aria-multiselectable` | On the tabular content region | `"true"` with multiple selection or range selection |
 | `aria-selected` | On a row, while `monaGridSelectable` is enabled | Whether the row is selected |
+| `aria-selected` | On a cell, while `monaGridRangeSelectable` is enabled | Whether the cell is in the range |
 | `aria-label` | On a row's checkbox / the select-all checkbox | `rowAriaLabel`'s text or `"Select row 3"` (`selectRow`) / `selectAllRows` |

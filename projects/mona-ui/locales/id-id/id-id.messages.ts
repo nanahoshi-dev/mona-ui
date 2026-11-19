@@ -406,6 +406,9 @@ export const ID_ID_MESSAGES = {
         cancel: "Batal",
         cancelNewRow: "Batalkan baris baru",
         cancelRowEdit: (rowNumber: number) => `Batalkan pengeditan baris ${localizeNumber(rowNumber)}`,
+        cellsCopied: (count: number) => `${localizeNumber(count)} sel disalin`,
+        cellsPasted: (count: number) =>
+            count === 0 ? "Tidak ada sel yang ditempel" : `${localizeNumber(count)} sel ditempel`,
         clearFilter: (column: string) => `Bersihkan saringan kolom ${column}`,
         collapseDetail: (rowNumber: number) => `Sembunyikan detail baris ${localizeNumber(rowNumber)}`,
         columnGrouped: (column: string) => `Dikelompokkan menurut ${column}`,

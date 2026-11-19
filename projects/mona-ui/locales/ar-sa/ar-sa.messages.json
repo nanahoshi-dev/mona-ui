@@ -383,6 +383,8 @@
         "cancel": "إلغاء",
         "cancelNewRow": "إلغاء الصف الجديد",
         "cancelRowEdit": "إلغاء تحرير الصف {rowNumber}",
+        "cellsCopied": "الخلايا المنسوخة: {count}",
+        "cellsPasted": "الخلايا التي تم اللصق فيها: {count}",
         "clearFilter": "مسح تصفية {column}",
         "collapseDetail": "طي تفاصيل الصف {rowNumber}",
         "columnGrouped": "تم التجميع حسب {column}",

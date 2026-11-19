@@ -1,0 +1,18 @@
+<mona-grid
+    #tree="monaGridTree"
+    aria-label="Project tasks"
+    children="subtasks"
+    rowKey="id"
+    [data]="tasks"
+    [pageSize]="20"
+    monaGridSortable
+    monaGridTree
+    [(treeExpandedKeys)]="expandedIds">
+    <ng-template monaGridToolbarTemplate>
+        <button monaButton type="button" (click)="tree.expandAll()">Expand all</button>
+        <button monaButton type="button" (click)="tree.collapseAll()">Collapse all</button>
+    </ng-template>
+    <mona-grid-column expandable field="name" title="Task" />
+    <mona-grid-column field="owner" title="Owner" />
+    <mona-grid-column field="hours" title="Hours" type="number" [width]="100" />
+</mona-grid>

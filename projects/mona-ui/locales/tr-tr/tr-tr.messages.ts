@@ -431,6 +431,9 @@ export const TR_TR_MESSAGES = {
         cancel: "İptal",
         cancelNewRow: "Yeni satırı iptal et",
         cancelRowEdit: (rowNumber: number) => `${localizeNumber(rowNumber)}. satırın düzenlenmesini iptal et`,
+        cellsCopied: (count: number) => `${localizeNumber(count)} hücre kopyalandı`,
+        cellsPasted: (count: number) =>
+            count === 0 ? "Hiçbir hücreye yapıştırılmadı" : `${localizeNumber(count)} hücreye yapıştırıldı`,
         clearFilter: (column: string) => `${column} sütununun filtresini temizle`,
         collapseDetail: (rowNumber: number) => `${localizeNumber(rowNumber)}. satırın ayrıntılarını daralt`,
         columnGrouped: (column: string) => `${column} ölçütüne göre gruplandı`,
