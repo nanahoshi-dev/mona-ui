@@ -29,5 +29,6 @@ export * from "./styles/dropdown-popup.styles";
 export * from "./styles/dropdown-sheet.styles";
 
 export * from "./utils/readDropdownField";
+export * from "./utils/smallScreen";
 
 export * from "./i18n/dropdowns.default-messages";

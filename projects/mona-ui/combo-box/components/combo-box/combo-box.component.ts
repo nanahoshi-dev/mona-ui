@@ -6,10 +6,12 @@ import {
     computed,
     contentChild,
     DestroyRef,
+    DOCUMENT,
     effect,
     ElementRef,
     forwardRef,
     inject,
+    Injector,
     input,
     model,
     output,
@@ -22,6 +24,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { FilterChangeEvent, type PreventableEvent } from "@nanahoshi/mona-ui/common";
 import {
+    type AdaptiveMode,
     DropdownDataHandlerDirective,
     type DropdownDataInput,
     DROPDOWN_DATA_INPUT_TOKEN,
@@ -40,7 +43,12 @@ import {
     dropdownPopupThemeVariants,
     type DropdownPopupVariantInput,
     DropdownPrefixTemplateDirective,
-    DropdownService
+    DropdownService,
+    dropdownSheetInputClasses,
+    dropdownSheetInputContainerClasses,
+    dropdownSheetSurfaceClasses,
+    injectSmallScreen,
+    matchesSmallScreen
 } from "@nanahoshi/mona-ui/dropdowns";
 import {
     createElementControlId,
@@ -132,10 +140,12 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         DropdownPopupVariantInput
 {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #dropdownListService = inject<DropdownListService<TData>>(DropdownListService);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    readonly #injector = inject(Injector);
     readonly #label = injectLabelAssociation({
         ariaDescribedBy: () => this.ariaDescribedBy(),
         ariaLabel: () => this.ariaLabel(),
@@ -144,6 +154,7 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     });
     readonly #listService = inject(ListService);
     readonly #popupRef = this.#dropdownService.popupRef;
+    readonly #smallScreen = injectSmallScreen();
     readonly #userNavigatedViaArrows = signal(false);
 
     protected readonly activeDescendant = computed(() => {
@@ -183,6 +194,13 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         const rounded = this.rounded();
         return comboBoxTextInputThemeVariants({ rounded });
     });
+    /**
+     * Where the popup opens as a bottom sheet, the field's input raises no on-screen keyboard: a press opens the sheet,
+     * whose own text box takes the typing.
+     */
+    protected readonly inputMode = computed(() =>
+        this.adaptiveMode() === "auto" && this.#smallScreen() ? "none" : null
+    );
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && this.value() == null))
     );
@@ -196,8 +214,11 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         const variantClass = dropdownPopupThemeVariants({ rounded, size });
         // With a popupHeight, the overlay sets the limit; the default max-h-64 would cut a taller popup short.
         const heightClass = this.popupHeight() ? "max-h-none" : "";
-        return twMerge(variantClass, heightClass, userClass);
+        const sheetClass = this.sheet() ? dropdownSheetSurfaceClasses : "";
+        return twMerge(variantClass, heightClass, sheetClass, userClass);
     });
+    /** The list's size: large in a bottom sheet, for touch. */
+    protected readonly listSize = computed(() => (this.sheet() ? "large" : this.size()));
     protected readonly messages = this.#i18n.componentMessages("comboBox", COMBO_BOX_DEFAULT_MESSAGES);
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("popupTemplate");
@@ -210,6 +231,10 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     protected readonly selectedListItem = computed(() => {
         return this.#listService.selectedListItems().firstOrDefault();
     });
+    protected readonly sheet = this.#dropdownService.sheet.asReadonly();
+    protected readonly sheetInputClass = dropdownSheetInputClasses;
+    protected readonly sheetInputContainerClass = dropdownSheetInputContainerClasses;
+    protected readonly sheetTitleId = this.#dropdownService.sheetTitleId.asReadonly();
     protected readonly valueText = computed(() => {
         const listItem = this.selectedListItem();
         if (!listItem) {
@@ -217,6 +242,21 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         }
         return this.#listService.getItemText(listItem);
     });
+
+    /**
+     * @description Opens the popup as a sheet along the bottom of the screen on a small screen (narrower than 640
+     * pixels), with a text box of its own at the top, where the typing happens. A press on the field opens the sheet,
+     * and the field raises no on-screen keyboard. `"none"` always opens the popup under the field.
+     * @default "none"
+     */
+    public readonly adaptiveMode = input<AdaptiveMode>("none");
+
+    /**
+     * @description Title of the bottom sheet the popup opens as with `adaptiveMode="auto"`, which also names the
+     * sheet's text box. When empty, the sheet shows the combo box's name, from its label or `aria-label`.
+     * @default ""
+     */
+    public readonly adaptiveTitle = input("");
 
     /**
      * @description Allows a custom value to be committed when it doesn't match any item in {@link data}.
@@ -494,6 +534,13 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         this.comboBoxValue$.next(text);
     }
 
+    protected onInputClick(): void {
+        // A press opens the bottom sheet, with its own text box, where the field raises no keyboard.
+        if (this.adaptiveMode() === "auto" && !this.#popupRef() && matchesSmallScreen(this.#document)) {
+            this.#dropdownService.triggerPopupOpen$.next({});
+        }
+    }
+
     protected onItemSelect(event: SelectionChangeEvent<TData>): void {
         if (
             this.#listService.filterableOptions().enabled &&
@@ -511,6 +558,11 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         if (target?.tagName !== "INPUT") {
             event.preventDefault();
         }
+    }
+
+    protected onSheetKeydown(event: KeyboardEvent): void {
+        // Looked up now: the handler injects this component, so it can't be injected while this component is created.
+        this.#injector.get(DropdownListPopupHandlerDirective).handleKeyDown(event);
     }
 
     protected onValueClear(event: Event): void {
@@ -537,6 +589,8 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
     }
 
     private closePopup(): void {
+        // Drops typed text still waiting for the filter's debounce, which would otherwise come back after the close.
+        this.comboBoxValue$.next(null);
         this.#popupRef()?.close();
     }
 
@@ -593,6 +647,7 @@ export class ComboBoxComponent<TData = unknown, TValue = TData>
         this.#listService.setNavigableOptions({ enabled: true, mode: "highlight" });
         this.#listService.setSelectableOptions(this.selectableOptions);
         this.#listService.filterInputVisible.set(false);
+        this.#dropdownService.sheetFillsHeight.set(true);
         this.comboBoxValue.set(this.valueText());
     }
 

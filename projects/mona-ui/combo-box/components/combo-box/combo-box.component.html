@@ -23,7 +23,9 @@
     [attr.aria-invalid]="invalidState() || undefined"
     [attr.aria-label]="ariaLabel() || undefined"
     [attr.aria-labelledby]="labelledBy()"
+    [attr.inputmode]="inputMode()"
     role="combobox"
+    (click)="onInputClick()"
     (input)="onInput(textInput.value)"
     #textInput />
 
@@ -42,8 +44,33 @@
 <mona-indicator-icon preset="dropdown" [size]="18"></mona-indicator-icon>
 
 <ng-template #popupTemplate>
+    @if (sheet()) {
+        <div [class]="sheetInputContainerClass" (pointerdown)="onPopupPointerDown($event)">
+            <input
+                monaTextBox
+                autocomplete="off"
+                data-mona-sheet-autofocus
+                role="combobox"
+                size="large"
+                [class]="sheetInputClass"
+                [placeholder]="placeholder()"
+                [rounded]="rounded()"
+                [value]="comboBoxValue()"
+                [attr.aria-activedescendant]="activeDescendant()"
+                [attr.aria-autocomplete]="'list'"
+                [attr.aria-busy]="loading()"
+                [attr.aria-controls]="listId"
+                [attr.aria-describedby]="describedBy()"
+                [attr.aria-expanded]="true"
+                [attr.aria-haspopup]="'listbox'"
+                [attr.aria-labelledby]="sheetTitleId()"
+                (input)="onInput(sheetInput.value)"
+                (keydown)="onSheetKeydown($event)"
+                #sheetInput />
+        </div>
+    }
     <div [class]="listPopupClass()" (pointerdown)="onPopupPointerDown($event)">
-        <mona-list (itemSelect)="onItemSelect($event)" [focusOnMount]="false" [size]="size()" [listId]="listId">
+        <mona-list (itemSelect)="onItemSelect($event)" [focusOnMount]="false" [size]="listSize()" [listId]="listId">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>
                     <ng-container [ngTemplateOutlet]="footerTemplate()"></ng-container>

@@ -11,7 +11,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import { focusCanReturn } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, focusCanReturn } from "@nanahoshi/mona-ui/internal";
 import {
     dropdownPopupAnimation,
     type PopupRef,
@@ -23,9 +23,7 @@ import { fromEvent, merge, take, takeUntil } from "rxjs";
 import { DropdownSheetComponent, type DropdownSheetData } from "../components/dropdown-sheet/dropdown-sheet.component";
 import { DROPDOWN_POPUP_INPUT_TOKEN } from "../models/DropdownPopupInput";
 import { DropdownService } from "../services/dropdown.service";
-
-/** Screens narrower than this open a dropdown with `adaptiveMode="auto"` as a bottom sheet. */
-const SMALL_SCREEN_QUERY = "(max-width: 639.98px)";
+import { matchesSmallScreen } from "../utils/smallScreen";
 
 /** How much of the visible viewport the bottom sheet may take, so the page above it still shows. */
 const SHEET_MAX_HEIGHT_RATIO = 0.85;
@@ -106,7 +104,15 @@ export class DropdownPopupHandlerDirective {
      * dropdown's popup content. Focus stays where it is, as with the popup under the field.
      */
     private createSheet(anchor: HTMLElement, content: TemplateRef<void>, restoreFocus: boolean | "auto"): PopupRef {
-        const data: DropdownSheetData = { content, title: computed(() => this.sheetTitle()) };
+        const titleId = createElementControlId();
+        // Set first, as the content renders while the sheet is created and names its text box with the title.
+        this.#dropdownService.sheetTitleId.set(titleId);
+        const data: DropdownSheetData = {
+            content,
+            fillHeight: this.#dropdownService.sheetFillsHeight(),
+            title: computed(() => this.sheetTitle()),
+            titleId
+        };
         const popupRef = this.#popupService.create({
             anchor,
             animation: slideFromBottomPopupAnimation,
@@ -129,6 +135,22 @@ export class DropdownPopupHandlerDirective {
         });
         this.followVisualViewport(popupRef);
         return popupRef;
+    }
+
+    /**
+     * Moves focus to the text box a combo box or an auto-complete shows in its sheet, with the caret after its text.
+     * It runs in the press or key that opened the sheet, as the sheet renders while it's created: iOS only raises the
+     * on-screen keyboard for a field focused then.
+     */
+    private focusSheetTextBox(popupRef: PopupRef): void {
+        const textBox = popupRef.overlayRef.overlayElement.querySelector<HTMLElement>("[data-mona-sheet-autofocus]");
+        if (!textBox) {
+            return;
+        }
+        textBox.focus({ preventScroll: true });
+        if (textBox instanceof HTMLInputElement) {
+            textBox.setSelectionRange(textBox.value.length, textBox.value.length);
+        }
     }
 
     /**
@@ -234,6 +256,10 @@ export class DropdownPopupHandlerDirective {
             : this.createPopup(anchor, content, settings);
         this.#dropdownService.popupRef.set(popupRef);
         this.setPopupCloseSubscriptions(popupRef);
+        if (sheet) {
+            // After popupRef is set, so the dropdown sees the focus move into its popup and doesn't count it as leaving.
+            this.focusSheetTextBox(popupRef);
+        }
         window.setTimeout(() => {
             if (this.#hostDestroyed) {
                 return;
@@ -248,7 +274,7 @@ export class DropdownPopupHandlerDirective {
         if (this.#host.adaptiveMode?.() !== "auto") {
             return false;
         }
-        return this.#document.defaultView?.matchMedia?.(SMALL_SCREEN_QUERY).matches ?? false;
+        return matchesSmallScreen(this.#document);
     }
 
     private setPopupCloseSubscriptions(popupRef: PopupRef): void {
@@ -268,6 +294,7 @@ export class DropdownPopupHandlerDirective {
             );
             this.#dropdownService.popupRef.set(null);
             this.#dropdownService.sheet.set(false);
+            this.#dropdownService.sheetTitleId.set(null);
             this.#dropdownService.popupCloseComplete$.next(event);
             if (!this.#hostDestroyed) {
                 this.#host.closed.emit();

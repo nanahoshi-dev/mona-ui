@@ -29,7 +29,12 @@ describe("DropdownSheetComponent", () => {
     beforeEach(async () => {
         close = vi.fn();
         title = signal("Place");
-        const data: { content: TemplateRef<unknown> | null; title: typeof title } = { content: null, title };
+        const data: {
+            content: TemplateRef<unknown> | null;
+            fillHeight: boolean;
+            title: typeof title;
+            titleId: string;
+        } = { content: null, fillHeight: false, title, titleId: "sheet-title" };
         TestBed.configureTestingModule({
             imports: [ContentHostComponent, DropdownSheetComponent],
             providers: [
@@ -67,6 +72,17 @@ describe("DropdownSheetComponent", () => {
         title.set("Destination");
         await stable();
         expect(sheet.querySelector("header")?.textContent?.trim()).toBe("Destination");
+    });
+
+    it("gives its title the id that names a text box in the sheet", () => {
+        const titleElement = (fixture.nativeElement as HTMLElement).querySelector("header span");
+        expect(titleElement?.id).toBe("sheet-title");
+    });
+
+    it("keeps the height its content needs", () => {
+        const section = (fixture.nativeElement as HTMLElement).querySelector("section") as HTMLElement;
+        expect(section.classList).toContain("h-full");
+        expect(section.classList).not.toContain("h-dvh");
     });
 
     it("hides its drag handle from assistive technology", () => {
