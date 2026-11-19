@@ -1443,6 +1443,31 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./theming-custom-colors/runtime-primary/runtime-primary-example.component").then(module => module.ThemingCustomColorsRuntimePrimaryExampleComponent),
         mainFile: "runtime-primary-example.component.ts"
     },
+    "timeline/alternate": {
+        files: ["alternate-example.component.ts", "alternate-example.component.html"],
+        load: () => import("./timeline/alternate/alternate-example.component").then(module => module.TimelineAlternateExampleComponent),
+        mainFile: "alternate-example.component.ts"
+    },
+    "timeline/basic": {
+        files: ["basic-example.component.ts", "basic-example.component.html"],
+        load: () => import("./timeline/basic/basic-example.component").then(module => module.TimelineBasicExampleComponent),
+        mainFile: "basic-example.component.ts"
+    },
+    "timeline/collapsible": {
+        files: ["collapsible-example.component.ts", "collapsible-example.component.html"],
+        load: () => import("./timeline/collapsible/collapsible-example.component").then(module => module.TimelineCollapsibleExampleComponent),
+        mainFile: "collapsible-example.component.ts"
+    },
+    "timeline/horizontal": {
+        files: ["horizontal-example.component.ts", "horizontal-example.component.html"],
+        load: () => import("./timeline/horizontal/horizontal-example.component").then(module => module.TimelineHorizontalExampleComponent),
+        mainFile: "horizontal-example.component.ts"
+    },
+    "timeline/templates": {
+        files: ["templates-example.component.ts", "templates-example.component.html"],
+        load: () => import("./timeline/templates/templates-example.component").then(module => module.TimelineTemplatesExampleComponent),
+        mainFile: "templates-example.component.ts"
+    },
     "toolbar/editor": {
         files: ["editor-example.component.ts", "editor-example.component.html"],
         load: () => import("./toolbar/editor/editor-example.component").then(module => module.ToolbarEditorExampleComponent),

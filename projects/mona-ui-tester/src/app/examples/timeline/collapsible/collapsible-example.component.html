@@ -1,0 +1,16 @@
+<div class="flex max-w-md flex-col gap-3">
+    <div class="flex gap-2">
+        <button monaButton size="small" type="button" (click)="expandAll()">Open all</button>
+        <button monaButton size="small" type="button" (click)="collapseAll()">Close all</button>
+    </div>
+    <mona-timeline
+        aria-label="Changelog"
+        descriptionField="notes"
+        keyField="version"
+        subtitleField="summary"
+        titleField="version"
+        [collapsible]="true"
+        [data]="changes"
+        [(expandedKeys)]="openVersions" />
+    <p class="text-sm text-muted-foreground">{{ openCount() }} of {{ changes.length }} releases open.</p>
+</div>

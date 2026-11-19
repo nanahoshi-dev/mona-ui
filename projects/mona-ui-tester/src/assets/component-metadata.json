@@ -2530,6 +2530,58 @@
       }
     ]
   },
+  "TimelineBodyTemplateDirective": {
+    "name": "TimelineBodyTemplateDirective",
+    "selector": "\"ng-template[monaTimelineBodyTemplate]\"",
+    "inputs": [
+      {
+        "description": "The timeline's data, used only to type the template's event. Optional.",
+        "kind": "input",
+        "name": "monaTimelineBodyTemplateOf",
+        "type": "Iterable<T> | null | undefined",
+        "defaultValue": "null"
+      }
+    ]
+  },
+  "TimelineDateTemplateDirective": {
+    "name": "TimelineDateTemplateDirective",
+    "selector": "\"ng-template[monaTimelineDateTemplate]\"",
+    "inputs": [
+      {
+        "description": "The timeline's data, used only to type the template's event. Optional.",
+        "kind": "input",
+        "name": "monaTimelineDateTemplateOf",
+        "type": "Iterable<T> | null | undefined",
+        "defaultValue": "null"
+      }
+    ]
+  },
+  "TimelineHeaderTemplateDirective": {
+    "name": "TimelineHeaderTemplateDirective",
+    "selector": "\"ng-template[monaTimelineHeaderTemplate]\"",
+    "inputs": [
+      {
+        "description": "The timeline's data, used only to type the template's event. Optional.",
+        "kind": "input",
+        "name": "monaTimelineHeaderTemplateOf",
+        "type": "Iterable<T> | null | undefined",
+        "defaultValue": "null"
+      }
+    ]
+  },
+  "TimelineMarkerTemplateDirective": {
+    "name": "TimelineMarkerTemplateDirective",
+    "selector": "\"ng-template[monaTimelineMarkerTemplate]\"",
+    "inputs": [
+      {
+        "description": "The timeline's data, used only to type the template's event. Optional.",
+        "kind": "input",
+        "name": "monaTimelineMarkerTemplateOf",
+        "type": "Iterable<T> | null | undefined",
+        "defaultValue": "null"
+      }
+    ]
+  },
   "ToolbarItemDirective": {
     "name": "ToolbarItemDirective",
     "selector": "\"[monaToolbarItem]\"",
@@ -20212,6 +20264,124 @@
         "name": "value",
         "type": "Date | null",
         "defaultValue": "null"
+      }
+    ]
+  },
+  "TimelineComponent": {
+    "name": "TimelineComponent",
+    "selector": "\"mona-timeline\"",
+    "inputs": [
+      {
+        "description": "Puts the cards on alternating sides of the line: on a vertical timeline, after it and before it, once\nthe timeline is 32rem wide, with each date on the side across from its card; on a horizontal one, below it and\nabove it.",
+        "kind": "input",
+        "name": "alternate",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "The timeline's name, such as \"Project history\", which assistive technology reads with its list.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The id of an element that names the timeline, such as a heading above it.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Makes each card's header a button that opens and closes its details: its description, or its body\ntemplate. The open events are `expandedKeys`; all are closed by default.",
+        "kind": "input",
+        "name": "collapsible",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "The events, in the order they're shown.",
+        "kind": "input",
+        "name": "data",
+        "type": "Iterable<T>",
+        "required": true
+      },
+      {
+        "description": "The field of each event that holds its date: a `Date`, a timestamp in milliseconds, or an ISO 8601\nstring, which is in local time unless it gives an offset. An event without one shows no date.",
+        "kind": "input",
+        "name": "dateField",
+        "type": "string",
+        "defaultValue": "\"date\""
+      },
+      {
+        "description": "How each event's date is formatted, in the locale, such as `{ year: \"numeric\", month: \"long\" }`.\nThe `<time>` element around it holds the date, and its time too when the format shows one.",
+        "kind": "input",
+        "name": "dateFormat",
+        "type": "Intl.DateTimeFormatOptions",
+        "defaultValue": "{ dateStyle: \"medium\" }"
+      },
+      {
+        "description": "The field of each event shown as its details, below its title.",
+        "kind": "input",
+        "name": "descriptionField",
+        "type": "string",
+        "defaultValue": "\"description\""
+      },
+      {
+        "description": "The keys of the events whose details are open, on a collapsible timeline: the values of their\n`keyField`, or the events themselves without one. Bind it two-way, `[(expandedKeys)]`, to follow the user's\ntoggles.",
+        "kind": "model",
+        "name": "expandedKeys",
+        "type": "readonly unknown[]",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "The level of each event's heading, its title, from 1 to 6. Set it to fit the page's outline, or to\n`null` for no headings.",
+        "kind": "input",
+        "name": "headingLevel",
+        "type": "number | null",
+        "defaultValue": "3"
+      },
+      {
+        "description": "The field of each event that identifies it in `expandedKeys`, so an open event stays open when the\ndata is replaced with copies. Without it, an event is its own key.",
+        "kind": "input",
+        "name": "keyField",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Which way the timeline runs: `\"vertical\"`, down the page, or `\"horizontal\"`, across it, scrolling\nsideways when its events don't fit. A horizontal timeline takes focus, so the arrow keys scroll it.",
+        "kind": "input",
+        "name": "orientation",
+        "type": "TimelineOrientation",
+        "options": [
+          "horizontal",
+          "vertical"
+        ],
+        "defaultValue": "\"vertical\""
+      },
+      {
+        "description": "The field of each event shown below its title, such as a place or a person.",
+        "kind": "input",
+        "name": "subtitleField",
+        "type": "string",
+        "defaultValue": "\"subtitle\""
+      },
+      {
+        "description": "The field of each event shown as its title, the heading of its card.",
+        "kind": "input",
+        "name": "titleField",
+        "type": "string",
+        "defaultValue": "\"title\""
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`. A horizontal timeline's\nevents are 16rem wide; set `--mona-timeline-event-width` to change it, as in\n`class=\"[--mona-timeline-event-width:20rem]\"`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
       }
     ]
   },

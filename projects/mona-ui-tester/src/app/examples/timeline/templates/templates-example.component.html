@@ -1,0 +1,35 @@
+<mona-timeline aria-label="Order status" dateField="time" class="max-w-md" [data]="steps">
+    <ng-template monaTimelineDateTemplate [monaTimelineDateTemplateOf]="steps" let-step let-date="date">
+        @if (step.status === "upcoming") {
+            Expected by <time [attr.datetime]="date | date: 'yyyy-MM-dd'">{{ date | date: "EEE, MMM d" }}</time>
+        } @else {
+            <time [attr.datetime]="date | date: 'yyyy-MM-dd HH:mm'">{{ date | date: "EEE, MMM d, h:mm a" }}</time>
+        }
+    </ng-template>
+    <ng-template monaTimelineMarkerTemplate [monaTimelineMarkerTemplateOf]="steps" let-step>
+        @switch (step.status) {
+            @case ("done") {
+                <span
+                    class="flex size-6 items-center justify-center rounded-full border-2 border-success bg-success text-success-foreground">
+                    <svg lucideCheck [size]="14" aria-hidden="true"></svg>
+                </span>
+            }
+            @case ("current") {
+                <span
+                    class="flex size-6 items-center justify-center rounded-full border-2 border-primary bg-background text-primary">
+                    <svg lucideTruck [size]="14" aria-hidden="true"></svg>
+                </span>
+            }
+            @default {
+                <span class="block size-3 rounded-full border-2 border-border bg-background"></span>
+            }
+        }
+        <span class="sr-only">{{ statusText[step.status] }}</span>
+    </ng-template>
+    <ng-template monaTimelineBodyTemplate [monaTimelineBodyTemplateOf]="steps" let-step>
+        <p>{{ step.detail }}</p>
+        @if (step.place) {
+            <p class="mt-1 text-xs">{{ step.place }}</p>
+        }
+    </ng-template>
+</mona-timeline>
