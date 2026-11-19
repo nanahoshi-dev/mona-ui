@@ -19,6 +19,8 @@ A modern, high-performance, accessible UI component library built for Angular an
 
 Coding agents can read the documentation as markdown. The package includes it: start from `llms.txt` at the package root, which links to a page for each component in `docs/`.
 
+Agents that support the Model Context Protocol can use [`@nanahoshi/mona-ui-mcp`](https://github.com/nanahoshi-dev/mona-ui/tree/main/projects/mona-ui-mcp#readme) instead. It searches the docs of the installed version, returns a component's API, and checks templates. In Claude Code: `claude mcp add mona-ui -- npx -y @nanahoshi/mona-ui-mcp`.
+
 - [Theming](docs/theming.md)
 - [Forms](docs/forms.md)
 - [Internationalization (i18n) & RTL Guide](docs/i18n.md)

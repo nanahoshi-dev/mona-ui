@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { DocsCategory, DocsPage } from "../src/app/layout/docs-manifest";
 import {
+    AI_DOCS_SCHEMA_VERSION,
     cleanPageMarkdown,
     cleanReferenceMarkdown,
     inlineExamples,
     listPages,
     renderLlmsTxt,
+    renderManifest,
     renderPage
 } from "./generate-ai-docs";
 
@@ -114,6 +116,52 @@ describe("generate-ai-docs", () => {
                 "- [`@nanahoshi/mona-ui/avatar`](docs/api/avatar.md): 1 export, in full.\n" +
                 "- [`@nanahoshi/mona-ui/button`](docs/api/button.md): 5 exports, in full."
         );
+    });
+
+    it("describes each page for tools in the manifest, with its file and slug", () => {
+        const state: DocsPage = {
+            description: "Keeps the sidebar open.",
+            kind: "guide",
+            path: "sidebar/state",
+            title: "State"
+        };
+        const manifest = renderManifest(
+            [
+                { category: "Actions", markdown: "", page: button },
+                { category: "Layout", markdown: "", page: state }
+            ],
+            "\nEssentials here.\n",
+            "1.2.3",
+            page => `docs/${page.path.replace("/", "-")}.md`
+        );
+
+        expect(manifest).toEqual({
+            essentials: "Essentials here.",
+            pages: [
+                {
+                    category: "Actions",
+                    description: "Styles a native button.",
+                    entryPoint: "button",
+                    file: "docs/button.md",
+                    kind: "component",
+                    path: "button",
+                    slug: "button",
+                    title: "Button"
+                },
+                {
+                    category: "Layout",
+                    description: "Keeps the sidebar open.",
+                    entryPoint: undefined,
+                    file: "docs/sidebar-state.md",
+                    kind: "guide",
+                    path: "sidebar/state",
+                    slug: "sidebar-state",
+                    title: "State"
+                }
+            ],
+            schemaVersion: AI_DOCS_SCHEMA_VERSION,
+            version: "1.2.3"
+        });
     });
 
     it("includes sub-pages under their parent's category", () => {

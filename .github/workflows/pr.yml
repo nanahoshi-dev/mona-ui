@@ -78,6 +78,12 @@ jobs:
       - name: Verify built package exports
         run: npm run verify:package
 
+      - name: Build MCP Server
+        run: npm run build:mcp
+
+      - name: Test MCP Server
+        run: npm run test:mcp
+
       - name: Test Library
         run: npm run test:lib
 

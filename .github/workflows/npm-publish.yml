@@ -53,12 +53,25 @@ jobs:
       - name: Verify built package exports
         run: npm run verify:package
 
+      # The MCP server takes the library's version and bundles its docs, so it builds and tests before either publishes.
+      - name: Build MCP server
+        run: npm run build:mcp
+
+      - name: Test MCP server
+        run: npm run test:mcp
+
       - name: Publish
+        id: publish
         working-directory: dist/mona-ui
         run: npm publish --provenance --access public
 
+      - name: Publish MCP server
+        working-directory: dist/mona-ui-mcp
+        run: npm publish --provenance --access public
+
+      # Only while the library isn't on npm yet: once it is, the release stands, even if the MCP server fails to publish.
       - name: Roll back GitHub release on publish failure
-        if: failure()
+        if: failure() && steps.publish.outcome != 'success'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release delete "${{ github.event.release.tag_name }}" --yes --cleanup-tag --repo "${{ github.repository }}"

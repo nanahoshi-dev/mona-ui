@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ApiEntryPointReference, ApiReferenceIndex } from "../src/app/api/api-model";
@@ -16,8 +16,32 @@ import { PAGES_WITHOUT_MARKDOWN, readRouteSources } from "./generate-search-inde
  * `npm run build:api-data` writes.
  *
  * By default the files go to `dist/docs-ai`, which the tester's build serves at the site root. With `--package` they go
- * into the built library at `dist/mona-ui`, so the installed version always carries its own docs.
+ * into the built library at `dist/mona-ui`, so the installed version always carries its own docs. The package also gets
+ * the same docs as data, for tools such as `@nanahoshi/mona-ui-mcp`: `docs/manifest.json` lists the pages, and
+ * `docs/api` holds each entry point's reference as JSON beside its markdown, with `index.json` listing them.
  */
+
+/** Bump when a field of `docs/manifest.json` or of the API JSON changes meaning or goes away. */
+export const AI_DOCS_SCHEMA_VERSION = 1;
+
+/** What `docs/manifest.json` in the package says. */
+export interface AiDocsManifest {
+    /** The essentials from the top of `llms.txt`, as markdown. */
+    readonly essentials: string;
+    /** Every page, in navigation order. */
+    readonly pages: readonly AiDocsManifestPage[];
+    readonly schemaVersion: number;
+    /** The package version the docs describe. */
+    readonly version: string;
+}
+
+export interface AiDocsManifestPage extends Pick<DocsPage, "description" | "entryPoint" | "kind" | "path" | "title"> {
+    readonly category: string;
+    /** The page's markdown file, relative to the package root. */
+    readonly file: string;
+    /** The file's name without its extension, which is what other pages link to. */
+    readonly slug: string;
+}
 
 export interface AiDocsPage {
     readonly category: string;
@@ -142,6 +166,29 @@ export function renderLlmsTxt(
     return lines.join("\n");
 }
 
+export function renderManifest(
+    pages: readonly AiDocsPage[],
+    essentials: string,
+    version: string,
+    linkTo: (page: DocsPage) => string
+): AiDocsManifest {
+    return {
+        essentials: essentials.trim(),
+        pages: pages.map(({ category, page }) => ({
+            category,
+            description: page.description,
+            entryPoint: page.entryPoint,
+            file: linkTo(page),
+            kind: page.kind,
+            path: page.path,
+            slug: docsPageSlug(page),
+            title: page.title
+        })),
+        schemaVersion: AI_DOCS_SCHEMA_VERSION,
+        version
+    };
+}
+
 /** Every page in the manifest, sub-pages included, with the category it's listed under. */
 export function listPages(categories: readonly DocsCategory[]): { category: string; page: DocsPage }[] {
     const flatten = (pages: readonly DocsPage[]): DocsPage[] =>
@@ -244,7 +291,14 @@ function main(): void {
             references.map(entry => entry.reference)
         )
     );
-    if (!forPackage) {
+    if (forPackage) {
+        for (const file of ["index.json", ...references.map(entry => `${entry.reference.name}.json`)]) {
+            copyFileSync(join(apiDirectory, file), join(outputRoot, pagesFolder, "api", file));
+        }
+        const { version } = JSON.parse(readFileSync(join(outputRoot, "package.json"), "utf8")) as { version: string };
+        const manifest = renderManifest(pages, essentials, version, linkTo);
+        writeFileSync(join(outputRoot, pagesFolder, "manifest.json"), JSON.stringify(manifest));
+    } else {
         const everything = [...pages, ...references].map(entry => entry.markdown);
         writeFileSync(join(outputRoot, "llms-full.txt"), everything.join("\n---\n\n"));
     }
