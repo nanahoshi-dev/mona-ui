@@ -65,6 +65,7 @@
             "@nanahoshi/mona-ui/file-upload": ["./projects/mona-ui/file-upload/public-api.ts"],
             "@nanahoshi/mona-ui/form-field": ["./projects/mona-ui/form-field/public-api.ts"],
             "@nanahoshi/mona-ui/grid": ["./projects/mona-ui/grid/public-api.ts"],
+            "@nanahoshi/mona-ui/kanban": ["./projects/mona-ui/kanban/public-api.ts"],
             "@nanahoshi/mona-ui/label": ["./projects/mona-ui/label/public-api.ts"],
             "@nanahoshi/mona-ui/list": ["./projects/mona-ui/list/public-api.ts"],
             "@nanahoshi/mona-ui/list-box": ["./projects/mona-ui/list-box/public-api.ts"],

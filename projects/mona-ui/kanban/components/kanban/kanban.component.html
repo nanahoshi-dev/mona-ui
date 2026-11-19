@@ -1,0 +1,61 @@
+@let active = activeCard();
+@for (column of columns(); track $index; let columnIndex = $index) {
+    @let cards = columnCards()[columnIndex];
+    @let headerId = id + "-column-" + columnIndex;
+    <!-- Named by the title and the count, so the name has a space between them. -->
+    @let labelledBy = columnHeaderTemplate() ? headerId : headerId + "-title " + headerId + "-count";
+    <div role="group" [class]="columnClass" [attr.aria-labelledby]="labelledBy">
+        <div [id]="headerId" [class]="headerClass">
+            @if (columnHeaderTemplate(); as headerTemplate) {
+                <ng-container
+                    [ngTemplateOutlet]="headerTemplate"
+                    [ngTemplateOutletContext]="columnContext(column, cards)" />
+            } @else {
+                <span [id]="headerId + '-title'" [class]="titleClass">{{ column.title }}</span>
+                <span aria-hidden="true" [class]="countClass(cards.length, column)">{{
+                    countBadge(cards.length, column)
+                }}</span>
+                <span class="sr-only" [id]="headerId + '-count'">{{ countText(cards.length, column) }}</span>
+            }
+        </div>
+        <div [class]="bodyClass">
+            <ul
+                [class]="listClass"
+                [attr.aria-labelledby]="labelledBy"
+                [monaSortable]="cards"
+                [sortableCanEnter]="enterChecks()[columnIndex]"
+                [sortableDisabled]="disabled()"
+                [sortableLabel]="column.title"
+                (sortableMove)="onCardMove($event, columnIndex)">
+                @for (card of cards; track card; let index = $index) {
+                    <li
+                        [class]="cardClass"
+                        [monaSortableItem]="card"
+                        [sortableLabel]="cardText(card)"
+                        [tabindex]="active?.column === columnIndex && active?.index === index ? 0 : -1"
+                        [attr.data-kanban-card]="columnIndex + '-' + index"
+                        (focus)="onCardFocus(columnIndex, index)"
+                        (keydown)="onCardKeydown($event, columnIndex, index)">
+                        @if (cardTemplate(); as template) {
+                            <ng-container
+                                [ngTemplateOutlet]="template"
+                                [ngTemplateOutletContext]="cardContext(card, column, index)" />
+                        } @else {
+                            {{ cardText(card) }}
+                        }
+                    </li>
+                }
+            </ul>
+            @if (cards.length === 0) {
+                <p aria-hidden="true" [class]="emptyClass">{{ messages().emptyColumn }}</p>
+            }
+        </div>
+        @if (columnFooterTemplate(); as footerTemplate) {
+            <div [class]="footerClass">
+                <ng-container
+                    [ngTemplateOutlet]="footerTemplate"
+                    [ngTemplateOutletContext]="columnContext(column, cards)" />
+            </div>
+        }
+    </div>
+}
