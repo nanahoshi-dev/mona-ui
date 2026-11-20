@@ -72,7 +72,6 @@
                     "options": {
                         "exclude": ["chart/tests/**/*.stress.spec.ts"],
                         "polyfills": [],
-                        "providersFile": "./test-providers.ts",
                         "setupFiles": ["./test-setup.ts"],
                         "runnerConfig": "./vitest-base.config.ts"
                     }
@@ -83,7 +82,6 @@
                         "include": ["chart/tests/**/*.stress.spec.ts"],
                         "isolate": true,
                         "polyfills": [],
-                        "providersFile": "./test-providers.ts",
                         "setupFiles": ["./test-setup.ts"],
                         "runnerConfig": "./vitest-density-stress.config.ts"
                     }

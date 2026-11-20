@@ -227,7 +227,7 @@ describe("ColorPickerComponent signal forms", () => {
 
         await openPicker(fixture);
         getOverlayTile(1).click();
-        await waitForStable(fixture);
+        await waitForPopupClose(fixture);
 
         expect(component.form.color().value()).toBe("#222222");
         expect(component.form.color().touched()).toBe(true);
@@ -302,7 +302,7 @@ describe("ColorPickerComponent keyboard interaction", () => {
         const tile = getOverlayTile(1);
         tile.focus();
         dispatchKeyDown(tile, "Tab");
-        await waitForStable(fixture);
+        await waitForPopupClose(fixture);
 
         expect(document.body.querySelector("mona-color-palette")).toBeNull();
     });
@@ -525,11 +525,19 @@ async function createSignalFormFixture(): Promise<ComponentFixture<SignalFormCol
 
 async function openPicker(fixture: ComponentFixture<unknown>): Promise<void> {
     getPicker(fixture).click();
+    await waitForPopupOpen(fixture);
+}
+
+/** The popup takes focus and starts handling keys on the task after it opens, which whenStable doesn't wait for. */
+async function waitForPopupOpen(fixture: ComponentFixture<unknown>): Promise<void> {
+    await waitForStable(fixture);
+    await new Promise(resolve => setTimeout(resolve));
     await waitForStable(fixture);
 }
 
-async function waitForPopupOpen(fixture: ComponentFixture<unknown>): Promise<void> {
-    await waitForStable(fixture);
+/** The popup finishes closing, and marks the picker touched, after its leave animation. */
+async function waitForPopupClose(fixture: ComponentFixture<unknown>): Promise<void> {
+    await waitForCondition(fixture, () => document.body.querySelector("[role='dialog']") === null);
 }
 
 function dispatchKeyDown(element: HTMLElement, key: string): void {

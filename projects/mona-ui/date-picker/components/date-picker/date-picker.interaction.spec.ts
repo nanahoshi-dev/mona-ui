@@ -220,6 +220,8 @@ describe("DatePickerComponent interaction", () => {
 
                 toggle.click();
                 await stable(fixture);
+                // The calendar takes focus on a timer once it renders, which whenStable doesn't wait for without zone.js.
+                await vi.runAllTimersAsync();
                 (document.getElementById("outside") as HTMLButtonElement).focus();
                 toggle.click();
                 await vi.runAllTimersAsync();

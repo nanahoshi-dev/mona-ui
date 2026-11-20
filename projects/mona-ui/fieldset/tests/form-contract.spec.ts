@@ -603,8 +603,8 @@ describe("form control contract", () => {
             expect(picker.getAttribute("aria-invalid")).toBeNull();
             const popup = document.querySelector<HTMLElement>("[data-palette-container]")!;
             key(popup, "Escape");
-            await settle(fixture);
-            expect(host.form.color().touched()).toBe(true);
+            // The popup closes, and marks the picker touched, once its leave animation is over.
+            await vi.waitFor(() => expect(host.form.color().touched()).toBe(true));
         });
 
         it("marks a closed picker touched on blur", async () => {
