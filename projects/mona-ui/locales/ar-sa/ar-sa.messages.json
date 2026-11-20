@@ -120,6 +120,25 @@
         "zoomedIn": "تم التكبير",
         "zoomedOut": "تم التصغير"
     },
+    "chat": {
+        "attachFiles": "إرفاق ملفات",
+        "messageBox": "رسالة",
+        "messages": "الرسائل",
+        "newMessage": "{name}: {text}",
+        "newMessages": "رسائل جديدة",
+        "noMessages": "لا توجد رسائل بعد",
+        "notSent": "لم تُرسل",
+        "placeholder": "اكتب رسالة",
+        "removeFile": "إزالة {name}",
+        "retry": "إعادة المحاولة",
+        "send": "إرسال",
+        "sending": "جارٍ الإرسال",
+        "stop": "إيقاف",
+        "suggestions": "ردود مقترحة",
+        "typing": "{count, plural, other {يكتب الآن: {names}}}",
+        "typingMany": "عدد الأشخاص الذين يكتبون الآن: {count}",
+        "you": "أنت"
+    },
     "chip": {
         "removeLabel": "{label, select, undefined {حذف العنصر} other {حذف {label}}}"
     },

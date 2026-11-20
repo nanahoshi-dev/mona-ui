@@ -27,6 +27,7 @@ describe("MONA_FR_FR_LOCALE", () => {
             "calendar",
             "card",
             "chart",
+            "chat",
             "chip",
             "colorGradient",
             "colorPalette",
@@ -75,7 +76,7 @@ describe("MONA_FR_FR_LOCALE", () => {
             "window"
         ] as const;
 
-        it("defines all 57 canonical message namespaces", () => {
+        it("defines all 58 canonical message namespaces", () => {
             for (const ns of expectedNamespaces) {
                 expect(MONA_FR_FR_LOCALE.messages[ns], `Namespace ${ns} must be defined`).toBeDefined();
             }

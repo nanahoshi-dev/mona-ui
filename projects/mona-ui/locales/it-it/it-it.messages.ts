@@ -162,6 +162,29 @@ export const IT_IT_MESSAGES = {
         zoomedIn: "Ingrandito",
         zoomedOut: "Ridotto"
     },
+    chat: {
+        attachFiles: "Allega file",
+        messageBox: "Messaggio",
+        messages: "Messaggi",
+        newMessage: (name: string, text: string) => `${name}: ${text}`,
+        newMessages: "Nuovi messaggi",
+        noMessages: "Ancora nessun messaggio",
+        notSent: "Non inviato",
+        placeholder: "Scrivi un messaggio",
+        removeFile: (name: string) => `Rimuovi ${name}`,
+        retry: "Riprova",
+        send: "Invia",
+        sending: "Invio in corso",
+        stop: "Interrompi",
+        suggestions: "Risposte suggerite",
+        typing: (names: string, count: number) =>
+            count === 1 ? `${names} sta scrivendo` : `${names} stanno scrivendo`,
+        typingMany: (count: number) =>
+            count === 1
+                ? `${localizeNumber(count)} persona sta scrivendo`
+                : `${localizeNumber(count)} persone stanno scrivendo`,
+        you: "Tu"
+    },
     chip: {
         removeLabel: (label?: string) => (label ? `Rimuovi ${label}` : "Rimuovi elemento")
     },

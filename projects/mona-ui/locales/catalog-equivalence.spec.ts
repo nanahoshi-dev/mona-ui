@@ -15,6 +15,7 @@ import { BUTTON_GROUP_DEFAULT_MESSAGES } from "../button-group/i18n/button-group
 import { CALENDAR_DEFAULT_MESSAGES } from "../calendar/i18n/calendar.default-messages";
 import { CARD_DEFAULT_MESSAGES } from "../card/i18n/card.default-messages";
 import { CHART_DEFAULT_MESSAGES } from "../chart/i18n/chart.default-messages";
+import { CHAT_DEFAULT_MESSAGES } from "../chat/i18n/chat.default-messages";
 import { CHIP_DEFAULT_MESSAGES } from "../chip/i18n/chip.default-messages";
 import { COLOR_GRADIENT_DEFAULT_MESSAGES } from "../color-gradient/i18n/color-gradient.default-messages";
 import { COLOR_PALETTE_DEFAULT_MESSAGES } from "../color-palette/i18n/color-palette.default-messages";
@@ -117,6 +118,7 @@ const ENGLISH_DEFAULTS = {
     calendar: CALENDAR_DEFAULT_MESSAGES,
     card: CARD_DEFAULT_MESSAGES,
     chart: CHART_DEFAULT_MESSAGES,
+    chat: CHAT_DEFAULT_MESSAGES,
     chip: CHIP_DEFAULT_MESSAGES,
     colorGradient: COLOR_GRADIENT_DEFAULT_MESSAGES,
     colorPalette: COLOR_PALETTE_DEFAULT_MESSAGES,

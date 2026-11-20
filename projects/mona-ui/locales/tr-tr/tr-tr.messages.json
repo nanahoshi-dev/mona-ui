@@ -120,6 +120,25 @@
         "zoomedIn": "Yakınlaştırıldı",
         "zoomedOut": "Uzaklaştırıldı"
     },
+    "chat": {
+        "attachFiles": "Dosya ekle",
+        "messageBox": "Mesaj",
+        "messages": "Mesajlar",
+        "newMessage": "{name}: {text}",
+        "newMessages": "Yeni mesajlar",
+        "noMessages": "Henüz mesaj yok",
+        "notSent": "Gönderilemedi",
+        "placeholder": "Bir mesaj yazın",
+        "removeFile": "{name} öğesini kaldır",
+        "retry": "Yeniden dene",
+        "send": "Gönder",
+        "sending": "Gönderiliyor",
+        "stop": "Durdur",
+        "suggestions": "Önerilen yanıtlar",
+        "typing": "{count, plural, other {{names} yazıyor}}",
+        "typingMany": "{count, plural, other {# kişi yazıyor}}",
+        "you": "Siz"
+    },
     "chip": {
         "removeLabel": "{label, select, undefined {Öğeyi kaldır} other {{label} öğesini kaldır}}"
     },

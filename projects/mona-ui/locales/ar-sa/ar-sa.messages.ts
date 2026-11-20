@@ -173,6 +173,25 @@ export const AR_SA_MESSAGES = {
         zoomedIn: "تم التكبير",
         zoomedOut: "تم التصغير"
     },
+    chat: {
+        attachFiles: "إرفاق ملفات",
+        messageBox: "رسالة",
+        messages: "الرسائل",
+        newMessage: (name: string, text: string) => `${name}: ${text}`,
+        newMessages: "رسائل جديدة",
+        noMessages: "لا توجد رسائل بعد",
+        notSent: "لم تُرسل",
+        placeholder: "اكتب رسالة",
+        removeFile: (name: string) => `إزالة ${name}`,
+        retry: "إعادة المحاولة",
+        send: "إرسال",
+        sending: "جارٍ الإرسال",
+        stop: "إيقاف",
+        suggestions: "ردود مقترحة",
+        typing: (names: string, _count: number) => `يكتب الآن: ${names}`,
+        typingMany: (count: number) => `عدد الأشخاص الذين يكتبون الآن: ${localizeNumber(count)}`,
+        you: "أنت"
+    },
     chip: {
         removeLabel: (label?: string) => (label ? `حذف ${label}` : "حذف العنصر")
     },

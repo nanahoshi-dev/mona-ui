@@ -138,6 +138,25 @@ export const ZH_CN_MESSAGES = {
         zoomedIn: "已放大",
         zoomedOut: "已缩小"
     },
+    chat: {
+        attachFiles: "附加文件",
+        messageBox: "消息",
+        messages: "消息",
+        newMessage: (name: string, text: string) => `${name}：${text}`,
+        newMessages: "新消息",
+        noMessages: "还没有消息",
+        notSent: "未发送",
+        placeholder: "输入消息",
+        removeFile: (name: string) => `移除 ${name}`,
+        retry: "重试",
+        send: "发送",
+        sending: "正在发送",
+        stop: "停止",
+        suggestions: "建议回复",
+        typing: (names: string, _count: number) => `${names} 正在输入`,
+        typingMany: (count: number) => `${localizeNumber(count)} 人正在输入`,
+        you: "你"
+    },
     chip: {
         removeLabel: (label?: string) => (label ? `删除${label}` : "删除项目")
     },

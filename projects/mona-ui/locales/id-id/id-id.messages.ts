@@ -140,6 +140,25 @@ export const ID_ID_MESSAGES = {
         zoomedIn: "Diperbesar",
         zoomedOut: "Diperkecil"
     },
+    chat: {
+        attachFiles: "Lampirkan file",
+        messageBox: "Pesan",
+        messages: "Pesan",
+        newMessage: (name: string, text: string) => `${name}: ${text}`,
+        newMessages: "Pesan baru",
+        noMessages: "Belum ada pesan",
+        notSent: "Tidak terkirim",
+        placeholder: "Ketik pesan",
+        removeFile: (name: string) => `Hapus ${name}`,
+        retry: "Coba lagi",
+        send: "Kirim",
+        sending: "Mengirim",
+        stop: "Hentikan",
+        suggestions: "Saran balasan",
+        typing: (names: string, _count: number) => `${names} sedang mengetik`,
+        typingMany: (count: number) => `${localizeNumber(count)} orang sedang mengetik`,
+        you: "Anda"
+    },
     chip: {
         removeLabel: (label?: string) => (label ? `Hapus ${label}` : "Hapus item")
     },

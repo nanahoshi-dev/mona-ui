@@ -161,6 +161,29 @@ export const ES_ES_MESSAGES = {
         zoomedIn: "Acercado",
         zoomedOut: "Alejado"
     },
+    chat: {
+        attachFiles: "Adjuntar archivos",
+        messageBox: "Mensaje",
+        messages: "Mensajes",
+        newMessage: (name: string, text: string) => `${name}: ${text}`,
+        newMessages: "Mensajes nuevos",
+        noMessages: "Aún no hay mensajes",
+        notSent: "No enviado",
+        placeholder: "Escribe un mensaje",
+        removeFile: (name: string) => `Quitar ${name}`,
+        retry: "Reintentar",
+        send: "Enviar",
+        sending: "Enviando",
+        stop: "Detener",
+        suggestions: "Respuestas sugeridas",
+        typing: (names: string, count: number) =>
+            count === 1 ? `${names} está escribiendo` : `${names} están escribiendo`,
+        typingMany: (count: number) =>
+            count === 1
+                ? `${localizeNumber(count)} persona está escribiendo`
+                : `${localizeNumber(count)} personas están escribiendo`,
+        you: "Tú"
+    },
     chip: {
         removeLabel: (label?: string) => (label ? `Quitar ${label}` : "Quitar elemento")
     },

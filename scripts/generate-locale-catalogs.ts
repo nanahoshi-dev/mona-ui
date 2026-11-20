@@ -100,6 +100,13 @@ export const DEFAULT_CATALOG_TARGETS: readonly DefaultCatalogTarget[] = [
         typeName: "MonaChartMessages"
     },
     {
+        constName: "CHAT_DEFAULT_MESSAGES",
+        file: "chat/i18n/chat.default-messages.ts",
+        namespace: "chat",
+        style: "type",
+        typeName: "MonaChatMessages"
+    },
+    {
         constName: "CHIP_DEFAULT_MESSAGES",
         file: "chip/i18n/chip.default-messages.ts",
         namespace: "chip",
@@ -457,6 +464,8 @@ export interface EmitContext {
     readonly parameters: readonly MessageParameterInfo[];
     /** The TypeScript expression `#` stands for, inside a plural. */
     readonly pound: string | null;
+    /** The parameter `#` counts, inside a plural, which a `#` uses. */
+    readonly poundParameter?: string;
     /** Optional parameters known to be set, inside the branch of a select that checked them. */
     readonly present: ReadonlySet<string>;
     readonly usage: EmitUsage;
@@ -564,6 +573,9 @@ function emitElement(element: Exclude<IcuElement, { kind: "literal" }>, context:
             return JSON.stringify("#");
         }
         context.usage.formatNumber = true;
+        if (context.poundParameter != null) {
+            context.usage.parameters.add(context.poundParameter);
+        }
         return `localizeNumber(${context.pound})`;
     }
 
@@ -571,7 +583,10 @@ function emitElement(element: Exclude<IcuElement, { kind: "literal" }>, context:
     if (parameter == null) {
         throw new Error(`Unknown parameter "${element.name}"`);
     }
-    context.usage.parameters.add(parameter.name);
+    // A plural uses its parameter only where its code does, which one with nothing but `other` and no `#` doesn't.
+    if (element.kind !== "plural") {
+        context.usage.parameters.add(parameter.name);
+    }
     const name = parameter.name;
 
     switch (element.kind) {
@@ -588,9 +603,12 @@ function emitElement(element: Exclude<IcuElement, { kind: "literal" }>, context:
         }
         case "plural": {
             const value = element.offset === 0 ? name : `(${name} - ${element.offset})`;
-            const inner: EmitContext = { ...context, pound: value };
+            const inner: EmitContext = { ...context, pound: value, poundParameter: name };
             const exact = [...element.options].filter(([key]) => key.startsWith("="));
             const categories = [...element.options].filter(([key]) => !key.startsWith("=") && key !== "other");
+            if (exact.length > 0 || categories.length > 0) {
+                context.usage.parameters.add(name);
+            }
             let fallback: string;
             if (categories.length === 0) {
                 fallback = emitMessage(element.options.get("other")!, inner);

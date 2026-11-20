@@ -120,6 +120,25 @@
         "zoomedIn": "확대됨",
         "zoomedOut": "축소됨"
     },
+    "chat": {
+        "attachFiles": "파일 첨부",
+        "messageBox": "메시지",
+        "messages": "메시지",
+        "newMessage": "{name}: {text}",
+        "newMessages": "새 메시지",
+        "noMessages": "아직 메시지가 없습니다",
+        "notSent": "전송되지 않음",
+        "placeholder": "메시지 입력",
+        "removeFile": "{name} 제거",
+        "retry": "다시 시도",
+        "send": "보내기",
+        "sending": "보내는 중",
+        "stop": "중지",
+        "suggestions": "추천 답장",
+        "typing": "{count, plural, other {{names} 님이 입력 중입니다}}",
+        "typingMany": "{count, plural, other {#명이 입력 중입니다}}",
+        "you": "나"
+    },
     "chip": {
         "removeLabel": "{label, select, undefined {항목 삭제} other {{label} 삭제}}"
     },

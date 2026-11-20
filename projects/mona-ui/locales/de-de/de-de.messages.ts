@@ -162,6 +162,26 @@ export const DE_DE_MESSAGES = {
         zoomedIn: "Vergrößert",
         zoomedOut: "Verkleinert"
     },
+    chat: {
+        attachFiles: "Dateien anhängen",
+        messageBox: "Nachricht",
+        messages: "Nachrichten",
+        newMessage: (name: string, text: string) => `${name}: ${text}`,
+        newMessages: "Neue Nachrichten",
+        noMessages: "Noch keine Nachrichten",
+        notSent: "Nicht gesendet",
+        placeholder: "Nachricht eingeben",
+        removeFile: (name: string) => `${name} entfernen`,
+        retry: "Erneut versuchen",
+        send: "Senden",
+        sending: "Wird gesendet",
+        stop: "Stoppen",
+        suggestions: "Antwortvorschläge",
+        typing: (names: string, count: number) => (count === 1 ? `${names} schreibt` : `${names} schreiben`),
+        typingMany: (count: number) =>
+            count === 1 ? `${localizeNumber(count)} Person schreibt` : `${localizeNumber(count)} Personen schreiben`,
+        you: "Sie"
+    },
     chip: {
         removeLabel: (label?: string) => (label ? `${label} entfernen` : "Element entfernen")
     },
