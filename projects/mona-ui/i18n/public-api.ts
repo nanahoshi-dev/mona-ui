@@ -16,6 +16,7 @@ export * from "./message-types/button-group.messages";
 export * from "./message-types/calendar.messages";
 export * from "./message-types/card.messages";
 export * from "./message-types/chart.messages";
+export * from "./message-types/chat.messages";
 export * from "./message-types/chip.messages";
 export * from "./message-types/color-gradient.messages";
 export * from "./message-types/color-palette.messages";

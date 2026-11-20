@@ -1,0 +1,172 @@
+<div [class]="logFrameClass">
+    <!-- Not live: the chat announces new messages itself, once each, rather than each word of a reply streaming in. -->
+    <div
+        #log
+        role="log"
+        aria-live="off"
+        tabindex="0"
+        [class]="logClass"
+        [attr.aria-label]="logLabel()"
+        (scroll)="onScroll()">
+        @for (day of days(); track day.key) {
+            <div [class]="dayClass">
+                @if (day.label) {
+                    <div [class]="dayLabelClass">
+                        <time [attr.datetime]="day.dateTime">{{ day.label }}</time>
+                    </div>
+                }
+                @for (run of day.runs; track run.key) {
+                    <div [class]="runClass(run.mine)">
+                        @if (!run.mine) {
+                            <!-- The name is in the text beside it. -->
+                            <span aria-hidden="true" [class]="avatarClass">
+                                <mona-avatar
+                                    width="2rem"
+                                    height="2rem"
+                                    borderRadius="9999px"
+                                    borderWidth="0"
+                                    labelFontSize="0.75rem"
+                                    [image]="run.author.avatarUrl ?? ''"
+                                    [label]="initials(run.author.name)" />
+                            </span>
+                        }
+                        <div [class]="runBodyClass(run.mine)">
+                            <span dir="auto" [class]="run.mine ? 'sr-only' : authorClass">
+                                {{ run.mine ? labels().you : run.author.name }}
+                            </span>
+                            @for (entry of run.entries; track entry.key) {
+                                <div
+                                    [class]="bubbleClass(entry)"
+                                    [attr.aria-busy]="entry.message.streaming ? 'true' : null">
+                                    @if (messageTemplate(); as template) {
+                                        <ng-container
+                                            [ngTemplateOutlet]="template"
+                                            [ngTemplateOutletContext]="messageContext(entry)" />
+                                    } @else if (entry.message.text) {
+                                        <!-- A message reads in its own direction, whatever the page's. -->
+                                        <p dir="auto" [class]="textClass">{{ entry.message.text }}</p>
+                                    }
+                                    @if (entry.message.streaming) {
+                                        <span data-chat-caret aria-hidden="true" [class]="caretClass"></span>
+                                    }
+                                    @if (entry.attachments.length > 0) {
+                                        <ul [class]="attachmentsClass">
+                                            @for (attachment of entry.attachments; track $index) {
+                                                <li [class]="attachmentClass">
+                                                    @if (attachmentTemplate(); as template) {
+                                                        <ng-container
+                                                            [ngTemplateOutlet]="template"
+                                                            [ngTemplateOutletContext]="
+                                                                attachmentContext(attachment, entry)
+                                                            " />
+                                                    } @else {
+                                                        @if (isImage(attachment)) {
+                                                            <img
+                                                                alt=""
+                                                                loading="lazy"
+                                                                [class]="attachmentImageClass"
+                                                                [src]="attachment.url"
+                                                                (load)="onMediaLoad()" />
+                                                        }
+                                                        <span [class]="attachmentRowClass">
+                                                            <svg
+                                                                lucideFile
+                                                                class="shrink-0"
+                                                                [size]="14"
+                                                                aria-hidden="true"></svg>
+                                                            @if (attachment.url) {
+                                                                <a
+                                                                    dir="auto"
+                                                                    [class]="attachmentLinkClass(entry.mine)"
+                                                                    [href]="attachment.url"
+                                                                    target="_blank"
+                                                                    rel="noopener">
+                                                                    {{ attachment.name }}
+                                                                </a>
+                                                            } @else {
+                                                                <span dir="auto" class="min-w-0 truncate">
+                                                                    {{ attachment.name }}
+                                                                </span>
+                                                            }
+                                                            @if (attachment.size !== undefined) {
+                                                                <span [class]="attachmentSizeClass">
+                                                                    {{ fileSize(attachment.size) }}
+                                                                </span>
+                                                            }
+                                                        </span>
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+                                @if (entry.mine && entry.message.status === "sending") {
+                                    <div [class]="statusClass">{{ labels().sending }}</div>
+                                } @else if (entry.mine && entry.message.status === "failed") {
+                                    <div [class]="failedClass">
+                                        <span>{{ labels().notSent }}</span>
+                                        <button
+                                            monaButton
+                                            look="link"
+                                            size="small"
+                                            [disabled]="disabled()"
+                                            (click)="onRetry(entry.message)">
+                                            {{ labels().retry }}
+                                        </button>
+                                    </div>
+                                }
+                            }
+                            @if (run.timeText) {
+                                <time [class]="timeClass" [attr.datetime]="run.dateTime">{{ run.timeText }}</time>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        } @empty {
+            <div [class]="emptyClass">
+                @if (emptyTemplate(); as template) {
+                    <ng-container [ngTemplateOutlet]="template" />
+                } @else {
+                    {{ labels().noMessages }}
+                }
+            </div>
+        }
+    </div>
+    @if (unseen()) {
+        <button monaButton size="small" rounded="full" [class]="newMessagesClass" (click)="showNewMessages()">
+            <svg lucideArrowDown [size]="14" aria-hidden="true"></svg>
+            {{ labels().newMessages }}
+        </button>
+    }
+</div>
+<div [class]="typingClass">
+    @if (typingText()) {
+        <span aria-hidden="true" [class]="typingDotsClass"><span></span><span></span><span></span></span>
+        <span>{{ typingText() }}</span>
+    }
+</div>
+@if (suggestions().length > 0 && !streaming()) {
+    <div role="group" [class]="suggestionsClass" [attr.aria-label]="labels().suggestions">
+        @for (suggestion of suggestions(); track $index) {
+            <button
+                monaButton
+                look="outline"
+                size="small"
+                rounded="full"
+                [disabled]="disabled()"
+                (click)="onSuggestion(suggestion)">
+                {{ suggestion }}
+            </button>
+        }
+    </div>
+}
+<mona-chat-composer
+    [accept]="accept()"
+    [allowFiles]="allowFiles()"
+    [disabled]="disabled()"
+    [placeholder]="placeholder()"
+    [streaming]="streaming()"
+    [(draft)]="draft"
+    (send)="onSend($event)"
+    (stop)="stop.emit()" />

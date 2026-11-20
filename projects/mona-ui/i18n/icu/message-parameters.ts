@@ -196,6 +196,31 @@ export const MONA_MESSAGE_PARAMETERS: Readonly<
         zoomedIn: null,
         zoomedOut: null
     },
+    chat: {
+        attachFiles: null,
+        messageBox: null,
+        messages: null,
+        newMessage: [
+            { name: "name", type: "string" },
+            { name: "text", type: "string" }
+        ],
+        newMessages: null,
+        noMessages: null,
+        notSent: null,
+        placeholder: null,
+        removeFile: [{ name: "name", type: "string" }],
+        retry: null,
+        send: null,
+        sending: null,
+        stop: null,
+        suggestions: null,
+        typing: [
+            { name: "names", type: "string" },
+            { name: "count", type: "number" }
+        ],
+        typingMany: [{ name: "count", type: "number" }],
+        you: null
+    },
     chip: {
         removeLabel: [{ name: "label", optional: true, type: "string" }]
     },

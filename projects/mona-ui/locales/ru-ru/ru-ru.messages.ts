@@ -168,6 +168,37 @@ export const RU_RU_MESSAGES = {
         zoomedIn: "Масштаб увеличен",
         zoomedOut: "Масштаб уменьшен"
     },
+    chat: {
+        attachFiles: "Прикрепить файлы",
+        messageBox: "Сообщение",
+        messages: "Сообщения",
+        newMessage: (name: string, text: string) => `${name}: ${text}`,
+        newMessages: "Новые сообщения",
+        noMessages: "Сообщений пока нет",
+        notSent: "Не отправлено",
+        placeholder: "Введите сообщение",
+        removeFile: (name: string) => `Удалить ${name}`,
+        retry: "Повторить",
+        send: "Отправить",
+        sending: "Отправка",
+        stop: "Остановить",
+        suggestions: "Предлагаемые ответы",
+        typing: (names: string, count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${names} печатает`,
+                few: () => `${names} печатают`,
+                many: () => `${names} печатают`,
+                other: () => `${names} печатают`
+            }),
+        typingMany: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} человек печатает`,
+                few: () => `${localizeNumber(count)} человека печатают`,
+                many: () => `${localizeNumber(count)} человек печатают`,
+                other: () => `${localizeNumber(count)} человека печатают`
+            }),
+        you: "Вы"
+    },
     chip: {
         removeLabel: (label?: string) => (label ? `Удалить ${label}` : "Удалить элемент")
     },

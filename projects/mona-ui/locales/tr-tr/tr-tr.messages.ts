@@ -161,6 +161,25 @@ export const TR_TR_MESSAGES = {
         zoomedIn: "Yakınlaştırıldı",
         zoomedOut: "Uzaklaştırıldı"
     },
+    chat: {
+        attachFiles: "Dosya ekle",
+        messageBox: "Mesaj",
+        messages: "Mesajlar",
+        newMessage: (name: string, text: string) => `${name}: ${text}`,
+        newMessages: "Yeni mesajlar",
+        noMessages: "Henüz mesaj yok",
+        notSent: "Gönderilemedi",
+        placeholder: "Bir mesaj yazın",
+        removeFile: (name: string) => `${name} öğesini kaldır`,
+        retry: "Yeniden dene",
+        send: "Gönder",
+        sending: "Gönderiliyor",
+        stop: "Durdur",
+        suggestions: "Önerilen yanıtlar",
+        typing: (names: string, _count: number) => `${names} yazıyor`,
+        typingMany: (count: number) => `${localizeNumber(count)} kişi yazıyor`,
+        you: "Siz"
+    },
     chip: {
         removeLabel: (label?: string) => (label ? `${label} öğesini kaldır` : "Öğeyi kaldır")
     },

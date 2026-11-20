@@ -1,0 +1,27 @@
+<mona-chat
+    aria-label="Docs assistant"
+    placeholder="Ask about a component"
+    class="h-112 max-w-xl"
+    [messages]="messages()"
+    [suggestions]="suggestions()"
+    [user]="me"
+    (send)="onSend($event)"
+    (stop)="onStop()">
+    <ng-template monaChatEmptyTemplate>
+        <p class="font-medium text-foreground">Hi, I'm the docs assistant.</p>
+        <p>Ask about a component, or pick a question below.</p>
+    </ng-template>
+    <ng-template monaChatMessageTemplate let-message>
+        @for (block of blocks(message.text ?? ""); track $index) {
+            @if (block.kind === "list") {
+                <ul class="my-1 list-disc ps-5">
+                    @for (item of block.items; track $index) {
+                        <li>{{ item }}</li>
+                    }
+                </ul>
+            } @else {
+                <p class="whitespace-pre-wrap">{{ block.text }}</p>
+            }
+        }
+    </ng-template>
+</mona-chat>

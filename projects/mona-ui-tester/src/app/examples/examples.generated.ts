@@ -323,6 +323,21 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./chart/tooltip/tooltip-example.component").then(module => module.ChartTooltipExampleComponent),
         mainFile: "tooltip-example.component.ts"
     },
+    "chat/assistant": {
+        files: ["assistant-example.component.ts", "assistant-example.component.html"],
+        load: () => import("./chat/assistant/assistant-example.component").then(module => module.ChatAssistantExampleComponent),
+        mainFile: "assistant-example.component.ts"
+    },
+    "chat/basic": {
+        files: ["basic-example.component.ts", "basic-example.component.html"],
+        load: () => import("./chat/basic/basic-example.component").then(module => module.ChatBasicExampleComponent),
+        mainFile: "basic-example.component.ts"
+    },
+    "chat/files": {
+        files: ["files-example.component.ts", "files-example.component.html"],
+        load: () => import("./chat/files/files-example.component").then(module => module.ChatFilesExampleComponent),
+        mainFile: "files-example.component.ts"
+    },
     "checkbox/directive": {
         files: ["directive-example.component.ts", "directive-example.component.html"],
         load: () => import("./checkbox/directive/directive-example.component").then(module => module.CheckboxDirectiveExampleComponent),

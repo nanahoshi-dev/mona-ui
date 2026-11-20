@@ -163,6 +163,29 @@ export const PT_BR_MESSAGES = {
         zoomedIn: "Ampliado",
         zoomedOut: "Reduzido"
     },
+    chat: {
+        attachFiles: "Anexar arquivos",
+        messageBox: "Mensagem",
+        messages: "Mensagens",
+        newMessage: (name: string, text: string) => `${name}: ${text}`,
+        newMessages: "Novas mensagens",
+        noMessages: "Nenhuma mensagem ainda",
+        notSent: "Não enviada",
+        placeholder: "Digite uma mensagem",
+        removeFile: (name: string) => `Remover ${name}`,
+        retry: "Tentar novamente",
+        send: "Enviar",
+        sending: "Enviando",
+        stop: "Parar",
+        suggestions: "Respostas sugeridas",
+        typing: (names: string, count: number) =>
+            count === 1 ? `${names} está digitando` : `${names} estão digitando`,
+        typingMany: (count: number) =>
+            count === 1
+                ? `${localizeNumber(count)} pessoa está digitando`
+                : `${localizeNumber(count)} pessoas estão digitando`,
+        you: "Você"
+    },
     chip: {
         removeLabel: (label?: string) => (label ? `Remover ${label}` : "Remover item")
     },

@@ -72,6 +72,20 @@ describe("generate-locale-catalogs emitter", () => {
         expect(run(2026, 12000)).toBe("Year 2026 of 12.000");
     });
 
+    it("marks a plural's parameter unused when only its other form is left, without #", () => {
+        const { code, run } = compile(
+            "{count, plural, other {{names} が入力中です}}",
+            [text("names"), number("count")],
+            "ja-JP"
+        );
+
+        expect(code).toBe("(names: string, _count: number) => `${names} が入力中です`");
+        expect(run("Ana", 1)).toBe("Ana が入力中です");
+        expect(compile("{n, plural, other {# 人}}", [number("n")], "ja-JP").code).toBe(
+            "(n: number) => `${localizeNumber(n)} 人`"
+        );
+    });
+
     it("emits =N plurals as conditionals and # as the value", () => {
         const { code, run } = compile("{n, plural, =1 {1 Spalte} other {# Spalten}}", [number("n")], "de-DE");
 
@@ -131,6 +145,6 @@ describe("generate-locale-catalogs emitter", () => {
         const namespaces = DEFAULT_CATALOG_TARGETS.map(target => target.namespace);
 
         expect(new Set(namespaces).size).toBe(namespaces.length);
-        expect(namespaces).toHaveLength(57);
+        expect(namespaces).toHaveLength(58);
     });
 });

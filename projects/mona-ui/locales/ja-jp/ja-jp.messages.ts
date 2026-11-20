@@ -137,6 +137,25 @@ export const JA_JP_MESSAGES = {
         zoomedIn: "拡大しました",
         zoomedOut: "縮小しました"
     },
+    chat: {
+        attachFiles: "ファイルを添付",
+        messageBox: "メッセージ",
+        messages: "メッセージ",
+        newMessage: (name: string, text: string) => `${name}：${text}`,
+        newMessages: "新しいメッセージ",
+        noMessages: "まだメッセージはありません",
+        notSent: "送信できませんでした",
+        placeholder: "メッセージを入力",
+        removeFile: (name: string) => `${name} を削除`,
+        retry: "再試行",
+        send: "送信",
+        sending: "送信中",
+        stop: "停止",
+        suggestions: "返信の候補",
+        typing: (names: string, _count: number) => `${names} が入力中です`,
+        typingMany: (count: number) => `${localizeNumber(count)} 人が入力中です`,
+        you: "あなた"
+    },
     chip: {
         removeLabel: (label?: string) => (label ? `${label}を削除` : "項目を削除")
     },

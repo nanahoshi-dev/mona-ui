@@ -120,6 +120,25 @@
         "zoomedIn": "Diperbesar",
         "zoomedOut": "Diperkecil"
     },
+    "chat": {
+        "attachFiles": "Lampirkan file",
+        "messageBox": "Pesan",
+        "messages": "Pesan",
+        "newMessage": "{name}: {text}",
+        "newMessages": "Pesan baru",
+        "noMessages": "Belum ada pesan",
+        "notSent": "Tidak terkirim",
+        "placeholder": "Ketik pesan",
+        "removeFile": "Hapus {name}",
+        "retry": "Coba lagi",
+        "send": "Kirim",
+        "sending": "Mengirim",
+        "stop": "Hentikan",
+        "suggestions": "Saran balasan",
+        "typing": "{count, plural, other {{names} sedang mengetik}}",
+        "typingMany": "{count, plural, other {# orang sedang mengetik}}",
+        "you": "Anda"
+    },
     "chip": {
         "removeLabel": "{label, select, undefined {Hapus item} other {Hapus {label}}}"
     },

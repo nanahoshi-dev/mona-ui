@@ -120,6 +120,25 @@
         "zoomedIn": "Zoomed in",
         "zoomedOut": "Zoomed out"
     },
+    "chat": {
+        "attachFiles": "Attach files",
+        "messageBox": "Message",
+        "messages": "Messages",
+        "newMessage": "{name}: {text}",
+        "newMessages": "New messages",
+        "noMessages": "No messages yet",
+        "notSent": "Not sent",
+        "placeholder": "Type a message",
+        "removeFile": "Remove {name}",
+        "retry": "Retry",
+        "send": "Send",
+        "sending": "Sending",
+        "stop": "Stop",
+        "suggestions": "Suggested replies",
+        "typing": "{count, plural, =1 {{names} is typing} other {{names} are typing}}",
+        "typingMany": "{count, plural, =1 {# person is typing} other {# people are typing}}",
+        "you": "You"
+    },
     "chip": {
         "removeLabel": "{label, select, undefined {Remove, item} other {Remove, {label}}}"
     },

@@ -168,6 +168,37 @@ export const PL_PL_MESSAGES = {
         zoomedIn: "Powiększono",
         zoomedOut: "Pomniejszono"
     },
+    chat: {
+        attachFiles: "Załącz pliki",
+        messageBox: "Wiadomość",
+        messages: "Wiadomości",
+        newMessage: (name: string, text: string) => `${name}: ${text}`,
+        newMessages: "Nowe wiadomości",
+        noMessages: "Brak wiadomości",
+        notSent: "Nie wysłano",
+        placeholder: "Wpisz wiadomość",
+        removeFile: (name: string) => `Usuń ${name}`,
+        retry: "Spróbuj ponownie",
+        send: "Wyślij",
+        sending: "Wysyłanie",
+        stop: "Zatrzymaj",
+        suggestions: "Sugerowane odpowiedzi",
+        typing: (names: string, count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${names} pisze`,
+                few: () => `${names} piszą`,
+                many: () => `${names} piszą`,
+                other: () => `${names} piszą`
+            }),
+        typingMany: (count: number) =>
+            plural(PLURAL_RULES.select(count), {
+                one: () => `${localizeNumber(count)} osoba pisze`,
+                few: () => `${localizeNumber(count)} osoby piszą`,
+                many: () => `${localizeNumber(count)} osób pisze`,
+                other: () => `${localizeNumber(count)} osoby piszą`
+            }),
+        you: "Ty"
+    },
     chip: {
         removeLabel: (label?: string) => (label ? `Usuń ${label}` : "Usuń element")
     },

@@ -120,6 +120,25 @@
         "zoomedIn": "已放大",
         "zoomedOut": "已縮小"
     },
+    "chat": {
+        "attachFiles": "附加檔案",
+        "messageBox": "訊息",
+        "messages": "訊息",
+        "newMessage": "{name}：{text}",
+        "newMessages": "新訊息",
+        "noMessages": "還沒有訊息",
+        "notSent": "未傳送",
+        "placeholder": "輸入訊息",
+        "removeFile": "移除 {name}",
+        "retry": "重試",
+        "send": "傳送",
+        "sending": "正在傳送",
+        "stop": "停止",
+        "suggestions": "建議回覆",
+        "typing": "{count, plural, other {{names} 正在輸入}}",
+        "typingMany": "{count, plural, other {# 人正在輸入}}",
+        "you": "你"
+    },
     "chip": {
         "removeLabel": "{label, select, undefined {移除項目} other {移除{label}}}"
     },

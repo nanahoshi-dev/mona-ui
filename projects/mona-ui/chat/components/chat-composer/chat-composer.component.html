@@ -1,0 +1,61 @@
+@if (files().length > 0) {
+    <ul [class]="filesClass">
+        @for (file of files(); track file) {
+            <li [class]="fileClass">
+                <span dir="auto" [class]="fileNameClass">{{ file.name }}</span>
+                <span class="shrink-0 text-muted-foreground">{{ fileSize(file) }}</span>
+                <button
+                    monaButton
+                    look="ghost"
+                    size="small"
+                    [iconOnly]="true"
+                    [attr.aria-label]="messages().removeFile(file.name)"
+                    (click)="removeFile(file)">
+                    <svg lucideX [size]="14" aria-hidden="true"></svg>
+                </button>
+            </li>
+        }
+    </ul>
+}
+<div [class]="fieldClass" [attr.data-disabled]="disabled() || null">
+    @if (allowFiles()) {
+        <button
+            monaButton
+            look="ghost"
+            [iconOnly]="true"
+            [disabled]="disabled()"
+            [attr.aria-label]="messages().attachFiles"
+            (click)="picker.click()">
+            <svg lucidePaperclip [size]="16" aria-hidden="true"></svg>
+        </button>
+        <input #picker type="file" multiple hidden tabindex="-1" [accept]="accept()" (change)="onFilesPicked(picker)" />
+    }
+    <!-- Empty, the box and its placeholder follow the page; with text, the text's own direction. -->
+    <textarea
+        #textArea
+        rows="1"
+        enterkeyhint="send"
+        [class]="textAreaClass"
+        [attr.dir]="draft() ? 'auto' : null"
+        [attr.aria-label]="messages().messageBox"
+        [placeholder]="placeholderText()"
+        [disabled]="disabled()"
+        [value]="draft()"
+        (input)="onInput(textArea)"
+        (keydown)="onKeydown($event)"></textarea>
+    @if (streaming()) {
+        <button monaButton look="primary" [iconOnly]="true" [attr.aria-label]="messages().stop" (click)="stop.emit()">
+            <svg lucideSquare [size]="14" aria-hidden="true"></svg>
+        </button>
+    } @else {
+        <button
+            monaButton
+            look="primary"
+            [iconOnly]="true"
+            [disabled]="!canSend()"
+            [attr.aria-label]="messages().send"
+            (click)="submit()">
+            <svg lucideSendHorizontal [size]="16" aria-hidden="true"></svg>
+        </button>
+    }
+</div>

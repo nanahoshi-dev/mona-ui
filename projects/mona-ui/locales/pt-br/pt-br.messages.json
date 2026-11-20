@@ -120,6 +120,25 @@
         "zoomedIn": "Ampliado",
         "zoomedOut": "Reduzido"
     },
+    "chat": {
+        "attachFiles": "Anexar arquivos",
+        "messageBox": "Mensagem",
+        "messages": "Mensagens",
+        "newMessage": "{name}: {text}",
+        "newMessages": "Novas mensagens",
+        "noMessages": "Nenhuma mensagem ainda",
+        "notSent": "Não enviada",
+        "placeholder": "Digite uma mensagem",
+        "removeFile": "Remover {name}",
+        "retry": "Tentar novamente",
+        "send": "Enviar",
+        "sending": "Enviando",
+        "stop": "Parar",
+        "suggestions": "Respostas sugeridas",
+        "typing": "{count, plural, =1 {{names} está digitando} other {{names} estão digitando}}",
+        "typingMany": "{count, plural, =1 {# pessoa está digitando} other {# pessoas estão digitando}}",
+        "you": "Você"
+    },
     "chip": {
         "removeLabel": "{label, select, undefined {Remover item} other {Remover {label}}}"
     },

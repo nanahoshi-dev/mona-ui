@@ -8843,6 +8843,176 @@
       }
     ]
   },
+  "ChatComponent": {
+    "name": "ChatComponent",
+    "selector": "\"mona-chat\"",
+    "inputs": [
+      {
+        "description": "The file types the file picker offers, as its `accept` attribute takes them, such as\n`\"image/*,.pdf\"`. Every type when empty.",
+        "kind": "input",
+        "name": "accept",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Shows a button that attaches files to the message, through the file picker. The files go out with\nthe message in `send`; upload them, and give the message its `attachments`.",
+        "kind": "input",
+        "name": "allowFiles",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "The chat's name, such as \"Support chat\", which names its list of messages. \"Messages\" when empty.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Disables the message box, its buttons and the suggested replies, such as while the chat is offline.\nThe messages can still be read and scrolled.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "The text in the message box. Bind it two-way, `[(draft)]`, to keep a draft per conversation, or to\ntell others the user is typing.",
+        "kind": "model",
+        "name": "draft",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The messages, oldest first. Give each an `id`, so one replaced with a copy, as a reply streaming in\nis, stays the same message.",
+        "kind": "input",
+        "name": "messages",
+        "type": "Iterable<ChatMessage>",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "The message box's placeholder. \"Type a message\" in the locale when empty.",
+        "kind": "input",
+        "name": "placeholder",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Emitted with a message of the user's that couldn't be sent, when they press its Retry button. Send\nit again, and set its `status`.",
+        "kind": "output",
+        "name": "retry",
+        "type": "ChatMessage"
+      },
+      {
+        "description": "Emitted with what the user sends: a message's text, trimmed, and its files, or a suggested reply\nthey press. Add the message to `messages` to show it.",
+        "kind": "output",
+        "name": "send",
+        "type": "ChatSendEvent"
+      },
+      {
+        "description": "Emitted when the user presses Stop while a reply streams in. Stop it, and set its `streaming` to\n`false`.",
+        "kind": "output",
+        "name": "stop",
+        "type": "void"
+      },
+      {
+        "description": "Replies the user can send with a press, shown above the message box while no reply is streaming\nin. Pressing one emits `send` with its text.",
+        "kind": "input",
+        "name": "suggestions",
+        "type": "readonly string[]",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "How the time under each run of messages is formatted, in the locale.",
+        "kind": "input",
+        "name": "timeFormat",
+        "type": "Intl.DateTimeFormatOptions",
+        "defaultValue": "{ hour: \"numeric\", minute: \"2-digit\" }"
+      },
+      {
+        "description": "The people typing, shown below the messages: \"Ana is typing\", or how many for more than three.",
+        "kind": "input",
+        "name": "typing",
+        "type": "readonly ChatUser[]",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "The user: messages whose author has their `id` are theirs, shown at the end without a name.",
+        "kind": "input",
+        "name": "user",
+        "type": "ChatUser",
+        "required": true
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`, such as a height: the chat\nis 32rem tall by default.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
+  "ChatComposerComponent": {
+    "name": "ChatComposerComponent",
+    "selector": "\"mona-chat-composer\"",
+    "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "accept",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "allowFiles",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "",
+        "kind": "model",
+        "name": "draft",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "placeholder",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "",
+        "kind": "output",
+        "name": "send",
+        "type": "ChatSendEvent"
+      },
+      {
+        "description": "",
+        "kind": "output",
+        "name": "stop",
+        "type": "void"
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "streaming",
+        "type": "boolean",
+        "defaultValue": "false"
+      }
+    ]
+  },
   "CheckBoxComponent": {
     "name": "CheckBoxComponent",
     "selector": "\"mona-check-box\"",

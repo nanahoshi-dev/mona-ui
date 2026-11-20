@@ -141,6 +141,25 @@ export const KO_KR_MESSAGES = {
         zoomedIn: "확대됨",
         zoomedOut: "축소됨"
     },
+    chat: {
+        attachFiles: "파일 첨부",
+        messageBox: "메시지",
+        messages: "메시지",
+        newMessage: (name: string, text: string) => `${name}: ${text}`,
+        newMessages: "새 메시지",
+        noMessages: "아직 메시지가 없습니다",
+        notSent: "전송되지 않음",
+        placeholder: "메시지 입력",
+        removeFile: (name: string) => `${name} 제거`,
+        retry: "다시 시도",
+        send: "보내기",
+        sending: "보내는 중",
+        stop: "중지",
+        suggestions: "추천 답장",
+        typing: (names: string, _count: number) => `${names} 님이 입력 중입니다`,
+        typingMany: (count: number) => `${localizeNumber(count)}명이 입력 중입니다`,
+        you: "나"
+    },
     chip: {
         removeLabel: (label?: string) => (label ? `${label} 삭제` : "항목 삭제")
     },

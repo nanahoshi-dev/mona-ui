@@ -138,6 +138,25 @@ export const ZH_TW_MESSAGES = {
         zoomedIn: "已放大",
         zoomedOut: "已縮小"
     },
+    chat: {
+        attachFiles: "附加檔案",
+        messageBox: "訊息",
+        messages: "訊息",
+        newMessage: (name: string, text: string) => `${name}：${text}`,
+        newMessages: "新訊息",
+        noMessages: "還沒有訊息",
+        notSent: "未傳送",
+        placeholder: "輸入訊息",
+        removeFile: (name: string) => `移除 ${name}`,
+        retry: "重試",
+        send: "傳送",
+        sending: "正在傳送",
+        stop: "停止",
+        suggestions: "建議回覆",
+        typing: (names: string, _count: number) => `${names} 正在輸入`,
+        typingMany: (count: number) => `${localizeNumber(count)} 人正在輸入`,
+        you: "你"
+    },
     chip: {
         removeLabel: (label?: string) => (label ? `移除${label}` : "移除項目")
     },

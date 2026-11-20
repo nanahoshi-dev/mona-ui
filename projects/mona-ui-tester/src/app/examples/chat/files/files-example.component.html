@@ -1,0 +1,9 @@
+<mona-chat
+    accept="image/*,.pdf,.txt"
+    aria-label="Chat with Kenji Mori"
+    class="h-112 max-w-xl"
+    [allowFiles]="true"
+    [messages]="messages()"
+    [user]="me"
+    (retry)="onRetry($event)"
+    (send)="onSend($event)" />

@@ -6,6 +6,7 @@ import type { MonaButtonGroupMessages } from "../message-types/button-group.mess
 import type { MonaCalendarMessages } from "../message-types/calendar.messages";
 import type { MonaCardMessages } from "../message-types/card.messages";
 import type { MonaChartMessages } from "../message-types/chart.messages";
+import type { MonaChatMessages } from "../message-types/chat.messages";
 import type { MonaChipMessages } from "../message-types/chip.messages";
 import type { MonaColorGradientMessages } from "../message-types/color-gradient.messages";
 import type { MonaColorPaletteMessages } from "../message-types/color-palette.messages";
@@ -65,6 +66,7 @@ export interface MonaLocaleMessages {
     calendar: MonaCalendarMessages;
     card: MonaCardMessages;
     chart: MonaChartMessages;
+    chat: MonaChatMessages;
     chip: MonaChipMessages;
     colorGradient: MonaColorGradientMessages;
     colorPalette: MonaColorPaletteMessages;
