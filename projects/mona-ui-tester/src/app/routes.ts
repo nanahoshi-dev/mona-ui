@@ -188,6 +188,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "chat",
+                loadComponent: () =>
+                    import("./docs/components/chat-doc/chat-doc.component").then(m => m.ChatDocComponent)
+            },
+            {
                 path: "checkbox",
                 loadComponent: () =>
                     import("./docs/components/checkbox-doc/checkbox-doc.component").then(m => m.CheckboxDocComponent)

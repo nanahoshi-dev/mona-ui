@@ -1,0 +1,13 @@
+<mona-chat
+    aria-label="Chat with Ana Silva"
+    [allowFiles]="allowFiles()"
+    [class]="userClass()"
+    [disabled]="disabled()"
+    [messages]="conversation()"
+    [placeholder]="placeholder()"
+    [suggestions]="suggestions()"
+    [timeFormat]="timeFormat()"
+    [typing]="typing()"
+    [user]="me"
+    [(draft)]="draft"
+    (send)="onSend($event)" />

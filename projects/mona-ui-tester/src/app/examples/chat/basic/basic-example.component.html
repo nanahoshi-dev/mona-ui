@@ -1,0 +1,7 @@
+<mona-chat
+    aria-label="Chat with Ana Silva"
+    class="h-112 max-w-xl"
+    [messages]="messages()"
+    [typing]="typing()"
+    [user]="me"
+    (send)="onSend($event)" />

@@ -411,6 +411,18 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
         ]
     },
     {
+        id: "conversation",
+        title: "Conversation",
+        pages: [
+            component(
+                "chat",
+                "Chat",
+                "chat",
+                "A conversation with people or an assistant: message bubbles by day and author, a message box that sends files, and replies that stream in."
+            )
+        ]
+    },
+    {
         id: "grid",
         title: "Grid",
         // The overview documents every grid export that no feature page claims.
