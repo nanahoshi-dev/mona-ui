@@ -168,6 +168,14 @@ export class PopupMenuListComponent implements OnInit {
         this.setSubscriptions();
     }
 
+    /**
+     * The row of an item, found by its id. The highlight (data-active) reaches the page only on the next render, so an
+     * item highlighted by the same keystroke can't be found by it yet.
+     */
+    #itemElement(item: PopupMenuItem): HTMLElement | null {
+        return this.#host.nativeElement.querySelector(`#${CSS.escape(item.uid)}`) as HTMLElement | null;
+    }
+
     #menuElement(): HTMLElement | null {
         return this.#host.nativeElement.firstElementChild as HTMLElement | null;
     }
@@ -398,9 +406,9 @@ export class PopupMenuListComponent implements OnInit {
             return;
         }
         if (activeItem && activeItem.items.length > 0) {
-            const target = this.#host.nativeElement.querySelector('[data-active="true"]');
+            const target = this.#itemElement(activeItem);
             if (target) {
-                this.createSubmenu(target as HTMLElement, true, activeItem);
+                this.createSubmenu(target, true, activeItem);
             }
         } else if (activeItem) {
             const syntheticEvent = new MouseEvent("click", {
@@ -485,9 +493,9 @@ export class PopupMenuListComponent implements OnInit {
         if (!activeItem || activeItem.disabled) {
             return { item: null, hasChild: false };
         }
-        const target = this.#host.nativeElement.querySelector('[data-active="true"]');
+        const target = this.#itemElement(activeItem);
         if (target && activeItem.items.length > 0) {
-            this.createSubmenu(target as HTMLElement, true, activeItem);
+            this.createSubmenu(target, true, activeItem);
             return { item: activeItem, hasChild: true };
         }
         if (activeItem && activeItem.items.length > 0) {
