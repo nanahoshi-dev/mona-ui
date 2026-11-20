@@ -862,17 +862,24 @@ describe("audit-locales", () => {
 
     describe("locale entry points", () => {
         const ES_ENTRY = `export { MONA_ES_ES_LOCALE } from "./es-es.locale";\n`;
-        const ES_NG_PACKAGE = JSON.stringify({ lib: { entryFile: "public-api.ts" } });
+        const ES_EXPORT = "./locales/es-es/public-api.ts";
         const ES_LOADER = `const L = {\n    "es-ES": () => import("@nanahoshi/mona-ui/locales/es-es").then(m => m.MONA_ES_ES_LOCALE)\n};\n`;
 
+        /** Builds a library root with a `locales` folder; `exportTarget` is the package.json export for es-es. */
         function withEsLocale(
-            files: { barrel: string; entry?: string; loader?: string; ngPackage?: string },
+            files: { barrel: string; entry?: string; loader?: string; exportTarget?: string },
             check: (details: string[]) => void
         ): void {
-            const tempDir = mkdtempSync(join(tmpdir(), "mona-locale-entry-"));
+            const libraryDir = mkdtempSync(join(tmpdir(), "mona-locale-entry-"));
             try {
+                const tempDir = join(libraryDir, "locales");
                 const esFolder = join(tempDir, "es-es");
                 mkdirSync(esFolder, { recursive: true });
+                const exports = files.exportTarget == null ? {} : { "./locales/es-es": files.exportTarget };
+                writeFileSync(
+                    join(libraryDir, "package.json"),
+                    JSON.stringify({ name: "@nanahoshi/mona-ui", exports })
+                );
                 writeFileSync(join(tempDir, "public-api.ts"), files.barrel);
                 writeFileSync(
                     join(esFolder, "es-es.messages.ts"),
@@ -885,15 +892,12 @@ describe("audit-locales", () => {
                 if (files.entry != null) {
                     writeFileSync(join(esFolder, "public-api.ts"), files.entry);
                 }
-                if (files.ngPackage != null) {
-                    writeFileSync(join(esFolder, "ng-package.json"), files.ngPackage);
-                }
                 if (files.loader != null) {
                     writeFileSync(join(tempDir, "load-mona-locale.ts"), files.loader);
                 }
                 check(discoverOfficialLocales(tempDir).violations.map(v => v.detail));
             } finally {
-                rmSync(tempDir, { recursive: true, force: true });
+                rmSync(libraryDir, { recursive: true, force: true });
             }
         }
 
@@ -903,7 +907,7 @@ describe("audit-locales", () => {
                     barrel: `export { MONA_ES_ES_LOCALE } from "@nanahoshi/mona-ui/locales/es-es";\n`,
                     entry: ES_ENTRY,
                     loader: ES_LOADER,
-                    ngPackage: ES_NG_PACKAGE
+                    exportTarget: ES_EXPORT
                 },
                 details => expect(details).toEqual([])
             );
@@ -914,7 +918,7 @@ describe("audit-locales", () => {
                 {
                     barrel: `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`,
                     entry: ES_ENTRY,
-                    ngPackage: ES_NG_PACKAGE
+                    exportTarget: ES_EXPORT
                 },
                 details =>
                     expect(details.some(d => d.includes('expected module "@nanahoshi/mona-ui/locales/es-es"'))).toBe(
@@ -923,11 +927,17 @@ describe("audit-locales", () => {
             );
         });
 
-        it("rejects an entry point without ng-package.json", () => {
+        it("rejects an entry point missing from the package.json exports", () => {
             withEsLocale(
                 { barrel: `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`, entry: ES_ENTRY },
-                details =>
-                    expect(details.some(d => d.includes("needs both ng-package.json and public-api.ts"))).toBe(true)
+                details => expect(details.some(d => d.includes("needs both public-api.ts and an exports"))).toBe(true)
+            );
+        });
+
+        it("rejects a package.json export without public-api.ts", () => {
+            withEsLocale(
+                { barrel: `export { MONA_ES_ES_LOCALE } from "./es-es/es-es.locale";\n`, exportTarget: ES_EXPORT },
+                details => expect(details.some(d => d.includes("needs both public-api.ts and an exports"))).toBe(true)
             );
         });
 
@@ -936,20 +946,23 @@ describe("audit-locales", () => {
                 {
                     barrel: `export { MONA_ES_ES_LOCALE } from "@nanahoshi/mona-ui/locales/es-es";\n`,
                     entry: `${ES_ENTRY}export { ES_ES_MESSAGES } from "./es-es.messages";\n`,
-                    ngPackage: ES_NG_PACKAGE
+                    exportTarget: ES_EXPORT
                 },
                 details => expect(details.some(d => d.includes("must contain only"))).toBe(true)
             );
         });
 
-        it("rejects an ng-package.json with another entry file", () => {
+        it("rejects a package.json export that points at another entry file", () => {
             withEsLocale(
                 {
                     barrel: `export { MONA_ES_ES_LOCALE } from "@nanahoshi/mona-ui/locales/es-es";\n`,
                     entry: ES_ENTRY,
-                    ngPackage: JSON.stringify({ lib: { entryFile: "index.ts" } })
+                    exportTarget: "./locales/es-es/index.ts"
                 },
-                details => expect(details.some(d => d.includes("lib.entryFile"))).toBe(true)
+                details =>
+                    expect(details).toContain(
+                        'package.json must export "./locales/es-es" as "./locales/es-es/public-api.ts"'
+                    )
             );
         });
 
@@ -966,7 +979,7 @@ describe("audit-locales", () => {
                     barrel: `export { MONA_ES_ES_LOCALE } from "@nanahoshi/mona-ui/locales/es-es";\n`,
                     entry: ES_ENTRY,
                     loader: `const L = {\n    "nl-NL": () => import("@nanahoshi/mona-ui/locales/nl-nl").then(m => m.MONA_NL_NL_LOCALE)\n};\n`,
-                    ngPackage: ES_NG_PACKAGE
+                    exportTarget: ES_EXPORT
                 },
                 details => {
                     expect(details.some(d => d.includes('must load "es-ES"'))).toBe(true);

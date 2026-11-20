@@ -12,7 +12,8 @@ import {
     verifyBuiltPackage,
     verifyLeanBundles,
     verifyPackageStyles,
-    verifyThirdPartyNotices
+    verifyThirdPartyNotices,
+    verifyTypeBundles
 } from "./verify-built-package";
 
 describe("verify-built-package", () => {
@@ -1421,6 +1422,52 @@ export declare function getLocaleFirstDayOfWeek(locale: string): LocaleFirstDayO
                 expect(() => verifyLeanBundles(tempDir)).toThrow('nanahoshi-mona-ui-chart.mjs imports "culori"');
                 rmSync(join(tempDir, "fesm2022", "nanahoshi-mona-ui-theme.mjs"));
                 expect(() => verifyLeanBundles(tempDir)).toThrow("nanahoshi-mona-ui-theme.mjs");
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+    });
+
+    describe("verifyTypeBundles", () => {
+        function createTypes(files: readonly string[]): string {
+            const tempDir = mkdtempSync(join(tmpdir(), "pkg-verify-test-"));
+            mkdirSync(join(tempDir, "types"));
+            for (const file of files) {
+                writeFileSync(join(tempDir, "types", file), "export {};\n");
+            }
+            writeFileSync(
+                join(tempDir, "package.json"),
+                JSON.stringify({
+                    exports: {
+                        "./styles.css": "./styles.css",
+                        ".": { types: "./types/nanahoshi-mona-ui.d.ts", default: "./fesm2022/nanahoshi-mona-ui.mjs" },
+                        "./i18n": {
+                            types: "./types/nanahoshi-mona-ui-i18n.d.ts",
+                            default: "./fesm2022/nanahoshi-mona-ui-i18n.mjs"
+                        }
+                    }
+                })
+            );
+            return tempDir;
+        }
+
+        it("accepts declaration files that entry points export", () => {
+            const tempDir = createTypes(["nanahoshi-mona-ui.d.ts", "nanahoshi-mona-ui-i18n.d.ts"]);
+            try {
+                expect(verifyTypeBundles(tempDir)).toBe(2);
+            } finally {
+                rmSync(tempDir, { recursive: true, force: true });
+            }
+        });
+
+        it("fails on a declaration chunk that entry points share", () => {
+            const tempDir = createTypes([
+                "nanahoshi-mona-ui.d.ts",
+                "nanahoshi-mona-ui-i18n.d.ts",
+                "public-api-BPUDPqk6.d.ts"
+            ]);
+            try {
+                expect(() => verifyTypeBundles(tempDir)).toThrow("public-api-BPUDPqk6.d.ts");
             } finally {
                 rmSync(tempDir, { recursive: true, force: true });
             }

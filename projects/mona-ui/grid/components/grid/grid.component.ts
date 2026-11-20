@@ -35,6 +35,7 @@ import {
     isDevMode,
     model,
     output,
+    type Signal,
     signal,
     TemplateRef,
     untracked,
@@ -46,6 +47,7 @@ import { fromEvent, type Subscription } from "rxjs";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ChipComponent } from "@nanahoshi/mona-ui/chip";
 import { FilterService } from "@nanahoshi/mona-ui/filter";
+import type { MonaGridMessages } from "@nanahoshi/mona-ui/i18n";
 import { injectLiveAnnouncer } from "@nanahoshi/mona-ui/internal/live-announcer";
 import { type PageChangeEvent, PagerComponent } from "@nanahoshi/mona-ui/pager";
 import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
@@ -376,7 +378,8 @@ export class GridComponent<T> implements GridVariantInput {
         return gridHeaderTableRowThemeVariants();
     });
 
-    protected readonly messages = this.gridService.messages;
+    // Typed from the package specifier so the declaration bundle imports it from @nanahoshi/mona-ui/i18n.
+    protected readonly messages: Signal<MonaGridMessages> = this.gridService.messages;
 
     protected readonly multiselectable = computed(() => {
         const options = this.gridService.selectableOptions();

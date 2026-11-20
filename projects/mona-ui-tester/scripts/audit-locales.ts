@@ -993,8 +993,24 @@ export function discoverOfficialLocales(
 const LOCALE_ENTRY_POINT_PREFIX = "@nanahoshi/mona-ui/locales/";
 
 /**
- * Checks a locale folder's entry point, if it has one: `ng-package.json` with `public-api.ts` as its entry file,
- * and a `public-api.ts` that re-exports only the locale constant from its locale file.
+ * Reads the `exports` of the library's package.json, which list its entry points for the library builder. A missing
+ * package.json has none; one that can't be parsed returns the error.
+ */
+function readLibraryExports(packageJsonPath: string): Readonly<Record<string, unknown>> | Error {
+    if (!existsSync(packageJsonPath)) {
+        return {};
+    }
+    try {
+        const { exports } = JSON.parse(readFileSync(packageJsonPath, "utf-8")) as { exports?: unknown };
+        return exports != null && typeof exports === "object" ? (exports as Record<string, unknown>) : {};
+    } catch (err: unknown) {
+        return err instanceof Error ? err : new Error(String(err));
+    }
+}
+
+/**
+ * Checks a locale folder's entry point, if it has one: an export in the library's package.json that points at the
+ * folder's `public-api.ts`, and a `public-api.ts` that re-exports only the locale constant from its locale file.
  */
 function checkLocaleEntryPoint(
     folder: string,
@@ -1005,37 +1021,40 @@ function checkLocaleEntryPoint(
     violations: LocaleAuditViolation[]
 ): boolean {
     const publicApiPath = join(folderPath, "public-api.ts");
-    const ngPackagePath = join(folderPath, "ng-package.json");
+    const packageJsonPath = join(dirname(folderPath), "..", "package.json");
+    const subpath = `./locales/${folder}`;
+    const libraryExports = readLibraryExports(packageJsonPath);
+    const exportTarget = libraryExports instanceof Error ? undefined : libraryExports[subpath];
     const hasPublicApi = existsSync(publicApiPath);
-    const hasNgPackage = existsSync(ngPackagePath);
-    if (!hasPublicApi && !hasNgPackage) {
+    const hasExport = exportTarget !== undefined;
+    if (!hasPublicApi && !hasExport) {
         return false;
     }
-    if (!hasPublicApi || !hasNgPackage) {
+    if (libraryExports instanceof Error) {
         violations.push({
             category: "invalid-metadata",
-            detail: `Locale entry point "${folder}" needs both ng-package.json and public-api.ts`,
-            file: hasPublicApi ? publicApiPath : ngPackagePath,
+            detail: `Failed to parse the package.json that exports locale entry point "${folder}": ${libraryExports.message}`,
+            file: packageJsonPath,
+            line: 1
+        });
+        return false;
+    }
+    if (!hasPublicApi || !hasExport) {
+        violations.push({
+            category: "invalid-metadata",
+            detail: `Locale entry point "${folder}" needs both public-api.ts and an exports["${subpath}"] entry in package.json`,
+            file: hasPublicApi ? packageJsonPath : publicApiPath,
             line: 1
         });
         return false;
     }
 
-    try {
-        const ngPackage = JSON.parse(readFileSync(ngPackagePath, "utf-8")) as { lib?: { entryFile?: string } };
-        if (ngPackage.lib?.entryFile !== "public-api.ts") {
-            violations.push({
-                category: "invalid-metadata",
-                detail: `ng-package.json in locale folder "${folder}" must set lib.entryFile to "public-api.ts"`,
-                file: ngPackagePath,
-                line: 1
-            });
-        }
-    } catch (err: unknown) {
+    const expectedTarget = `${subpath}/public-api.ts`;
+    if (exportTarget !== expectedTarget) {
         violations.push({
             category: "invalid-metadata",
-            detail: `Failed to parse ng-package.json in locale folder "${folder}": ${(err as Error).message}`,
-            file: ngPackagePath,
+            detail: `package.json must export "${subpath}" as "${expectedTarget}"`,
+            file: packageJsonPath,
             line: 1
         });
     }
@@ -1085,7 +1104,7 @@ function checkLocaleLoader(
         if (!loc.entryPoint) {
             violations.push({
                 category: "invalid-metadata",
-                detail: `Locale folder "${loc.folder}" must be an entry point (ng-package.json and public-api.ts) so load-mona-locale.ts can load it lazily`,
+                detail: `Locale folder "${loc.folder}" must be an entry point (public-api.ts and a package.json export) so load-mona-locale.ts can load it lazily`,
                 file: loc.folderPath,
                 line: 1
             });

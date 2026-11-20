@@ -2,6 +2,7 @@ import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, ElementRef, input, model, Signal, signal, viewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { type FormValueControl } from "@angular/forms/signals";
+import type { MonaSliderMessages } from "@nanahoshi/mona-ui/i18n";
 import { filter, fromEvent, tap } from "rxjs";
 import { LabelStylePipe } from "../../pipes/label-style.pipe";
 import { TickStylePipe } from "../../pipes/tick-style.pipe";
@@ -34,7 +35,11 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
         ...this.handleTemplateStyles(),
         ...this.handleStyles()
     }));
-    protected readonly messages = this.i18n.componentMessages("slider", SLIDER_DEFAULT_MESSAGES);
+    // Typed from the package specifier so the declaration bundle imports it from @nanahoshi/mona-ui/i18n.
+    protected readonly messages: Signal<MonaSliderMessages> = this.i18n.componentMessages(
+        "slider",
+        SLIDER_DEFAULT_MESSAGES
+    );
     protected readonly normalizedValue = computed(() => this.snapValue(this.value()));
     protected readonly selectionLeft = computed(() => 0);
     protected readonly selectionRight = computed(() => this.handlePosition());
