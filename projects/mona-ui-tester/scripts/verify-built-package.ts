@@ -806,6 +806,38 @@ export function verifyLeanBundles(distDir: string): number {
     return bundles.length;
 }
 
+/**
+ * Checks that every declaration file in `types` belongs to one entry point, which names it in `exports`. The library
+ * builder bundles the declarations of all entry points together. When TypeScript writes a type inferred from another
+ * entry point, it imports it by relative path, and the declarations both entry points then use move to a shared chunk.
+ * A type annotation that imports the type from the entry point's package specifier keeps them in that entry point.
+ * @returns how many declaration files were checked
+ */
+export function verifyTypeBundles(distDir: string): number {
+    const typesDir = resolve(distDir, "types");
+    if (!existsSync(typesDir)) {
+        throw new Error(`Declaration bundles not found at: ${typesDir}`);
+    }
+    const { exports } = JSON.parse(readFileSync(resolve(distDir, "package.json"), "utf-8")) as {
+        exports?: Record<string, unknown>;
+    };
+    const exported = new Set(
+        Object.values(exports ?? {}).flatMap(target => {
+            const types = typeof target === "object" && target != null ? (target as { types?: unknown }).types : null;
+            return typeof types === "string" ? [resolve(distDir, types)] : [];
+        })
+    );
+    const files = readdirSync(typesDir).filter(file => file.endsWith(".d.ts"));
+    const shared = files.filter(file => !exported.has(resolve(typesDir, file)));
+    if (shared.length > 0) {
+        throw new Error(
+            `Declaration files that no entry point exports: ${shared.join(", ")}. A type inferred from another entry point ` +
+                "was written as a relative import; annotate it with the type imported from that entry point's package."
+        );
+    }
+    return files.length;
+}
+
 export function verifyBuiltPackage(options: PackageVerificationOptions = {}): void {
     const distDir = resolve(options.distDir ?? resolve(process.cwd(), "dist/mona-ui"));
     const sourceLocalesDir = resolve(options.sourceLocalesDir ?? resolve(process.cwd(), "projects/mona-ui/locales"));
@@ -899,7 +931,7 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
     console.log(`✓ Resolved hermetic TypeScript compiler at: ${tscPath}`);
 
     // The ICU entry point is required once the source has it.
-    const verifyIcu = existsSync(resolve(sourceLocalesDir, "../i18n/icu/ng-package.json"));
+    const verifyIcu = existsSync(resolve(sourceLocalesDir, "../i18n/icu/public-api.ts"));
     if (verifyIcu) {
         const icuTargets = resolveExportTargets(pkgJsonPath, "./i18n/icu");
         for (const target of [icuTargets.runtimeRelPath, icuTargets.typesRelPath]) {
@@ -946,6 +978,9 @@ export function verifyBuiltPackage(options: PackageVerificationOptions = {}): vo
 
     const bundles = verifyLeanBundles(distDir);
     console.log(`✓ ${bundles} bundles checked: none imports what would undo tree-shaking`);
+
+    const typeBundles = verifyTypeBundles(distDir);
+    console.log(`✓ ${typeBundles} declaration bundles checked: each belongs to one entry point`);
 
     runConsumerSmokeTest({
         distDir,

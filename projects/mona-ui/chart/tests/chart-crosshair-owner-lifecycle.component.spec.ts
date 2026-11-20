@@ -519,6 +519,8 @@ describe("ChartCrosshairOwnerLifecycle", () => {
         fixture.componentInstance.crosshairYAxisId.set("y-sec");
         fixture.detectChanges();
         await fixture.whenStable();
+        // The crosshair repaints on the next frame, which whenStable doesn't wait for without zone.js.
+        await new Promise(r => requestAnimationFrame(r));
 
         const postChangeOverlay = globalRenderSpy?.mock.lastCall?.[2] as ChartRenderOverlayState | undefined;
         expect(postChangeOverlay?.crosshair ?? null).toBeNull();

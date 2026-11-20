@@ -16,16 +16,53 @@
             "prefix": "mona",
             "architect": {
                 "build": {
-                    "builder": "@angular/build:ng-packagr",
+                    "builder": "@angular/build:library",
                     "options": {
-                        "project": "projects/mona-ui/ng-package.json"
+                        "tsConfig": "projects/mona-ui/tsconfig.lib.json",
+                        "outputPath": "dist/mona-ui",
+                        "assets": [
+                            {
+                                "input": "projects/mona-ui/src/styles",
+                                "glob": "**/*.scss",
+                                "output": "styles"
+                            },
+                            {
+                                "input": "projects/mona-ui/i18n/catalogs",
+                                "glob": "*.messages.json",
+                                "output": "i18n/catalogs"
+                            },
+                            {
+                                "input": "projects/mona-ui/locales",
+                                "glob": "*/*.messages.json",
+                                "output": "locales"
+                            },
+                            {
+                                "input": "projects/mona-ui/chart",
+                                "glob": "README.md",
+                                "output": "chart"
+                            },
+                            "projects/mona-ui/styles.css",
+                            "projects/mona-ui/THIRD_PARTY_NOTICES.md"
+                        ],
+                        "allowedNonPeerDependencies": [
+                            "^@lucide/angular$",
+                            "^@mirei/ts-collections$",
+                            "^class-variance-authority$",
+                            "^culori$",
+                            "^d3-hierarchy$",
+                            "^d3-scale$",
+                            "^d3-shape$",
+                            "^luxon$",
+                            "^tailwind-merge$",
+                            "^uuid$"
+                        ]
                     },
                     "configurations": {
                         "production": {
                             "tsConfig": "projects/mona-ui/tsconfig.lib.prod.json"
                         },
                         "development": {
-                            "tsConfig": "projects/mona-ui/tsconfig.lib.json"
+                            "compilationMode": "full"
                         }
                     },
                     "defaultConfiguration": "production"
@@ -34,6 +71,7 @@
                     "builder": "@angular/build:unit-test",
                     "options": {
                         "exclude": ["chart/tests/**/*.stress.spec.ts"],
+                        "polyfills": [],
                         "setupFiles": ["./test-setup.ts"],
                         "runnerConfig": "./vitest-base.config.ts"
                     }
@@ -43,6 +81,7 @@
                     "options": {
                         "include": ["chart/tests/**/*.stress.spec.ts"],
                         "isolate": true,
+                        "polyfills": [],
                         "setupFiles": ["./test-setup.ts"],
                         "runnerConfig": "./vitest-density-stress.config.ts"
                     }
