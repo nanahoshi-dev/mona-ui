@@ -196,7 +196,7 @@ describe("MultiSelectComponent", () => {
         ).toBe(true);
         expect(host.classList.contains("border-input-border")).toBe(true);
         expect(host.classList.contains("shadow-(--shadow-control)")).toBe(true);
-        expect(host.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
+        expect(host.classList.contains("focus-within:ring-focus-indicator/(--mona-focus-ring-opacity,35%)")).toBe(true);
         expect(host.classList.contains("opacity-50")).toBe(false);
     });
 
@@ -478,7 +478,7 @@ describe("MultiSelectComponent", () => {
 
         expect(getHost(fixture).getAttribute("aria-invalid")).toBe("true");
         expect(getHost(fixture).getAttribute("aria-required")).toBe("true");
-        expect(getHost(fixture).className).toContain("focus-within:ring-error/35");
+        expect(getHost(fixture).className).toContain("focus-within:ring-error/(--mona-focus-ring-opacity,35%)");
     });
 
     describe("clear button state", () => {

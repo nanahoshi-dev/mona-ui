@@ -1,13 +1,17 @@
 import type { ThemeShadowDefinition, ThemeShadows } from "../models/ThemeDefinition";
 
+// Controls sit flat. "No shadow" is written as an empty one, not "none": components put the shadow in one box-shadow
+// list with their focus ring, and "none" in a list makes the whole value invalid, so the ring would never paint.
+const flat = "0 0 #0000";
+
 const light: ThemeShadows = Object.freeze({
-    "--shadow-control": "none",
+    "--shadow-control": flat,
     "--shadow-raised": "0 2px 6px -2px rgb(17 17 20 / 0.14)",
     "--shadow-overlay": "0 8px 20px -6px rgb(17 17 20 / 0.22)"
 });
 
 const dark: ThemeShadows = Object.freeze({
-    "--shadow-control": "none",
+    "--shadow-control": flat,
     "--shadow-raised": "0 4px 10px -4px rgb(0 0 0 / 0.6)",
     "--shadow-overlay": "0 6px 14px -4px rgb(0 0 0 / 0.65)"
 });

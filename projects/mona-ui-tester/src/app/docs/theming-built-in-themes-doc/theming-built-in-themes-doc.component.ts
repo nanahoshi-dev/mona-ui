@@ -51,7 +51,9 @@ export class ThemingBuiltInThemesDocComponent {
             createPreview("Luna Light", builtInThemes.luna.variants.light, "light", options),
             createPreview("Luna Dark", builtInThemes.luna.variants.dark, "dark", options),
             createPreview("Anna Light", builtInThemes.anna.variants.light, "light", options),
-            createPreview("Anna Dark", builtInThemes.anna.variants.dark, "dark", options)
+            createPreview("Anna Dark", builtInThemes.anna.variants.dark, "dark", options),
+            createPreview("Rena Light", builtInThemes.rena.variants.light, "light", options),
+            createPreview("Rena Dark", builtInThemes.rena.variants.dark, "dark", options)
         ];
     }
 }
@@ -62,8 +64,11 @@ function createPreview(
     variant: ThemeVariant,
     options: { readonly moreContrast: boolean; readonly reducedTransparency: boolean }
 ): ThemePreview {
-    // A theme without indicator colors would otherwise inherit the site theme's, where it sets them.
+    // A theme without indicator colors or a focus ring of its own would otherwise inherit the site theme's, where it
+    // sets them.
     const style: Record<string, string> = {
+        "--mona-focus-ring-opacity": "35%",
+        "--mona-focus-ring-width": "2px",
         "--mona-indicator-color": "var(--color-primary)",
         "--mona-indicator-foreground": "var(--color-primary-foreground)",
         ...flattenThemeProfile(profile),

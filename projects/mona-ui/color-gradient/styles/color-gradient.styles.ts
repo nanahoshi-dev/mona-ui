@@ -15,7 +15,7 @@ export const colorGradientBaseThemeVariants = cva(
         data-[invalid='true']:border
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-1
-        data-[invalid='true']:ring-error/35
+        data-[invalid='true']:ring-error/(--mona-focus-ring-opacity,35%)
     `
 );
 

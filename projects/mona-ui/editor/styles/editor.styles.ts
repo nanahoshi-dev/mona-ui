@@ -8,15 +8,15 @@ export const editorBaseThemeVariants = cva(
         border border-border
         transition-[border-color,box-shadow] duration-150 ease-in
         focus-within:border-focus-indicator
-        focus-within:ring-2 focus-within:ring-focus-indicator/35
+        focus-within:ring-(length:--mona-focus-ring-width,2px) focus-within:ring-focus-indicator/(--mona-focus-ring-opacity,35%)
 
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:border-disabled-border
         data-[disabled='true']:text-disabled-foreground
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:ring-(length:--mona-focus-ring-width,2px) data-[invalid='true']:ring-error/(--mona-focus-ring-opacity,35%)
         data-[invalid='true']:focus-within:border-error
-        data-[invalid='true']:focus-within:ring-error/35
+        data-[invalid='true']:focus-within:ring-error/(--mona-focus-ring-opacity,35%)
 
         prose prose-neutral max-w-none
         prose-headings:text-foreground prose-headings:font-bold

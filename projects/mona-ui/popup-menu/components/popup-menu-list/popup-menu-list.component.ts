@@ -8,6 +8,7 @@ import {
     effect,
     ElementRef,
     inject,
+    NgZone,
     OnInit,
     signal,
     untracked
@@ -22,7 +23,7 @@ import { fromEvent, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { PopupMenuItem, PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/internal/popup-menu";
 import { PopupMenuListConfig } from "../../models/PopupMenuListConfig";
-import { groupPopupMenuItems } from "../../utils/popup-menu.utils";
+import { groupPopupMenuItems, isPointInTriangle, type PointerPosition } from "../../utils/popup-menu.utils";
 import {
     popupMenuBaseThemeVariants,
     popupMenuContainerThemeVariants,
@@ -33,10 +34,20 @@ import {
 } from "../../styles/popup-menu.styles";
 
 /**
- * How long the pointer can cross other items, while a submenu is open, before that submenu closes. It gives the
- * pointer time to travel diagonally from a parent item to its submenu.
+ * How many recent pointer positions the pointer's heading is measured across.
  */
-const SUBMENU_SWITCH_DELAY = 250;
+const POINTER_TRAIL_LENGTH = 3;
+
+/**
+ * How long the pointer can rest on another item, on its way to an open submenu, before that item takes over. A pointer
+ * still moving toward the submenu keeps it open; one that turns away hands over at once.
+ */
+const SUBMENU_AIM_REST_DELAY = 100;
+
+/**
+ * How far above and below an open submenu the pointer can aim and still be heading for it, in pixels.
+ */
+const SUBMENU_AIM_TOLERANCE = 20;
 
 @Component({
     selector: "mona-popup-menu-list",
@@ -45,7 +56,8 @@ const SUBMENU_SWITCH_DELAY = 250;
     host: {
         "[class]": "baseClasses()",
         "(focusout)": "onFocusOut($event)",
-        "(pointerenter)": "onHostPointerEnter()"
+        "(pointerenter)": "onHostPointerEnter()",
+        "(pointerleave)": "onHostPointerLeave()"
     }
 })
 export class PopupMenuListComponent implements OnInit {
@@ -66,9 +78,13 @@ export class PopupMenuListComponent implements OnInit {
     readonly #popupService = inject(PopupService);
     readonly #submenuId = signal<string | null>(null);
     readonly #typeaheadKey$ = new Subject<string>();
+    readonly #zone = inject(NgZone);
     #childClose$: Subject<void> | null = null;
     #closing = false;
     #hoverTimer: ReturnType<typeof setTimeout> | undefined;
+    // An item the pointer crossed while heading for the open submenu: it takes over if the pointer stops or turns away.
+    #pendingHover: { readonly item: PopupMenuItem; readonly target: HTMLElement } | null = null;
+    #pointerTrail: readonly PointerPosition[] = [];
     protected readonly activeMenuItem = signal<PopupMenuItem | null>(null);
     protected readonly ariaLabel = this.#parentConfig.ariaLabel || null;
     protected readonly baseClasses = computed(() => {
@@ -158,7 +174,6 @@ export class PopupMenuListComponent implements OnInit {
             });
         });
         this.#destroyRef.onDestroy(() => {
-            clearTimeout(this.#hoverTimer);
             this.#closing = true;
             this.closePopup();
         });
@@ -197,6 +212,12 @@ export class PopupMenuListComponent implements OnInit {
         this.#parentConfig.submenuPointerEnter?.();
     }
 
+    protected onHostPointerLeave(): void {
+        // An item crossed on the way out doesn't take over, and the pointer's heading starts over when it comes back.
+        this.cancelPendingHover();
+        this.#pointerTrail = [];
+    }
+
     protected onItemClick(event: MouseEvent, item: PopupMenuItem): void {
         if (item.disabled) {
             return;
@@ -216,31 +237,37 @@ export class PopupMenuListComponent implements OnInit {
     }
 
     protected onItemPointerEnter(event: PointerEvent, item: PopupMenuItem): void {
-        clearTimeout(this.#hoverTimer);
+        this.cancelPendingHover();
         const open = this.#openSubmenuItem();
         if (open === item) {
             this.activeMenuItem.set(item);
             return;
         }
         const target = event.currentTarget as HTMLElement;
-        const hover = (): void => {
-            this.closePopup();
-            if (item.items.length > 0 && !item.disabled) {
-                this.activeMenuItem.set(item);
-                this.createSubmenu(target, false, item);
-            } else {
-                this.activeMenuItem.set(null);
-            }
-        };
-        if (open) {
-            // Wait before switching, so the pointer can cross other items on its way into the open submenu.
-            this.#hoverTimer = setTimeout(hover, SUBMENU_SWITCH_DELAY);
-        } else {
-            hover();
+        if (open && event.pointerType !== "touch" && this.isHeadingToSubmenu({ x: event.clientX, y: event.clientY })) {
+            // The pointer crosses this item on its way into the open submenu: the submenu stays while it keeps going.
+            this.#pendingHover = { item, target };
+            this.restartRestTimer();
+            return;
+        }
+        this.hoverItem(item, target);
+    }
+
+    private applyPendingHover(): void {
+        const pending = this.#pendingHover;
+        this.cancelPendingHover();
+        if (pending) {
+            this.hoverItem(pending.item, pending.target);
         }
     }
 
+    private cancelPendingHover(): void {
+        clearTimeout(this.#hoverTimer);
+        this.#pendingHover = null;
+    }
+
     private closePopup(): void {
+        this.cancelPendingHover();
         const ref = this.popupRef;
         this.popupRef = null;
         this.#openSubmenuItem.set(null);
@@ -471,6 +498,41 @@ export class PopupMenuListComponent implements OnInit {
         this.#typeaheadKey$.next(event.key);
     }
 
+    private hoverItem(item: PopupMenuItem, target: HTMLElement): void {
+        this.closePopup();
+        if (item.items.length > 0 && !item.disabled) {
+            this.activeMenuItem.set(item);
+            this.createSubmenu(target, false, item);
+        } else {
+            this.activeMenuItem.set(null);
+        }
+    }
+
+    /**
+     * Whether the pointer, now at the given position, is moving toward the open submenu: it is inside the triangle
+     * between where it was a few moves ago and the submenu's near edge.
+     */
+    private isHeadingToSubmenu(position: PointerPosition): boolean {
+        const origin = this.#pointerTrail[0];
+        const submenuId = this.#submenuId();
+        const submenu = submenuId ? this.#document.getElementById(submenuId) : null;
+        const menu = this.#menuElement();
+        if (!origin || !submenu || !menu || (origin.x === position.x && origin.y === position.y)) {
+            return false;
+        }
+        const menuRect = menu.getBoundingClientRect();
+        const submenuRect = submenu.getBoundingClientRect();
+        // The submenu can open on either side (right to left, or flipped to fit the viewport): aim at the facing edge.
+        const onRight = submenuRect.left + submenuRect.width / 2 >= menuRect.left + menuRect.width / 2;
+        const edge = onRight ? submenuRect.left : submenuRect.right;
+        return isPointInTriangle(
+            position,
+            origin,
+            { x: edge, y: submenuRect.top - SUBMENU_AIM_TOLERANCE },
+            { x: edge, y: submenuRect.bottom + SUBMENU_AIM_TOLERANCE }
+        );
+    }
+
     private notifyNavigation(item: PopupMenuItem | null, direction: "up" | "down" | "left" | "right"): void {
         this.#parentConfig.navigate$.next({
             direction,
@@ -479,9 +541,23 @@ export class PopupMenuListComponent implements OnInit {
         });
     }
 
+    private onPointerMove(event: PointerEvent): void {
+        const position = { x: event.clientX, y: event.clientY };
+        this.#pointerTrail = [...this.#pointerTrail.slice(1 - POINTER_TRAIL_LENGTH), position];
+        if (!this.#pendingHover) {
+            return;
+        }
+        if (this.isHeadingToSubmenu(position)) {
+            this.restartRestTimer();
+        } else {
+            // It turned away from the submenu: the item under it takes over now.
+            this.#zone.run(() => this.applyPendingHover());
+        }
+    }
+
     private onSubmenuPointerEnter(): void {
         // The pointer reached the open submenu: keep it, and its parent item highlighted.
-        clearTimeout(this.#hoverTimer);
+        this.cancelPendingHover();
         const open = this.#openSubmenuItem();
         if (open) {
             this.activeMenuItem.set(open);
@@ -523,6 +599,12 @@ export class PopupMenuListComponent implements OnInit {
         }
     }
 
+    private restartRestTimer(): void {
+        clearTimeout(this.#hoverTimer);
+        // A pointer that stops on the item, short of the submenu, means that item.
+        this.#hoverTimer = setTimeout(() => this.#zone.run(() => this.applyPendingHover()), SUBMENU_AIM_REST_DELAY);
+    }
+
     private setKeyboardEvents(): void {
         const element = this.#menuElement();
         if (!element) {
@@ -546,6 +628,15 @@ export class PopupMenuListComponent implements OnInit {
                 })
             )
             .subscribe();
+    }
+
+    private setPointerSubscription(): void {
+        // Pointer moves only track where the pointer is heading, so they stay out of change detection.
+        this.#zone.runOutsideAngular(() => {
+            fromEvent<PointerEvent>(this.#host.nativeElement, "pointermove")
+                .pipe(takeUntilDestroyed(this.#destroyRef))
+                .subscribe(event => this.onPointerMove(event));
+        });
     }
 
     private setPopupCloseSubscription(): void {
@@ -573,6 +664,7 @@ export class PopupMenuListComponent implements OnInit {
 
     private setSubscriptions(): void {
         this.setKeyboardEvents();
+        this.setPointerSubscription();
         this.setPopupCloseSubscription();
         this.setTypeaheadSubscription();
     }

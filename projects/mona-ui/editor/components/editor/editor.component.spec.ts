@@ -29,7 +29,7 @@ describe("EditorComponent", () => {
         const toolbar = host.querySelector(":scope > div") as HTMLElement;
 
         expect(host.classList.contains("bg-surface")).toBe(true);
-        expect(host.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
+        expect(host.classList.contains("focus-within:ring-focus-indicator/(--mona-focus-ring-opacity,35%)")).toBe(true);
         expect(toolbar.classList.contains("bg-surface-muted")).toBe(true);
         expect(toolbar.classList.contains("border-b-border-subtle")).toBe(true);
         expect(editorClasses).toContain("[&_.selectedCell]:after:bg-active/70");

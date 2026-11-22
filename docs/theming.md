@@ -26,6 +26,7 @@ Most themes have a light and a dark variant. The theme and the variant together,
 | Mona  | Light, dark | Neutral grays, with color kept for status. The default.                             |
 | Luna  | Light, dark | Clean surfaces with a blue primary, and translucent glass on controls and overlays. |
 | Anna  | Light, dark | Graphite grays with a deep violet primary, and flat controls a shade lighter.       |
+| Rena  | Light, dark | Tailwind CSS's cool grays and indigo, with crisp shadows and a solid focus ring.    |
 
 [Built-in Themes](/components/theming/built-in-themes) shows each one side by side, with real components.
 

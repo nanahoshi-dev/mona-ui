@@ -10,7 +10,7 @@ export const indicatorIconHostThemeVariants = cva(
                 true: `
                     text-muted-foreground
                     hover:text-foreground
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35 focus-visible:outline-hidden
+                    focus-visible:ring-(length:--mona-focus-ring-width,2px) focus-visible:ring-focus-indicator/(--mona-focus-ring-opacity,35%) focus-visible:outline-hidden
                 `,
                 false: ""
             },

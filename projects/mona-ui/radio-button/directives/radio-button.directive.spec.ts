@@ -26,9 +26,13 @@ describe("RadioButtonDirective", () => {
         const element = fixture.nativeElement.querySelector("input") as HTMLInputElement;
 
         expect(element.classList.contains("checked:after:bg-primary")).toBe(true);
-        expect(element.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(element.classList.contains("focus-visible:ring-focus-indicator/(--mona-focus-ring-opacity,35%)")).toBe(
+            true
+        );
         expect(element.classList.contains("disabled:bg-disabled-background")).toBe(true);
-        expect(element.classList.contains("data-[invalid='true']:focus-visible:ring-error/35")).toBe(true);
+        expect(
+            element.classList.contains("data-[invalid='true']:focus-visible:ring-error/(--mona-focus-ring-opacity,35%)")
+        ).toBe(true);
     });
 
     it("should reflect the invalid state on the host element", () => {

@@ -180,8 +180,14 @@ describe("SliderComponent", () => {
                     "[background-color:var(--mona-effect-raised-background-color,var(--color-surface-raised))]"
                 )
             ).toBe(true);
-            expect(handle.classList.contains('data-[focused="true"]:ring-focus-indicator/35')).toBe(true);
-            expect(handle.classList.contains('data-[invalid="true"]:data-[focused="true"]:ring-error/35')).toBe(true);
+            expect(
+                handle.classList.contains('data-[focused="true"]:ring-focus-indicator/(--mona-focus-ring-opacity,35%)')
+            ).toBe(true);
+            expect(
+                handle.classList.contains(
+                    'data-[invalid="true"]:data-[focused="true"]:ring-error/(--mona-focus-ring-opacity,35%)'
+                )
+            ).toBe(true);
         });
 
         it("should disable focus and keyboard updates when the form field is disabled", async () => {

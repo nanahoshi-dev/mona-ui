@@ -17,7 +17,7 @@ const contrastPairs: readonly (readonly [`--color-${string}`, `--color-${string}
 ];
 
 /**
- * What's wrong with a theme's colors, as sentences. Only for development: an invalid value fails silently where
+ * What's wrong with a theme's colors and shadows, as sentences. Only for development: an invalid value fails silently where
  * it's used, far from where it was written. Values this can't read, such as `color-mix()` or a variable from
  * outside the color tokens, aren't reported, because they may well be right.
  */
@@ -45,11 +45,26 @@ export function findThemeProblems(name: string, variant: ThemeVariant, profile: 
         }
     }
 
+    // Components put a shadow in one box-shadow list with their focus ring, and "none" in a list makes the whole value
+    // invalid, so the ring never paints.
+    const noneShadows = Object.entries({ ...profile.shadows, ...profile.components, ...profile.custom })
+        .filter(([token, value]) => isShadowToken(token) && value.trim().toLowerCase() === "none")
+        .map(([token]) => token);
+    if (noneShadows.length > 0) {
+        problems.push(
+            `Theme "${name}" (${variant}) sets shadows to "none", which hides the focus ring of the controls that use them: ${noneShadows.join(", ")}. For no shadow, use "0 0 #0000".`
+        );
+    }
+
     const custom = Object.keys(profile.custom ?? {}).filter(key => !key.startsWith("--"));
     if (custom.length > 0) {
         problems.push(`Theme "${name}" (${variant}) has custom variables without "--": ${custom.join(", ")}.`);
     }
     return problems;
+}
+
+function isShadowToken(token: string): boolean {
+    return token.startsWith("--shadow-") || token.endsWith("-shadow");
 }
 
 function resolveColor(colors: Readonly<Record<string, string>>, token: string): string | undefined {

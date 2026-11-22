@@ -9,7 +9,7 @@ export const calendarBaseThemeVariants = cva(
         bg-(--mona-calendar-background) ${themeRaisedBackdropClasses} text-foreground
         border border-border shadow-(--mona-calendar-shadow)
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:ring-(length:--mona-focus-ring-width,2px) data-[invalid='true']:ring-error/(--mona-focus-ring-opacity,35%)
     `,
     {
         variants: {
@@ -53,7 +53,7 @@ export const calendarMonthViewDayThemeVariants = cva(
                 true: "pointer-events-none cursor-not-allowed text-disabled-foreground"
             },
             focused: {
-                true: "bg-hover outline-none focus-visible:outline-hidden ring-2 ring-inset ring-focus-indicator/35"
+                true: "bg-hover outline-none focus-visible:outline-hidden ring-(length:--mona-focus-ring-width,2px) ring-inset ring-focus-indicator/(--mona-focus-ring-opacity,35%)"
             },
             outside: {
                 true: "text-muted-foreground"
@@ -136,7 +136,7 @@ export const calendarYearViewCellThemeVariants = cva(
     {
         variants: {
             focused: {
-                true: "bg-hover outline-none focus-visible:outline-hidden ring-2 ring-inset ring-focus-indicator/35"
+                true: "bg-hover outline-none focus-visible:outline-hidden ring-(length:--mona-focus-ring-width,2px) ring-inset ring-focus-indicator/(--mona-focus-ring-opacity,35%)"
             },
             rounded: {
                 none: "rounded-none",
@@ -165,7 +165,7 @@ export const calendarDecadeViewCellThemeVariants = cva(
     {
         variants: {
             focused: {
-                true: "bg-hover outline-none focus-visible:outline-hidden ring-2 ring-inset ring-focus-indicator/35"
+                true: "bg-hover outline-none focus-visible:outline-hidden ring-(length:--mona-focus-ring-width,2px) ring-inset ring-focus-indicator/(--mona-focus-ring-opacity,35%)"
             },
             rounded: {
                 none: "rounded-none",

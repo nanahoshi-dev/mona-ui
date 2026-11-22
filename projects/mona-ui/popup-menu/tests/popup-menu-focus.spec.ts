@@ -1,6 +1,6 @@
 import { Component, signal, viewChild } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PopupMenuComponent } from "../components/popup-menu/popup-menu.component";
 import { PopupMenuItemComponent } from "../components/popup-menu-item/popup-menu-item.component";
 import type { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/internal/popup-menu";
@@ -288,9 +288,50 @@ describe("popup menu focus and lifecycle", () => {
         });
 
         describe("the pointer", () => {
-            function enter(element: HTMLElement): void {
-                element.dispatchEvent(new PointerEvent("pointerenter", { bubbles: false }));
+            function enter(element: HTMLElement, x = 0, y = 0): void {
+                element.dispatchEvent(new PointerEvent("pointerenter", { bubbles: false, clientX: x, clientY: y }));
             }
+
+            function leave(element: HTMLElement): void {
+                element.dispatchEvent(new PointerEvent("pointerleave", { bubbles: false }));
+            }
+
+            function move(element: HTMLElement, x: number, y: number): void {
+                element.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientX: x, clientY: y }));
+            }
+
+            function place(element: HTMLElement, left: number, top: number, width: number, height: number): void {
+                const rect = { bottom: top + height, height, left, right: left + width, top, width, x: left, y: top };
+                vi.spyOn(element, "getBoundingClientRect").mockReturnValue({ ...rect, toJSON: () => rect });
+            }
+
+            function expanded(label: string): string | null {
+                return item(label).getAttribute("aria-expanded");
+            }
+
+            // Opens Parent's submenu beside the menu: the menu spans x 0 to 100, the submenu x 100 to 200, y 20 to 80.
+            async function openParentSubmenu(): Promise<void> {
+                await clickOpen();
+                enter(item("Parent"), 50, 30);
+                move(item("Parent"), 50, 30);
+                await settle();
+                place(menus()[0], 0, 0, 100, 100);
+                place(menus()[1], 100, 20, 100, 60);
+            }
+
+            // Moves from Parent down and to the right, toward its submenu, crossing Other parent on the way.
+            function aimAcrossOtherParent(): void {
+                move(item("Parent"), 40, 25);
+                move(item("Parent"), 50, 32);
+                move(item("Parent"), 60, 38);
+                enter(item("Other parent"), 70, 44);
+                move(item("Other parent"), 70, 44);
+                fixture.detectChanges();
+            }
+
+            afterEach(() => {
+                vi.restoreAllMocks();
+            });
 
             it("opens a submenu on hover without moving focus into it", async () => {
                 const menu = await clickOpen();
@@ -301,33 +342,81 @@ describe("popup menu focus and lifecycle", () => {
                 expect(document.activeElement).toBe(menu);
             });
 
-            it("keeps the open submenu while it crosses another item, and switches after a pause", async () => {
-                await clickOpen();
-                enter(item("Parent"));
-                await settle();
-                enter(item("Other parent"));
+            it("switches to the next item's submenu at once when it moves straight onto that item", async () => {
+                await openParentSubmenu();
+                move(item("Parent"), 50, 38);
+                enter(item("Other parent"), 50, 44);
                 fixture.detectChanges();
 
-                expect(menus()[1].textContent?.trim()).toBe("Child");
+                expect(expanded("Parent")).toBe("false");
+                expect(expanded("Other parent")).toBe("true");
 
-                await wait(300);
                 await settle();
                 await wait(200);
                 expect(menus().length).toBe(2);
-                expect(menus()[1].textContent).toContain("Other child");
+                expect(menus()[1].textContent?.trim()).toBe("Other child");
             });
 
-            it("keeps the submenu when it reaches it before the pause ends", async () => {
-                await clickOpen();
-                enter(item("Parent"));
+            it("closes the open submenu at once when it moves onto an item without one", async () => {
+                await openParentSubmenu();
+                move(item("Parent"), 50, 22);
+                enter(item("Alpha"), 50, 16);
+                fixture.detectChanges();
+
+                expect(expanded("Parent")).toBe("false");
+
                 await settle();
-                enter(item("Alpha"));
-                enter(menus()[1].parentElement!);
+                await wait(200);
+                expect(menus().length).toBe(1);
+            });
+
+            it("keeps the open submenu while it crosses another item on its way into it", async () => {
+                await openParentSubmenu();
+                aimAcrossOtherParent();
+
+                expect(expanded("Parent")).toBe("true");
+                expect(expanded("Other parent")).toBe("false");
+
+                move(item("Other parent"), 80, 50);
+                leave(menus()[0].parentElement!);
+                enter(menus()[1].parentElement!, 100, 55);
                 await wait(300);
                 await settle();
 
                 expect(menus().length).toBe(2);
                 expect(menus()[1].textContent?.trim()).toBe("Child");
+                expect(expanded("Parent")).toBe("true");
+            });
+
+            it("switches once it rests on the crossed item short of the submenu", async () => {
+                await openParentSubmenu();
+                aimAcrossOtherParent();
+                await wait(150);
+                fixture.detectChanges();
+
+                expect(expanded("Parent")).toBe("false");
+                expect(expanded("Other parent")).toBe("true");
+            });
+
+            it("switches at once when it turns away from the submenu", async () => {
+                await openParentSubmenu();
+                aimAcrossOtherParent();
+                move(item("Other parent"), 66, 56);
+                fixture.detectChanges();
+
+                expect(expanded("Parent")).toBe("false");
+                expect(expanded("Other parent")).toBe("true");
+            });
+
+            it("keeps the open submenu when it leaves the menu after crossing another item", async () => {
+                await openParentSubmenu();
+                aimAcrossOtherParent();
+                leave(menus()[0].parentElement!);
+                await wait(150);
+                fixture.detectChanges();
+
+                expect(expanded("Parent")).toBe("true");
+                expect(expanded("Other parent")).toBe("false");
             });
         });
     });

@@ -121,9 +121,15 @@ describe("NumericTextBoxComponent", () => {
             ).toBe(true);
             expect(element.classList.contains("border-input-border")).toBe(true);
             expect(element.classList.contains("shadow-(--shadow-control)")).toBe(true);
-            expect(element.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
+            expect(
+                element.classList.contains("focus-within:ring-focus-indicator/(--mona-focus-ring-opacity,35%)")
+            ).toBe(true);
             expect(element.classList.contains("data-[disabled='true']:bg-disabled-background")).toBe(true);
-            expect(element.classList.contains("data-[invalid='true']:focus-within:ring-error/35")).toBe(true);
+            expect(
+                element.classList.contains(
+                    "data-[invalid='true']:focus-within:ring-error/(--mona-focus-ring-opacity,35%)"
+                )
+            ).toBe(true);
             expect(spinnerContainer).toBeTruthy();
             expect((spinnerButtons[0].nativeElement as HTMLElement).getAttribute("data-look")).toBe("ghost");
         });

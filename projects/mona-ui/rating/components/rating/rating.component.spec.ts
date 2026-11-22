@@ -1263,7 +1263,7 @@ describe("RatingComponent", () => {
         it("draws the invalid state with a solid outline as well", () => {
             const classes = getControl(fixture).classList;
             expect(classes.contains('data-[invalid="true"]:outline-error')).toBe(true);
-            expect(classes.toString()).not.toContain("ring-error/35");
+            expect(classes.toString()).not.toContain("ring-error/(--mona-focus-ring-opacity,35%)");
         });
 
         it("doesn't fade the icons of the unfilled items", () => {

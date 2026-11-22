@@ -106,6 +106,24 @@ custom: {
 }
 ```
 
+### Focus Rings
+
+A focused control's border takes `--color-focus-indicator`, with a ring of the same color around it. An invalid control does the same in `--color-error`. Two variables shape the ring, and a theme sets them in `custom`:
+
+- `--mona-focus-ring-width` is how wide the ring is. It falls back to `2px`.
+- `--mona-focus-ring-opacity` is how strong the ring's color is, as a percentage. It falls back to `35%`, a soft halo.
+
+For a solid line, as Rena draws, make the ring narrower and opaque. With the border, it reads as one 2 px line:
+
+```typescript
+custom: {
+    "--mona-focus-ring-width": "1px",
+    "--mona-focus-ring-opacity": "100%"
+}
+```
+
+The ring and a control's shadow are drawn together, as one `box-shadow`. So for no shadow, write `0 0 #0000`, as Anna does for its flat controls, not `none`: a shadow token set to `none` hides the ring of every control that uses it.
+
 ### Contrast Borders
 
 `--color-border-control-contrast` and `--color-border-control-contrast-hover` are the only optional colors. When the user asks for more contrast, the theme service uses them in place of `--color-border-control` and `--color-border-control-hover`, for fields, buttons, chips, chart gridlines and everything else that shares those borders. Give them at least 3:1 against `--color-input-background`. A theme without them keeps its usual borders.
@@ -125,6 +143,7 @@ In development, custom themes and overrides are also checked, and each problem l
 
 - A value that isn't a color.
 - A custom variable whose name doesn't start with `--`.
+- A shadow set to `none`, which hides the [focus ring](#focus-rings). Use `0 0 #0000` for no shadow.
 - A pair below the contrast WCAG AA asks for:
     - 4.5:1 for `--color-foreground` and `--color-muted-foreground` on `--color-surface`, `--color-input-foreground` on `--color-input-background`, and `--color-primary-foreground` on `--color-primary`.
     - 3:1 for `--color-focus-indicator` and `--color-selected-border` on `--color-surface`, and for the contrast borders on `--color-input-background`, when the theme sets them.

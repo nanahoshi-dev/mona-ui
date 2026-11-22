@@ -87,8 +87,14 @@ describe("IndicatorIconComponent", () => {
 
         expect(getIndicator(fixture).getAttribute("role")).toBe("button");
         expect(getIndicator(fixture).getAttribute("tabindex")).toBe("0");
-        expect(getIndicator(fixture).classList.contains("focus-visible:ring-2")).toBe(true);
-        expect(getIndicator(fixture).classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(
+            getIndicator(fixture).classList.contains("focus-visible:ring-(length:--mona-focus-ring-width,2px)")
+        ).toBe(true);
+        expect(
+            getIndicator(fixture).classList.contains(
+                "focus-visible:ring-focus-indicator/(--mona-focus-ring-opacity,35%)"
+            )
+        ).toBe(true);
         expect(getIndicator(fixture).classList.toString()).not.toContain("focus:ring-primary");
         expect(getIndicator(fixture).getAttribute("aria-label")).toBe("Clear");
     });

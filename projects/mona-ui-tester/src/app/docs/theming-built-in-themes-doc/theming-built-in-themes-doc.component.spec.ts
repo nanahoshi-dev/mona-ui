@@ -30,13 +30,15 @@ describe("ThemingBuiltInThemesDocComponent", () => {
             "Luna Light preview",
             "Luna Dark preview",
             "Anna Light preview",
-            "Anna Dark preview"
+            "Anna Dark preview",
+            "Rena Light preview",
+            "Rena Dark preview"
         ]);
     });
 
     it("gives each preview its own theme's tokens, whatever the site's theme is", () => {
         TestBed.inject(ThemeService).setTheme({ name: "mona", variant: "light" });
-        const [, monaDark, , lunaDark, annaLight, annaDark] = renderPreviews();
+        const [, monaDark, , lunaDark, annaLight, annaDark, , renaDark] = renderPreviews();
 
         expect(monaDark.style.getPropertyValue("--color-primary").trim()).toBe(
             builtInThemes.mona.variants.dark.colors["--color-primary"]
@@ -50,6 +52,13 @@ describe("ThemingBuiltInThemesDocComponent", () => {
         );
         expect(annaDark.style.getPropertyValue("--mona-indicator-color").trim()).toBe(
             builtInThemes.anna.variants.dark.custom["--mona-indicator-color"]
+        );
+        expect(annaDark.style.getPropertyValue("--mona-focus-ring-width").trim()).toBe("2px");
+        expect(renaDark.style.getPropertyValue("--color-canvas").trim()).toBe(
+            builtInThemes.rena.variants.dark.colors["--color-canvas"]
+        );
+        expect(renaDark.style.getPropertyValue("--mona-focus-ring-width").trim()).toBe(
+            builtInThemes.rena.variants.dark.custom["--mona-focus-ring-width"]
         );
     });
 

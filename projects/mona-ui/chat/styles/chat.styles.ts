@@ -150,7 +150,7 @@ export const CHAT_FIELD_CLASSES = `
     ${themeControlSurfaceClasses}
     border border-input-border shadow-(--shadow-control)
     transition-[color,box-shadow,border] duration-(--mona-motion-standard) ease-in-out
-    focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35
+    focus-within:border-focus-indicator focus-within:ring-(length:--mona-focus-ring-width,2px) focus-within:ring-focus-indicator/(--mona-focus-ring-opacity,35%)
     data-[disabled]:cursor-not-allowed data-[disabled]:border-disabled-border data-[disabled]:bg-disabled-background
     data-[disabled]:shadow-none
 `;

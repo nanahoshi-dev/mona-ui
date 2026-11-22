@@ -104,7 +104,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-The built-in themes are Mona, Luna and Anna, each in light and dark. To switch themes while the application runs, or to use your own colors, see [Theming](/components/theming).
+The built-in themes are Mona, Luna, Anna and Rena, each in light and dark. To switch themes while the application runs, or to use your own colors, see [Theming](/components/theming).
 
 ### Translate the Built-in Text
 

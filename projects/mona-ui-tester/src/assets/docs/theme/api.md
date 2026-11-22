@@ -50,5 +50,5 @@ Provided in root. It's created by any theme provider at startup, or by the first
 - **Selections:** `ThemeName`, `ThemeVariant`, `ThemeVariantPreference`, `ThemePreference`, `ThemeSelection`, `ThemeAvailability`.
 - **Definitions:** `ThemeProfile`, `ThemeFamilyRegistration`, `ThemeOverrideRegistration`, `ThemeOptions`, `ThemeColorPaletteRegistration`, `ThemeColorPaletteSeeds`.
 - **Extending:** `ThemeStrategy`, `ThemeStorage`, `DefaultThemeStrategy`, `LocalStorageThemeStorage`.
-- **Built-in themes:** `monaTheme`, `lunaTheme`, `annaTheme`, `builtInThemes`.
+- **Built-in themes:** `monaTheme`, `lunaTheme`, `annaTheme`, `renaTheme`, `builtInThemes`.
 - **Helpers:** `generateThemeColorPalette`, `flattenThemeProfile`, `createSidebarColorRoles`.

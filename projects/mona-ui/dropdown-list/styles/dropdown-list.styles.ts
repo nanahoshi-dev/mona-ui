@@ -12,7 +12,7 @@ export const dropdownListInputThemeVariants = cva(
         transition-[color,box-shadow,border] duration-(--mona-motion-standard) ease-in-out
         data-[readonly='true']:cursor-default
         hover:bg-hover active:bg-active
-        focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35
+        focus-within:border-focus-indicator focus-within:ring-(length:--mona-focus-ring-width,2px) focus-within:ring-focus-indicator/(--mona-focus-ring-opacity,35%)
     `,
     {
         variants: {
@@ -25,14 +25,14 @@ export const dropdownListInputThemeVariants = cva(
                 false: ""
             },
             expanded: {
-                true: "border-focus-indicator ring-2 ring-focus-indicator/35",
+                true: "border-focus-indicator ring-(length:--mona-focus-ring-width,2px) ring-focus-indicator/(--mona-focus-ring-opacity,35%)",
                 false: ""
             },
             hasPrefix: {
                 false: "ps-2"
             },
             invalid: {
-                true: "border-error ring-2 ring-error/35 focus-within:border-error focus-within:ring-error/35",
+                true: "border-error ring-(length:--mona-focus-ring-width,2px) ring-error/(--mona-focus-ring-opacity,35%) focus-within:border-error focus-within:ring-error/(--mona-focus-ring-opacity,35%)",
                 false: ""
             },
             rounded: {
@@ -52,7 +52,7 @@ export const dropdownListInputThemeVariants = cva(
             {
                 expanded: true,
                 invalid: true,
-                class: "border-error ring-error/35"
+                class: "border-error ring-error/(--mona-focus-ring-opacity,35%)"
             }
         ]
     }

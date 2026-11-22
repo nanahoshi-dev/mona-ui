@@ -26,8 +26,14 @@ describe("SwitchComponent", () => {
         expect(
             hostElement.classList.contains("data-[active='true']:bg-[var(--mona-indicator-color,var(--color-primary))]")
         ).toBe(true);
-        expect(hostElement.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
-        expect(hostElement.classList.contains("data-[invalid='true']:focus-visible:ring-error/35")).toBe(true);
+        expect(
+            hostElement.classList.contains("focus-visible:ring-focus-indicator/(--mona-focus-ring-opacity,35%)")
+        ).toBe(true);
+        expect(
+            hostElement.classList.contains(
+                "data-[invalid='true']:focus-visible:ring-error/(--mona-focus-ring-opacity,35%)"
+            )
+        ).toBe(true);
         expect(hostElement.classList.contains("data-[disabled='true']:bg-disabled-background")).toBe(true);
         expect(
             handleElement.classList.contains(

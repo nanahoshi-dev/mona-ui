@@ -74,7 +74,7 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                     guide(
                         "theming/built-in-themes",
                         "Built-in Themes",
-                        "Mona, Luna and Anna side by side, and when to use each one."
+                        "Mona, Luna, Anna and Rena side by side, and when to use each one."
                     ),
                     guide(
                         "theming/colors",

@@ -34,13 +34,13 @@ export const radioButtonCircleThemeVariants = cva(
         peer-disabled:border-disabled-border peer-disabled:bg-disabled-background peer-disabled:text-disabled-foreground
 
         peer-focus-visible:border-focus-indicator
-        peer-focus-visible:ring-2 peer-focus-visible:ring-focus-indicator/35
+        peer-focus-visible:ring-(length:--mona-focus-ring-width,2px) peer-focus-visible:ring-focus-indicator/(--mona-focus-ring-opacity,35%)
         peer-focus-visible:outline-hidden
 
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:ring-(length:--mona-focus-ring-width,2px) data-[invalid='true']:ring-error/(--mona-focus-ring-opacity,35%)
         data-[invalid='true']:peer-focus-visible:border-error
-        data-[invalid='true']:peer-focus-visible:ring-error/35
+        data-[invalid='true']:peer-focus-visible:ring-error/(--mona-focus-ring-opacity,35%)
     `,
     {
         variants: {
@@ -120,12 +120,12 @@ export const radioButtonDirectiveThemeVariants = cva(
         checked:after:rounded-full
 
         focus-visible:border-focus-indicator
-        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+        focus-visible:ring-(length:--mona-focus-ring-width,2px) focus-visible:ring-focus-indicator/(--mona-focus-ring-opacity,35%)
 
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:ring-(length:--mona-focus-ring-width,2px) data-[invalid='true']:ring-error/(--mona-focus-ring-opacity,35%)
         data-[invalid='true']:focus-visible:border-error
-        data-[invalid='true']:focus-visible:ring-error/35
+        data-[invalid='true']:focus-visible:ring-error/(--mona-focus-ring-opacity,35%)
     `,
     {
         variants: {

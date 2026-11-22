@@ -1,4 +1,4 @@
-export type BuiltInThemeName = "anna" | "luna" | "mona";
+export type BuiltInThemeName = "anna" | "luna" | "mona" | "rena";
 export type ThemeName = string;
 export type ThemeVariant = "light" | "dark";
 /** A variant, or `"system"` to follow the operating system's light or dark setting. */

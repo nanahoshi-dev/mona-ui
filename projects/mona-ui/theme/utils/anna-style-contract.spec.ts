@@ -5,6 +5,8 @@ import { gridBaseThemeVariants } from "../../grid/styles/grid.styles";
 import { listItemContentThemeVariants } from "../../internal/list/styles/list.styles";
 import { menubarBaseThemeVariants } from "../../menubar/styles/menu.styles";
 import { sliderHandleThemeVariants, sliderSelectionThemeVariants } from "../../slider/styles/slider.styles";
+import { checkmarkThemeVariants } from "../../check-box/styles/checkbox.styles";
+import { textBoxThemeVariants } from "../../text-box/styles/textbox.styles";
 import { timeSelectorListThemeVariants } from "../../time-selector/styles/time-selector.styles";
 import { annaTheme } from "../definitions/anna-theme";
 import { monaTheme } from "../definitions/mona-theme";
@@ -37,11 +39,24 @@ describe("canonical recipe and built-in profile contract", () => {
         expect(gridBaseThemeVariants()).not.toContain("backdrop-filter");
     });
 
+    it("routes the focus and invalid rings through the focus ring variables", () => {
+        const width = "ring-(length:--mona-focus-ring-width,2px)";
+        const textBox = textBoxThemeVariants();
+        const checkmark = checkmarkThemeVariants();
+
+        expect(textBox).toContain(`focus-within:${width}`);
+        expect(textBox).toContain("focus-within:ring-focus-indicator/(--mona-focus-ring-opacity,35%)");
+        expect(textBox).toContain(`data-[invalid='true']:${width}`);
+        expect(textBox).toContain("data-[invalid='true']:ring-error/(--mona-focus-ring-opacity,35%)");
+        expect(checkmark).toContain(`peer-focus-visible:${width}`);
+        expect(checkmark).toContain("peer-focus-visible:ring-focus-indicator/(--mona-focus-ring-opacity,35%)");
+    });
+
     it("preserves Mona's raised surfaces and Anna's flat controls", () => {
-        expect(monaTheme.variants.dark.shadows["--shadow-control"]).not.toBe("none");
+        expect(monaTheme.variants.dark.shadows["--shadow-control"]).not.toBe("0 0 #0000");
         expect(monaTheme.variants.dark.components["--mona-calendar-shadow"]).toBe("var(--shadow-raised)");
-        expect(annaTheme.variants.dark.shadows["--shadow-control"]).toBe("none");
-        expect(annaTheme.variants.dark.components["--mona-calendar-shadow"]).toBe("none");
+        expect(annaTheme.variants.dark.shadows["--shadow-control"]).toBe("0 0 #0000");
+        expect(annaTheme.variants.dark.components["--mona-calendar-shadow"]).toBe("0 0 #0000");
     });
 
     it("preserves the distinct selected and focus-surface behaviors", () => {

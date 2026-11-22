@@ -20,13 +20,13 @@ export const checkmarkThemeVariants = cva(
         peer-indeterminate:border-(--color-selected-border) peer-indeterminate:bg-primary peer-indeterminate:text-primary-foreground
 
         peer-focus-visible:border-focus-indicator
-        peer-focus-visible:ring-2 peer-focus-visible:ring-focus-indicator/35
+        peer-focus-visible:ring-(length:--mona-focus-ring-width,2px) peer-focus-visible:ring-focus-indicator/(--mona-focus-ring-opacity,35%)
         peer-focus-visible:outline-hidden
 
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:ring-(length:--mona-focus-ring-width,2px) data-[invalid='true']:ring-error/(--mona-focus-ring-opacity,35%)
         data-[invalid='true']:peer-focus-visible:border-error
-        data-[invalid='true']:peer-focus-visible:ring-error/35
+        data-[invalid='true']:peer-focus-visible:ring-error/(--mona-focus-ring-opacity,35%)
 
         peer-indeterminate:after:absolute
         peer-indeterminate:after:inset-0
@@ -88,7 +88,7 @@ export const checkboxDirectiveThemeVariants = cva(
         indeterminate:border-(--color-selected-border) indeterminate:bg-primary indeterminate:text-primary-foreground
 
         focus-visible:border-focus-indicator
-        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+        focus-visible:ring-(length:--mona-focus-ring-width,2px) focus-visible:ring-focus-indicator/(--mona-focus-ring-opacity,35%)
 
         checked:after:absolute
         checked:after:inset-[1px_0_0_1px]
@@ -109,9 +109,9 @@ export const checkboxDirectiveThemeVariants = cva(
         indeterminate:after:[mask-size:contain]
 
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:ring-(length:--mona-focus-ring-width,2px) data-[invalid='true']:ring-error/(--mona-focus-ring-opacity,35%)
         data-[invalid='true']:focus-visible:border-error
-        data-[invalid='true']:focus-visible:ring-error/35
+        data-[invalid='true']:focus-visible:ring-error/(--mona-focus-ring-opacity,35%)
     `,
     {
         variants: {

@@ -11,5 +11,7 @@ export const THEME_OPTIONS: readonly ThemeOption[] = Object.freeze([
     { text: "Anna Dark", name: "anna", variant: "dark", group: "Anna" },
     { text: "Luna Light", name: "luna", variant: "light", group: "Luna" },
     { text: "Luna Dark", name: "luna", variant: "dark", group: "Luna" },
+    { text: "Rena Light", name: "rena", variant: "light", group: "Rena" },
+    { text: "Rena Dark", name: "rena", variant: "dark", group: "Rena" },
     { text: "Aurora Dark", name: "aurora", variant: "dark", group: "Aurora" }
 ]);

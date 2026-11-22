@@ -895,7 +895,7 @@ describe("color gradient behavior", () => {
 
             expect(classes).toContain("focus-visible:outline-2");
             expect(classes).toContain("focus-visible:shadow-[0_0_0_4px_rgb(0_0_0/0.9)]");
-            expect(classes).not.toContain("ring-focus-indicator/35");
+            expect(classes).not.toContain("ring-focus-indicator/(--mona-focus-ring-opacity,35%)");
         });
 
         it("centers the handle on its position", () => {

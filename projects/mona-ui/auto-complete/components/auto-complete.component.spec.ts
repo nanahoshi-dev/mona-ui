@@ -91,7 +91,7 @@ describe("AutoCompleteComponent", () => {
         ).toBe(true);
         expect(host.classList.contains("border-input-border")).toBe(true);
         expect(host.classList.contains("shadow-(--shadow-control)")).toBe(true);
-        expect(host.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
+        expect(host.classList.contains("focus-within:ring-focus-indicator/(--mona-focus-ring-opacity,35%)")).toBe(true);
         expect(host.classList.contains("opacity-50")).toBe(false);
     });
 
@@ -201,7 +201,7 @@ describe("AutoCompleteComponent", () => {
         expect(getInput(fixture).getAttribute("aria-invalid")).toBe("true");
         expect(getInput(fixture).required).toBe(true);
         expect(getHost(fixture).className).toContain("border-error");
-        expect(getHost(fixture).className).toContain("focus-within:ring-error/35");
+        expect(getHost(fixture).className).toContain("focus-within:ring-error/(--mona-focus-ring-opacity,35%)");
     });
 
     it("leaves the input's name to its placeholder when no label is given", async () => {
