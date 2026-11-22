@@ -11,14 +11,15 @@ const motion: ThemeMotion = Object.freeze({
 const components: ThemeComponents = Object.freeze({
     // A calendar is a panel, not a field, so it keeps the surface rather than the lifted control fill.
     "--mona-calendar-background": "var(--color-surface)",
-    "--mona-calendar-shadow": "none",
+    // An empty shadow rather than "none", for the reason in anna-theme-shadows.ts.
+    "--mona-calendar-shadow": "0 0 #0000",
     "--mona-list-background": "var(--color-surface)",
     "--mona-list-disabled-background": "var(--color-disabled-background)",
     "--mona-list-group-background": "var(--color-surface-muted)",
     "--mona-list-group-border-width": "1px",
     "--mona-list-group-font-weight": "600",
     "--mona-menubar-background": "var(--color-surface-muted)",
-    "--mona-menubar-shadow": "none",
+    "--mona-menubar-shadow": "0 0 #0000",
     "--mona-pager-background": "var(--color-surface-muted)",
     "--mona-slider-handle-border-color": "var(--color-focus-indicator)"
 });

@@ -53,10 +53,10 @@ describe("canonical recipe and built-in profile contract", () => {
     });
 
     it("preserves Mona's raised surfaces and Anna's flat controls", () => {
-        expect(monaTheme.variants.dark.shadows["--shadow-control"]).not.toBe("none");
+        expect(monaTheme.variants.dark.shadows["--shadow-control"]).not.toBe("0 0 #0000");
         expect(monaTheme.variants.dark.components["--mona-calendar-shadow"]).toBe("var(--shadow-raised)");
-        expect(annaTheme.variants.dark.shadows["--shadow-control"]).toBe("none");
-        expect(annaTheme.variants.dark.components["--mona-calendar-shadow"]).toBe("none");
+        expect(annaTheme.variants.dark.shadows["--shadow-control"]).toBe("0 0 #0000");
+        expect(annaTheme.variants.dark.components["--mona-calendar-shadow"]).toBe("0 0 #0000");
     });
 
     it("preserves the distinct selected and focus-surface behaviors", () => {

@@ -35,6 +35,48 @@ describe("checking a custom theme", () => {
         expect(warn.mock.calls.flat().join()).toContain("--color-focus-indicator on --color-surface is 1.00:1");
     });
 
+    it("warns about a shadow set to none, which would hide the focus ring", () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+        const light = monaTheme.variants.light;
+
+        new DefaultThemeStrategy(
+            [
+                {
+                    name: "custom",
+                    variants: {
+                        light: {
+                            ...light,
+                            shadows: { ...light.shadows, "--shadow-control": "none" },
+                            components: { ...light.components, "--mona-calendar-shadow": " None " }
+                        }
+                    }
+                }
+            ],
+            []
+        );
+
+        const warnings = warn.mock.calls.flat().join();
+        expect(warnings).toContain('sets shadows to "none"');
+        expect(warnings).toContain("--shadow-control, --mona-calendar-shadow");
+    });
+
+    it("accepts an empty shadow for no shadow", () => {
+        const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+        const light = monaTheme.variants.light;
+
+        new DefaultThemeStrategy(
+            [
+                {
+                    name: "custom",
+                    variants: { light: { ...light, shadows: { ...light.shadows, "--shadow-control": "0 0 #0000" } } }
+                }
+            ],
+            []
+        );
+
+        expect(warn.mock.calls.flat().join()).not.toContain("shadow");
+    });
+
     it("follows aliases to read a pair", () => {
         const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 

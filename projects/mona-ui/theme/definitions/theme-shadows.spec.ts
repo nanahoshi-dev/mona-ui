@@ -27,12 +27,26 @@ describe("built-in theme shadows", () => {
         });
     });
 
+    // Components put a shadow in one box-shadow list with their focus ring, where "none" would make the list invalid.
+    it("never writes no shadow as none", () => {
+        for (const shadows of [
+            monaThemeShadows.light,
+            monaThemeShadows.dark,
+            annaThemeShadows.light,
+            annaThemeShadows.dark,
+            renaThemeShadows.light,
+            renaThemeShadows.dark
+        ]) {
+            expect(Object.values(shadows)).not.toContain("none");
+        }
+    });
+
     it("owns elevation independently for every supported theme variant", () => {
         expect(monaThemeShadows.dark).not.toEqual(monaThemeShadows.light);
         expect(annaThemeShadows.light).not.toEqual(monaThemeShadows.light);
         expect(annaThemeShadows.dark).not.toEqual(monaThemeShadows.dark);
-        expect(annaThemeShadows.light["--shadow-control"]).toBe("none");
-        expect(annaThemeShadows.dark["--shadow-control"]).toBe("none");
+        expect(annaThemeShadows.light["--shadow-control"]).toBe("0 0 #0000");
+        expect(annaThemeShadows.dark["--shadow-control"]).toBe("0 0 #0000");
         expect(annaThemeShadows.dark["--shadow-raised"]).toContain("rgb(0 0 0 / 0.6)");
         expect(annaThemeShadows.dark["--shadow-overlay"]).toContain("rgb(0 0 0 / 0.65)");
     });
