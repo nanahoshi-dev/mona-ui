@@ -38,6 +38,30 @@ export const groupPopupMenuItems = (items: Iterable<PopupMenuItem>): PopupMenuIt
 };
 
 /**
+ * A point in viewport coordinates, such as the pointer's position.
+ */
+export interface PointerPosition {
+    readonly x: number;
+    readonly y: number;
+}
+
+/**
+ * Whether a point lies inside the triangle with corners a, b and c, or on one of its edges.
+ */
+export const isPointInTriangle = (
+    point: PointerPosition,
+    a: PointerPosition,
+    b: PointerPosition,
+    c: PointerPosition
+): boolean => {
+    // Which side of each edge the point is on: inside, it is on the same side of all three.
+    const side = (from: PointerPosition, to: PointerPosition): number =>
+        (point.x - to.x) * (from.y - to.y) - (from.x - to.x) * (point.y - to.y);
+    const sides = [side(a, b), side(b, c), side(c, a)];
+    return !(sides.some(s => s < 0) && sides.some(s => s > 0));
+};
+
+/**
  * Whether the item's checked state is held by the menu (a checkable `MenuItem` from the `items` input), so the
  * menu toggles it when the item is activated.
  */

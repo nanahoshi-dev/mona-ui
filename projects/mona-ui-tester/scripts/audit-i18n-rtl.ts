@@ -740,6 +740,18 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/popup-menu/components/popup-menu-list/popup-menu-list.component.ts",
+        lineSnippet: "submenuRect.left + submenuRect.width / 2 >= menuRect.left + menuRect.width / 2",
+        reason: "Submenu aim measures which side the submenu opened on, so it holds right to left and when flipped to fit"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/popup-menu/components/popup-menu-list/popup-menu-list.component.ts",
+        lineSnippet: "onRight ? submenuRect.left : submenuRect.right",
+        reason: "Submenu aim targets the submenu edge facing its parent menu, whichever side it opened on"
+    },
+    {
+        category: "rtl-manual-review",
         filePattern: "projects/mona-ui/internal/tree/components/tree-drop-hint/tree-drop-hint.component.ts",
         lineSnippet: "rect.right - 40",
         reason: "Tree drop hint position calculation explicitly branches on isRtl"
