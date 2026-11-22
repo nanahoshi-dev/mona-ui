@@ -106,6 +106,22 @@ custom: {
 }
 ```
 
+### Focus Rings
+
+A focused control's border takes `--color-focus-indicator`, with a ring of the same color around it. An invalid control does the same in `--color-error`. Two variables shape the ring, and a theme sets them in `custom`:
+
+- `--mona-focus-ring-width` is how wide the ring is. It falls back to `2px`.
+- `--mona-focus-ring-opacity` is how strong the ring's color is, as a percentage. It falls back to `35%`, a soft halo.
+
+For a solid line, as Rena draws, make the ring narrower and opaque. With the border, it reads as one 2 px line:
+
+```typescript
+custom: {
+    "--mona-focus-ring-width": "1px",
+    "--mona-focus-ring-opacity": "100%"
+}
+```
+
 ### Contrast Borders
 
 `--color-border-control-contrast` and `--color-border-control-contrast-hover` are the only optional colors. When the user asks for more contrast, the theme service uses them in place of `--color-border-control` and `--color-border-control-hover`, for fields, buttons, chips, chart gridlines and everything else that shares those borders. Give them at least 3:1 against `--color-input-background`. A theme without them keeps its usual borders.
