@@ -338,7 +338,7 @@ describe("Calendar visual contract", () => {
         expect(baseClasses).toContain("border-border");
         expect(baseClasses).toContain("shadow-(--mona-calendar-shadow)");
         expect(focusedClasses).toContain("bg-hover");
-        expect(focusedClasses).toContain("ring-focus-indicator/35");
+        expect(focusedClasses).toContain("ring-focus-indicator/(--mona-focus-ring-opacity,35%)");
         expect(focusedClasses).not.toContain("bg-accent");
         expect(selectedClasses).toContain("bg-primary");
         expect(selectedClasses).toContain("text-primary-foreground");

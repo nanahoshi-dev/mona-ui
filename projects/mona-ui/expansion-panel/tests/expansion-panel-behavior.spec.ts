@@ -176,7 +176,7 @@ describe("mona-expansion-panel behavior", () => {
             const classes = expansionPanelTriggerThemeVariants({ disabled: false });
             expect(classes).toContain("focus-visible:outline-2");
             expect(classes).not.toContain("outline-none");
-            expect(classes).not.toContain("ring-focus-indicator/35");
+            expect(classes).not.toContain("ring-focus-indicator/(--mona-focus-ring-opacity,35%)");
         });
     });
 

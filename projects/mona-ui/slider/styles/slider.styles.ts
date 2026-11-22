@@ -129,13 +129,13 @@ export const sliderHandleThemeVariants = cva(
         data-[orientation="vertical"]:data-[dragging="true"]:transition-none
 
         data-[focused="true"]:border-focus-indicator
-        data-[focused="true"]:ring-2
-        data-[focused="true"]:ring-focus-indicator/35
+        data-[focused="true"]:ring-(length:--mona-focus-ring-width,2px)
+        data-[focused="true"]:ring-focus-indicator/(--mona-focus-ring-opacity,35%)
 
         data-[invalid="true"]:border-error
-        data-[invalid="true"]:ring-2 data-[invalid="true"]:ring-error/35
+        data-[invalid="true"]:ring-(length:--mona-focus-ring-width,2px) data-[invalid="true"]:ring-error/(--mona-focus-ring-opacity,35%)
         data-[invalid="true"]:data-[focused="true"]:border-error
-        data-[invalid="true"]:data-[focused="true"]:ring-error/35
+        data-[invalid="true"]:data-[focused="true"]:ring-error/(--mona-focus-ring-opacity,35%)
     `,
     {
         variants: {

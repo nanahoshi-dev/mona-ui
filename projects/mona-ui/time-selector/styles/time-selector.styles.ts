@@ -6,7 +6,7 @@ export const timeSelectorBaseThemeVariants = cva(
     `
         flex h-full w-full flex-col overflow-hidden
         data-[invalid='true']:border data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:ring-(length:--mona-focus-ring-width,2px) data-[invalid='true']:ring-error/(--mona-focus-ring-opacity,35%)
     `,
     {
         variants: {

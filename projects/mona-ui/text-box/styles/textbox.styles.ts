@@ -20,12 +20,12 @@ export const textBoxThemeVariants = cva(
         data-[readonly='true']:cursor-default
 
         focus-within:border-focus-indicator
-        focus-within:ring-2 focus-within:ring-focus-indicator/35
+        focus-within:ring-(length:--mona-focus-ring-width,2px) focus-within:ring-focus-indicator/(--mona-focus-ring-opacity,35%)
 
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:ring-(length:--mona-focus-ring-width,2px) data-[invalid='true']:ring-error/(--mona-focus-ring-opacity,35%)
         data-[invalid='true']:focus-within:border-error
-        data-[invalid='true']:focus-within:ring-error/35
+        data-[invalid='true']:focus-within:ring-error/(--mona-focus-ring-opacity,35%)
 
         [&>input]:h-full [&>input]:w-full
         [&>input]:px-2
@@ -71,12 +71,12 @@ export const inputThemeVariants = cva(
         read-only:cursor-default
 
         focus-visible:border-focus-indicator
-        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+        focus-visible:ring-(length:--mona-focus-ring-width,2px) focus-visible:ring-focus-indicator/(--mona-focus-ring-opacity,35%)
 
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:ring-(length:--mona-focus-ring-width,2px) data-[invalid='true']:ring-error/(--mona-focus-ring-opacity,35%)
         data-[invalid='true']:focus-visible:border-error
-        data-[invalid='true']:focus-visible:ring-error/35
+        data-[invalid='true']:focus-visible:ring-error/(--mona-focus-ring-opacity,35%)
     `,
     {
         variants: {

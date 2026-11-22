@@ -49,9 +49,13 @@ describe("TextBoxDirective", () => {
         ).toBe(true);
         expect(element.classList.contains("border-input-border")).toBe(true);
         expect(element.classList.contains("shadow-(--shadow-control)")).toBe(true);
-        expect(element.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(element.classList.contains("focus-visible:ring-focus-indicator/(--mona-focus-ring-opacity,35%)")).toBe(
+            true
+        );
         expect(element.classList.contains("disabled:bg-disabled-background")).toBe(true);
-        expect(element.classList.contains("data-[invalid='true']:focus-visible:ring-error/35")).toBe(true);
+        expect(
+            element.classList.contains("data-[invalid='true']:focus-visible:ring-error/(--mona-focus-ring-opacity,35%)")
+        ).toBe(true);
     });
 
     it("should reflect the invalid state on the host element", () => {

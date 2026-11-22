@@ -36,7 +36,7 @@ export const otpInputSlotThemeVariants = cva(
         data-[readonly='true']:cursor-default
 
         data-[active='true']:border-focus-indicator
-        data-[active='true']:ring-2 data-[active='true']:ring-focus-indicator/35
+        data-[active='true']:ring-(length:--mona-focus-ring-width,2px) data-[active='true']:ring-focus-indicator/(--mona-focus-ring-opacity,35%)
         data-[active='true']:z-10
 
         data-[selected='true']:bg-primary/10
@@ -45,8 +45,8 @@ export const otpInputSlotThemeVariants = cva(
 
         data-[invalid='true']:border-error
         data-[invalid='true']:data-[active='true']:border-error
-        data-[invalid='true']:data-[active='true']:ring-2
-        data-[invalid='true']:data-[active='true']:ring-error/35
+        data-[invalid='true']:data-[active='true']:ring-(length:--mona-focus-ring-width,2px)
+        data-[invalid='true']:data-[active='true']:ring-error/(--mona-focus-ring-opacity,35%)
     `,
     {
         variants: {

@@ -9,7 +9,7 @@ export const segmentedContainerThemeVariants = cva(
         border border-input-border
         p-1
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:ring-(length:--mona-focus-ring-width,2px) data-[invalid='true']:ring-error/(--mona-focus-ring-opacity,35%)
         data-[readonly='true']:[&_*]:cursor-default
         transition-colors duration-(--mona-motion-fast)
     `,

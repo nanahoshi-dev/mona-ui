@@ -26,8 +26,14 @@ describe("RadioButtonComponent", () => {
 
         expect(inputElement.classList.toString()).not.toContain("focus:ring");
         expect(inputElement.classList.toString()).not.toContain("ring-offset");
-        expect(circleElement.classList.contains("peer-focus-visible:ring-focus-indicator/35")).toBe(true);
-        expect(circleElement.classList.contains("data-[invalid='true']:peer-focus-visible:ring-error/35")).toBe(true);
+        expect(
+            circleElement.classList.contains("peer-focus-visible:ring-focus-indicator/(--mona-focus-ring-opacity,35%)")
+        ).toBe(true);
+        expect(
+            circleElement.classList.contains(
+                "data-[invalid='true']:peer-focus-visible:ring-error/(--mona-focus-ring-opacity,35%)"
+            )
+        ).toBe(true);
         expect(circleElement.classList.contains("peer-disabled:bg-disabled-background")).toBe(true);
     });
 

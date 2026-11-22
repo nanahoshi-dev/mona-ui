@@ -22,17 +22,17 @@ export const colorPickerBaseThemeVariants = cva(
         hover:bg-hover active:bg-active
 
         focus-within:border-focus-indicator
-        focus-within:ring-2 focus-within:ring-focus-indicator/35
+        focus-within:ring-(length:--mona-focus-ring-width,2px) focus-within:ring-focus-indicator/(--mona-focus-ring-opacity,35%)
 
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:ring-(length:--mona-focus-ring-width,2px) data-[invalid='true']:ring-error/(--mona-focus-ring-opacity,35%)
         data-[invalid='true']:focus-within:border-error
-        data-[invalid='true']:focus-within:ring-error/35
+        data-[invalid='true']:focus-within:ring-error/(--mona-focus-ring-opacity,35%)
     `,
     {
         variants: {
             expanded: {
-                true: "border-focus-indicator ring-2 ring-focus-indicator/35",
+                true: "border-focus-indicator ring-(length:--mona-focus-ring-width,2px) ring-focus-indicator/(--mona-focus-ring-opacity,35%)",
                 false: ""
             },
             rounded: {
@@ -51,7 +51,7 @@ export const colorPickerBaseThemeVariants = cva(
         compoundVariants: [
             {
                 expanded: true,
-                class: "data-[invalid='true']:border-error data-[invalid='true']:ring-error/35"
+                class: "data-[invalid='true']:border-error data-[invalid='true']:ring-error/(--mona-focus-ring-opacity,35%)"
             }
         ]
     }

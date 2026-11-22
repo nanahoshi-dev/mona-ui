@@ -7,7 +7,7 @@ export const buttonGroupThemeVariants = cva(
         inline-flex items-center justify-center
         border border-input-border
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:ring-(length:--mona-focus-ring-width,2px) data-[invalid='true']:ring-error/(--mona-focus-ring-opacity,35%)
         data-[readonly='true']:[&_button[aria-pressed]]:cursor-default
         [&>button]:border-0
         [&>button]:shadow-none

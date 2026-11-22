@@ -116,6 +116,16 @@ if (forbiddenThemeStyleFiles.length > 0) {
     throw new Error(`Theme-specific style files remain: ${forbiddenThemeStyleFiles.join(", ")}.`);
 }
 
+// A focused or invalid control's ring takes its width and strength from the theme, so a recipe mustn't fix them.
+const fixedFocusRings = librarySources
+    .concat(globSync("projects/mona-ui/**/*.html"))
+    .filter(path => /ring-(?:focus-indicator|error)\/35/.test(readFileSync(path, "utf8")));
+if (fixedFocusRings.length > 0) {
+    throw new Error(
+        `Fixed focus rings remain; use --mona-focus-ring-width and --mona-focus-ring-opacity: ${fixedFocusRings.join(", ")}.`
+    );
+}
+
 const forbiddenRecipeStrategies = librarySources.filter(path =>
     readFileSync(path, "utf8").includes("createThemeStrategy")
 );
