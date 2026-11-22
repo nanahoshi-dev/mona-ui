@@ -9,6 +9,7 @@ export { annaTheme } from "./definitions/anna-theme";
 export { builtInThemes } from "./definitions/built-in-themes";
 export { lunaTheme } from "./definitions/luna-theme";
 export { monaTheme } from "./definitions/mona-theme";
+export { renaTheme } from "./definitions/rena-theme";
 export { createSidebarColorRoles } from "./definitions/theme-primitives";
 export type {
     SidebarColorRoleSeeds,

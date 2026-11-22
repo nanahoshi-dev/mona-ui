@@ -134,6 +134,8 @@ describe("PageComponent", () => {
             "anna-dark",
             "luna-light",
             "luna-dark",
+            "rena-light",
+            "rena-dark",
             "aurora-dark"
         ]);
 

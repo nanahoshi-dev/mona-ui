@@ -1,5 +1,6 @@
 import { annaThemeShadows } from "./anna-theme-shadows";
 import { monaThemeShadows } from "./mona-theme-shadows";
+import { renaThemeShadows } from "./rena-theme-shadows";
 
 describe("built-in theme shadows", () => {
     const requiredTokens = ["--shadow-control", "--shadow-overlay", "--shadow-raised"];
@@ -9,7 +10,9 @@ describe("built-in theme shadows", () => {
             monaThemeShadows.light,
             monaThemeShadows.dark,
             annaThemeShadows.light,
-            annaThemeShadows.dark
+            annaThemeShadows.dark,
+            renaThemeShadows.light,
+            renaThemeShadows.dark
         ]) {
             expect(Object.keys(shadows).sort()).toEqual(requiredTokens);
             expect(Object.keys(shadows).every(name => name.startsWith("--shadow-"))).toBe(true);

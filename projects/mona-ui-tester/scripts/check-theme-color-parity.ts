@@ -10,6 +10,9 @@ import { lunaTheme } from "../../mona-ui/theme/definitions/luna-theme";
 import { monaThemeColors } from "../../mona-ui/theme/definitions/mona-theme-colors";
 import { monaThemeShadows } from "../../mona-ui/theme/definitions/mona-theme-shadows";
 import { monaTheme } from "../../mona-ui/theme/definitions/mona-theme";
+import { renaThemeColors } from "../../mona-ui/theme/definitions/rena-theme-colors";
+import { renaThemeShadows } from "../../mona-ui/theme/definitions/rena-theme-shadows";
+import { renaTheme } from "../../mona-ui/theme/definitions/rena-theme";
 
 const stylesPath = resolve("projects/mona-ui/styles.css");
 const styles = readFileSync(stylesPath, "utf8");
@@ -44,7 +47,9 @@ for (const [name, colors] of Object.entries({
     "Anna Light": annaThemeColors.light,
     "Anna Dark": annaThemeColors.dark,
     "Luna Light": lunaThemeColors.light,
-    "Luna Dark": lunaThemeColors.dark
+    "Luna Dark": lunaThemeColors.dark,
+    "Rena Light": renaThemeColors.light,
+    "Rena Dark": renaThemeColors.dark
 })) {
     const keys = Object.keys(colors).sort();
     if (JSON.stringify(keys) !== JSON.stringify(runtimeKeys)) {
@@ -74,7 +79,9 @@ for (const [name, shadows] of Object.entries({
     "Anna Light": annaThemeShadows.light,
     "Anna Dark": annaThemeShadows.dark,
     "Luna Light": lunaThemeShadows.light,
-    "Luna Dark": lunaThemeShadows.dark
+    "Luna Dark": lunaThemeShadows.dark,
+    "Rena Light": renaThemeShadows.light,
+    "Rena Dark": renaThemeShadows.dark
 })) {
     const keys = Object.keys(shadows).sort();
     if (JSON.stringify(keys) !== JSON.stringify(runtimeShadowKeys)) {
@@ -99,7 +106,9 @@ for (const [name, profile] of Object.entries({
     "Anna Light": annaTheme.variants.light,
     "Anna Dark": annaTheme.variants.dark,
     "Luna Light": lunaTheme.variants.light,
-    "Luna Dark": lunaTheme.variants.dark
+    "Luna Dark": lunaTheme.variants.dark,
+    "Rena Light": renaTheme.variants.light,
+    "Rena Dark": renaTheme.variants.dark
 })) {
     for (const section of ["effects", "shape", "components"] as const) {
         if (
@@ -111,7 +120,7 @@ for (const [name, profile] of Object.entries({
     }
 }
 
-const forbiddenThemeStyleFiles = librarySources.filter(path => /\.(?:anna|luna|mona)\.styles\.ts$/.test(path));
+const forbiddenThemeStyleFiles = librarySources.filter(path => /\.(?:anna|luna|mona|rena)\.styles\.ts$/.test(path));
 if (forbiddenThemeStyleFiles.length > 0) {
     throw new Error(`Theme-specific style files remain: ${forbiddenThemeStyleFiles.join(", ")}.`);
 }
