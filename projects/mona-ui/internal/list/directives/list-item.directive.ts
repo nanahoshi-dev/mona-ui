@@ -1,5 +1,6 @@
 import { computed, Directive, ElementRef, inject, input } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { RippleDirective } from "@nanahoshi/mona-ui/ripple";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../models/ListItem";
@@ -20,7 +21,8 @@ import { LIST_SELECT_ALL_ITEM_CLASSES, listItemContentThemeVariants } from "../s
         "[attr.role]": "isOption() ? 'option' : 'listitem'",
         "[attr.tabindex]": "rovingTabIndex()",
         "[class]": "textClasses()"
-    }
+    },
+    hostDirectives: [RippleDirective]
 })
 export class ListItemDirective<TData> {
     readonly #listService = inject(ListService<TData>);
@@ -63,6 +65,14 @@ export class ListItemDirective<TData> {
     public readonly item = input.required<ListItem<TData>>();
 
     public constructor() {
+        // An item ripples when pressing it does something: it can be selected, or focused and activated.
+        inject(RippleDirective, { self: true }).setHostDisabled(
+            computed(() => {
+                const interactive =
+                    this.#listService.selectableOptions().enabled || this.#listService.navigableOptions().enabled;
+                return this.disabled() || !interactive;
+            })
+        );
         fromEvent(inject(ElementRef<HTMLElement>).nativeElement, "focusout")
             .pipe(takeUntilDestroyed())
             .subscribe(() => this.#listService.itemFocusOut$.next(this.item()));

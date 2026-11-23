@@ -6,6 +6,12 @@ Press a button and hold it, then let go. The rest of this site has no ripples, s
 ripple/buttons
 ```
 
+Chips that toggle, tabs and list items ripple too:
+
+```example
+ripple/components
+```
+
 ## Turn Ripples On
 
 Add `provideRipple()` to your application's providers:
@@ -22,7 +28,16 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-Every Mona UI button then draws one, including those in button groups, dropdown buttons and split buttons. The `link` and `clear` looks don't, since they have no surface to draw it on. `provideRipple({ enabled: false })` keeps ripples off, for example behind a setting.
+These then draw one when pressed:
+
+| Component                    | Ripples                                                                                                                                                  |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Buttons                      | Every look but `link` and `clear`, which have no surface to draw it on. That includes the buttons of button groups, dropdown buttons and split buttons. |
+| Chips                        | A chip that toggles or is a link. A chip that only shows a value does nothing when pressed, so it doesn't ripple.                                        |
+| Tabs                         | Every tab but a disabled one.                                                                                                                            |
+| List items                   | The items of List Box, List View, and the popups of Dropdown List, Combo Box, Auto Complete and Multi Select, when they can be selected or navigated.   |
+
+A press on a control inside one of these, such as a chip's remove button, a tab's close button, or a button in a list item's template, belongs to that control, so the item around it doesn't ripple. `provideRipple({ enabled: false })` keeps ripples off, for example behind a setting.
 
 ### Part of an Application
 
@@ -40,12 +55,13 @@ import { RIPPLE_OPTIONS } from "@nanahoshi/mona-ui/ripple";
 export class ToolbarComponent {}
 ```
 
-### One Button
+### One Button or Chip
 
-`monaRippleDisabled` turns the ripple off for one button:
+`monaRippleDisabled` turns the ripple off for one button or chip:
 
 ```html
 <button monaButton monaRippleDisabled>Save</button>
+<mona-chip label="Archived" toggleable monaRippleDisabled></mona-chip>
 ```
 
 ## Your Own Elements
@@ -58,7 +74,7 @@ ripple/custom-element
 
 The wave covers the element's padding box, in its corner radius, over its background and under its content. For that, the first press gives the element `isolation: isolate`, and makes it `relative` if its position is `static`. If the element's position can change later, set one with a class yourself, as the tiles above do with `relative`.
 
-A Mona UI button already has the directive. Don't add `monaRipple` to one: Angular doesn't allow a directive on an element twice.
+Mona UI's buttons and chips already have the directive. Don't add `monaRipple` to one: Angular doesn't allow a directive on an element twice. As on Mona UI's own components, a press on a button, link or form field inside the element doesn't make it ripple.
 
 ## Customize It
 

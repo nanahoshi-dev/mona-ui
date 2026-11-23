@@ -1178,6 +1178,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./ripple/buttons/buttons-example.component").then(module => module.RippleButtonsExampleComponent),
         mainFile: "buttons-example.component.ts"
     },
+    "ripple/components": {
+        files: ["components-example.component.ts", "components-example.component.html"],
+        load: () => import("./ripple/components/components-example.component").then(module => module.RippleComponentsExampleComponent),
+        mainFile: "components-example.component.ts"
+    },
     "ripple/custom-element": {
         files: ["custom-element-example.component.ts", "custom-element-example.component.html"],
         load: () => import("./ripple/custom-element/custom-element-example.component").then(module => module.RippleCustomElementExampleComponent),

@@ -1,5 +1,5 @@
+import { isPlatformBrowser } from "@angular/common";
 import {
-    afterNextRender,
     booleanAttribute,
     DestroyRef,
     Directive,
@@ -8,6 +8,7 @@ import {
     inject,
     input,
     NgZone,
+    PLATFORM_ID,
     type Signal,
     signal
 } from "@angular/core";
@@ -28,6 +29,12 @@ const FALLBACK_FADE_DURATION = 300;
  */
 const SPREAD_EASING = "cubic-bezier(0, 0, 0.2, 1)";
 const RELEASE_EVENTS = ["pointercancel", "pointerleave", "pointerup"] as const;
+/**
+ * Controls of their own. A press on one inside the element, such as a chip's remove button or a button in a list item,
+ * belongs to that control, so the element draws no ripple for it.
+ */
+const NESTED_CONTROL_SELECTOR =
+    "a[href], button, input, select, textarea, [contenteditable='true'], [role='button'], [role='link']";
 
 interface RippleDurations {
     readonly fade: number;
@@ -46,7 +53,8 @@ interface RippleDurations {
  * opacity is `--mona-ripple-opacity`, 12% unless set.
  *
  * There is no ripple on a disabled or `aria-disabled` element, with the system's reduced motion setting, or in forced
- * colors. Keyboard presses have none either: the focus indicator already shows where they act.
+ * colors. Keyboard presses have none either: the focus indicator already shows where they act. Nor does a press on a
+ * control inside the element, such as a button or a link, which belongs to that control.
  */
 @Directive({
     selector: "[monaRipple]"
@@ -65,18 +73,15 @@ export class RippleDirective {
     public readonly disabled = input(false, { alias: "monaRippleDisabled", transform: booleanAttribute });
 
     public constructor() {
-        if (!this.#options.enabled) {
+        if (!this.#options.enabled || !isPlatformBrowser(inject(PLATFORM_ID))) {
             return;
         }
-        const destroyRef = inject(DestroyRef);
-        const zone = inject(NgZone);
-        afterNextRender(() => {
-            const host = this.#hostElementRef.nativeElement;
-            const listener = (event: PointerEvent): void => this.#launch(event);
-            // A press changes nothing Angular renders, so it shouldn't start change detection in a zone.js app.
-            zone.runOutsideAngular(() => host.addEventListener("pointerdown", listener, { passive: true }));
-            destroyRef.onDestroy(() => host.removeEventListener("pointerdown", listener));
-        });
+        // Listening straight away, rather than after the first render, costs a long list nothing per item.
+        const host = this.#hostElementRef.nativeElement;
+        const listener = (event: PointerEvent): void => this.#launch(event);
+        // A press changes nothing Angular renders, so it shouldn't start change detection in a zone.js app.
+        inject(NgZone).runOutsideAngular(() => host.addEventListener("pointerdown", listener, { passive: true }));
+        inject(DestroyRef).onDestroy(() => host.removeEventListener("pointerdown", listener));
     }
 
     /**
@@ -88,8 +93,12 @@ export class RippleDirective {
         this.#hostDisabled = disabled;
     }
 
-    #canDraw(host: HTMLElement): boolean {
+    #canDraw(host: HTMLElement, event: PointerEvent): boolean {
         if (this.disabled() || this.#hostDisabled() || host.matches(":disabled, [aria-disabled='true']")) {
+            return false;
+        }
+        const control = event.target instanceof Element ? event.target.closest(NESTED_CONTROL_SELECTOR) : null;
+        if (control && control !== host && host.contains(control)) {
             return false;
         }
         // Not every environment has the Web Animations API, jsdom among them.
@@ -138,7 +147,7 @@ export class RippleDirective {
 
     #launch(event: PointerEvent): void {
         const host = this.#hostElementRef.nativeElement;
-        if (event.button !== 0 || !this.#canDraw(host)) {
+        if (event.button !== 0 || !this.#canDraw(host, event)) {
             return;
         }
         const container = this.#ensureContainer(host);

@@ -5,7 +5,9 @@ import { provideRipple } from "../providers/ripple.providers";
 import { RippleDirective } from "./ripple.directive";
 
 @Component({
-    template: `<div monaRipple [monaRippleDisabled]="disabled()" [attr.aria-disabled]="ariaDisabled()">Press</div>`,
+    template: `<div monaRipple [monaRippleDisabled]="disabled()" [attr.aria-disabled]="ariaDisabled()">
+        <span id="label">Press</span><button type="button" id="inner">Inner</button><a id="bare-anchor">Anchor</a>
+    </div>`,
     imports: [RippleDirective]
 })
 class RippleHostComponent {
@@ -116,6 +118,7 @@ describe("RippleDirective", () => {
         expect(layer?.dir).toBe("ltr");
         expect(layer?.classList).toContain("-z-1");
         expect(layer?.classList).toContain("forced-colors:hidden");
+        expect(layer?.classList).toContain("in-[.cdk-drag-preview]:hidden");
 
         const [wave] = waves(host);
         // The pointer is at (20, 10) in the layer, so the farthest corner is (100, 40), 85.44px away.
@@ -172,6 +175,17 @@ describe("RippleDirective", () => {
         await settle();
 
         expect(animateCalls.map(call => call.options.duration)).toEqual([450, 300]);
+    });
+
+    it("draws a press on the element's content, but not one on a control inside it", async () => {
+        const fixture = await createHost(true);
+        const host = hostElement(fixture);
+        press(host.querySelector<HTMLElement>("#inner") as HTMLElement);
+        expect(container(host)).toBeNull();
+
+        press(host.querySelector<HTMLElement>("#label") as HTMLElement);
+        press(host.querySelector<HTMLElement>("#bare-anchor") as HTMLElement);
+        expect(waves(host)).toHaveLength(2);
     });
 
     it("draws every press in one layer", async () => {
