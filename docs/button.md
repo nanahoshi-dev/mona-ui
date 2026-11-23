@@ -98,7 +98,27 @@ import { ButtonGroupComponent } from '@nanahoshi/mona-ui/button-group';
 
 ---
 
-## 6. Accessibility
+## 6. Ripple
+
+Buttons draw a ripple when pressed once `provideRipple()` from `@nanahoshi/mona-ui/ripple` is in the application's providers. It is off by default.
+
+```typescript
+import { ApplicationConfig } from '@angular/core';
+import { provideRipple } from '@nanahoshi/mona-ui/ripple';
+
+export const appConfig: ApplicationConfig = {
+    providers: [provideRipple()]
+};
+```
+
+- The wave spreads from the pointer in the button's text color, at `--mona-ripple-opacity` (12% by default), over the theme's `--mona-motion-standard`, and fades over `--mona-motion-fast` once the button is let go.
+- The `link` and `clear` looks, and disabled and loading buttons, draw none. `monaRippleDisabled` turns it off for one button.
+- There is none with reduced motion, in forced colors, or for keyboard presses.
+- Every button is `position: relative`, so the ripple layer can cover it. A positioning class such as `absolute` still wins.
+
+---
+
+## 7. Accessibility
 
 - **Icon-only buttons need a name.** Add `aria-label`, `aria-labelledby` or `title`, or visually hidden text. In dev mode, an icon-only button without one logs a `[Mona Button]` warning to the console.
 - **Popup triggers:** set `aria-haspopup` to `menu`, `listbox`, `tree`, `grid`, `dialog` or `true` on a button that opens one. The default, `"false"`, omits the attribute.
@@ -107,7 +127,7 @@ import { ButtonGroupComponent } from '@nanahoshi/mona-ui/button-group';
 
 ---
 
-## 7. Inputs
+## 8. Inputs
 
 | Input | Type | Description |
 |---|---|---|
@@ -116,6 +136,7 @@ import { ButtonGroupComponent } from '@nanahoshi/mona-ui/button-group';
 | `disabled` | `boolean` | Natively disables the button. |
 | `iconOnly` | `boolean` | Square button without padding. |
 | `loading` | `boolean` | Spinner, `aria-busy`, blocked clicks; stays focusable. |
+| `monaRippleDisabled` | `boolean` | No ripple for this button while ripples are on. |
 | `look` | see section 2 | Visual style. Two-way bindable. |
 | `rounded` | see section 2 | Corner radius. |
 | `selected` | `boolean` | Pressed state of a toggle button. Two-way bindable. |

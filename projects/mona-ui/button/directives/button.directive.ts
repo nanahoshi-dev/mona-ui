@@ -21,6 +21,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
+import { RippleDirective } from "@nanahoshi/mona-ui/ripple";
 import { fromEvent, Subscription, takeWhile } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import type { ButtonAriaHasPopup } from "../models/ButtonAriaHasPopup";
@@ -40,7 +41,8 @@ import { buttonThemeVariants, ButtonVariantProps, ButtonVariantsInput } from "..
         "[attr.tabindex]": "effectiveDisabled() ? -1 : tabindex()",
         "[attr.type]": "type()",
         "[class]": "baseClass()"
-    }
+    },
+    hostDirectives: [{ directive: RippleDirective, inputs: ["monaRippleDisabled"] }]
 })
 export class ButtonDirective implements ButtonVariantsInput {
     readonly #appRef = inject(ApplicationRef);
@@ -54,6 +56,14 @@ export class ButtonDirective implements ButtonVariantsInput {
     readonly #hostElementRef: ElementRef<HTMLButtonElement> = inject(ElementRef);
     readonly #injector = inject(Injector);
     readonly #renderer = inject(Renderer2);
+    readonly #ripple = inject(RippleDirective, { self: true });
+    /**
+     * The link and clear looks have no surface to draw a ripple on.
+     */
+    readonly #rippleSuppressed = computed(() => {
+        const look = this.effectiveLook();
+        return look === "link" || look === "clear";
+    });
     #loaderComponentRef: ComponentRef<IndicatorIconComponent> | null = null;
     #toggleSubscription: Subscription | null = null;
 
@@ -200,6 +210,7 @@ export class ButtonDirective implements ButtonVariantsInput {
     public readonly value = input<unknown>();
 
     public constructor() {
+        this.#ripple.setHostDisabled(this.#rippleSuppressed);
         effect(() => {
             const toggleable = this.effectiveToggleable();
             if (toggleable) {

@@ -61,6 +61,10 @@ export const routes: Routes = [
             { path: "theme-colors", redirectTo: "theming/colors" },
             { path: "theme-luna", redirectTo: "theming/built-in-themes" },
             {
+                path: "ripple",
+                loadComponent: () => import("./docs/ripple-doc/ripple-doc.component").then(m => m.RippleDocComponent)
+            },
+            {
                 path: "forms",
                 loadComponent: () => import("./docs/forms-doc/forms-doc.component").then(m => m.FormsDocComponent)
             },
