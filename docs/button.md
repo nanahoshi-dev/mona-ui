@@ -111,7 +111,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-- The wave spreads from the pointer in the button's text color, at `--mona-ripple-opacity` (12% by default), over the theme's `--mona-motion-standard`, and fades over `--mona-motion-fast` once the button is let go.
+- The wave spreads from the pointer in the button's text color, at `--mona-ripple-opacity` (12% by default), over `--mona-ripple-duration` (450ms), and fades over `--mona-ripple-fade-duration` (300ms) once the button is let go.
 - The `link` and `clear` looks, and disabled and loading buttons, draw none. `monaRippleDisabled` turns it off for one button.
 - There is none with reduced motion, in forced colors, or for keyboard presses.
 - Every button is `position: relative`, so the ripple layer can cover it. A positioning class such as `absolute` still wins.

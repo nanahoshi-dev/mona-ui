@@ -62,19 +62,20 @@ A Mona UI button already has the directive. Don't add `monaRipple` to one: Angul
 
 ## Customize It
 
-The ripple follows the theme's motion tokens, and one token of its own sets how strongly it shows:
+Three tokens set how the ripple looks and moves. It has its own timing rather than the theme's motion tokens, which keep menus and popups brisk:
 
-| Token                    | Default        | Sets                                                     |
-| ------------------------ | -------------- | -------------------------------------------------------- |
-| `--mona-ripple-opacity`  | `12%`          | How much of the element's text color the wave shows.     |
-| `--mona-motion-standard` | Set by a theme | How long the wave takes to spread.                       |
-| `--mona-motion-fast`     | Set by a theme | How long it takes to fade, once it has finished spreading. |
+| Token                         | Default | Sets                                                       |
+| ----------------------------- | ------- | ---------------------------------------------------------- |
+| `--mona-ripple-opacity`       | `12%`   | How much of the element's text color the wave shows.       |
+| `--mona-ripple-duration`      | `450ms` | How long the wave takes to spread.                         |
+| `--mona-ripple-fade-duration` | `300ms` | How long it takes to fade, once it has finished spreading. |
 
-Set `--mona-ripple-opacity` in your styles, for the whole page or for one element:
+The wave starts moving at once and slows as it spreads, so a press shows straight away even at a longer duration. Set the tokens in your styles, for the whole page or for one element:
 
 ```css
 :root {
     --mona-ripple-opacity: 16%;
+    --mona-ripple-duration: 600ms;
 }
 ```
 

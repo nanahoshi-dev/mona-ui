@@ -15,12 +15,18 @@ import { rippleContainerClasses, rippleWaveClasses } from "../styles/ripple.styl
 import { RIPPLE_OPTIONS } from "../tokens/ripple.tokens";
 import { parseCssTime } from "../utils/parse-css-time";
 
-/** Used when the theme sets no `--mona-motion-standard`. */
-const FALLBACK_SPREAD_DURATION = 300;
-/** Used when the theme sets no `--mona-motion-fast`. */
-const FALLBACK_FADE_DURATION = 200;
-/** Fast at first and slow to settle, so that even a short press shows the wave spreading. */
-const SPREAD_EASING = "cubic-bezier(0.2, 0, 0, 1)";
+/**
+ * Used when nothing sets `--mona-ripple-duration`. The theme's motion tokens are for menus and popups, which should be
+ * brisk, and over those the wave read as a flash rather than a ripple.
+ */
+const FALLBACK_SPREAD_DURATION = 450;
+/** Used when nothing sets `--mona-ripple-fade-duration`. */
+const FALLBACK_FADE_DURATION = 300;
+/**
+ * Moving at once, so that a press shows straight away, and slowing down from there. It is a third of the way out
+ * after 50ms of the default duration, and nine tenths after 270ms.
+ */
+const SPREAD_EASING = "cubic-bezier(0, 0, 0.2, 1)";
 const RELEASE_EVENTS = ["pointercancel", "pointerleave", "pointerup"] as const;
 
 interface RippleDurations {
@@ -36,8 +42,8 @@ interface RippleDurations {
  *
  * The wave covers the element's padding box, over its background and under its content. For that, the first press
  * gives the element `isolation: isolate`, and makes it `relative` if its position is `static`. The wave spreads over
- * the theme's `--mona-motion-standard`, fades over its `--mona-motion-fast`, and its opacity is
- * `--mona-ripple-opacity`, 12% unless set.
+ * `--mona-ripple-duration`, 450ms unless set, fades over `--mona-ripple-fade-duration`, 300ms unless set, and its
+ * opacity is `--mona-ripple-opacity`, 12% unless set.
  *
  * There is no ripple on a disabled or `aria-disabled` element, with the system's reduced motion setting, or in forced
  * colors. Keyboard presses have none either: the focus indicator already shows where they act.
@@ -103,8 +109,8 @@ export class RippleDirective {
     #durations(host: HTMLElement): RippleDurations {
         const style = this.#document.defaultView?.getComputedStyle(host);
         return {
-            fade: parseCssTime(style?.getPropertyValue("--mona-motion-fast") ?? "", FALLBACK_FADE_DURATION),
-            spread: parseCssTime(style?.getPropertyValue("--mona-motion-standard") ?? "", FALLBACK_SPREAD_DURATION)
+            fade: parseCssTime(style?.getPropertyValue("--mona-ripple-fade-duration") ?? "", FALLBACK_FADE_DURATION),
+            spread: parseCssTime(style?.getPropertyValue("--mona-ripple-duration") ?? "", FALLBACK_SPREAD_DURATION)
         };
     }
 

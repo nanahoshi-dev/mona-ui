@@ -127,7 +127,8 @@ describe("RippleDirective", () => {
         expect(translateY).toBeCloseTo(10 - radius);
         expect(animateCalls).toHaveLength(1);
         expect(animateCalls[0].keyframes).toEqual([{ scale: 0 }, { scale: 1 }]);
-        expect(animateCalls[0].options.duration).toBe(300);
+        expect(animateCalls[0].options.duration).toBe(450);
+        expect(animateCalls[0].options.easing).toBe("cubic-bezier(0, 0, 0.2, 1)");
     });
 
     it("keeps the wave while held, then fades it once and removes it", async () => {
@@ -144,19 +145,33 @@ describe("RippleDirective", () => {
         expect(waves(host)).toHaveLength(0);
         expect(animateCalls).toHaveLength(2);
         expect(animateCalls[1].keyframes).toEqual([{ opacity: 1 }, { opacity: 0 }]);
-        expect(animateCalls[1].options.duration).toBe(200);
+        expect(animateCalls[1].options.duration).toBe(300);
     });
 
-    it("takes its durations from the theme's motion tokens", async () => {
+    it("takes its durations from the ripple's tokens, not the theme's motion", async () => {
         const fixture = await createHost(true);
         const host = hostElement(fixture);
-        host.style.setProperty("--mona-motion-standard", "0.45s");
-        host.style.setProperty("--mona-motion-fast", "120ms");
+        host.style.setProperty("--mona-ripple-duration", "0.6s");
+        host.style.setProperty("--mona-ripple-fade-duration", "120ms");
+        host.style.setProperty("--mona-motion-standard", "200ms");
+        host.style.setProperty("--mona-motion-fast", "150ms");
         press(host);
         host.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
         await settle();
 
-        expect(animateCalls.map(call => call.options.duration)).toEqual([450, 120]);
+        expect(animateCalls.map(call => call.options.duration)).toEqual([600, 120]);
+    });
+
+    it("keeps its own pace when only the theme's motion is set", async () => {
+        const fixture = await createHost(true);
+        const host = hostElement(fixture);
+        host.style.setProperty("--mona-motion-standard", "200ms");
+        host.style.setProperty("--mona-motion-fast", "150ms");
+        press(host);
+        host.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+        await settle();
+
+        expect(animateCalls.map(call => call.options.duration)).toEqual([450, 300]);
     });
 
     it("draws every press in one layer", async () => {
