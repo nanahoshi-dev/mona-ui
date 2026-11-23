@@ -9,11 +9,15 @@ Tabs organizes related content into named panels and shows one panel at a time. 
 
 Tabs is not a routing mechanism. Switching tabs does not change the URL. To deep-link to a tab, read the route yourself and bind `selectedIndex`, or `selected` on the tab.
 
+When the tabs sit apart from what they show, such as browser-style tabs in a window's titlebar over the page below, use `<mona-tab-strip>`. It draws only the tab list, and you render each tab's panel wherever it goes. See [Tabs whose panels are elsewhere](#tabs-whose-panels-are-elsewhere).
+
 ## Import & Quick Start
 
 ```typescript
 import { TabComponent, TabContentTemplateDirective, TabsComponent } from "@nanahoshi/mona-ui/tabs";
 ```
+
+For a strip whose panels you render yourself, import `TabStripComponent` instead of `TabsComponent`.
 
 ```html
 <mona-tabs aria-label="Account">
@@ -55,6 +59,8 @@ Each structural directive below is an `ng-template` placed as projected content 
 
 A title template renders inside the tab, whose content is presentational to assistive technology, so it can hold text and icons but not links or other controls.
 
+`<mona-tab-strip>` takes the same `<mona-tab>` children and the same title template. It renders no panels, so it ignores a `monaTabContentTemplate`.
+
 ## Examples
 
 ### Setting the selected tab
@@ -78,6 +84,8 @@ With nothing set, the first enabled tab is selected. When every `mona-tab` is di
 ```example
 tabs/closable
 ```
+
+A middle-click on a tab that can close asks to close it too, as it does on a browser's tabs. It doesn't select the tab, and it stops the middle button from starting to autoscroll the page. `tabClose` carries the click as its `originalEvent`.
 
 Closing a tab is entirely the consumer's responsibility — see [Tabs are removed by the consumer](#tabs-are-removed-by-the-consumer).
 
@@ -138,16 +146,65 @@ A left or right strip requires a constrained available height so its tabs can sc
 </mona-tabs>
 ```
 
+### The pill look
+
+`look="pill"` rounds every tab and raises the selected one on a background with a shadow, in place of the indicator line, and drops the rule between the strip and the content. It suits a strip that stands on its own, such as one in a titlebar. `look` takes the same values on `mona-tabs` and `mona-tab-strip`, and defaults to `"line"`.
+
+```html
+<mona-tab-strip aria-label="Open folders" look="pill">...</mona-tab-strip>
+```
+
+The selected pill's background is `--mona-tab-pill-background` when it's set, and the theme's raised surface, `--color-surface-raised`, when it isn't. The shadow is the theme's `--shadow-raised`. A theme whose raised surface sits too close to the color behind the strip can point the property at a token of its own, on the strip or anywhere above it:
+
+```css
+.app-titlebar {
+    --mona-tab-pill-background: var(--color-surface-active);
+}
+```
+
+Pills keep one font weight, so selecting a tab doesn't change its width. In forced colors, where backgrounds and shadows don't paint, the selected pill gets a ring in the system highlight color instead. When the user asks for more contrast, it gets a ring in the text color as well as its background.
+
+### Tabs whose panels are elsewhere
+
+`<mona-tab-strip>` renders only the tab list. Each tab's panel is yours to render, anywhere on the page, which suits browser-style tabs in a window's titlebar over the content below. It takes the same `<mona-tab>` children as `mona-tabs`, and keeps the same `selectedIndex`, `closable`, `sortable`, keyboard and scrolling behavior.
+
+```example
+tabs/strip
+```
+
+The tab and its panel still name each other, so assistive technology can go from one to the other:
+
+- `panelId` on each `mona-tab` is the id of the panel you render. The tab names it in `aria-controls`. Tabs can share one panel when the page shows one place at a time, as above. A tab without a `panelId` has no `aria-controls`.
+- `tabId` on each `mona-tab` is the id of the tab element. Set it to know it, or read it back from the tab when it's generated. Point the panel's `aria-labelledby` at the selected tab's `tabId`.
+- Give the panel `role="tabpanel"` and, unless the first thing in it takes focus, `tabindex="0"`.
+
+```html
+<mona-tab-strip aria-label="Open folders" look="pill" [(selectedIndex)]="selectedIndex">
+    @for (folder of folders(); track folder.id) {
+        <mona-tab [tabId]="'folder-tab-' + folder.id" panelId="folder-view" [title]="folder.name"></mona-tab>
+    }
+</mona-tab-strip>
+
+<div id="folder-view" role="tabpanel" tabindex="0" [attr.aria-labelledby]="'folder-tab-' + selected().id">...</div>
+```
+
+In `mona-tabs`, `tabId` and `panelId` set the ids of the tab and of the panel the component renders, and both are generated when they're empty.
+
+`Tab` on a strip goes to the next control after it, such as a new-tab button, rather than into the panel, since the panel may be anywhere on the page. See [A strip in a row of controls](#a-strip-in-a-row-of-controls) for the layout.
+
 ### Migrating from the removed `rounded` input
 
-The `rounded` input has been removed. Tabs are line-based: the tab strip is separated from the content by a rule and the active tab is marked by an indicator line, so no radius is applied to the strip or the content.
+The `rounded` input has been removed. The tab strip is separated from the content by a rule and the active tab is marked by an indicator line, so no radius is applied to the strip or the content. For rounded tabs, use the [pill look](#the-pill-look).
 
 ```text
 Before:
 <mona-tabs rounded="large">
 
-After:
+After, with the line look:
 <mona-tabs>
+
+After, with rounded tabs:
+<mona-tabs look="pill">
 ```
 
 Tab content no longer receives a default card-like surface. Consumers that need that appearance should wrap their tab content in `mona-card` or apply their own surface styles.
@@ -166,7 +223,7 @@ tabs/cancel-select
 
 ### Tabs are removed by the consumer
 
-`TabsComponent` does not remove a `<mona-tab>` from the DOM when it is closed. `tabClose` only notifies the consumer that a close was requested (by clicking the close button or pressing Delete/Backspace on a tab); the consumer is responsible for removing the corresponding tab from whatever collection drives the projected `<mona-tab>` elements (typically an `@for` loop).
+`TabsComponent` and `TabStripComponent` do not remove a `<mona-tab>` from the DOM when it is closed. `tabClose` only notifies the consumer that a close was requested (by clicking the close button, pressing Delete/Backspace on a tab, or middle-clicking it); the consumer is responsible for removing the corresponding tab from whatever collection drives the projected `<mona-tab>` elements (typically an `@for` loop).
 
 ### What happens when the selected tab goes away
 
@@ -192,6 +249,21 @@ Changing a tab's `title`, `disabled` or `closable` leaves its panel and everythi
 
 When the tab strip overflows its container, scroll buttons appear automatically — this is not controlled by a public input. Top and bottom strips overflow horizontally (left/right scroll buttons); left and right strips overflow vertically (up/down scroll buttons). The scroll buttons are hidden from assistive technology and are not a Tab stop. Keyboard users can still reach tabs outside the visible area because moving focus with the arrow keys scrolls the newly focused tab into view. A tab selected by code is scrolled into view within the strip, without scrolling the page. Scroll buttons don't animate when the user asks for reduced motion.
 
+### A strip in a row of controls
+
+A `mona-tab-strip` is as wide as its tabs and shrinks with the row it's in, down to nothing, scrolling its tabs once they don't fit. In a titlebar, put it in a flex row and let the space after it grow, so the strip gives way before the controls around it:
+
+```html
+<header class="flex h-12 items-center gap-1">
+    <mona-tab-strip aria-label="Open folders" look="pill" size="small">...</mona-tab-strip>
+    <button monaButton look="ghost" [iconOnly]="true" aria-label="New tab" (click)="add()">+</button>
+    <!-- Drag space: it grows to fill the row, and shrinks to its minimum before the strip does. -->
+    <div class="h-full min-w-6 flex-1"></div>
+</header>
+```
+
+The strip is only as tall as its tabs, so center it in a taller row. With the pill look it draws no rule along its edge. A strip is always horizontal.
+
 ### Vertical layout constraints
 
 A left or right tab strip needs a constrained available height. If the strip is as tall as its content, the tabs have no room to scroll and overflow tabs become unreachable. Give the `mona-tabs` host a bounded height (for example `class="h-96"`) when using `position="left"` or `position="right"`.
@@ -213,14 +285,14 @@ Not applicable. `TabsComponent` and `TabComponent` are not form controls and do 
 | `Home` / `End`                                 | Select the first/last enabled tab.                                                            |
 | `Delete` / `Backspace`                         | Close the tab that has focus, if it is closable and not disabled.                             |
 | `Control+Shift` with the strip's arrow keys, `Home` or `End` (`Command+Shift` on macOS) | With `sortable`: move the focused tab one place, or to the start or end of the strip. |
-| `Tab`                                          | Moves focus from the tab strip into the selected tab's panel.                                 |
+| `Tab`                                          | Moves focus from the tab strip into the selected tab's panel. In `mona-tab-strip`, moves on to the next control after the strip. |
 | `Shift+Tab` (while the panel itself has focus) | Moves focus back to the selected tab.                                                         |
 
 In a right-to-left layout, `ArrowLeft` and `ArrowRight` swap, so they still follow the strip.
 
 These keys are left to the browser when `Alt`, `Ctrl` or `Meta` is held, so `Alt+ArrowLeft` still goes back, and when `Shift` is held on the arrows, except for the moves of a `sortable` strip.
 
-The close button on each tab is not a Tab stop; keyboard users close a tab with `Delete`/`Backspace` instead of activating the close button directly.
+The close button on each tab is not a Tab stop; keyboard users close a tab with `Delete`/`Backspace` instead of activating the close button directly. With a pointer, a middle-click on a tab that can close does the same as its close button.
 
 A vetoed tab can have focus without being selected. `Tab` still goes to the selected tab's panel, and coming back lands on the selected tab.
 
@@ -237,13 +309,16 @@ The selected tab is the only tab in the Tab order (`tabindex="0"`); all other ta
 | Tab list | `aria-labelledby`  | When the `aria-labelledby` input is set                        | The input's value                                                                        |
 | Tab list | `aria-orientation` | Always                                                         | `"horizontal"` for top/bottom positions, `"vertical"` for left/right                     |
 | Tab      | `role`             | Always                                                         | `"tab"`                                                                                  |
+| Tab      | `id`               | Always                                                         | The tab's `tabId`, generated when it isn't set                                           |
 | Tab      | `aria-selected`   | Always                                                         | Reflects whether the tab is the active tab                                               |
 | Tab      | `aria-disabled`   | Always                                                         | Reflects the tab's effective disabled state (own `disabled`, or the parent's `disabled`) |
-| Tab      | `aria-controls`   | Always                                                         | The corresponding panel's element id                                                     |
+| Tab      | `aria-controls`   | Always in `mona-tabs`; in `mona-tab-strip`, when the tab has a `panelId` | The corresponding panel's element id: the tab's `panelId`, or the generated id of the panel `mona-tabs` renders |
 | Tab      | `aria-keyshortcuts` | The tab can close, or the strip is `sortable`, and the tab isn't disabled | `"Delete Backspace"` when it can close, then the moves, such as `"Control+Shift+ArrowLeft Control+Shift+ArrowRight Control+Shift+Home Control+Shift+End"` |
 | Panel    | `role`            | Always                                                         | `"tabpanel"`                                                                             |
 | Panel    | `aria-hidden`     | Always                                                         | `"true"` on a kept panel that isn't the active one, otherwise `"false"`                  |
 | Panel    | `aria-labelledby` | Always                                                         | The corresponding tab's element id                                                       |
+
+The panel rows are for `mona-tabs`. With `mona-tab-strip`, the panel is yours: give it `role="tabpanel"` and an `aria-labelledby` naming the selected tab's `tabId`, as in [Tabs whose panels are elsewhere](#tabs-whose-panels-are-elsewhere).
 
 Give the tab list a name with `aria-label` or `aria-labelledby` on `mona-tabs` when the page has more than one set of tabs, or when nothing nearby says what they're for. The inputs go to the tab list, not the host.
 
@@ -267,4 +342,9 @@ A tab list may only contain tabs, and a tab's content is presentational, so a cl
 - [x] Vertical layout constraints verified against tabs.styles.ts position recipes and the left/right overflow detection path (scrollHeight > clientHeight)
 - [x] Form interaction "not applicable" verified: no ControlValueAccessor, NG_VALUE_ACCESSOR provider, formField input, or signal-forms control interface implemented by TabsComponent or TabComponent
 - [x] No internal-only symbols (TabListComponent, TabListItemDirective, TabItem, ScrollIntent, Tailwind class names, data-tab-id/data-selected attributes) documented as public API
+- [x] TabStripComponent inputs/outputs/defaults verified against tab-strip.component.ts (aria-label, aria-labelledby, closable, disabled, look, selectedIndex, size, sortable, tabClose, tabReorder, tabSelect, class); it has no position, keepTabContent or panels, and its template renders only mona-tab-list
+- [x] tabId (default generated, `<id>-tab`) and panelId (default "") on TabComponent verified against tab.component.ts; tab-list.component.html renders `[id]="tab.tabId"` and aria-controls from panelIdOf, which is the named panelId in a strip (absent when empty) and ownPanelId in mona-tabs; tabs.component.html renders the panel with ownPanelId and aria-labelledby tab.tabId; covered by tests/tab-strip.spec.ts and tests/tabs-ids-and-look.spec.ts
+- [x] Tab in a strip not intercepted: handleTabKey returns unless rendersPanels, which only mona-tabs sets; covered by "leaves Tab to the browser"
+- [x] Middle-click verified against tab-list.component.ts's onTabAuxClick (button 1, isTabClosable, preventDefault, emitTabClose with the MouseEvent) and onTabMouseDown (preventDefault on button 1 for a closable tab); covered by the middle-click specs
+- [x] look="pill" verified against tabs.styles.ts: list gap-1 p-1, no strip border, li rounded-md font-medium, selected pill [background-color:var(--mona-tab-pill-background,var(--color-surface-raised))] shadow-(--shadow-raised) with themeSelectionBorderClasses and forced-colors:after:border-[Highlight]; line look unchanged
 -->

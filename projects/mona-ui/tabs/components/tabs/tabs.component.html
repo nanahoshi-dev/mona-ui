@@ -3,7 +3,9 @@
     [aria-labelledby]="ariaLabelledBy()"
     [closable]="closable()"
     [disabled]="disabled()"
+    [look]="look()"
     [position]="position()"
+    [rendersPanels]="true"
     [size]="size()"
     [sortable]="sortable()"
     [tabList]="tabList()"
@@ -22,11 +24,11 @@
                 class="w-full h-full rounded-sm focus-visible:outline-2 focus-visible:outline-focus-indicator focus-visible:-outline-offset-2"
                 [class.hidden]="tabHidden"
                 role="tabpanel"
-                [id]="tab.id + '-panel'"
+                [id]="panelIdOf(tab)"
                 tabindex="0"
                 (keydown)="handlePanelKeyDown($event)"
                 [attr.aria-hidden]="tabHidden"
-                [attr.aria-labelledby]="tab.id + '-tab'">
+                [attr.aria-labelledby]="tab.tabId">
                 <ng-container [ngTemplateOutlet]="tab.contentTemplate"></ng-container>
             </div>
         }

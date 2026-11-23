@@ -27,6 +27,7 @@ import { TABS_DEFAULT_MESSAGES } from "../../i18n/tabs.default-messages";
 import type { ScrollIntent, TabScrollDirection } from "../../models/ScrollIntent";
 import { TabCloseEvent } from "../../models/TabCloseEvent";
 import type { TabItem } from "../../models/TabItem";
+import { ownPanelId } from "../../models/TabItem";
 import { getTabOrientation } from "../../models/TabOrientation";
 import { TabReorderEvent } from "../../models/TabReorderEvent";
 import { TabSelectEvent } from "../../models/TabSelectEvent";
@@ -74,7 +75,7 @@ export class TabListComponent implements TabListVariantInput {
     #focusedTabId: string | null = null;
     #resizeObserver: ResizeObserver | null = null;
     protected readonly baseClass = computed(() => {
-        return tabListBaseThemeVariants({ position: this.position() });
+        return tabListBaseThemeVariants({ look: this.look(), position: this.position() });
     });
     protected readonly closeButtonClass = computed(() => {
         return tabListCloseButtonThemeVariants();
@@ -84,7 +85,7 @@ export class TabListComponent implements TabListVariantInput {
     });
     protected readonly isRtl = computed(() => this.#direction() === "rtl");
     protected readonly listClass = computed(() => {
-        return tabListListThemeVariants({ position: this.position() });
+        return tabListListThemeVariants({ look: this.look(), position: this.position() });
     });
     protected readonly listWrapperClass = computed(() => {
         return tabListListWrapperThemeVariants();
@@ -99,7 +100,7 @@ export class TabListComponent implements TabListVariantInput {
     });
     protected readonly sortableTabs = computed(() => Array.from(this.tabList()));
     protected readonly tabClass = computed(() => {
-        return tabListTabThemeVariants({ position: this.position(), size: this.size() });
+        return tabListTabThemeVariants({ look: this.look(), position: this.position(), size: this.size() });
     });
     protected readonly tabElements = viewChildren<ElementRef<HTMLElement>>("tabElement");
     protected readonly tabListElement = viewChild.required<ElementRef<HTMLUListElement>>("tabListElement");
@@ -108,12 +109,15 @@ export class TabListComponent implements TabListVariantInput {
     public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
     public readonly closable = input(false);
     public readonly disabled = input(false);
+    public readonly look = input<TabListVariantProps["look"]>("line");
 
     /**
      * @description Placement of the tab list relative to the tab content.
      * @default "top"
      */
     public readonly position = input.required<TabListVariantProps["position"]>();
+    /** Whether the parent renders each tab's panel, as `mona-tabs` does. Tab then goes to the selected one. */
+    public readonly rendersPanels = input(false);
     public readonly selectedTabId = model<string | null>(null);
 
     /**
@@ -194,6 +198,14 @@ export class TabListComponent implements TabListVariantInput {
         }
     }
 
+    /** A middle-click closes a tab that can close, as it does a browser's tab. */
+    protected onTabAuxClick(tab: TabItem, event: MouseEvent): void {
+        if (event.button === 1 && this.isTabClosable(tab)) {
+            event.preventDefault();
+            this.emitTabClose(tab, event);
+        }
+    }
+
     protected onTabClick(tab: TabItem, event: MouseEvent): void {
         if (tab.disabled || this.disabled() || tab.id === this.selectedTabId()) {
             return;
@@ -208,8 +220,20 @@ export class TabListComponent implements TabListVariantInput {
         this.emitTabClose(tab, event);
     }
 
+    /** Keeps the middle button from starting to autoscroll, or to paste on Linux, over a tab it's closing. */
+    protected onTabMouseDown(tab: TabItem, event: MouseEvent): void {
+        if (event.button === 1 && this.isTabClosable(tab)) {
+            event.preventDefault();
+        }
+    }
+
     protected onTabMove(event: SortableMoveEvent<TabItem>): void {
         this.tabReorder.emit(new TabReorderEvent(event.previousIndex, event.currentIndex, event.originalEvent));
+    }
+
+    /** The panel a tab controls: the one the parent renders, else the one the consumer named, if any. */
+    protected panelIdOf(tab: TabItem): string | null {
+        return this.rendersPanels() ? ownPanelId(tab) : tab.panelId;
     }
 
     protected startContinuousScroll(event: PointerEvent, element: HTMLElement, direction: TabScrollDirection): void {
@@ -287,14 +311,15 @@ export class TabListComponent implements TabListVariantInput {
         return null;
     }
 
+    /** Moves into the selected tab's panel. A panel the consumer renders may be anywhere, so Tab is left alone there. */
     private handleTabKey(tabs: readonly TabItem[], event: KeyboardEvent): void {
         const selectedTab = tabs.find(t => t.id === this.selectedTabId());
-        if (!selectedTab) {
+        if (!selectedTab || !this.rendersPanels()) {
             return;
         }
         // The root node, because a document lookup finds nothing inside a shadow root.
         const root = this.#hostElement.getRootNode() as Document | ShadowRoot;
-        const panel = root.getElementById(selectedTab.id + "-panel");
+        const panel = root.getElementById(ownPanelId(selectedTab));
         if (panel) {
             event.preventDefault();
             panel.focus();
@@ -326,12 +351,16 @@ export class TabListComponent implements TabListVariantInput {
                 break;
             case "Delete":
             case "Backspace":
-                if (this.isTabEnabled(currentTab) && (currentTab.closable || this.closable())) {
+                if (this.isTabClosable(currentTab)) {
                     event.preventDefault();
                     this.emitTabClose(currentTab, event);
                 }
                 break;
         }
+    }
+
+    private isTabClosable(tab: TabItem): boolean {
+        return this.isTabEnabled(tab) && (tab.closable || this.closable());
     }
 
     private isTabEnabled(tab: TabItem): boolean {
@@ -422,8 +451,11 @@ export class TabListComponent implements TabListVariantInput {
             .subscribe();
     }
 
-    private tabElementOf(tabId: string): HTMLElement | undefined {
-        return this.tabElements().find(tab => tab.nativeElement.id === tabId + "-tab")?.nativeElement;
+    /** The tab element of the tab with this key. Its id is the consumer's to set, so it's found by its list item. */
+    private tabElementOf(id: string): HTMLElement | undefined {
+        return this.tabElements().find(
+            tab => tab.nativeElement.closest("[data-tab-id]")?.getAttribute("data-tab-id") === id
+        )?.nativeElement;
     }
 
     /**
@@ -435,8 +467,8 @@ export class TabListComponent implements TabListVariantInput {
         if (!target) {
             return tabs.find(tab => tab.id === this.selectedTabId());
         }
-        const tabElement = target.closest("[role='tab']");
-        return tabElement ? tabs.find(tab => tab.id + "-tab" === tabElement.id) : undefined;
+        const key = target.closest("[role='tab']")?.closest("[data-tab-id]")?.getAttribute("data-tab-id");
+        return key ? tabs.find(tab => tab.id === key) : undefined;
     }
 
     private updateScrollVisibility(): void {

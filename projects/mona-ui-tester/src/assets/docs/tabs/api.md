@@ -7,6 +7,7 @@ Everything below is imported from `@nanahoshi/mona-ui/tabs`. Each name links to 
 | Name | Kind | Description |
 | --- | --- | --- |
 | [`TabsComponent`](/api/tabs/TabsComponent) | Component |  |
+| [`TabStripComponent`](/api/tabs/TabStripComponent) | Component | Only the tab list of a set of tabs, for when each tab's panel is somewhere else on the page, as with the tabs in a window's titlebar. |
 | [`TabComponent`](/api/tabs/TabComponent) | Component |  |
 | [`TabContentTemplateDirective`](/api/tabs/TabContentTemplateDirective) | Directive |  |
 | [`TabTitleTemplateDirective`](/api/tabs/TabTitleTemplateDirective) | Directive |  |
@@ -16,9 +17,10 @@ Everything below is imported from `@nanahoshi/mona-ui/tabs`. Each name links to 
 
 ### Types
 
-| Type | Kind |
-| --- | --- |
-| [`TABS_DEFAULT_MESSAGES`](/api/tabs/TABS_DEFAULT_MESSAGES) | Constant |
-| [`TabsPosition`](/api/tabs/TabsPosition) | Type alias |
+| Type | Kind | Description |
+| --- | --- | --- |
+| [`TABS_DEFAULT_MESSAGES`](/api/tabs/TABS_DEFAULT_MESSAGES) | Constant |  |
+| [`TabsLook`](/api/tabs/TabsLook) | Type alias | How a tab strip marks the selected tab. |
+| [`TabsPosition`](/api/tabs/TabsPosition) | Type alias |  |
 
 **Related types:** [`MonaTabsMessages`](/api/i18n/MonaTabsMessages), [`PreventableEvent`](/api/common/PreventableEvent)

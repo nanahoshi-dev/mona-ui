@@ -10,9 +10,36 @@ describe("TabListComponent", () => {
     let fixture: ComponentFixture<TabListComponent>;
 
     const makeTabs = () => [
-        { id: "tab1", index: 0, selected: true, title: "Tab 1", closable: true, disabled: false },
-        { id: "tab2", index: 1, selected: false, title: "Tab 2", closable: true, disabled: false },
-        { id: "tab3", index: 2, selected: false, title: "Tab 3", closable: true, disabled: false }
+        {
+            id: "tab1",
+            tabId: "tab1-tab",
+            panelId: null,
+            index: 0,
+            selected: true,
+            title: "Tab 1",
+            closable: true,
+            disabled: false
+        },
+        {
+            id: "tab2",
+            tabId: "tab2-tab",
+            panelId: null,
+            index: 1,
+            selected: false,
+            title: "Tab 2",
+            closable: true,
+            disabled: false
+        },
+        {
+            id: "tab3",
+            tabId: "tab3-tab",
+            panelId: null,
+            index: 2,
+            selected: false,
+            title: "Tab 3",
+            closable: true,
+            disabled: false
+        }
     ];
 
     const flushAsync = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -25,6 +52,7 @@ describe("TabListComponent", () => {
         fixture = TestBed.createComponent(TabListComponent);
         component = fixture.componentInstance;
         fixture.componentRef.setInput("position", "top");
+        fixture.componentRef.setInput("rendersPanels", true);
         fixture.componentRef.setInput("size", "medium");
         fixture.componentRef.setInput("tabList", makeTabs());
         fixture.detectChanges();
@@ -198,9 +226,36 @@ describe("TabListComponent", () => {
 
     it("should skip disabled tabs with ArrowRight", () => {
         fixture.componentRef.setInput("tabList", [
-            { id: "tab1", index: 0, selected: true, title: "Tab 1", closable: true, disabled: false },
-            { id: "tab2", index: 1, selected: false, title: "Tab 2", closable: true, disabled: true },
-            { id: "tab3", index: 2, selected: false, title: "Tab 3", closable: true, disabled: false }
+            {
+                id: "tab1",
+                tabId: "tab1-tab",
+                panelId: null,
+                index: 0,
+                selected: true,
+                title: "Tab 1",
+                closable: true,
+                disabled: false
+            },
+            {
+                id: "tab2",
+                tabId: "tab2-tab",
+                panelId: null,
+                index: 1,
+                selected: false,
+                title: "Tab 2",
+                closable: true,
+                disabled: true
+            },
+            {
+                id: "tab3",
+                tabId: "tab3-tab",
+                panelId: null,
+                index: 2,
+                selected: false,
+                title: "Tab 3",
+                closable: true,
+                disabled: false
+            }
         ]);
         fixture.componentRef.setInput("selectedTabId", "tab1");
         fixture.detectChanges();
@@ -213,9 +268,36 @@ describe("TabListComponent", () => {
 
     it("should skip disabled tabs with ArrowLeft", () => {
         fixture.componentRef.setInput("tabList", [
-            { id: "tab1", index: 0, selected: false, title: "Tab 1", closable: true, disabled: false },
-            { id: "tab2", index: 1, selected: false, title: "Tab 2", closable: true, disabled: true },
-            { id: "tab3", index: 2, selected: true, title: "Tab 3", closable: true, disabled: false }
+            {
+                id: "tab1",
+                tabId: "tab1-tab",
+                panelId: null,
+                index: 0,
+                selected: false,
+                title: "Tab 1",
+                closable: true,
+                disabled: false
+            },
+            {
+                id: "tab2",
+                tabId: "tab2-tab",
+                panelId: null,
+                index: 1,
+                selected: false,
+                title: "Tab 2",
+                closable: true,
+                disabled: true
+            },
+            {
+                id: "tab3",
+                tabId: "tab3-tab",
+                panelId: null,
+                index: 2,
+                selected: true,
+                title: "Tab 3",
+                closable: true,
+                disabled: false
+            }
         ]);
         fixture.componentRef.setInput("selectedTabId", "tab3");
         fixture.detectChanges();
@@ -228,9 +310,36 @@ describe("TabListComponent", () => {
 
     it("should skip a disabled tab at Home", () => {
         fixture.componentRef.setInput("tabList", [
-            { id: "tab1", index: 0, selected: false, title: "Tab 1", closable: true, disabled: true },
-            { id: "tab2", index: 1, selected: false, title: "Tab 2", closable: true, disabled: false },
-            { id: "tab3", index: 2, selected: true, title: "Tab 3", closable: true, disabled: false }
+            {
+                id: "tab1",
+                tabId: "tab1-tab",
+                panelId: null,
+                index: 0,
+                selected: false,
+                title: "Tab 1",
+                closable: true,
+                disabled: true
+            },
+            {
+                id: "tab2",
+                tabId: "tab2-tab",
+                panelId: null,
+                index: 1,
+                selected: false,
+                title: "Tab 2",
+                closable: true,
+                disabled: false
+            },
+            {
+                id: "tab3",
+                tabId: "tab3-tab",
+                panelId: null,
+                index: 2,
+                selected: true,
+                title: "Tab 3",
+                closable: true,
+                disabled: false
+            }
         ]);
         fixture.componentRef.setInput("selectedTabId", "tab3");
         fixture.detectChanges();
@@ -242,9 +351,36 @@ describe("TabListComponent", () => {
 
     it("should skip a disabled tab at End", () => {
         fixture.componentRef.setInput("tabList", [
-            { id: "tab1", index: 0, selected: true, title: "Tab 1", closable: true, disabled: false },
-            { id: "tab2", index: 1, selected: false, title: "Tab 2", closable: true, disabled: false },
-            { id: "tab3", index: 2, selected: false, title: "Tab 3", closable: true, disabled: true }
+            {
+                id: "tab1",
+                tabId: "tab1-tab",
+                panelId: null,
+                index: 0,
+                selected: true,
+                title: "Tab 1",
+                closable: true,
+                disabled: false
+            },
+            {
+                id: "tab2",
+                tabId: "tab2-tab",
+                panelId: null,
+                index: 1,
+                selected: false,
+                title: "Tab 2",
+                closable: true,
+                disabled: false
+            },
+            {
+                id: "tab3",
+                tabId: "tab3-tab",
+                panelId: null,
+                index: 2,
+                selected: false,
+                title: "Tab 3",
+                closable: true,
+                disabled: true
+            }
         ]);
         fixture.componentRef.setInput("selectedTabId", "tab1");
         fixture.detectChanges();
@@ -256,8 +392,26 @@ describe("TabListComponent", () => {
 
     it("should not close a disabled tab with Delete", () => {
         fixture.componentRef.setInput("tabList", [
-            { id: "tab1", index: 0, selected: true, title: "Tab 1", closable: true, disabled: true },
-            { id: "tab2", index: 1, selected: false, title: "Tab 2", closable: true, disabled: false }
+            {
+                id: "tab1",
+                tabId: "tab1-tab",
+                panelId: null,
+                index: 0,
+                selected: true,
+                title: "Tab 1",
+                closable: true,
+                disabled: true
+            },
+            {
+                id: "tab2",
+                tabId: "tab2-tab",
+                panelId: null,
+                index: 1,
+                selected: false,
+                title: "Tab 2",
+                closable: true,
+                disabled: false
+            }
         ]);
         fixture.componentRef.setInput("selectedTabId", "tab1");
         fixture.detectChanges();
@@ -269,8 +423,26 @@ describe("TabListComponent", () => {
 
     it("should not emit any selection when every tab is disabled", () => {
         fixture.componentRef.setInput("tabList", [
-            { id: "tab1", index: 0, selected: true, title: "Tab 1", closable: true, disabled: true },
-            { id: "tab2", index: 1, selected: false, title: "Tab 2", closable: true, disabled: true }
+            {
+                id: "tab1",
+                tabId: "tab1-tab",
+                panelId: null,
+                index: 0,
+                selected: true,
+                title: "Tab 1",
+                closable: true,
+                disabled: true
+            },
+            {
+                id: "tab2",
+                tabId: "tab2-tab",
+                panelId: null,
+                index: 1,
+                selected: false,
+                title: "Tab 2",
+                closable: true,
+                disabled: true
+            }
         ]);
         fixture.componentRef.setInput("selectedTabId", "tab1");
         fixture.detectChanges();
@@ -301,7 +473,16 @@ describe("TabListComponent", () => {
     it("should show the close button when closable is true regardless of per-tab closable value", () => {
         fixture.componentRef.setInput("closable", true);
         fixture.componentRef.setInput("tabList", [
-            { id: "tab1", index: 0, selected: true, title: "Tab 1", closable: false, disabled: false }
+            {
+                id: "tab1",
+                tabId: "tab1-tab",
+                panelId: null,
+                index: 0,
+                selected: true,
+                title: "Tab 1",
+                closable: false,
+                disabled: false
+            }
         ]);
         fixture.componentRef.setInput("selectedTabId", "tab1");
         fixture.detectChanges();

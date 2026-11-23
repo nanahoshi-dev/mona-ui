@@ -1,0 +1,41 @@
+<div class="flex w-[32rem] max-w-full flex-col overflow-hidden rounded-lg border border-border">
+    <!-- A titlebar: the strip shrinks and scrolls, the new-tab button follows it, and the rest is drag space. -->
+    <div class="flex h-12 items-center gap-1 bg-canvas px-2">
+        <mona-tab-strip
+            aria-label="Open folders"
+            look="pill"
+            size="small"
+            closable
+            sortable
+            [(selectedIndex)]="selectedIndex"
+            (tabClose)="close($event)"
+            (tabReorder)="reorder($event)">
+            @for (folder of folders(); track folder.id) {
+                <mona-tab [tabId]="'folder-tab-' + folder.id" panelId="folder-view" [title]="folder.name">
+                    <ng-template monaTabTitleTemplate>
+                        <span class="flex items-center gap-1.5">
+                            <svg lucideFolder aria-hidden="true" [size]="14"></svg>
+                            <span>{{ folder.name }}</span>
+                        </span>
+                    </ng-template>
+                </mona-tab>
+            }
+        </mona-tab-strip>
+        <button monaButton look="ghost" size="small" [iconOnly]="true" aria-label="New tab" (click)="add()">
+            <svg lucidePlus [size]="15"></svg>
+        </button>
+        <div class="h-full min-w-6 flex-1"></div>
+    </div>
+    <div
+        id="folder-view"
+        role="tabpanel"
+        tabindex="0"
+        class="h-32 p-4 text-sm focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus-indicator"
+        [attr.aria-labelledby]="selected() ? 'folder-tab-' + selected()?.id : null">
+        @if (selected(); as folder) {
+            <p>{{ folder.name }} holds {{ folder.items }} items.</p>
+        } @else {
+            <p>No folders are open.</p>
+        }
+    </div>
+</div>

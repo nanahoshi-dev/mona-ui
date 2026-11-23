@@ -49,6 +49,11 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
                 type: "string",
                 value: ""
             },
+            look: {
+                type: "dropdown",
+                value: ["line", "pill"],
+                defaultValue: "line"
+            },
             position: {
                 type: "dropdown",
                 value: ["top", "bottom", "left", "right"],
@@ -87,6 +92,7 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
             [closable]="closable()"
             [disabled]="disabled()"
             [keepTabContent]="keepTabContent()"
+            [look]="look()"
             [position]="position()"
             [(selectedIndex)]="selectedIndex"
             [size]="size()"
@@ -176,6 +182,7 @@ export class TabsWrapperComponent implements ComponentInputsAsSignal<TabsCompone
     public readonly closable = input(false, { transform: booleanAttribute });
     public readonly disabled = input(false, { transform: booleanAttribute });
     public readonly keepTabContent = input(true, { transform: booleanAttribute });
+    public readonly look = input<ReturnType<TabsComponent["look"]>>("line");
     public readonly position = input<ReturnType<TabsComponent["position"]>>("top");
     public readonly selectedIndex = model(0);
     public readonly size = input<ReturnType<TabsComponent["size"]>>("medium");
