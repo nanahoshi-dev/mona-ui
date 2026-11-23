@@ -24,6 +24,19 @@ class SidebarSkeletonHostComponent {
     public readonly showIcon = signal(true);
 }
 
+@Component({
+    template: `
+        <mona-sidebar-layout>
+            <mona-sidebar collapsible="icon">
+                <mona-sidebar-menu-skeleton class="h-7 px-2" />
+            </mona-sidebar>
+            <button monaSidebarTrigger class="trigger">Toggle</button>
+        </mona-sidebar-layout>
+    `,
+    imports: [SidebarLayoutComponent, SidebarComponent, SidebarMenuSkeletonComponent, SidebarTriggerDirective]
+})
+class SidebarDenseSkeletonHostComponent {}
+
 describe("SidebarMenuSkeletonComponent", () => {
     let fixture: ComponentFixture<SidebarSkeletonHostComponent>;
     let component: SidebarSkeletonHostComponent;
@@ -86,6 +99,28 @@ describe("SidebarMenuSkeletonComponent", () => {
         // than the placeholder snapping to a square of its own.
         collapse();
         expect(host.classList.contains("w-full")).toBe(true);
+        expect(host.classList.contains("px-2")).toBe(true);
+        expect(host.classList.contains("gap-8")).toBe(true);
+    });
+
+    it("should let user supplied classes replace its height and padding", () => {
+        // A menu whose buttons are made denser needs its placeholder rows resized to match, without
+        // `!important` overrides fighting the skeleton's own `h-8` and inset.
+        const denseFixture = TestBed.createComponent(SidebarDenseSkeletonHostComponent);
+        denseFixture.detectChanges();
+        const host: HTMLElement = denseFixture.nativeElement.querySelector("mona-sidebar-menu-skeleton");
+
+        expect(host.classList.contains("h-7")).toBe(true);
+        expect(host.classList.contains("h-8")).toBe(false);
+        expect(host.classList.contains("px-2")).toBe(true);
+        expect(host.classList.contains("px-1")).toBe(false);
+        expect(host.classList.contains("overflow-hidden")).toBe(true);
+
+        // The rail state keeps the user's sizing too, rather than snapping back to its own.
+        (denseFixture.nativeElement.querySelector(".trigger") as HTMLElement).click();
+        denseFixture.detectChanges();
+        expect(host.classList.contains("h-7")).toBe(true);
+        expect(host.classList.contains("h-8")).toBe(false);
         expect(host.classList.contains("px-2")).toBe(true);
         expect(host.classList.contains("gap-8")).toBe(true);
     });
