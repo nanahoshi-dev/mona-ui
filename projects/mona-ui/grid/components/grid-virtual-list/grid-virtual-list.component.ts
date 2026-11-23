@@ -10,6 +10,7 @@ import {
     inject,
     Injector,
     input,
+    signal,
     untracked,
     viewChild
 } from "@angular/core";
@@ -32,6 +33,13 @@ import { GridColgroupComponent } from "../grid-colgroup/grid-colgroup.component"
 import { GridFooterRowComponent } from "../grid-footer-row/grid-footer-row.component";
 import { GridGroupRowComponent } from "../grid-group-row/grid-group-row.component";
 import { GridRowComponent } from "../grid-row/grid-row.component";
+
+/**
+ * Rows drawn past each edge of the viewport. When fewer than the first number are left on a side, the viewport draws
+ * up to the second, so scrolling redraws a few rows at a time.
+ */
+const MIN_BUFFER_ROWS = 4;
+const MAX_BUFFER_ROWS = 8;
 
 @Component({
     selector: "mona-grid-virtual-list",
@@ -58,6 +66,7 @@ export class GridVirtualListComponent {
     readonly #groupColumns$ = toObservable(inject(GridService).groupColumns);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
     readonly #injector = inject(Injector);
+    readonly #viewportHeight = signal(0);
     private readonly addRowScrollElementRef = viewChild<ElementRef<HTMLDivElement>>("addRowScrollElement");
     private readonly bodyTableElementRef = viewChild.required<ElementRef<HTMLTableElement>>("bodyTable");
     private readonly footerScrollElementRef = viewChild<ElementRef<HTMLDivElement>>("footerScrollElement");
@@ -80,9 +89,21 @@ export class GridVirtualListComponent {
         () => this.gridService.bodyAriaRowStart() + this.bodyRows().length + 1
     );
     protected readonly gridService = inject(GridService);
+    protected readonly maxBufferPx = computed(() => this.rowHeight() * MAX_BUFFER_ROWS);
+    protected readonly minBufferPx = computed(() => this.rowHeight() * MIN_BUFFER_ROWS);
+    protected readonly rowHeight = computed(
+        () => this.gridService.virtualScrollOptions().height ?? GRID_DEFAULT_VIRTUAL_ROW_HEIGHT
+    );
     protected readonly tableClass = computed(() => {
         return gridListTableThemeVariants();
     });
+    /**
+     * How many row views the list keeps for reuse: every row it can draw at once. Scrolling a page then gives the
+     * views other rows' data, rather than destroying them and building new ones.
+     */
+    protected readonly templateCacheSize = computed(
+        () => Math.ceil(this.#viewportHeight() / this.rowHeight()) + 2 * MAX_BUFFER_ROWS + 2
+    );
     protected readonly viewport = viewChild.required(CdkVirtualScrollViewport);
     public readonly data = input<ImmutableList<Row>>(ImmutableList.create());
 
@@ -106,6 +127,7 @@ export class GridVirtualListComponent {
                 this.gridService.bodyScrollElement.set(bodyScrollElement);
                 this.setRowScroller();
                 this.setScrollEndSubscription();
+                this.setViewportResizeObserver(bodyScrollElement);
                 this.#destroyRef.onDestroy(() => {
                     if (this.gridService.bodyTableElement() === bodyTableElement) {
                         this.gridService.bodyTableElement.set(null);
@@ -175,9 +197,11 @@ export class GridVirtualListComponent {
 
     private setScrollEndSubscription(): void {
         const viewport = this.viewport();
-        viewport.scrolledIndexChange.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            const bottomOffset = viewport.measureScrollOffset("bottom");
-            const itemHeight = this.gridService.virtualScrollOptions().height ?? GRID_DEFAULT_VIRTUAL_ROW_HEIGHT;
+        viewport.scrolledIndexChange.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(index => {
+            // From the first visible row rather than the scroll height: the rows have just changed, and reading
+            // the scroll height would make the browser lay them out again.
+            const itemHeight = this.rowHeight();
+            const bottomOffset = (viewport.getDataLength() - index) * itemHeight - viewport.getViewportSize();
             const threshold = this.gridService.scrollEndThreshold();
             if (bottomOffset <= threshold * itemHeight) {
                 this.gridService.scrollEnd$.next();
@@ -205,5 +229,22 @@ export class GridVirtualListComponent {
                 });
             }
         });
+    }
+
+    /** The viewport measures its height once; a grid that's resized needs it measured again to draw enough rows. */
+    private setViewportResizeObserver(viewportElement: HTMLElement | null): void {
+        if (viewportElement == null) {
+            return;
+        }
+        this.#viewportHeight.set(viewportElement.clientHeight);
+        if (typeof ResizeObserver === "undefined") {
+            return;
+        }
+        const observer = new ResizeObserver(entries => {
+            this.#viewportHeight.set(entries[entries.length - 1]?.contentRect.height ?? 0);
+            this.viewport().checkViewportSize();
+        });
+        observer.observe(viewportElement);
+        this.#destroyRef.onDestroy(() => observer.disconnect());
     }
 }

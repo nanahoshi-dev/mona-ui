@@ -193,8 +193,6 @@ export class GridComponent<T> implements GridVariantInput {
 
     #dragKeySubscription: Subscription | null = null;
 
-    #resizeObserver: ResizeObserver | null = null;
-
     /** The toolbar control that holds its Tab stop; kept by element, so controls added before it don't take it. */
     #toolbarActiveItem: HTMLElement | null = null;
 
@@ -560,12 +558,10 @@ export class GridComponent<T> implements GridVariantInput {
                 this.setInitialCalculatedWidthOfColumns();
                 this.#fitViewInitialScrollbarGutterWidth.set(this.gridService.scrollbarGutterWidth());
                 this.gridWidthSet.set(true);
-                this.setResizeObserver();
                 const stopObservingTabStops = observeGridCellTabStops(this.#hostElementRef.nativeElement);
                 this.#destroyRef.onDestroy(stopObservingTabStops);
             }
         });
-        this.#destroyRef.onDestroy(() => this.#resizeObserver?.disconnect());
     }
 
     protected isColumnDragDisabled(column: Column): boolean {
@@ -1258,17 +1254,6 @@ export class GridComponent<T> implements GridVariantInput {
                 }
             });
         });
-    }
-
-    private setResizeObserver(): void {
-        if (typeof ResizeObserver === "undefined") {
-            return;
-        }
-        this.#resizeObserver = new ResizeObserver(() => {
-            const rect = this.#hostElementRef.nativeElement.getBoundingClientRect();
-            this.gridService.virtualGridMinBuffer.set(rect.height);
-        });
-        this.#resizeObserver.observe(this.#hostElementRef.nativeElement);
     }
 
     private syncToolbarFocusTargets(): void {
