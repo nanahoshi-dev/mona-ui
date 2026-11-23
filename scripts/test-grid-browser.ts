@@ -54,21 +54,32 @@ async function main(): Promise<void> {
             waitUntil: "networkidle"
         });
         const remote = page.locator("#server-binding");
-        await expect(remote.locator("mona-grid")).not.toHaveAttribute("aria-busy", "true");
-        await expect(remote.locator("tbody tr[monaGridRow]")).toHaveCount(10);
-        await expect(remote.locator("tbody tr[monaGridRow]").first()).toHaveAttribute("aria-rowindex", "42");
+        // The element with the grid role carries aria-busy, not the mona-grid host.
+        const remoteGrid = remote.getByRole("grid", { name: "Users from the server", exact: true });
+        const remoteRows = remote.locator("tbody tr[monaGridRow]");
+        await expect(remoteGrid).not.toHaveAttribute("aria-busy", "true");
+        await expect(remoteRows).toHaveCount(10);
+        // Row 1 is the column headers and row 2 the filter row; the 40 rows of earlier pages come next.
+        await expect(remoteGrid).toHaveAttribute("aria-rowcount", "139");
+        await expect(remoteRows.first()).toContainText("User 041");
+        await expect(remoteRows.first()).toHaveAttribute("aria-rowindex", "43");
         await expect(remote.locator("[data-request-count]")).toHaveText("Requests: 1");
         await remote.getByRole("button", { name: "Next page", exact: true }).click();
         await expect(remote.locator("[data-grid-loading]")).toBeVisible();
-        await expect(remote.locator("mona-grid")).not.toHaveAttribute("aria-busy", "true");
+        await expect(remoteGrid).toHaveAttribute("aria-busy", "true");
+        await expect(remoteGrid).not.toHaveAttribute("aria-busy", "true");
         await expect(remote.locator("[data-request-count]")).toHaveText("Requests: 2");
-        await expect(remote.locator("tbody tr[monaGridRow]").first()).toContainText("User 051");
+        await expect(remoteRows.first()).toContainText("User 051");
+        await expect(remoteRows.first()).toHaveAttribute("aria-rowindex", "53");
+        // A new page size keeps the first item of the current page in view: items 51-60 become 41-60.
         await remote.locator("mona-pager").getByRole("combobox").click();
         await page.getByRole("option", { name: "20", exact: true }).click();
-        await expect(remote.locator("mona-grid")).not.toHaveAttribute("aria-busy", "true");
+        await expect(remoteGrid).not.toHaveAttribute("aria-busy", "true");
         await expect(remote.locator("[data-request-count]")).toHaveText("Requests: 3");
-        await expect(remote.locator("tbody tr[monaGridRow]")).toHaveCount(20);
-        await expect(remote.locator("tbody tr[monaGridRow]").first()).toHaveAttribute("aria-rowindex", "2");
+        await expect(remoteRows).toHaveCount(20);
+        await expect(remoteRows.first()).toContainText("User 041");
+        await expect(remoteRows.first()).toHaveAttribute("aria-rowindex", "43");
+        await expect(remoteRows.last()).toHaveAttribute("aria-rowindex", "62");
         const [download] = await Promise.all([
             page.waitForEvent("download"),
             remote.getByRole("button", { name: "Export loaded page", exact: true }).click()
@@ -82,27 +93,28 @@ async function main(): Promise<void> {
             .split("\r\n");
         expect(csv).toHaveLength(21);
         expect(csv[0]).toBe("ID,User");
-        expect(csv[1]).toBe("1,User 001");
+        expect(csv[1]).toBe("41,User 041");
         await remote.locator("th [title='User']").click();
         await expect(remote.locator("[data-request-count]")).toHaveText("Requests: 4");
-        await expect(remote.locator("mona-grid")).not.toHaveAttribute("aria-busy", "true");
+        await expect(remoteGrid).not.toHaveAttribute("aria-busy", "true");
         await remote.locator("mona-grid-filter-row-cell input").last().fill("User 13");
         await expect(remote.locator("[data-request-count]")).toHaveText("Requests: 5");
-        await expect(remote.locator("mona-grid")).not.toHaveAttribute("aria-busy", "true");
-        await expect(remote.locator("tbody tr[monaGridRow]")).toHaveCount(8);
+        await expect(remoteGrid).not.toHaveAttribute("aria-busy", "true");
+        await expect(remoteRows).toHaveCount(8);
 
         await remote.locator("mona-grid-filter-row-cell input").last().fill("No matching user");
         await expect(remote.locator("[data-request-count]")).toHaveText("Requests: 6");
-        await expect(remote.locator("mona-grid")).not.toHaveAttribute("aria-busy", "true");
-        await expect(remote.locator("tbody tr[monaGridRow]")).toHaveCount(0);
-        await expect(remote.locator("mona-grid")).toContainText("No data");
+        await expect(remoteGrid).not.toHaveAttribute("aria-busy", "true");
+        await expect(remoteRows).toHaveCount(0);
+        await expect(remoteGrid).toContainText("No data");
         await expect(remote.locator("mona-pager")).toContainText("0 - 0 of 0 items");
         for (const name of ["First page", "Previous page", "Next page", "Last page"]) {
             await expect(remote.getByRole("button", { name, exact: true })).toBeDisabled();
         }
-        await remote.locator("mona-pager").focus();
-        await page.keyboard.press("End");
-        await page.keyboard.press("PageDown");
+        // The pager takes paging keys from its buttons only; with no pages they don't request anything.
+        for (const key of ["End", "PageDown"]) {
+            await remote.getByRole("button", { name: "Last page", exact: true }).dispatchEvent("keydown", { key });
+        }
         await expect(remote.locator("[data-request-count]")).toHaveText("Requests: 6");
 
         for (const direction of ["ltr", "rtl"]) {
@@ -151,7 +163,7 @@ async function main(): Promise<void> {
             await expect(grid.locator("tr[monaGridDetailRow]")).toHaveCount(0);
             await grid.getByRole("button", { name: "Add user", exact: true }).click();
             await expect(grid.locator("[data-grid-add-row] [data-tall-editor]")).toBeVisible();
-            await grid.getByRole("button", { name: "Cancel row edit", exact: true }).click();
+            await grid.getByRole("button", { name: "Cancel new row", exact: true }).click();
             await expect(grid.locator("[data-grid-add-row]")).toHaveCount(0);
 
             // Locked columns stay pinned to their logical side after scrolling to the far inline end.
