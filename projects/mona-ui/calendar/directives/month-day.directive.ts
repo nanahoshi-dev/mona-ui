@@ -1,5 +1,6 @@
 import { computed, Directive, inject, input, output } from "@angular/core";
 import { formatGregorianDateToLocaleString, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { RippleDirective } from "@nanahoshi/mona-ui/ripple";
 import type { CalendarVariantProps } from "../styles/calendar.styles";
 import { calendarMonthViewDayThemeVariants } from "../styles/calendar.styles";
 import { compareDates, toDayKey } from "../utils/compareDates";
@@ -25,6 +26,7 @@ export type MonthDayRangePart = "end" | "middle" | "start";
  */
 @Directive({
     selector: "[monaMonthDay]",
+    hostDirectives: [RippleDirective],
     host: {
         "[attr.tabindex]": "focused() && !disabled() ? 0 : -1",
         "[attr.aria-current]": "isToday() ? 'date' : null",

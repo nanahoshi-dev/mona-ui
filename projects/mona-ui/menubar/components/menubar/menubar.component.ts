@@ -28,6 +28,7 @@ import {
     PopupMenuShortcutTemplateDirective,
     PopupMenuTextTemplateDirective
 } from "@nanahoshi/mona-ui/popup-menu";
+import { RippleDirective } from "@nanahoshi/mona-ui/ripple";
 import { Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { MenuGroupTemplateDirective } from "../../directives/menu-group-template.directive";
@@ -55,7 +56,8 @@ import { MenuComponent } from "../menu/menu.component";
         PopupMenuTextTemplateDirective,
         PopupMenuIconTemplateDirective,
         PopupMenuShortcutTemplateDirective,
-        PopupMenuGroupTemplateDirective
+        PopupMenuGroupTemplateDirective,
+        RippleDirective
     ],
     host: {
         "[attr.aria-label]": "null",

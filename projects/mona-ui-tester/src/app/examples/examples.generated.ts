@@ -1173,6 +1173,26 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./rating/icons/icons-example.component").then(module => module.RatingIconsExampleComponent),
         mainFile: "icons-example.component.ts"
     },
+    "ripple/buttons": {
+        files: ["buttons-example.component.ts", "buttons-example.component.html"],
+        load: () => import("./ripple/buttons/buttons-example.component").then(module => module.RippleButtonsExampleComponent),
+        mainFile: "buttons-example.component.ts"
+    },
+    "ripple/components": {
+        files: ["components-example.component.ts", "components-example.component.html"],
+        load: () => import("./ripple/components/components-example.component").then(module => module.RippleComponentsExampleComponent),
+        mainFile: "components-example.component.ts"
+    },
+    "ripple/controls": {
+        files: ["controls-example.component.ts", "controls-example.component.html"],
+        load: () => import("./ripple/controls/controls-example.component").then(module => module.RippleControlsExampleComponent),
+        mainFile: "controls-example.component.ts"
+    },
+    "ripple/custom-element": {
+        files: ["custom-element-example.component.ts", "custom-element-example.component.html"],
+        load: () => import("./ripple/custom-element/custom-element-example.component").then(module => module.RippleCustomElementExampleComponent),
+        mainFile: "custom-element-example.component.ts"
+    },
     "scroll-view/arrows-pager": {
         files: ["arrows-pager-example.component.ts", "arrows-pager-example.component.html"],
         load: () => import("./scroll-view/arrows-pager/arrows-pager-example.component").then(module => module.ScrollViewArrowsPagerExampleComponent),

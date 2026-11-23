@@ -14,6 +14,8 @@
 
     <label
         #optionElement
+        monaRipple
+        [monaRippleDisabled]="optionDisabled || readonly()"
         [class]="optionClasses()"
         [attr.data-selected]="selected"
         [attr.data-indicator]="geometryReady() || null"

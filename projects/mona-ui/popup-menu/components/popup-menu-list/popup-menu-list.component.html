@@ -44,6 +44,7 @@
                 [attr.role]="item.checkable ? 'menuitemcheckbox' : item.radio ? 'menuitemradio' : 'menuitem'"
                 [attr.aria-checked]="item.checkable ? !!item.checked?.() : item.radio ? !!item.selected?.() : null"
                 [id]="item.uid"
+                monaRipple
                 (pointerenter)="onItemPointerEnter($event, item)"
                 (click)="onItemClick($event, item)"
                 [attr.data-active]="item === activeMenuItem()"

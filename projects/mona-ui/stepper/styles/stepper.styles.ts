@@ -58,7 +58,7 @@ export const stepperStepListItemThemeVariants = cva(
 
 export const stepperStepIndicatorThemeVariants = cva(
     `
-        flex h-8 w-8 items-center justify-center
+        relative flex h-8 w-8 items-center justify-center
         border border-border cursor-[inherit]
         transition-colors duration-(--mona-motion-standard) ease-in-out
         focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus-indicator

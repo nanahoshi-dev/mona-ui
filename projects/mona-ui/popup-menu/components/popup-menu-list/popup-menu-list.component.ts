@@ -18,6 +18,7 @@ import { LucideCheck, LucideChevronRight } from "@lucide/angular";
 import { createElementControlId, isNavigationKey, isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
 import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import { PopupDataInjectionToken, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
+import { RippleDirective } from "@nanahoshi/mona-ui/ripple";
 import { selectMany } from "@mirei/ts-collections";
 import { fromEvent, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -51,7 +52,7 @@ const SUBMENU_AIM_TOLERANCE = 20;
 
 @Component({
     selector: "mona-popup-menu-list",
-    imports: [NgTemplateOutlet, LucideChevronRight, LucideCheck],
+    imports: [NgTemplateOutlet, LucideChevronRight, LucideCheck, RippleDirective],
     templateUrl: "./popup-menu-list.component.html",
     host: {
         "[class]": "baseClasses()",

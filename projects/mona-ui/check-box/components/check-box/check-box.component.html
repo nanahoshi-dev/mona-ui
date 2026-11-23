@@ -28,7 +28,7 @@
         (focus)="inputFocus.emit($event)"
         #checkBox />
 
-    <span [class]="checkMarkClasses()" [attr.data-invalid]="invalidState() || null" aria-hidden="true">
+    <span [class]="checkMarkClasses()" [attr.data-invalid]="invalidState() || null" aria-hidden="true" #checkMark>
         @if (checked() && !indeterminateState()) {
             <svg
                 xmlns="http://www.w3.org/2000/svg"

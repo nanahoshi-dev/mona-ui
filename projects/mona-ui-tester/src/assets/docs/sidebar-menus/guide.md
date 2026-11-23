@@ -109,6 +109,14 @@ A submenu cannot render in a rail one icon wide, and there's no flyout. While on
 
 `mona-sidebar-menu-skeleton` goes in an item in place of the row's control, laid out exactly like a real row, so the two animate as one. Vary `labelWidth` across a list so the placeholder doesn't look like a rigid grid, and set `[showIcon]="false"` for rows that have no icon.
 
+If you resize the rows, resize the skeleton to match. Its `class` is merged over its own sizing, so the same classes that make a `monaSidebarMenuButton` denser fit the placeholder as well, and nothing shifts when the real rows replace it:
+
+```html
+<li monaSidebarMenuItem>
+    <mona-sidebar-menu-skeleton class="h-7 px-2" />
+</li>
+```
+
 The skeleton is hidden from assistive technology. Mark what's loading on its container instead, with `aria-busy="true"`, and remove it when the rows arrive.
 
 ## Accessibility

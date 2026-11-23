@@ -4,7 +4,7 @@ import { VariantProps } from "class-variance-authority";
 
 export const buttonThemeVariants = cva(
     `
-        inline-flex items-center justify-center gap-2
+        relative inline-flex items-center justify-center gap-2
         cursor-pointer whitespace-nowrap
         text-sm font-medium
         transition-colors duration-100 ease-in-out

@@ -32,6 +32,42 @@ function renderReference(symbols: readonly ApiSymbol[]): string {
 }
 
 describe("readEntryPoint", () => {
+    it("adds what a directive exposes from its host directives, by the name it binds them", () => {
+        const symbols = readSource(`
+            @Directive({ selector: "[monaInner]" })
+            export class InnerDirective {
+                /** @description Turns it off. */
+                public readonly disabled = input(false, { alias: "monaInnerDisabled" });
+                /** @description Not exposed. */
+                public readonly size = input(1);
+                /** @description Fires on a press. */
+                public readonly pressed = output<void>();
+            }
+
+            /** Uses the inner directive. */
+            @Directive({
+                selector: "[monaOuter]",
+                hostDirectives: [
+                    InnerDirective,
+                    { directive: InnerDirective, inputs: ["monaInnerDisabled"], outputs: ["pressed: outerPressed"] }
+                ]
+            })
+            export class OuterDirective {
+                /** @description Its own. */
+                public readonly disabled = input(false);
+            }
+        `);
+        const outer = symbols.find(symbol => symbol.name === "OuterDirective");
+
+        expect(outer?.inputs?.map(input => input.alias ?? input.name)).toEqual(["disabled", "monaInnerDisabled"]);
+        expect(outer?.inputs?.find(input => input.name === "monaInnerDisabled")).toMatchObject({
+            defaultValue: "false",
+            description: "Turns it off."
+        });
+        expect(outer?.outputs?.map(output => output.name)).toEqual(["outerPressed"]);
+        expect(outer?.outputs?.[0].description).toBe("Fires on a press.");
+    });
+
     it("reads a component's selector, inputs, models and outputs", () => {
         const [symbol] = readSource(`
             /** Shows a demo. */

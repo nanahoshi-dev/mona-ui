@@ -1,7 +1,16 @@
-import { ApplicationRef, Component, inject, signal, viewChild, viewChildren } from "@angular/core";
+import {
+    ApplicationRef,
+    Component,
+    type EnvironmentProviders,
+    inject,
+    signal,
+    viewChild,
+    viewChildren
+} from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { provideRipple } from "@nanahoshi/mona-ui/ripple";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ButtonAriaHasPopup } from "../models/ButtonAriaHasPopup";
 import { ButtonService } from "../services/button.service";
 import { ButtonVariantProps } from "../styles/button.styles";
@@ -1118,5 +1127,102 @@ describe("ButtonDirective icon-only accessible name warning", () => {
         const warn = await render("text");
         expect(warn).not.toHaveBeenCalled();
         warn.mockRestore();
+    });
+});
+
+// =============================================================================
+// Ripple Tests
+// =============================================================================
+
+@Component({
+    template: `
+        <button monaButton id="default">Default</button>
+        <button monaButton look="primary" id="primary">Primary</button>
+        <button monaButton look="link" id="link">Link</button>
+        <button monaButton look="clear" id="clear">Clear</button>
+        <button monaButton monaRippleDisabled id="opted-out">Opted out</button>
+        <button monaButton loading id="loading">Loading</button>
+        <button monaButton disabled id="disabled">Disabled</button>
+    `,
+    imports: [ButtonDirective]
+})
+class TestRippleHostComponent {}
+
+describe("ButtonDirective ripple", () => {
+    const animateDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, "animate");
+    let fixture: ComponentFixture<TestRippleHostComponent>;
+    const button = (id: string): HTMLButtonElement => fixture.nativeElement.querySelector(`#${id}`);
+    const rippleLayer = (id: string): Element | null => button(id).querySelector(":scope > span[aria-hidden='true']");
+    const press = (id: string): void => {
+        button(id).dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0, clientX: 4, clientY: 4 }));
+    };
+
+    async function render(providers: EnvironmentProviders[]): Promise<void> {
+        TestBed.configureTestingModule({ imports: [TestRippleHostComponent], providers });
+        fixture = TestBed.createComponent(TestRippleHostComponent);
+        await waitForStable(fixture);
+    }
+
+    beforeEach(() => {
+        Object.defineProperty(Element.prototype, "animate", {
+            configurable: true,
+            writable: true,
+            value: (): Animation => ({ finished: Promise.resolve() }) as unknown as Animation
+        });
+    });
+
+    afterEach(() => {
+        if (animateDescriptor) {
+            Object.defineProperty(Element.prototype, "animate", animateDescriptor);
+        } else {
+            Reflect.deleteProperty(Element.prototype, "animate");
+        }
+    });
+
+    it("should be positioned, so that a ripple layer can cover it", async () => {
+        await render([]);
+        expect(button("default").classList).toContain("relative");
+    });
+
+    it("should let a positioning class win over relative", async () => {
+        TestBed.overrideTemplate(
+            TestRippleHostComponent,
+            `<button monaButton class="absolute" id="default">A</button>`
+        );
+        await render([]);
+        expect(button("default").classList).toContain("absolute");
+        expect(button("default").classList).not.toContain("relative");
+    });
+
+    it("should draw no ripple until ripples are turned on", async () => {
+        await render([]);
+        press("default");
+        expect(rippleLayer("default")).toBeNull();
+    });
+
+    it("should draw a ripple for the looks with a surface once ripples are on", async () => {
+        await render([provideRipple()]);
+        press("default");
+        press("primary");
+        expect(rippleLayer("default")).not.toBeNull();
+        expect(rippleLayer("primary")).not.toBeNull();
+    });
+
+    it("should draw no ripple for the link and clear looks", async () => {
+        await render([provideRipple()]);
+        press("link");
+        press("clear");
+        expect(rippleLayer("link")).toBeNull();
+        expect(rippleLayer("clear")).toBeNull();
+    });
+
+    it("should draw no ripple when turned off on the button, loading or disabled", async () => {
+        await render([provideRipple()]);
+        press("opted-out");
+        press("loading");
+        press("disabled");
+        expect(rippleLayer("opted-out")).toBeNull();
+        expect(rippleLayer("loading")).toBeNull();
+        expect(rippleLayer("disabled")).toBeNull();
     });
 });

@@ -1,5 +1,7 @@
 import { Component, computed, inject, input } from "@angular/core";
+import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { SkeletonComponent } from "@nanahoshi/mona-ui/skeleton";
+import { twMerge } from "tailwind-merge";
 import { SidebarService } from "../../services/sidebar.service";
 import { sidebarMenuSkeletonThemeVariants } from "../../styles/sidebar.styles";
 
@@ -25,7 +27,9 @@ export class SidebarMenuSkeletonComponent {
     readonly #sidebarService = inject(SidebarService, { optional: true });
     // Laid out exactly like a real menu button, so the two animate as one: the same inset centres the
     // icon square on the rail, and the same widened gap carries the label bar out of the clipped box.
-    protected readonly baseClass = computed(() => sidebarMenuSkeletonThemeVariants({ iconOnly: this.iconOnly() }));
+    protected readonly baseClass = computed(() =>
+        twMerge(sidebarMenuSkeletonThemeVariants({ iconOnly: this.iconOnly() }), this.userClass())
+    );
     protected readonly iconOnly = computed(() => this.#sidebarService?.iconOnly() ?? false);
 
     /**
@@ -40,4 +44,15 @@ export class SidebarMenuSkeletonComponent {
      * @default true
      */
     public readonly showIcon = input(true);
+
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`. Give it the
+     * same height and padding as the menu buttons it stands in for when those are restyled, such as
+     * `h-7 px-2` for a denser menu, so the rows don't jump when the real ones arrive.
+     * @default ""
+     */
+    public readonly userClass = input<string, ClassInputType>("", {
+        alias: "class",
+        transform: value => classInputToClass(value)
+    });
 }

@@ -18,7 +18,7 @@
         </span>
     }
 </span>
-<div [class]="handleClasses()" [attr.data-active]="checked()">
+<div [class]="handleClasses()" [attr.data-active]="checked()" #handle>
     @if (handleContentTemplate()) {
         <ng-container
             [ngTemplateOutlet]="handleContentTemplate() ?? null"

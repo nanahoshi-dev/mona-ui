@@ -1,0 +1,18 @@
+<div class="flex flex-col items-start gap-4">
+    <div class="flex flex-wrap items-center gap-3">
+        <button monaButton type="button">Default</button>
+        <button monaButton look="primary" type="button">Primary</button>
+        <button monaButton look="secondary" type="button">Secondary</button>
+        <button monaButton look="ghost" type="button">Ghost</button>
+        <button monaButton look="error" rounded="full" type="button">Delete</button>
+    </div>
+    <mona-button-group aria-label="Clipboard">
+        <button monaButton type="button" [toggleable]="false">Cut</button>
+        <button monaButton type="button" [toggleable]="false">Copy</button>
+        <button monaButton type="button" [toggleable]="false">Paste</button>
+    </mona-button-group>
+    <div class="flex flex-wrap items-center gap-3">
+        <button monaButton look="link" type="button">Link, without a ripple</button>
+        <button monaButton monaRippleDisabled type="button">Turned off</button>
+    </div>
+</div>

@@ -402,6 +402,62 @@ function decoratorOptions(decorator: Decorator): Map<string, string> {
     return options;
 }
 
+/**
+ * The inputs and outputs a component or directive takes on from its host directives. Only those its `hostDirectives`
+ * entry lists count, under the name the entry gives them (`"theirs: ours"`), which is how the template names them.
+ */
+function readHostDirectiveMembers(
+    decorator: Decorator,
+    isPublicClass: IsPublicClass
+): Pick<ApiSymbol, "inputs" | "outputs"> {
+    const inputs: ApiMember[] = [];
+    const outputs: ApiMember[] = [];
+    const argument = decorator.getArguments()[0];
+    const property =
+        argument && Node.isObjectLiteralExpression(argument) ? argument.getProperty("hostDirectives") : undefined;
+    const entries = property && Node.isPropertyAssignment(property) ? property.getInitializer() : undefined;
+    if (!entries || !Node.isArrayLiteralExpression(entries)) {
+        return { inputs, outputs };
+    }
+    const exposedNames = (entry: Node, key: string): string[] => {
+        const list = Node.isObjectLiteralExpression(entry) ? entry.getProperty(key) : undefined;
+        const value = list && Node.isPropertyAssignment(list) ? list.getInitializer() : undefined;
+        return value && Node.isArrayLiteralExpression(value)
+            ? value.getElements().flatMap(item => (Node.isStringLiteral(item) ? [item.getLiteralValue()] : []))
+            : [];
+    };
+    const expose = (members: readonly ApiMember[] | undefined, names: readonly string[], into: ApiMember[]): void => {
+        for (const binding of names) {
+            const [theirs, ours = theirs] = binding.split(":").map(part => part.trim());
+            const member = members?.find(candidate => (candidate.alias ?? candidate.name) === theirs);
+            if (member) {
+                // The member isn't a property of this class, so it goes by the name the template binds.
+                into.push({ ...member, alias: undefined, name: ours });
+            }
+        }
+    };
+    for (const entry of entries.getElements()) {
+        // A bare class in the list exposes nothing.
+        if (!Node.isObjectLiteralExpression(entry)) {
+            continue;
+        }
+        const directive = entry.getProperty("directive");
+        const reference = directive && Node.isPropertyAssignment(directive) ? directive.getInitializer() : undefined;
+        const declaration = reference
+            ?.getType()
+            .getSymbol()
+            ?.getDeclarations()
+            .find((node): node is ClassDeclaration => Node.isClassDeclaration(node));
+        if (!declaration) {
+            continue;
+        }
+        const members = readClassMembers(declaration, isPublicClass);
+        expose(members.inputs, exposedNames(entry, "inputs"), inputs);
+        expose(members.outputs, exposedNames(entry, "outputs"), outputs);
+    }
+    return { inputs, outputs };
+}
+
 /** Reads the context a template directive declares through its static `ngTemplateContextGuard`. */
 function readTemplateContext(declaration: ClassDeclaration): ApiTemplateContext | undefined {
     const guard = declaration.getStaticMethod("ngTemplateContextGuard");
@@ -447,6 +503,8 @@ function readClass(name: string, declaration: ClassDeclaration, isPublicClass: I
         .getImplements()
         .map(item => oneLine(item.getText()))
         .filter(item => FORM_CONTROL_CONTRACT.test(item));
+    const members = readClassMembers(declaration, isPublicClass);
+    const host = angular ? readHostDirectiveMembers(angular, isPublicClass) : { inputs: [], outputs: [] };
     return {
         description: readDoc(declaration).description,
         exportAs: options.get("exportAs"),
@@ -458,7 +516,9 @@ function readClass(name: string, declaration: ClassDeclaration, isPublicClass: I
         selector: options.get("selector"),
         templateContext: readTemplateContext(declaration),
         typeParameters: typeParametersOf(declaration),
-        ...readClassMembers(declaration, isPublicClass)
+        ...members,
+        inputs: byName([...(members.inputs ?? []), ...(host.inputs ?? [])]),
+        outputs: byName([...(members.outputs ?? []), ...(host.outputs ?? [])])
     };
 }
 

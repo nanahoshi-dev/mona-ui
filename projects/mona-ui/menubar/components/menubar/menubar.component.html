@@ -16,6 +16,7 @@
             [attr.data-active]="isOpen"
             [attr.data-mid]="item.uid"
             [id]="item.uid + '-item'"
+            monaRipple
             [attr.tabindex]="disabled() ? -1 : i === activeIndex() ? 0 : -1"
             [attr.role]="'menuitem'"
             [attr.aria-haspopup]="hasItems ? 'menu' : null"

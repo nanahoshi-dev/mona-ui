@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, DestroyRef, inject, input } from "@angular/core";
 import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
+import { RippleDirective } from "@nanahoshi/mona-ui/ripple";
 import { filter, map, Subject, tap } from "rxjs";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";
 import { NodeClickEvent } from "../../models/NodeClickEvent";
@@ -11,7 +12,7 @@ import { treeNodeBaseThemeVariants } from "../../styles/tree.styles";
 
 @Component({
     selector: "mona-tree-node",
-    imports: [NgTemplateOutlet],
+    imports: [NgTemplateOutlet, RippleDirective],
     templateUrl: "./tree-node.component.html"
 })
 export class TreeNodeComponent<T> {

@@ -1,5 +1,6 @@
 import { computed, Directive, inject, input } from "@angular/core";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { RippleDirective } from "@nanahoshi/mona-ui/ripple";
 import { DateTime } from "luxon";
 import { CALENDAR_DEFAULT_MESSAGES } from "../i18n/calendar.default-messages";
 import type { CalendarVariantProps } from "../styles/calendar.styles";
@@ -8,6 +9,7 @@ import { calendarDecadeViewCellThemeVariants } from "../styles/calendar.styles";
 /** One year of the decade view: a grid cell. */
 @Directive({
     selector: "[monaDecadeYear]",
+    hostDirectives: [RippleDirective],
     host: {
         "[attr.tabindex]": "focused() && !disabled() ? 0 : -1",
         "[attr.aria-current]": "isCurrent() ? 'true' : null",

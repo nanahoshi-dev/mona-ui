@@ -1916,6 +1916,20 @@
       }
     ]
   },
+  "RippleDirective": {
+    "name": "RippleDirective",
+    "selector": "\"[monaRipple]\"",
+    "inputs": [
+      {
+        "description": "Turns the ripple off for this element while ripples are on.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "alias": "monaRippleDisabled",
+        "defaultValue": "false"
+      }
+    ]
+  },
   "ScrollViewActivePageDirective": {
     "name": "ScrollViewActivePageDirective",
     "selector": "\"button[monaScrollViewActivePage]\"",
@@ -17987,6 +18001,14 @@
         "name": "showIcon",
         "type": "boolean",
         "defaultValue": "true"
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`. Give it the\nsame height and padding as the menu buttons it stands in for when those are restyled, such as\n`h-7 px-2` for a denser menu, so the rows don't jump when the real ones arrive.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
       }
     ]
   },

@@ -20,6 +20,7 @@ import { RouterLink } from "@angular/router";
 import { LucideCircleX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { RippleDirective } from "@nanahoshi/mona-ui/ripple";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ChipPrefixTemplateDirective } from "../directives/chip-prefix-template.directive";
@@ -46,12 +47,14 @@ const PROJECTED_CONTROL_SELECTOR =
         "[attr.role]": "hostRole()",
         "[attr.aria-checked]": "split() ? null : ariaChecked()",
         "[attr.aria-label]": "split() ? null : ariaLabel() || null"
-    }
+    },
+    hostDirectives: [{ directive: RippleDirective, inputs: ["monaRippleDisabled"] }]
 })
 export class ChipComponent implements ChipVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #i18n = inject(MonaI18nService);
+    readonly #ripple = inject(RippleDirective, { self: true });
     readonly #routerLink = inject(RouterLink, { optional: true });
 
     protected readonly ariaChecked = computed(() => {
@@ -225,6 +228,8 @@ export class ChipComponent implements ChipVariantInputs {
     public readonly value = input<unknown>();
 
     public constructor() {
+        // Only a chip that does something when pressed, a toggle or a link, ripples.
+        this.#ripple.setHostDisabled(computed(() => !this.bodyInteractive()));
         afterNextRender({
             read: () => {
                 this.#setSubscriptions();

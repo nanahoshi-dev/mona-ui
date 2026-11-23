@@ -93,6 +93,12 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                     )
                 ]
             },
+            guide(
+                "ripple",
+                "Ripple",
+                "Turn on a ripple that spreads from where a button is pressed, and add it to your own elements.",
+                "ripple"
+            ),
             guide("forms", "Forms", "Connect Mona UI controls to Angular signal forms.")
         ]
     },

@@ -75,6 +75,7 @@
         "./query": "./query/public-api.ts",
         "./radio-button": "./radio-button/public-api.ts",
         "./rating": "./rating/public-api.ts",
+        "./ripple": "./ripple/public-api.ts",
         "./scroll-view": "./scroll-view/public-api.ts",
         "./segmented": "./segmented/public-api.ts",
         "./separator": "./separator/public-api.ts",

@@ -1,10 +1,12 @@
 import { computed, Directive, input } from "@angular/core";
+import { RippleDirective } from "@nanahoshi/mona-ui/ripple";
 import type { StepState } from "../models/Step";
 import type { StepperVariantProps } from "../styles/stepper.styles";
 import { stepperStepIndicatorThemeVariants } from "../styles/stepper.styles";
 
 @Directive({
     selector: "button[monaStepperIndicator]",
+    hostDirectives: [RippleDirective],
     host: {
         "[class]": "stepIndicatorClass()"
     }

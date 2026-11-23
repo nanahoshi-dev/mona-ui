@@ -30,9 +30,16 @@ interface SourceMember {
     readonly required: boolean;
 }
 
+/** A `hostDirectives` entry: the directive, and the bindings it exposes as `"theirs"` or `"theirs: ours"`. */
+interface SourceHostDirective {
+    readonly bindings: readonly string[];
+    readonly className: string;
+}
+
 interface SourceClass {
     readonly baseClass?: string;
     readonly className: string;
+    readonly hostDirectives?: readonly SourceHostDirective[];
     readonly members: readonly SourceMember[];
     readonly selector: string;
 }
@@ -166,7 +173,36 @@ describe("Leaf component documentation", () => {
             if (!metadata || !ts.isObjectLiteralExpression(metadata)) {
                 return undefined;
             }
-            return { ...readMembers(node, node.name.text), selector: readSelector(metadata) };
+            return {
+                ...readMembers(node, node.name.text),
+                hostDirectives: readHostDirectives(metadata),
+                selector: readSelector(metadata)
+            };
+        };
+
+        const readHostDirectives = (metadata: Ts.ObjectLiteralExpression): SourceHostDirective[] => {
+            const property = metadata.properties.find(candidate => candidate.name?.getText() === "hostDirectives");
+            if (!property || !ts.isPropertyAssignment(property) || !ts.isArrayLiteralExpression(property.initializer)) {
+                return [];
+            }
+            const read = (entry: Ts.ObjectLiteralExpression, key: string): Ts.Expression | undefined => {
+                const found = entry.properties.find(candidate => candidate.name?.getText() === key);
+                return found && ts.isPropertyAssignment(found) ? found.initializer : undefined;
+            };
+            // A bare class in the list exposes nothing.
+            return property.initializer.elements.filter(ts.isObjectLiteralExpression).flatMap(entry => {
+                const directive = read(entry, "directive");
+                if (!directive) {
+                    return [];
+                }
+                const bindings = ["inputs", "outputs"].flatMap(key => {
+                    const list = read(entry, key);
+                    return list && ts.isArrayLiteralExpression(list)
+                        ? list.elements.filter(ts.isStringLiteral).map(item => item.text)
+                        : [];
+                });
+                return [{ bindings, className: directive.getText() }];
+            });
         };
 
         const readSelector = (metadata: Ts.ObjectLiteralExpression): string => {
@@ -243,6 +279,17 @@ describe("Leaf component documentation", () => {
                     }
                 }
                 base = base.baseClass ? allClasses.get(base.baseClass) : undefined;
+            }
+            // What a host directive exposes is bound on this class's element, by the name the entry gives it.
+            for (const hostDirective of source.hostDirectives ?? []) {
+                const directive = allClasses.get(hostDirective.className);
+                for (const binding of hostDirective.bindings) {
+                    const [theirs, ours = theirs] = binding.split(":").map(part => part.trim());
+                    const member = directive?.members.find(candidate => candidate.name === theirs);
+                    if (member && !members.some(candidate => candidate.name === ours)) {
+                        members.push({ ...member, name: ours });
+                    }
+                }
             }
             return { ...source, members };
         };
