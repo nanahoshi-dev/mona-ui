@@ -4,6 +4,7 @@
 | :--- | :--- | :--- |
 | Detail rows | `monaGridDetailTemplate` inside `mona-grid` | `[(expandedKeys)]` on the grid |
 | Row reordering | `monaGridRowReorderable` | `rowReorder` with the reordered data |
+| Row activation | A double-click on a data row, or `Enter` on one of its cells | `rowActivate` on the grid |
 | Row classes | `rowClass` on the grid | — |
 | Row height | Cell templates and editors | — |
 
@@ -71,6 +72,29 @@ protected readonly productLabel = (row: Record<PropertyKey, unknown>): string =>
 
 A row that can't move shows a disabled handle.
 
+### Opening Rows
+
+`rowActivate` reports a data row the user opens, the way a file list opens an item: a double-click on the row, or `Enter` on one of its cells. It carries the row's item from `data` as `rowData`, the same object, and the double-click or key press as `originalEvent`, so a modified one such as `Alt+Enter` can do something else.
+
+```html
+<mona-grid aria-label="Files" rowKey="path" [data]="files()" (rowActivate)="onRowActivate($event)">
+    <mona-grid-column field="name" title="Name"></mona-grid-column>
+    <mona-grid-column field="modified" title="Date modified" type="date"></mona-grid-column>
+</mona-grid>
+```
+
+```typescript
+protected onRowActivate(event: GridRowActivateEvent<FileEntry>): void {
+    if (event.originalEvent instanceof KeyboardEvent && event.originalEvent.altKey) {
+        this.showProperties(event.rowData);
+        return;
+    }
+    this.open(event.rowData);
+}
+```
+
+Import `type GridRowActivateEvent` from `@nanahoshi/mona-ui/grid`. The grid reports every activation without a directive, with `monaGridVirtualScroll` too; which keys and clicks count is under [Row activation](#row-activation).
+
 ### Row Classes
 
 `rowClass` returns classes for each data row from its item, such as a muted row for a cancelled order:
@@ -119,6 +143,17 @@ Import `GridCellTemplateDirective` from `@nanahoshi/mona-ui/grid` and `AvatarCom
 
 The detail toggle sits in its own column at the start of the grid. `expandedKeys` holds the `rowKey` values of the expanded rows, or the data items when the grid has no `rowKey`; `expandedKeysChange` reports the rows people open and close. Detail rows aren't supported with `monaGridVirtualScroll`, whose rows share one height: the grid ignores the template there and warns in development mode. While detail rows exist, `aria-rowcount` is `-1`, since the grid can't know how many rows the details add.
 
+### Row activation
+
+Only data rows activate: header, group, group footer, add and detail rows don't. `Enter` keeps every meaning it already had, and activates the row only from a cell where it has none:
+
+1. On the detail toggle, it opens or closes the detail row.
+2. On an editable cell, it starts the edit, and with row editing (`mode: "row"`) so does any data cell. In cell mode a double-click on an editable cell edits it too, and doesn't activate the row even when the `edit` event is prevented.
+3. On a cell with controls, such as a button in a cell template, it moves into them.
+4. On any other cell of the row, it activates the row.
+
+A double-click on a control inside a cell (a button, link, field, label or editable text) is the control's, and so is one whose default a handler already prevented, such as `(dblclick)="$event.preventDefault()"` in a cell template. Nothing activates while an edit is open. A double-click starts with two clicks, so with `monaGridSelectable` and `selectOnRowClick` the row is selected as usual, then activated.
+
 ### Row reordering
 
 The handle sits in a column of its own, the first in the grid, and rows move only by that handle. The consumer owns the order: `rowReorder` carries the complete reordered data, and the grid never changes `data`. Row order is application data and isn't stored in `GridState`.
@@ -134,6 +169,7 @@ A row's handle is a button named after the row (`reorderRow`, or `rowAriaLabel`)
 | Key | Action |
 | --- | --- |
 | `Enter` / `Alt+ArrowDown` | On a row's detail toggle cell, expands or collapses its detail row. |
+| `Enter` | On any other cell of a data row where it doesn't edit or move into the cell's controls, activates the row (`rowActivate`). |
 | `Alt+ArrowUp` / `Alt+ArrowDown` | On a reorder handle, moves the row up/down one place. Focus stays on the handle, so the row can keep moving. |
 
 The rest of the grid's keys are on [Grid Overview](/components/grid#keyboard).

@@ -79,6 +79,12 @@ While `loading` is true, the body shows a localized loading indicator, keeps the
 
 `height` in the options defaults to **36px** and must be finite and greater than zero. It sets the rendered height and the virtual item size of every row, group header and group footer, and templates taller than it are clipped. Variable-height virtualization isn't provided. Ordinary rows, by contrast, fit their content, see [Rows](/components/grid-rows#rows-that-fit-their-content).
 
+### Large data in virtual scrolling
+
+The grid draws the rows in view and four to eight more on each side, and moves the same row elements to the rows scrolled to instead of building new ones. It measures the viewport again whenever the grid is resized.
+
+Data that keeps the items it had and adds more after them, such as `[...files(), ...nextBatch]` after `scrollEnd`, keeps its rows: the grid only reads the new items, so a batch costs about the same however many rows are already loaded. An item keeps its row while it's the same object with the same `rowKey` value, so to change an item that's already loaded in the same update, give a new object for it. Data that removes, reorders or replaces items, or gives the same items again, is read again in full.
+
 ### Features with virtual scrolling
 
 While virtual scrolling is on, the grid shows no pager and no aggregate footer, and ignores detail rows. Selection's `selectAllScope: "page"` covers the whole view, since there are no pages. `Ctrl+End` scrolls to the last row before moving focus there.

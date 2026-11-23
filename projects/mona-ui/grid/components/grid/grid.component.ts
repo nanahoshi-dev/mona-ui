@@ -72,6 +72,7 @@ import type { ColumnResizeEvent } from "../../models/ColumnResizeEvent";
 import { ColumnSortEvent } from "../../models/ColumnSortEvent";
 import { GRID_COLUMN_DEFINITION, type GridColumnDefinition } from "../../models/GridColumnDefinition";
 import type { GridKeySelector } from "../../models/GridKeySelector";
+import type { GridRowActivateEvent } from "../../models/GridRowActivateEvent";
 import type { GridRowClass } from "../../models/GridRowClass";
 import type { GridToolbarContext, GridToolbarTemplateContext } from "../../models/GridToolbarTemplateContext";
 import { ResizeMethod } from "../../models/ResizeMethod";
@@ -191,8 +192,6 @@ export class GridComponent<T> implements GridVariantInput {
     #dragCancelled = false;
 
     #dragKeySubscription: Subscription | null = null;
-
-    #resizeObserver: ResizeObserver | null = null;
 
     /** The toolbar control that holds its Tab stop; kept by element, so controls added before it don't take it. */
     #toolbarActiveItem: HTMLElement | null = null;
@@ -488,6 +487,14 @@ export class GridComponent<T> implements GridVariantInput {
     public readonly rounded = input<GridVariantProps["rounded"]>("medium");
 
     /**
+     * @description Emitted when the user activates a data row, the way a file list opens an item: by
+     * double-clicking it, or by pressing `Enter` on one of its cells where the key has no other use. Editing,
+     * moving into a cell's controls and opening a detail row keep `Enter`. Not emitted for header, group, group
+     * footer, detail or add rows, for a double-click on a control inside a cell, or while an edit is open.
+     */
+    public readonly rowActivate = output<GridRowActivateEvent<T>>();
+
+    /**
      * @description Returns extra CSS classes for the data row that shows an item, merged onto the row's own
      * classes via `tailwind-merge`. It runs again whenever the item's row is rebound.
      * Group, group footer and detail rows are not affected.
@@ -525,6 +532,9 @@ export class GridComponent<T> implements GridVariantInput {
             untracked(() => this.gridService.setColumnDefinitions(columns));
         });
         effect(() => this.gridService.rowClass.set(this.rowClass() as GridRowClass<unknown> | null));
+        this.gridService.rowActivate$
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => this.rowActivate.emit(event as GridRowActivateEvent<T>));
         this.setPageSizeEffect();
         this.setPagingEffects();
         this.setGridDetailEffect();
@@ -548,12 +558,10 @@ export class GridComponent<T> implements GridVariantInput {
                 this.setInitialCalculatedWidthOfColumns();
                 this.#fitViewInitialScrollbarGutterWidth.set(this.gridService.scrollbarGutterWidth());
                 this.gridWidthSet.set(true);
-                this.setResizeObserver();
                 const stopObservingTabStops = observeGridCellTabStops(this.#hostElementRef.nativeElement);
                 this.#destroyRef.onDestroy(stopObservingTabStops);
             }
         });
-        this.#destroyRef.onDestroy(() => this.#resizeObserver?.disconnect());
     }
 
     protected isColumnDragDisabled(column: Column): boolean {
@@ -1246,17 +1254,6 @@ export class GridComponent<T> implements GridVariantInput {
                 }
             });
         });
-    }
-
-    private setResizeObserver(): void {
-        if (typeof ResizeObserver === "undefined") {
-            return;
-        }
-        this.#resizeObserver = new ResizeObserver(() => {
-            const rect = this.#hostElementRef.nativeElement.getBoundingClientRect();
-            this.gridService.virtualGridMinBuffer.set(rect.height);
-        });
-        this.#resizeObserver.observe(this.#hostElementRef.nativeElement);
     }
 
     private syncToolbarFocusTargets(): void {

@@ -1229,6 +1229,12 @@
     "selector": "\"td[monaGridLogicalCell], th[monaGridLogicalCell]\"",
     "inputs": [
       {
+        "description": "Emits the key press when `Enter` on the cell has no other use: it doesn't expand, sort, edit, or\nmove into the cell's controls.",
+        "kind": "output",
+        "name": "activate",
+        "type": "KeyboardEvent"
+      },
+      {
         "description": "The cell's `aria-colindex` when it isn't its column's place in the layout, as for a group\nrow's title cell, which follows the group's indents.",
         "kind": "input",
         "name": "ariaColIndex",
@@ -13007,6 +13013,12 @@
           "large"
         ],
         "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Emitted when the user activates a data row, the way a file list opens an item: by\ndouble-clicking it, or by pressing `Enter` on one of its cells where the key has no other use. Editing,\nmoving into a cell's controls and opening a detail row keep `Enter`. Not emitted for header, group, group\nfooter, detail or add rows, for a double-click on a control inside a cell, or while an edit is open.",
+        "kind": "output",
+        "name": "rowActivate",
+        "type": "GridRowActivateEvent<T>"
       },
       {
         "description": "Returns extra CSS classes for the data row that shows an item, merged onto the row's own\nclasses via `tailwind-merge`. It runs again whenever the item's row is rebound.\nGroup, group footer and detail rows are not affected.\n\nTo dim a row, prefer a text style such as `text-muted-foreground` over `opacity`: locked cells stay\nopaque so scrolled cells pass beneath them, and opacity on the row or its cells would let those show through.",

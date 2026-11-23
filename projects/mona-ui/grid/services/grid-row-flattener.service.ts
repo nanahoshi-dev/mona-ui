@@ -70,10 +70,20 @@ export class GridRowFlattenerService {
     }
 
     /**
-     * Wraps ungrouped rows as data view rows, so grouped and ungrouped bodies render from the same shape.
+     * Wraps ungrouped rows as data view rows, so grouped and ungrouped bodies render from the same shape. A row in
+     * the same place in `previous` keeps its view row, so data that grows at the end only wraps the new rows.
      */
-    public toDataRows(rows: Iterable<Row>): GridViewDataRow[] {
-        return Array.from(rows, row => this.#createDataRow(row, 0, null));
+    public toDataRows(rows: Iterable<Row>, previous: readonly GridViewRow[] = []): GridViewDataRow[] {
+        const dataRows: GridViewDataRow[] = [];
+        for (const row of rows) {
+            const kept = previous[dataRows.length];
+            dataRows.push(
+                kept?.type === "data" && kept.row === row && kept.groupKey === null && kept.depth === 0
+                    ? kept
+                    : this.#createDataRow(row, 0, null)
+            );
+        }
+        return dataRows;
     }
 
     #createDataRow(row: Row, depth: number, groupKey: string | null): GridViewDataRow {

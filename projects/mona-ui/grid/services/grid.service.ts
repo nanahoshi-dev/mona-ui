@@ -57,6 +57,7 @@ import type { GridEditFormContext } from "../models/GridEditFormContext";
 import type { GridEditSession } from "../models/GridEditSession";
 import type { GridViewRow } from "../models/GridGroup";
 import { GridKeySelector } from "../models/GridKeySelector";
+import type { GridRowActivateEvent } from "../models/GridRowActivateEvent";
 import type { GridRowClass } from "../models/GridRowClass";
 import type { GridLayoutColumn } from "../models/GridLayoutColumn";
 import type { GridRangePasteChange, GridRangePasteEvent } from "../models/GridRangePasteEvent";
@@ -105,6 +106,23 @@ import {
 // $rowId is injected to carry the row identity without modifying Row.data.
 interface RowEditDataItem extends Record<string, unknown> {
     readonly $rowId: string;
+}
+
+/**
+ * What `setRows` read from flat data, so that data which only adds items at the end keeps the rows it has and reads
+ * just the new items.
+ */
+interface GridRowState {
+    duplicateKey: boolean;
+    /** The items read, in order, and each one's `rowKey` value. */
+    readonly items: Record<PropertyKey, unknown>[];
+    readonly keys: unknown[];
+    /** How many times each repeated row identity has been seen. */
+    readonly occurrences: Map<string, number>;
+    readonly rowKey: GridKeySelector<unknown> | null;
+    rows: ImmutableList<Row>;
+    /** What each row's identity was made from, so a repeated one is found without hashing the identity strings. */
+    readonly seen: Set<unknown>;
 }
 
 interface GridEditSessionOptions extends GridEditFormContext {
@@ -299,11 +317,14 @@ export class GridService {
     #groupRequest: readonly GroupDescriptor[] = [];
     /** The selection last loaded from the `selectedKeys` input, so its echo isn't reported as a user change. */
     #loadedSelectedKeys: ImmutableSet<unknown> | null = null;
+    /** The ungrouped body rows built last; rows still in the same place keep theirs. */
+    #previousDataRows: readonly GridViewRow[] = [];
     /** The data and key last given to `setRows`, so a change to the tree options can read the data again. */
     #rowSource: {
         readonly data: Iterable<Record<PropertyKey, unknown>>;
         readonly rowKey: GridKeySelector<unknown>;
     } | null = null;
+    #rowState: GridRowState | null = null;
     public readonly add$ = new Subject<GridAddEvent>();
     public readonly addRowData = computed(() => {
         const session = this.#editSession();
@@ -587,6 +608,7 @@ export class GridService {
     public readonly renderedBodyRowCount = signal(0);
     public readonly reorderableOptions = this.#reorderableOptions.asReadonly();
     public readonly resizableOptions = this.#resizableOptions.asReadonly();
+    public readonly rowActivate$ = new Subject<GridRowActivateEvent>();
     public readonly rowClass = signal<GridRowClass<unknown> | null>(null);
     public readonly rowDragInProgress = computed(() => this.draggingRowUid() != null);
     public readonly rowEdit$ = new Subject<RowEditEvent>();
@@ -765,11 +787,7 @@ export class GridService {
         if (this.serverBindingEnabled()) {
             return rows;
         }
-        let queryEnumerable = Query.from(rows, { locale: this.#i18n.localeId() });
-        for (const filter of this.getFilterDescriptors()) {
-            queryEnumerable = queryEnumerable.filter(filter, r => r.data);
-        }
-
+        const filters = this.getFilterDescriptors();
         // One sort: the group fields first, then the column sorts, so the groups keep their order.
         const groupSorts = this.getGroupDescriptors(this.groupColumns()).map<SortDescriptor>(d => ({
             field: d.field,
@@ -777,11 +795,17 @@ export class GridService {
         }));
         const groupFields = new Set(groupSorts.map(sort => sort.field));
         const columnSorts = this.#sortDescriptors().filter(sort => !groupFields.has(sort.field));
+        if (filters.length === 0 && groupSorts.length === 0 && columnSorts.length === 0) {
+            // Nothing to filter or sort: the rows are the view, without copying them.
+            return rows;
+        }
+        let queryEnumerable = Query.from(rows, { locale: this.#i18n.localeId() });
+        for (const filter of filters) {
+            queryEnumerable = queryEnumerable.filter(filter, r => r.data);
+        }
         queryEnumerable = queryEnumerable.sort([...groupSorts, ...columnSorts], r => r.data);
         return ImmutableList.create(queryEnumerable.run());
     });
-    public readonly virtualGridMaxBuffer = computed(() => this.virtualGridMinBuffer() * 1.42857);
-    public readonly virtualGridMinBuffer = signal(0);
     public readonly virtualScrollOptions = signal<VirtualScrollOptions>({
         enabled: false,
         height: GRID_DEFAULT_VIRTUAL_ROW_HEIGHT
@@ -797,6 +821,14 @@ export class GridService {
         this.#scrollbarGutterWidth.set(this.measureFallbackScrollbarGutter());
         this.setHorizontalScrollSyncEffects();
         this.setScrollbarGutterEffects();
+    }
+
+    /** Reports that the user activated a data row. Not while an edit is open, whose keys and clicks are its own. */
+    public activateRow(row: Row, originalEvent: KeyboardEvent | MouseEvent): void {
+        if (this.isInEditMode()) {
+            return;
+        }
+        this.rowActivate$.next({ originalEvent, rowData: row.data });
     }
 
     public addGroupColumn(column: Column): void {
@@ -1028,7 +1060,9 @@ export class GridService {
     public createBodyRows(rows: Iterable<Row>): GridViewRow[] {
         const groupColumns = this.groupColumns();
         if (groupColumns.length === 0) {
-            return this.#rowFlattener.toDataRows(rows);
+            const dataRows = this.#rowFlattener.toDataRows(rows, this.#previousDataRows);
+            this.#previousDataRows = dataRows;
+            return dataRows;
         }
         return this.#rowFlattener.flatten(
             rows,
@@ -2004,33 +2038,44 @@ export class GridService {
         this.selectedKeys.update(keys => keys.remove(key));
     }
 
+    /**
+     * Wraps the data items in rows. Flat data that keeps the items read last time and adds more at the end, as a
+     * list that loads in pages does, keeps its rows: only the new items are read.
+     */
     public setRows(
         value: Iterable<Record<PropertyKey, unknown>>,
         rowKey: GridKeySelector<unknown> | null = null
     ): void {
         this.#rowSource = { data: value, rowKey };
-        const occurrences = new Map<string, number>();
-        let duplicateKey = false;
+        const children = this.#treeOptions()?.children ?? null;
+        if (children == null && Array.isArray(value) && this.appendRows(value, rowKey)) {
+            return;
+        }
+        const state: GridRowState = {
+            duplicateKey: false,
+            items: [],
+            keys: [],
+            occurrences: new Map(),
+            rowKey,
+            rows: ImmutableList.create(),
+            seen: new Set()
+        };
         const rows: Row[] = [];
         const parents = new Map<string, string | null>();
-        const children = this.#treeOptions()?.children ?? null;
-        // The items on the path from the root, so an item that contains itself can't loop forever.
-        const path = new Set<Record<PropertyKey, unknown>>();
-        const addRows = (items: Iterable<Record<PropertyKey, unknown>>, parentUid: string | null): void => {
-            for (const data of items) {
-                if (path.has(data)) {
-                    continue;
-                }
-                const uid = this.getRowUid(data, rowKey);
-                const occurrence = (occurrences.get(uid) ?? 0) + 1;
-                occurrences.set(uid, occurrence);
-                if (occurrence > 1 && rowKey) {
-                    duplicateKey = true;
-                }
-                // A repeated item or key still gets its own row identity, so rendering and editing never collide.
-                const row = new Row(data, occurrence === 1 ? uid : `${uid}#${occurrence}`);
-                rows.push(row);
-                if (children != null) {
+        if (children == null) {
+            for (const data of value) {
+                rows.push(this.readRow(data, state, true));
+            }
+        } else {
+            // The items on the path from the root, so an item that contains itself can't loop forever.
+            const path = new Set<Record<PropertyKey, unknown>>();
+            const addRows = (items: Iterable<Record<PropertyKey, unknown>>, parentUid: string | null): void => {
+                for (const data of items) {
+                    if (path.has(data)) {
+                        continue;
+                    }
+                    const row = this.readRow(data, state, false);
+                    rows.push(row);
                     parents.set(row.uid, parentUid);
                     const childItems = getTreeChildren(data, children);
                     if (childItems != null) {
@@ -2039,17 +2084,15 @@ export class GridService {
                         path.delete(data);
                     }
                 }
-            }
-        };
-        addRows(value, null);
-        if (duplicateKey && isDevMode()) {
-            console.warn(
-                "mona-grid: several rows have the same rowKey value. Selection, editing and detail rows " +
-                    "follow the key, so give every row a unique key."
-            );
+            };
+            addRows(value, null);
         }
+        this.warnDuplicateKeys(state);
         this.#treeParents.set(parents);
-        this.rows.set(ImmutableList.create(rows));
+        state.rows = ImmutableList.create(rows);
+        // A tree's rows depend on more than the items' order, so only flat data is appended to.
+        this.#rowState = children == null ? state : null;
+        this.rows.set(state.rows);
     }
 
     public setScrollEndThreshold(threshold: number): void {
@@ -2308,6 +2351,48 @@ export class GridService {
         if (message) {
             void this.#liveAnnouncer.announce(message, "polite");
         }
+    }
+
+    /**
+     * Reads only the new items when `items` start with the items read last time, each with the same `rowKey` value,
+     * and add more. Returns false otherwise, for the caller to read them all: the same items given again are read
+     * again, so a field changed in place shows.
+     */
+    private appendRows(
+        items: readonly Record<PropertyKey, unknown>[],
+        rowKey: GridKeySelector<unknown> | null
+    ): boolean {
+        const state = this.#rowState;
+        if (
+            state == null ||
+            state.rowKey !== rowKey ||
+            state.rows !== this.rows() ||
+            items.length <= state.items.length
+        ) {
+            return false;
+        }
+        const readCount = state.items.length;
+        for (let index = 0; index < readCount; index++) {
+            if (items[index] !== state.items[index]) {
+                return false;
+            }
+        }
+        if (rowKey) {
+            // An item whose key changed needs a new row identity.
+            for (let index = 0; index < readCount; index++) {
+                if (!Object.is(this.getRowUidKey(items[index], rowKey), state.keys[index])) {
+                    return false;
+                }
+            }
+        }
+        const rows: Row[] = [];
+        for (let index = readCount; index < items.length; index++) {
+            rows.push(this.readRow(items[index], state, true));
+        }
+        this.warnDuplicateKeys(state);
+        state.rows = state.rows.addAll(rows);
+        this.rows.set(state.rows);
+        return true;
     }
 
     private applyColumnIndexes(columns: readonly Column[]): Column[] {
@@ -2573,8 +2658,7 @@ export class GridService {
         return this.getRowDataItemSelectionKey(row.data);
     }
 
-    private getRowUid(data: Record<PropertyKey, unknown>, rowKey: GridKeySelector<unknown> | null): string {
-        const key = this.getRowUidKey(data, rowKey);
+    private getRowUid(data: Record<PropertyKey, unknown>, key: unknown): string {
         if (key != null) {
             if (typeof key === "object" || typeof key === "function") {
                 const cachedKeyUid = this.#rowUidByKeyObject.get(key);
@@ -2638,6 +2722,30 @@ export class GridService {
         const unlockedColumns = groupedColumns.filter(column => this.getColumnLockBucket(column) === "unlocked");
         const rightLockedColumns = groupedColumns.filter(column => this.getColumnLockBucket(column) === "right");
         return [...leftLockedColumns, ...unlockedColumns, ...rightLockedColumns];
+    }
+
+    /** Wraps an item in a row; a repeated item or key still gets its own identity, so rows never collide. */
+    private readRow(data: Record<PropertyKey, unknown>, state: GridRowState, flat: boolean): Row {
+        const key = this.getRowUidKey(data, state.rowKey);
+        const uid = this.getRowUid(data, key);
+        // Two keys give the same identity only when they're equal, except symbols with the same description.
+        const source = key == null ? data : typeof key === "symbol" ? uid : key;
+        const seenCount = state.seen.size;
+        state.seen.add(source);
+        let rowUid = uid;
+        if (state.seen.size === seenCount) {
+            const occurrence = (state.occurrences.get(uid) ?? 1) + 1;
+            state.occurrences.set(uid, occurrence);
+            rowUid = `${uid}#${occurrence}`;
+            if (state.rowKey) {
+                state.duplicateKey = true;
+            }
+        }
+        if (flat) {
+            state.items.push(data);
+            state.keys.push(key);
+        }
+        return new Row(data, rowUid);
     }
 
     private reconcileColumn(config: ColumnConfig, previous: Column | undefined): Column {
@@ -2911,6 +3019,15 @@ export class GridService {
             this.announceInvalid(session);
         }
         return valid;
+    }
+
+    private warnDuplicateKeys(state: GridRowState): void {
+        if (state.duplicateKey && isDevMode()) {
+            console.warn(
+                "mona-grid: several rows have the same rowKey value. Selection, editing and detail rows " +
+                    "follow the key, so give every row a unique key."
+            );
+        }
     }
 
     private withColumnIndices(columns: readonly Column[]): Column[] {

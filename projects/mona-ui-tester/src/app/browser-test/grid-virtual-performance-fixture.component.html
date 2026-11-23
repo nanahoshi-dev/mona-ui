@@ -1,0 +1,30 @@
+<main class="p-4">
+    <h1 class="sr-only">Virtual grid performance</h1>
+    <div class="mb-2 flex gap-2">
+        <button type="button" data-bench="prepare-replace" (click)="prepareReplace()">Prepare 50,000 rows</button>
+        <button type="button" data-bench="prepare-clear" (click)="prepareClear()">Prepare no rows</button>
+        <button type="button" data-bench="prepare-append" (click)="prepareAppend()">Prepare 1,000 more rows</button>
+        <button type="button" data-bench="apply" (click)="apply()">Apply prepared rows</button>
+        <span data-bench-count>{{ files().length }}</span>
+    </div>
+    @if (mode === "cdk") {
+        <cdk-virtual-scroll-viewport data-bench-viewport itemSize="28" style="height: 1108px">
+            <div *cdkVirtualFor="let file of files()" class="flex h-7 items-center">
+                <div class="w-80 truncate">{{ file.name }}</div>
+                <div class="w-48 truncate">{{ file.modified }}</div>
+                <div class="w-32 truncate">{{ file.size }}</div>
+            </div>
+        </cdk-virtual-scroll-viewport>
+    } @else {
+        <mona-grid
+            aria-label="Files"
+            rowKey="path"
+            style="height: 1145px"
+            [data]="files()"
+            [monaGridVirtualScroll]="{ height: 28 }">
+            <mona-grid-column field="name" title="Name" />
+            <mona-grid-column field="modified" title="Date modified" />
+            <mona-grid-column field="size" title="Size" />
+        </mona-grid>
+    }
+</main>

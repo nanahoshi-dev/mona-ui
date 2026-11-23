@@ -14,13 +14,19 @@
 
 <cdk-virtual-scroll-viewport
     class="flex-1 min-h-0"
-    [itemSize]="gridService.virtualScrollOptions().height"
-    [minBufferPx]="gridService.virtualGridMinBuffer()"
-    [maxBufferPx]="gridService.virtualGridMaxBuffer()">
+    [itemSize]="rowHeight()"
+    [minBufferPx]="minBufferPx()"
+    [maxBufferPx]="maxBufferPx()">
     <table role="presentation" #bodyTable [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
         <colgroup monaGridColgroup></colgroup>
         <tbody role="rowgroup" #bodyElement>
-            <ng-container *cdkVirtualFor="let bodyRow of bodyRows(); let rowIndex = index; trackBy: trackBodyRow">
+            <ng-container
+                *cdkVirtualFor="
+                    let bodyRow of bodyRows();
+                    let rowIndex = index;
+                    trackBy: trackBodyRow;
+                    templateCacheSize: templateCacheSize()
+                ">
                 @let ariaRowIndex = gridService.bodyAriaRowStart() + rowIndex + 1;
                 @if (bodyRow.type === "group") {
                     <tr monaGridGroupRow [group]="bodyRow" [rowIndex]="rowIndex" [ariaRowIndex]="ariaRowIndex"></tr>
