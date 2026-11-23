@@ -717,6 +717,13 @@ export const routes: Routes = [
             import("./browser-test/direction-geometry-fixture.component").then(m => m.DirectionGeometryFixtureComponent)
     },
     {
+        path: "browser-test/grid-virtual-performance",
+        loadComponent: () =>
+            import("./browser-test/grid-virtual-performance-fixture.component").then(
+                m => m.GridVirtualPerformanceFixtureComponent
+            )
+    },
+    {
         path: "browser-test/popup-scroll",
         loadComponent: () =>
             import("./browser-test/popup-scroll-fixture.component").then(m => m.PopupScrollFixtureComponent)
