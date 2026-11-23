@@ -12,6 +12,12 @@ Chips that toggle, tabs and list items ripple too:
 ripple/components
 ```
 
+Check boxes, radio buttons and switches are too small for a wave inside them, so they draw a halo around the box, the circle or the handle. The switch's halo slides across with its handle:
+
+```example
+ripple/controls
+```
+
 ## Turn Ripples On
 
 Add `provideRipple()` to your application's providers:
@@ -30,12 +36,18 @@ export const appConfig: ApplicationConfig = {
 
 These then draw one when pressed:
 
-| Component                    | Ripples                                                                                                                                                  |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Buttons                      | Every look but `link` and `clear`, which have no surface to draw it on. That includes the buttons of button groups, dropdown buttons and split buttons. |
-| Chips                        | A chip that toggles or is a link. A chip that only shows a value does nothing when pressed, so it doesn't ripple.                                        |
-| Tabs                         | Every tab but a disabled one.                                                                                                                            |
-| List items                   | The items of List Box, List View, and the popups of Dropdown List, Combo Box, Auto Complete and Multi Select, when they can be selected or navigated.   |
+| Component                               | Ripples                                                                                                                                                                                                               |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Buttons                                 | Every look but `link` and `clear`, which have no surface to draw it on. That includes the buttons of button groups, dropdown buttons and split buttons.                                                               |
+| Chips                                   | A chip that toggles or is a link. A chip that only shows a value does nothing when pressed, so it doesn't ripple.                                                                                                     |
+| Tabs                                    | Every tab but a disabled one.                                                                                                                                                                                         |
+| List items                              | The items of List Box, List View, and the popups of Dropdown List, Combo Box, Auto Complete and Multi Select, when they can be selected or navigated.                                                                 |
+| Menus                                   | The items of popup menus, context menus and menubars, and the menus of a menubar.                                                                                                                                     |
+| Tree View                               | Every node but a disabled one.                                                                                                                                                                                        |
+| Calendar                                | The days, months and years of Calendar and of the date pickers' calendars, except the dates that can't be picked.                                                                                                     |
+| Stepper                                 | The indicator of every step that can be reached. A step drawn by `monaStepperStepTemplate` looks as the template draws it, so it doesn't ripple.                                                                      |
+| Segmented                               | Every option but a disabled one.                                                                                                                                                                                      |
+| Check boxes, radio buttons and switches | A halo around the box, the circle or the handle, unless the control is disabled or read-only. The `monaCheckbox` and `monaRadioButton` directives style a native input, which can't hold a ripple, so they have none. |
 
 A press on a control inside one of these, such as a chip's remove button, a tab's close button, or a button in a list item's template, belongs to that control, so the item around it doesn't ripple. `provideRipple({ enabled: false })` keeps ripples off, for example behind a setting.
 
@@ -55,13 +67,14 @@ import { RIPPLE_OPTIONS } from "@nanahoshi/mona-ui/ripple";
 export class ToolbarComponent {}
 ```
 
-### One Button or Chip
+### One Component
 
-`monaRippleDisabled` turns the ripple off for one button or chip:
+`monaRippleDisabled` turns the ripple off for one button, chip, check box, radio button or switch:
 
 ```html
 <button monaButton monaRippleDisabled>Save</button>
 <mona-chip label="Archived" toggleable monaRippleDisabled></mona-chip>
+<mona-switch aria-label="Sync" monaRippleDisabled></mona-switch>
 ```
 
 ## Your Own Elements
@@ -74,7 +87,7 @@ ripple/custom-element
 
 The wave covers the element's padding box, in its corner radius, over its background and under its content. For that, the first press gives the element `isolation: isolate`, and makes it `relative` if its position is `static`. If the element's position can change later, set one with a class yourself, as the tiles above do with `relative`.
 
-Mona UI's buttons and chips already have the directive. Don't add `monaRipple` to one: Angular doesn't allow a directive on an element twice. As on Mona UI's own components, a press on a button, link or form field inside the element doesn't make it ripple.
+Mona UI's buttons, chips, check boxes, radio buttons and switches already have the directive. Don't add `monaRipple` to one: Angular doesn't allow a directive on an element twice. As on Mona UI's own components, a press on a button, link or form field inside the element doesn't make it ripple, unless the element is that field's `<label>`.
 
 ## Customize It
 
@@ -86,7 +99,7 @@ Three tokens set how the ripple looks and moves. It has its own timing rather th
 | `--mona-ripple-duration`      | `450ms` | How long the wave takes to spread.                         |
 | `--mona-ripple-fade-duration` | `300ms` | How long it takes to fade, once it has finished spreading. |
 
-The wave starts moving at once and slows as it spreads, so a press shows straight away even at a longer duration. Set the tokens in your styles, for the whole page or for one element:
+The wave starts moving at once and slows as it spreads, so a press shows straight away even at a longer duration. A halo takes the same tokens, reaches 10px past its control's edges, and is drawn in the theme's text color, since a checked box's own color is the one on its fill. Set the tokens in your styles, for the whole page or for one element:
 
 ```css
 :root {
@@ -103,4 +116,4 @@ The ripple is decoration, so nothing changes for assistive technology:
 - There's no ripple with the system's reduced motion setting. The pressed background still shows the press.
 - There's no ripple in forced colors, where it would paint as a solid block.
 - Keyboard presses draw none. The focus indicator already shows where they act.
-- Disabled, `aria-disabled` and loading buttons draw none.
+- Disabled and read-only components draw none, and neither do `aria-disabled` elements and loading buttons.

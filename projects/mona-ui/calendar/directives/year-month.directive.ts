@@ -1,5 +1,6 @@
 import { computed, Directive, inject, input } from "@angular/core";
 import { formatGregorianDateToLocaleString, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { RippleDirective } from "@nanahoshi/mona-ui/ripple";
 import { DateTime } from "luxon";
 import type { CalendarVariantProps } from "../styles/calendar.styles";
 import { calendarYearViewCellThemeVariants } from "../styles/calendar.styles";
@@ -7,6 +8,7 @@ import { calendarYearViewCellThemeVariants } from "../styles/calendar.styles";
 /** One month of the year view: a grid cell named by the long month and the year ("November 2026"). */
 @Directive({
     selector: "[monaYearMonth]",
+    hostDirectives: [RippleDirective],
     host: {
         "[attr.tabindex]": "focused() && !disabled() ? 0 : -1",
         "[attr.aria-current]": "isCurrent() ? 'date' : null",

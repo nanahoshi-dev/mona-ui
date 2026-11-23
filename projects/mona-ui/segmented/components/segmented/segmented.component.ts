@@ -20,6 +20,7 @@ import {
 import type { FormValueControl } from "@angular/forms/signals";
 import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import { createElementControlId, injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
+import { RippleDirective } from "@nanahoshi/mona-ui/ripple";
 import { twMerge } from "tailwind-merge";
 import { SegmentedItemTemplateDirective } from "../../directives/segmented-item-template.directive";
 import type { SegmentedIndicatorGeometry } from "../../models/SegmentedIndicatorGeometry";
@@ -38,7 +39,7 @@ import {
 @Component({
     selector: "mona-segmented",
     templateUrl: "./segmented.component.html",
-    imports: [NgTemplateOutlet],
+    imports: [NgTemplateOutlet, RippleDirective],
     host: {
         "[attr.aria-disabled]": "effectiveDisabled() || undefined",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",

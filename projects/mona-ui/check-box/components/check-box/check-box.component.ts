@@ -4,6 +4,7 @@ import {
     Component,
     computed,
     ElementRef,
+    inject,
     input,
     linkedSignal,
     model,
@@ -22,9 +23,11 @@ import {
     CheckmarkVariantProps
 } from "../../styles/checkbox.styles";
 import { createElementControlId, injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
+import { RippleDirective } from "@nanahoshi/mona-ui/ripple";
 
 @Component({
     selector: "mona-check-box",
+    hostDirectives: [{ directive: RippleDirective, inputs: ["monaRippleDisabled"] }],
     imports: [NgTemplateOutlet],
     templateUrl: "./check-box.component.html",
     host: {
@@ -54,6 +57,7 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
         const rounded = this.rounded();
         return checkmarkThemeVariants({ rounded });
     });
+    protected readonly checkMarkRef = viewChild<ElementRef<HTMLSpanElement>>("checkMark");
     protected readonly containerLabelClasses = computed(() => {
         const labelSize = this.labelSize();
         const classes = this.userClass();
@@ -208,6 +212,13 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
      * @default ""
      */
     public readonly userClass = input<string>("", { alias: "class" });
+
+    public constructor() {
+        const ripple = inject(RippleDirective, { self: true });
+        // A press anywhere on the check box toggles it, unless it can't change, and the box is too small for a wave.
+        ripple.setHostDisabled(computed(() => this.effectiveDisabled() || this.readonly()));
+        ripple.setHalo(() => this.checkMarkRef()?.nativeElement);
+    }
 
     /**
      * Toggles the check box when a label pointing at it through `[for]` is clicked.

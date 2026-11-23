@@ -8,7 +8,7 @@ export const checkmarkThemeVariants = cva(
     `
         relative flex items-center justify-center
         h-4.5 w-4.5 ps-0.25
-        cursor-pointer overflow-hidden
+        cursor-pointer
         ${themeControlSurfaceClasses}
         border border-input-border
         outline-none focus-visible:outline-hidden

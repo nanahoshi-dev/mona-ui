@@ -6,11 +6,11 @@ Everything below is imported from `@nanahoshi/mona-ui/ripple`.
 
 **Selector:** `[monaRipple]`
 
-Draws a ripple when the element is pressed. Mona UI's buttons apply it themselves.
+Draws a ripple when the element is pressed. Mona UI's buttons and the other components people press apply it themselves.
 
-| Input                | Type      | Default | Description                                                                          |
-| -------------------- | --------- | ------- | ------------------------------------------------------------------------------------ |
-| `monaRippleDisabled` | `boolean` | `false` | Turns the ripple off for this element while ripples are on. Buttons take it as well. |
+| Input                | Type      | Default | Description                                                                                                                          |
+| -------------------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `monaRippleDisabled` | `boolean` | `false` | Turns the ripple off for this element while ripples are on. Buttons, chips, check boxes, radio buttons and switches take it as well. |
 
 ### Providers
 

@@ -25,7 +25,7 @@ export const radioButtonThemeVariants = cva(
 export const radioButtonCircleThemeVariants = cva(
     `
         relative flex h-4.5 w-4.5 items-center justify-center
-        cursor-pointer overflow-hidden
+        cursor-pointer
         ${themeControlSurfaceClasses}
         border border-input-border
         transition-colors duration-(--mona-motion-fast)

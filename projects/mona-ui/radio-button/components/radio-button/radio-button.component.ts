@@ -24,9 +24,11 @@ import {
 } from "../../styles/radio.styles";
 import { createElementControlId, injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
 import { MONA_RADIO_GROUP } from "../../models/RadioGroupContext";
+import { RippleDirective } from "@nanahoshi/mona-ui/ripple";
 
 @Component({
     selector: "mona-radio-button",
+    hostDirectives: [{ directive: RippleDirective, inputs: ["monaRippleDisabled"] }],
     imports: [FormsModule, NgTemplateOutlet],
     templateUrl: "./radio-button.component.html",
     host: {
@@ -48,6 +50,7 @@ export class RadioButtonComponent<T = unknown> implements RadioButtonVariantInpu
         focus: () => this.focus(),
         wrapped: false
     });
+    protected readonly circleRef = viewChild<ElementRef<HTMLSpanElement>>("circle");
     protected readonly containerLabelClasses = computed(() => {
         const labelSize = this.labelSize();
         const userClasses = this.userClass();
@@ -221,6 +224,11 @@ export class RadioButtonComponent<T = unknown> implements RadioButtonVariantInpu
     public readonly value = model<T>(undefined as T);
 
     public constructor() {
+        const ripple = inject(RippleDirective, { self: true });
+        // A press anywhere on the radio button selects it, unless it can't change, and the circle is too small for a
+        // wave.
+        ripple.setHostDisabled(computed(() => this.effectiveDisabled() || this.effectiveReadonly()));
+        ripple.setHalo(() => this.circleRef()?.nativeElement);
         const group = this.#group;
         if (group) {
             afterRenderEffect({

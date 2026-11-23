@@ -1,5 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { provideRipple } from "../providers/ripple.providers";
 import { RippleDirective } from "./ripple.directive";
@@ -14,6 +15,13 @@ class RippleHostComponent {
     public readonly ariaDisabled = signal<string | null>(null);
     public readonly disabled = signal(false);
 }
+
+@Component({
+    template: `<div monaRipple id="halo-host"><span id="box">Box</span><span>Label</span></div>
+        <label monaRipple id="option"><input type="radio" id="own" /></label>`,
+    imports: [RippleDirective]
+})
+class RippleHaloHostComponent {}
 
 interface AnimateCall {
     readonly keyframes: Keyframe[];
@@ -119,6 +127,7 @@ describe("RippleDirective", () => {
         expect(layer?.classList).toContain("-z-1");
         expect(layer?.classList).toContain("forced-colors:hidden");
         expect(layer?.classList).toContain("in-[.cdk-drag-preview]:hidden");
+        expect(layer?.classList).toContain("in-[.cdk-drag-placeholder]:hidden");
 
         const [wave] = waves(host);
         // The pointer is at (20, 10) in the layer, so the farthest corner is (100, 40), 85.44px away.
@@ -257,6 +266,67 @@ describe("RippleDirective", () => {
         const fixture = await createHost(true);
         press(hostElement(fixture));
         expect(container(hostElement(fixture))).toBeNull();
+    });
+
+    it("draws a press on the control a label is for as a press on the label", async () => {
+        TestBed.configureTestingModule({ imports: [RippleHaloHostComponent], providers: [provideRipple()] });
+        const fixture = TestBed.createComponent(RippleHaloHostComponent);
+        fixture.detectChanges();
+        const label = fixture.nativeElement.querySelector("#option") as HTMLLabelElement;
+        press(label.querySelector("#own") as HTMLElement);
+
+        expect(waves(label)).toHaveLength(1);
+    });
+
+    describe("as a halo", () => {
+        let fixture: ComponentFixture<RippleHaloHostComponent>;
+        let box: HTMLSpanElement;
+        let host: HTMLDivElement;
+
+        beforeEach(() => {
+            TestBed.configureTestingModule({ imports: [RippleHaloHostComponent], providers: [provideRipple()] });
+            fixture = TestBed.createComponent(RippleHaloHostComponent);
+            fixture.detectChanges();
+            host = fixture.nativeElement.querySelector("#halo-host");
+            box = host.querySelector("#box") as HTMLSpanElement;
+            const directive = fixture.debugElement.query(By.css("#halo-host")).injector.get(RippleDirective);
+            directive.setHalo(() => box);
+        });
+
+        it("draws it in the control, centred on it, reaching past its edges", () => {
+            press(host.querySelector("span:last-child") as HTMLElement);
+
+            const layer = container(box);
+            expect(layer?.classList).toContain("start-1/2");
+            expect(layer?.classList).toContain("top-1/2");
+            expect(layer?.classList).toContain("text-foreground");
+            expect(layer?.classList).not.toContain("overflow-hidden");
+            expect(container(host)).toBeNull();
+
+            // The box is 100 by 40, so the halo reaches 10px past its longer side.
+            const [wave] = waves(box);
+            expect(wave.style.width).toBe("120px");
+            expect(wave.style.height).toBe("120px");
+            expect(wave.style.translate).toBe("-60px -60px");
+            expect(animateCalls[0].keyframes).toEqual([{ scale: 0 }, { scale: 1 }]);
+        });
+
+        it("positions the control rather than the host, and isolates the host", () => {
+            press(host);
+
+            expect(box.style.position).toBe("relative");
+            expect(host.style.position).toBe("");
+            expect(host.style.isolation).toBe("isolate");
+        });
+
+        it("fades it when the host is let go", async () => {
+            press(host);
+            host.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+            await settle();
+
+            expect(waves(box)).toHaveLength(0);
+            expect(animateCalls[1].keyframes).toEqual([{ opacity: 1 }, { opacity: 0 }]);
+        });
     });
 
     it("stops listening once destroyed", async () => {

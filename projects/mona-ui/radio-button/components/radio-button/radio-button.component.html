@@ -23,7 +23,7 @@
         (click)="onInputClick($event)"
         (focus)="inputFocus.emit($event)"
         (change)="onSelectionChange()" />
-    <span [class]="radioButtonCircleClasses()" [attr.data-invalid]="invalidState() || null">
+    <span [class]="radioButtonCircleClasses()" [attr.data-invalid]="invalidState() || null" #circle>
         @if (selected()) {
             <span [class]="radioButtonIndicatorClasses()"></span>
         }

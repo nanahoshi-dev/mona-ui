@@ -1,0 +1,17 @@
+<div class="flex flex-col items-start gap-5">
+    <div class="flex flex-col gap-2">
+        <mona-check-box label="Email me about replies" [(checked)]="replies"></mona-check-box>
+        <mona-check-box label="Email me about mentions" [(checked)]="mentions"></mona-check-box>
+    </div>
+    <div class="flex flex-col items-start gap-2">
+        <mona-label text="Digest" [for]="digestGroup" />
+        <mona-radio-group #digestGroup [(value)]="digest">
+            <mona-radio-button label="Daily" radioValue="daily" />
+            <mona-radio-button label="Weekly" radioValue="weekly" />
+        </mona-radio-group>
+    </div>
+    <mona-label text="Pause notifications">
+        <mona-switch [(checked)]="paused" />
+    </mona-label>
+    <mona-segmented aria-label="Theme" [options]="themes" [(value)]="theme" />
+</div>

@@ -44,7 +44,7 @@ export const calendarHeaderThemeVariants = cva(
 
 export const calendarMonthViewDayThemeVariants = cva(
     `
-        cursor-pointer
+        relative cursor-pointer
         hover:bg-hover active:bg-active
     `,
     {
@@ -130,7 +130,7 @@ export const calendarYearViewGridThemeVariants = cva(
 
 export const calendarYearViewCellThemeVariants = cva(
     `
-        cursor-pointer py-2
+        relative cursor-pointer py-2
         hover:bg-hover active:bg-active
     `,
     {
@@ -159,7 +159,7 @@ export const calendarDecadeViewGridThemeVariants = cva(
 
 export const calendarDecadeViewCellThemeVariants = cva(
     `
-        cursor-pointer py-2
+        relative cursor-pointer py-2
         hover:bg-hover active:bg-active
     `,
     {

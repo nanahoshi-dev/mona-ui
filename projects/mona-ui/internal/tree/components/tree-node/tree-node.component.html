@@ -1,4 +1,10 @@
-<div [class]="baseClass()" (click)="onNodeClick($event)" (contextmenu)="onNodeContextMenu()" #element>
+<div
+    monaRipple
+    [monaRippleDisabled]="disabled()"
+    [class]="baseClass()"
+    (click)="onNodeClick($event)"
+    (contextmenu)="onNodeContextMenu()"
+    #element>
     @if (treeService.nodeTemplate()) {
         <ng-container
             [ngTemplateOutlet]="treeService.nodeTemplate()"

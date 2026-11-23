@@ -12,7 +12,8 @@ import {
     model,
     numberAttribute,
     output,
-    TemplateRef
+    TemplateRef,
+    viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormCheckboxControl } from "@angular/forms/signals";
@@ -29,9 +30,11 @@ import {
     SwitchVariantProps
 } from "../../styles/switch.styles";
 import { injectEffectiveDisabled, injectLabelAssociation } from "@nanahoshi/mona-ui/internal";
+import { RippleDirective } from "@nanahoshi/mona-ui/ripple";
 
 @Component({
     selector: "mona-switch",
+    hostDirectives: [{ directive: RippleDirective, inputs: ["monaRippleDisabled"] }],
     templateUrl: "./switch.component.html",
     styles: [
         `
@@ -118,6 +121,7 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
     protected readonly handleContentTemplate = contentChild(SwitchHandleContentTemplateDirective, {
         read: TemplateRef
     });
+    protected readonly handleRef = viewChild<ElementRef<HTMLDivElement>>("handle");
     protected readonly invalidState = computed(
         () => this.touched() && (this.invalid() || (this.required() && !this.checked()))
     );
@@ -231,6 +235,10 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {
+        const ripple = inject(RippleDirective, { self: true });
+        // The halo is drawn in the handle, so it slides across with it when the press toggles the switch.
+        ripple.setHostDisabled(computed(() => this.effectiveDisabled() || this.readonly()));
+        ripple.setHalo(() => this.handleRef()?.nativeElement);
         afterNextRender({
             read: () => this.#setEventListeners()
         });

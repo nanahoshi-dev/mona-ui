@@ -12,7 +12,7 @@ import {
     type Signal,
     signal
 } from "@angular/core";
-import { rippleContainerClasses, rippleWaveClasses } from "../styles/ripple.styles";
+import { rippleContainerClasses, rippleHaloContainerClasses, rippleWaveClasses } from "../styles/ripple.styles";
 import { RIPPLE_OPTIONS } from "../tokens/ripple.tokens";
 import { parseCssTime } from "../utils/parse-css-time";
 
@@ -35,6 +35,8 @@ const RELEASE_EVENTS = ["pointercancel", "pointerleave", "pointerup"] as const;
  */
 const NESTED_CONTROL_SELECTOR =
     "a[href], button, input, select, textarea, [contenteditable='true'], [role='button'], [role='link']";
+/** How far a halo reaches past each edge of the control it is drawn around. */
+const HALO_REACH = 10;
 
 interface RippleDurations {
     readonly fade: number;
@@ -44,8 +46,8 @@ interface RippleDurations {
 /**
  * @description
  * Draws a ripple when the element is pressed: a wave in its text color that spreads from the pointer, stays while the
- * element is held and fades once it is let go. Mona UI's buttons apply it themselves. It draws nothing until ripples
- * are turned on with `provideRipple()`.
+ * element is held and fades once it is let go. Mona UI's buttons and other pressable components apply it themselves.
+ * It draws nothing until ripples are turned on with `provideRipple()`.
  *
  * The wave covers the element's padding box, over its background and under its content. For that, the first press
  * gives the element `isolation: isolate`, and makes it `relative` if its position is `static`. The wave spreads over
@@ -54,7 +56,8 @@ interface RippleDurations {
  *
  * There is no ripple on a disabled or `aria-disabled` element, with the system's reduced motion setting, or in forced
  * colors. Keyboard presses have none either: the focus indicator already shows where they act. Nor does a press on a
- * control inside the element, such as a button or a link, which belongs to that control.
+ * control inside the element, such as a button or a link, which belongs to that control, unless the element is the
+ * `<label>` of that control.
  */
 @Directive({
     selector: "[monaRipple]"
@@ -64,6 +67,7 @@ export class RippleDirective {
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #options = inject(RIPPLE_OPTIONS);
     #container: HTMLSpanElement | null = null;
+    #haloTarget: () => HTMLElement | null | undefined = () => null;
     #hostDisabled: Signal<boolean> = signal(false);
 
     /**
@@ -85,6 +89,17 @@ export class RippleDirective {
     }
 
     /**
+     * Draws the ripple as a halo around a control inside the element, such as a check box's box, which is too small to
+     * show a wave inside it. The halo spreads from the control's centre, reaches past its edges and is drawn under it,
+     * in the control itself, so it moves with the control, such as a switch's handle. The control must not clip what
+     * overflows it, and its position is made `relative` if it is `static`.
+     * @hidden Used by Mona UI's own components.
+     */
+    public setHalo(target: () => HTMLElement | null | undefined): void {
+        this.#haloTarget = target;
+    }
+
+    /**
      * Lets a component that applies this directive as a host directive turn the ripple off, such as a button whose look
      * has no surface to draw it on.
      * @hidden Used by Mona UI's own components.
@@ -98,7 +113,9 @@ export class RippleDirective {
             return false;
         }
         const control = event.target instanceof Element ? event.target.closest(NESTED_CONTROL_SELECTOR) : null;
-        if (control && control !== host && host.contains(control)) {
+        // A label and the control it is for are pressed as one, as a segmented option's radio covers its label.
+        const ownControl = host instanceof HTMLLabelElement && host.control === control;
+        if (control && control !== host && !ownControl && host.contains(control)) {
             return false;
         }
         // Not every environment has the Web Animations API, jsdom among them.
@@ -123,24 +140,27 @@ export class RippleDirective {
         };
     }
 
-    #ensureContainer(host: HTMLElement): HTMLSpanElement {
-        if (this.#container && this.#container.parentNode === host) {
+    #ensureContainer(host: HTMLElement, halo: HTMLElement | null): HTMLSpanElement {
+        // A halo is drawn in its control, and any other wave in the host.
+        const parent = halo ?? host;
+        if (this.#container && this.#container.parentNode === parent) {
             return this.#container;
         }
-        const style = this.#document.defaultView?.getComputedStyle(host);
-        if (style?.position === "static") {
-            host.style.position = "relative";
+        const view = this.#document.defaultView;
+        // The layer is placed against its parent, so that is the element that needs a position.
+        if (view?.getComputedStyle(parent).position === "static") {
+            parent.style.position = "relative";
         }
-        if (style?.isolation !== "isolate") {
+        if (view?.getComputedStyle(host).isolation !== "isolate") {
             host.style.isolation = "isolate";
         }
         const container = this.#document.createElement("span");
-        container.className = rippleContainerClasses;
+        container.className = halo ? rippleHaloContainerClasses : rippleContainerClasses;
         container.setAttribute("aria-hidden", "true");
         // A wave is placed by the pointer's physical position, so its layer is laid out left to right in every
         // direction.
         container.dir = "ltr";
-        host.append(container);
+        parent.append(container);
         this.#container = container;
         return container;
     }
@@ -150,17 +170,23 @@ export class RippleDirective {
         if (event.button !== 0 || !this.#canDraw(host, event)) {
             return;
         }
-        const container = this.#ensureContainer(host);
-        const bounds = container.getBoundingClientRect();
-        const x = event.clientX - bounds.x;
-        const y = event.clientY - bounds.y;
-        // The wave reaches the corner farthest from the pointer, so that it covers the element once it has spread.
-        const radius = Math.hypot(Math.max(x, bounds.width - x), Math.max(y, bounds.height - y));
+        const halo = this.#haloTarget() ?? null;
+        const container = this.#ensureContainer(host, halo);
         const wave = this.#document.createElement("span");
         wave.className = rippleWaveClasses;
-        wave.style.width = `${radius * 2}px`;
-        wave.style.height = `${radius * 2}px`;
-        wave.style.translate = `${x - radius}px ${y - radius}px`;
+        if (halo) {
+            // A halo's layer is a point at the control's centre, so the halo is centred on that point.
+            const bounds = halo.getBoundingClientRect();
+            const radius = Math.max(bounds.width, bounds.height) / 2 + HALO_REACH;
+            this.#placeWave(wave, radius, -radius, -radius);
+        } else {
+            const bounds = container.getBoundingClientRect();
+            const x = event.clientX - bounds.x;
+            const y = event.clientY - bounds.y;
+            // The wave reaches the corner farthest from the pointer, so that it covers the element once it has spread.
+            const radius = Math.hypot(Math.max(x, bounds.width - x), Math.max(y, bounds.height - y));
+            this.#placeWave(wave, radius, x - radius, y - radius);
+        }
         container.append(wave);
 
         const durations = this.#durations(host);
@@ -185,5 +211,12 @@ export class RippleDirective {
         for (const type of RELEASE_EVENTS) {
             host.addEventListener(type, fadeOut, { passive: true, signal: release.signal });
         }
+    }
+
+    /** Sizes a wave to `radius` and moves its top start corner to (`x`, `y`) in its layer. */
+    #placeWave(wave: HTMLSpanElement, radius: number, x: number, y: number): void {
+        wave.style.width = `${radius * 2}px`;
+        wave.style.height = `${radius * 2}px`;
+        wave.style.translate = `${x}px ${y}px`;
     }
 }

@@ -102,7 +102,7 @@ export const menubarBaseThemeVariants = cva(
 
 export const menubarListItemThemeVariants = cva(
     `
-        flex h-full items-center justify-center px-2 py-1.5
+        relative flex h-full items-center justify-center px-2 py-1.5
         cursor-pointer text-foreground outline-none focus-visible:outline-hidden
         hover:bg-[var(--mona-menu-item-hover-background,var(--color-hover))] hover:text-foreground
         focus-within:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]
