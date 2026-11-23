@@ -1443,6 +1443,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./tabs/sortable/sortable-example.component").then(module => module.TabsSortableExampleComponent),
         mainFile: "sortable-example.component.ts"
     },
+    "tabs/strip": {
+        files: ["strip-example.component.ts", "strip-example.component.html"],
+        load: () => import("./tabs/strip/strip-example.component").then(module => module.TabsStripExampleComponent),
+        mainFile: "strip-example.component.ts"
+    },
     "tabs/vertical": {
         files: ["vertical-example.component.ts", "vertical-example.component.html"],
         load: () => import("./tabs/vertical/vertical-example.component").then(module => module.TabsVerticalExampleComponent),

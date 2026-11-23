@@ -2374,6 +2374,17 @@
       {
         "description": "",
         "kind": "input",
+        "name": "look",
+        "type": "TabListListItemVariantProps[\"look\"]",
+        "options": [
+          "line",
+          "pill"
+        ],
+        "defaultValue": "\"line\""
+      },
+      {
+        "description": "",
+        "kind": "input",
         "name": "position",
         "type": "TabListListItemVariantProps[\"position\"]",
         "options": [
@@ -18828,9 +18839,9 @@
         "name": "type",
         "type": "SparklineType",
         "options": [
+          "line",
           "area",
           "column",
-          "line",
           "win-loss"
         ],
         "defaultValue": "\"line\""
@@ -19614,18 +19625,25 @@
     "selector": "\"mona-tab\"",
     "inputs": [
       {
-        "description": "Displays a close button on this tab. Turning it on here shows the button even when the parent\n`mona-tabs` has `closable` off; turning it off here doesn't hide a button the parent asked for.",
+        "description": "Displays a close button on this tab. Turning it on here shows the button even when the parent\n`mona-tabs` or `mona-tab-strip` has `closable` off; turning it off here doesn't hide a button the parent asked for.",
         "kind": "input",
         "name": "closable",
         "type": "boolean",
         "defaultValue": "false"
       },
       {
-        "description": "Renders this tab with reduced visual emphasis and removes pointer and keyboard interaction. A tab is\ndisabled when this or the parent `mona-tabs` component's `disabled` input is on.",
+        "description": "Renders this tab with reduced visual emphasis and removes pointer and keyboard interaction. A tab is\ndisabled when this or the parent's `disabled` input is on.",
         "kind": "input",
         "name": "disabled",
         "type": "boolean",
         "defaultValue": "false"
+      },
+      {
+        "description": "The id of the panel this tab controls, which the tab names in `aria-controls`. In a `mona-tab-strip`,\nit's the panel you render: give it `role=\"tabpanel\"` and label it with the tab's `tabId`. Without it, a strip's tab\ncontrols nothing. In `mona-tabs`, the component renders the panel with this id, and generates one when it's empty.",
+        "kind": "input",
+        "name": "panelId",
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "Whether the tab is selected. Setting it to `true` selects the tab unless it's disabled, and it\nfollows the selection, so `[(selected)]` stays current. Setting it to `false` doesn't clear the selection, because\na group of tabs always keeps one selected.",
@@ -19633,6 +19651,13 @@
         "name": "selected",
         "type": "boolean",
         "defaultValue": "false"
+      },
+      {
+        "description": "The id of the tab element, the one with `role=\"tab\"`. Point a panel's `aria-labelledby` at it. A unique\nid is generated when it isn't set, and reading the input gives it back.",
+        "kind": "input",
+        "name": "tabId",
+        "type": "string",
+        "defaultValue": "generated"
       },
       {
         "description": "Title text displayed on the tab.",
@@ -19678,6 +19703,17 @@
         "defaultValue": "false"
       },
       {
+        "description": "",
+        "kind": "input",
+        "name": "look",
+        "type": "TabListVariantProps[\"look\"]",
+        "options": [
+          "line",
+          "pill"
+        ],
+        "defaultValue": "\"line\""
+      },
+      {
         "description": "Placement of the tab list relative to the tab content.",
         "kind": "input",
         "name": "position",
@@ -19690,6 +19726,13 @@
         ],
         "required": true,
         "defaultValue": "\"top\""
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "rendersPanels",
+        "type": "boolean",
+        "defaultValue": "false"
       },
       {
         "description": "",
@@ -19745,6 +19788,105 @@
       }
     ]
   },
+  "TabStripComponent": {
+    "name": "TabStripComponent",
+    "selector": "\"mona-tab-strip\"",
+    "inputs": [
+      {
+        "description": "Accessible name for the tab list.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "The id of an element that names the tab list. Takes precedence over `aria-label`.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Displays a close button on each tab. A tab's own `closable` can add a button, not remove this one.",
+        "kind": "input",
+        "name": "closable",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Renders every tab with reduced visual emphasis and removes pointer and keyboard interaction.",
+        "kind": "input",
+        "name": "disabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "How the selected tab is marked: `\"line\"` draws an indicator under it, and `\"pill\"` raises it on a\nrounded background, `--mona-tab-pill-background` when it's set.",
+        "kind": "input",
+        "name": "look",
+        "type": "TabStripVariantProps[\"look\"]",
+        "options": [
+          "line",
+          "pill"
+        ],
+        "defaultValue": "\"line\""
+      },
+      {
+        "description": "The zero-based index of the selected tab. Writing it selects that tab, unless it's disabled or out of\nrange, in which case the value goes back to the selected tab's index. It also changes when the component moves the\nselection itself, such as when the selected tab is removed.",
+        "kind": "model",
+        "name": "selectedIndex",
+        "type": "number",
+        "defaultValue": "0"
+      },
+      {
+        "description": "Size preset controlling the tabs' dimensions.",
+        "kind": "input",
+        "name": "size",
+        "type": "TabStripVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "defaultValue": "\"medium\""
+      },
+      {
+        "description": "Lets the user reorder the tabs: by dragging them, or with Control+Shift and the arrow keys, Home or\nEnd (Command+Shift on macOS). The component emits `tabReorder` and doesn't move the tabs itself.",
+        "kind": "input",
+        "name": "sortable",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Emitted with a {@link TabCloseEvent} when a close is requested: by the close button, Delete or\nBackspace, or a middle-click on the tab. The component doesn't remove the tab: remove it from whatever renders the\n`mona-tab` elements.",
+        "kind": "output",
+        "name": "tabClose",
+        "type": "TabCloseEvent"
+      },
+      {
+        "description": "Emitted with a {@link TabReorderEvent} when a tab of a `sortable` strip is moved. The component doesn't\nreorder the tabs: move the tab in whatever renders the `mona-tab` elements. The selected tab stays selected.",
+        "kind": "output",
+        "name": "tabReorder",
+        "type": "TabReorderEvent"
+      },
+      {
+        "description": "Emitted with a {@link TabSelectEvent} before a click or key selects a tab. This event is preventable.\nIt doesn't fire for selections made through `selectedIndex` or `selected`, or when the selected tab is removed.",
+        "kind": "output",
+        "name": "tabSelect",
+        "type": "TabSelectEvent"
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
   "TabsComponent": {
     "name": "TabsComponent",
     "selector": "\"mona-tabs\"",
@@ -19787,6 +19929,17 @@
         "defaultValue": "true"
       },
       {
+        "description": "How the selected tab is marked: `\"line\"` draws an indicator along the strip's edge, and `\"pill\"`\nraises the tab on a rounded background, `--mona-tab-pill-background` when it's set.",
+        "kind": "input",
+        "name": "look",
+        "type": "TabsVariantProps[\"look\"]",
+        "options": [
+          "line",
+          "pill"
+        ],
+        "defaultValue": "\"line\""
+      },
+      {
         "description": "Placement of the tab list relative to the tab content.",
         "kind": "input",
         "name": "position",
@@ -19826,7 +19979,7 @@
         "defaultValue": "false"
       },
       {
-        "description": "Emitted with a {@link TabCloseEvent} when a close is requested. The component doesn't remove the tab:\nremove it from whatever renders the `mona-tab` elements.",
+        "description": "Emitted with a {@link TabCloseEvent} when a close is requested: by the close button, Delete or\nBackspace, or a middle-click on the tab. The component doesn't remove the tab: remove it from whatever renders the\n`mona-tab` elements.",
         "kind": "output",
         "name": "tabClose",
         "type": "TabCloseEvent"

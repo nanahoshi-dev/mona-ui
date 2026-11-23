@@ -1,38 +1,16 @@
 import { NgTemplateOutlet } from "@angular/common";
-import {
-    afterRenderEffect,
-    booleanAttribute,
-    Component,
-    computed,
-    contentChildren,
-    effect,
-    input,
-    linkedSignal,
-    model,
-    output,
-    untracked,
-    viewChild
-} from "@angular/core";
-import type { ImmutableSet } from "@mirei/ts-collections";
-import { select } from "@mirei/ts-collections";
+import { booleanAttribute, Component, computed, contentChildren, input, model, output, viewChild } from "@angular/core";
 import { twMerge } from "tailwind-merge";
 import type { TabCloseEvent } from "../../models/TabCloseEvent";
 import type { TabItem } from "../../models/TabItem";
+import { ownPanelId } from "../../models/TabItem";
 import type { TabReorderEvent } from "../../models/TabReorderEvent";
 import type { TabSelectEvent } from "../../models/TabSelectEvent";
 import type { TabsVariantInput, TabsVariantProps } from "../../styles/tabs.styles";
 import { tabContentThemeVariants, tabsBaseThemeVariants } from "../../styles/tabs.styles";
+import { TabSelection } from "../../utils/tab-selection";
 import { TabListComponent } from "../tab-list/tab-list.component";
 import { TabComponent } from "../tab/tab.component";
-
-function isEnabled(tab: TabItem): boolean {
-    return !tab.disabled;
-}
-
-/** The tab to select after the selected one is gone: the one that took its place, else the nearest before it. */
-function neighborOf(tabs: readonly TabItem[], removedIndex: number): TabItem | undefined {
-    return tabs.slice(removedIndex).find(isEnabled) ?? tabs.slice(0, removedIndex).reverse().find(isEnabled);
-}
 
 @Component({
     selector: "mona-tabs",
@@ -46,13 +24,10 @@ function neighborOf(tabs: readonly TabItem[], removedIndex: number): TabItem | u
     }
 })
 export class TabsComponent implements TabsVariantInput {
-    #flaggedTabId: string | null = null;
-    #reportedIndex: number | null = null;
-    /**
-     * Whether the tabs have rendered. A tab in an `@for` gets its inputs after this component first reads it, so until then
-     * a selection is only a first guess, and a tab that turns out to be disabled was never really selected.
-     */
-    #tabsSettled = false;
+    readonly #selection = new TabSelection(
+        () => this.tabs(),
+        () => this.selectedIndex
+    );
     protected readonly baseClass = computed(() => {
         const variantClass = tabsBaseThemeVariants({ position: this.position() });
         const userClass = this.userClass();
@@ -61,28 +36,8 @@ export class TabsComponent implements TabsVariantInput {
     protected readonly contentClass = computed(() => {
         return tabContentThemeVariants();
     });
-    protected readonly selectedTabId = linkedSignal<ImmutableSet<TabItem>, string | null>({
-        source: () => this.tabList(),
-        computation: (tabList, previous) => {
-            const tabs = tabList.toArray();
-            const previousId = previous?.value ?? null;
-            if (previousId === null || !this.#tabsSettled) {
-                const requested = tabs[untracked(this.selectedIndex)];
-                return (requested && isEnabled(requested) ? requested : tabs.find(isEnabled))?.id ?? null;
-            }
-            if (tabs.some(tab => tab.id === previousId)) {
-                return previousId;
-            }
-            const removedIndex = previous?.source.toArray().findIndex(tab => tab.id === previousId) ?? 0;
-            return neighborOf(tabs, removedIndex)?.id ?? null;
-        }
-    });
-    protected readonly tabList = computed(() => {
-        const tabs = this.tabs();
-        return select(tabs, t => t.tabItem)
-            .tap((t, tx) => (t.index = tx))
-            .toImmutableSet();
-    });
+    protected readonly selectedTabId = this.#selection.selectedTabId;
+    protected readonly tabList = this.#selection.tabList;
     protected readonly tabListComponent = viewChild.required(TabListComponent);
     protected readonly tabs = contentChildren(TabComponent);
 
@@ -117,6 +72,13 @@ export class TabsComponent implements TabsVariantInput {
     public readonly keepTabContent = input(true, { transform: booleanAttribute });
 
     /**
+     * @description How the selected tab is marked: `"line"` draws an indicator along the strip's edge, and `"pill"`
+     * raises the tab on a rounded background, `--mona-tab-pill-background` when it's set.
+     * @default "line"
+     */
+    public readonly look = input<TabsVariantProps["look"]>("line");
+
+    /**
      * @description Placement of the tab list relative to the tab content.
      * @default "top"
      */
@@ -144,8 +106,9 @@ export class TabsComponent implements TabsVariantInput {
     public readonly sortable = input(false, { transform: booleanAttribute });
 
     /**
-     * @description Emitted with a {@link TabCloseEvent} when a close is requested. The component doesn't remove the tab:
-     * remove it from whatever renders the `mona-tab` elements.
+     * @description Emitted with a {@link TabCloseEvent} when a close is requested: by the close button, Delete or
+     * Backspace, or a middle-click on the tab. The component doesn't remove the tab: remove it from whatever renders the
+     * `mona-tab` elements.
      */
     public readonly tabClose = output<TabCloseEvent>();
 
@@ -167,23 +130,6 @@ export class TabsComponent implements TabsVariantInput {
      */
     public readonly userClass = input("", { alias: "class" });
 
-    public constructor() {
-        effect(() => {
-            const requested = this.selectedIndex();
-            untracked(() => this.applyRequestedIndex(requested));
-        });
-        effect(() => {
-            const items = this.tabList().toArray();
-            const selectedId = this.selectedTabId();
-            untracked(() => this.syncSelection(items, selectedId));
-        });
-        afterRenderEffect({
-            read: () => {
-                this.#tabsSettled = this.tabList().length > 0;
-            }
-        });
-    }
-
     protected handlePanelKeyDown(event: KeyboardEvent): void {
         if (event.key === "Tab" && event.shiftKey) {
             if (event.target !== event.currentTarget) {
@@ -194,46 +140,7 @@ export class TabsComponent implements TabsVariantInput {
         }
     }
 
-    private applyRequestedIndex(requested: number): void {
-        if (requested === this.#reportedIndex) {
-            return;
-        }
-        const items = this.tabList().toArray();
-        if (items.length === 0) {
-            return; // Tabs may still be on their way, and the linked signal reads the index when they arrive.
-        }
-        const tab = items[requested];
-        if (tab && isEnabled(tab)) {
-            this.selectedTabId.set(tab.id);
-        }
-        this.reportIndex(items, this.selectedTabId());
-    }
-
-    private reportIndex(items: readonly TabItem[], selectedId: string | null): void {
-        const index = items.findIndex(item => item.id === selectedId);
-        if (index !== -1) {
-            this.#reportedIndex = index;
-            this.selectedIndex.set(index);
-        }
-    }
-
-    /**
-     * Brings the three views of the selection together. A tab newly flagged `selected` from outside wins, and the first
-     * one wins when there are several. Every tab's `selected` and the index are then written to match, so a flag that was
-     * already seen, or one this method wrote, can't take the selection back.
-     */
-    private syncSelection(items: readonly TabItem[], selectedId: string | null): void {
-        const incoming = items.find(
-            item => item.selected && item.id !== this.#flaggedTabId && item.id !== selectedId && isEnabled(item)
-        );
-        const nextId = incoming?.id ?? selectedId;
-        if (incoming) {
-            this.selectedTabId.set(incoming.id);
-        }
-        this.#flaggedTabId = nextId;
-        for (const tab of this.tabs()) {
-            tab.selected.set(tab.tabItem.id === nextId);
-        }
-        this.reportIndex(items, nextId);
+    protected panelIdOf(tab: TabItem): string {
+        return ownPanelId(tab);
     }
 }

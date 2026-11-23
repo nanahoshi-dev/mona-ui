@@ -1,21 +1,34 @@
 import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeSelectionBorderClasses } from "@nanahoshi/mona-ui/internal";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 
+/** A line strip is ruled off from the content beside it. A pill strip stands on its own, as in a titlebar. */
 export const tabListBaseThemeVariants = cva(
     `
         flex max-w-full min-w-0 overflow-hidden
     `,
     {
         variants: {
+            look: {
+                line: "",
+                pill: ""
+            },
             position: {
-                top: "flex-row border-b border-border",
-                bottom: "flex-row border-t border-border",
-                left: "flex-col max-h-full min-h-0 border-e border-border",
-                right: "flex-col max-h-full min-h-0 border-s border-border"
+                top: "flex-row",
+                bottom: "flex-row",
+                left: "flex-col max-h-full min-h-0",
+                right: "flex-col max-h-full min-h-0"
             }
         },
+        compoundVariants: [
+            { look: "line", position: "top", class: "border-b border-border" },
+            { look: "line", position: "bottom", class: "border-t border-border" },
+            { look: "line", position: "left", class: "border-e border-border" },
+            { look: "line", position: "right", class: "border-s border-border" }
+        ],
         defaultVariants: {
+            look: "line",
             position: "top"
         }
     }
@@ -23,6 +36,7 @@ export const tabListBaseThemeVariants = cva(
 
 export const tabListListWrapperThemeVariants = cva(`flex-1 min-w-0 min-h-0 overflow-hidden`);
 
+/** Pills are spaced apart, and inset so the strip, which clips, doesn't cut off the selected one's shadow. */
 export const tabListListThemeVariants = cva(
     `
         flex list-none overflow-hidden
@@ -31,6 +45,10 @@ export const tabListListThemeVariants = cva(
     `,
     {
         variants: {
+            look: {
+                line: "",
+                pill: "gap-1 p-1"
+            },
             position: {
                 top: "flex-row max-w-full min-w-0",
                 bottom: "flex-row max-w-full min-w-0",
@@ -39,12 +57,20 @@ export const tabListListThemeVariants = cva(
             }
         },
         defaultVariants: {
+            look: "line",
             position: "top"
         }
     }
 );
 
-/** A tab being dragged to a new place floats as a raised copy of itself. */
+/**
+ * A tab being dragged to a new place floats as a raised copy of itself.
+ *
+ * A line tab marks the selection with an indicator along the strip's edge. A pill tab raises the selected tab on a
+ * background: `--mona-tab-pill-background` when it's set, else the raised surface. Shadows and backgrounds don't paint
+ * in forced colors, so there the selected pill is ringed in the highlight color, and in the text color when the user
+ * asks for more contrast. Pill tabs keep one weight, so selecting one doesn't shift the strip.
+ */
 export const tabListListItemThemeVariants = cva(
     `
         relative flex shrink-0 cursor-pointer
@@ -55,30 +81,62 @@ export const tabListListItemThemeVariants = cva(
     {
         variants: {
             active: {
-                true: `
-                    text-foreground font-semibold
-                    after:absolute after:content-[''] after:bg-[var(--mona-indicator-color,var(--color-primary))]
-                    after:forced-color-adjust-none forced-colors:after:bg-[Highlight]
-                `,
+                true: "text-foreground",
                 false: "text-muted-foreground hover:bg-hover hover:text-foreground"
             },
             disabled: {
-                true: "pointer-events-none cursor-not-allowed select-none text-disabled-foreground after:hidden",
+                true: "pointer-events-none cursor-not-allowed select-none text-disabled-foreground",
                 false: ""
             },
+            look: {
+                line: "",
+                pill: "rounded-md font-medium"
+            },
             position: {
-                top: "items-center justify-center whitespace-nowrap after:inset-x-0 after:bottom-0 after:h-[2px]",
-                bottom: "items-center justify-center whitespace-nowrap after:inset-x-0 after:top-0 after:h-[2px]",
-                left: "w-full items-center justify-start text-start after:inset-y-0 after:end-0 after:w-[2px]",
-                right: "w-full items-center justify-start text-start after:inset-y-0 after:start-0 after:w-[2px]"
+                top: "items-center justify-center whitespace-nowrap",
+                bottom: "items-center justify-center whitespace-nowrap",
+                left: "w-full items-center justify-start text-start",
+                right: "w-full items-center justify-start text-start"
             },
             size: {
-                small: "h-8 text-xs",
-                medium: "h-9 text-sm",
-                large: "h-10 text-sm"
+                small: "text-xs",
+                medium: "text-sm",
+                large: "text-sm"
             }
         },
+        compoundVariants: [
+            {
+                look: "line",
+                active: true,
+                class: `
+                    font-semibold
+                    after:absolute after:content-[''] after:bg-[var(--mona-indicator-color,var(--color-primary))]
+                    after:forced-color-adjust-none forced-colors:after:bg-[Highlight]
+                `
+            },
+            { look: "line", disabled: true, class: "after:hidden" },
+            { look: "line", position: "top", class: "after:inset-x-0 after:bottom-0 after:h-[2px]" },
+            { look: "line", position: "bottom", class: "after:inset-x-0 after:top-0 after:h-[2px]" },
+            { look: "line", position: "left", class: "after:inset-y-0 after:end-0 after:w-[2px]" },
+            { look: "line", position: "right", class: "after:inset-y-0 after:start-0 after:w-[2px]" },
+            { look: "line", size: "small", class: "h-8" },
+            { look: "line", size: "medium", class: "h-9" },
+            { look: "line", size: "large", class: "h-10" },
+            {
+                look: "pill",
+                active: true,
+                class: `
+                    [background-color:var(--mona-tab-pill-background,var(--color-surface-raised))] shadow-(--shadow-raised)
+                    ${themeSelectionBorderClasses}
+                    after:content-[''] after:forced-color-adjust-none forced-colors:after:border-[Highlight]
+                `
+            },
+            { look: "pill", size: "small", class: "h-7" },
+            { look: "pill", size: "medium", class: "h-8" },
+            { look: "pill", size: "large", class: "h-9" }
+        ],
         defaultVariants: {
+            look: "line",
             position: "top",
             size: "medium"
         }
@@ -93,6 +151,10 @@ export const tabListTabThemeVariants = cva(
     `,
     {
         variants: {
+            look: {
+                line: "",
+                pill: "rounded-md"
+            },
             position: {
                 top: "justify-center whitespace-nowrap",
                 bottom: "justify-center whitespace-nowrap",
@@ -106,6 +168,7 @@ export const tabListTabThemeVariants = cva(
             }
         },
         defaultVariants: {
+            look: "line",
             position: "top",
             size: "medium"
         }
@@ -156,6 +219,13 @@ export const tabsBaseThemeVariants = cva(
     }
 );
 
+/** A strip in a row of other controls, such as a titlebar's, shrinks with the row and scrolls its tabs. */
+export const tabStripThemeVariants = cva(
+    `
+        flex max-w-full min-w-0
+    `
+);
+
 type TabListBaseVariantProps = VariantProps<typeof tabListBaseThemeVariants>;
 
 type TabListBaseVariantInput = VariantInputs<TabListBaseVariantProps>;
@@ -202,3 +272,8 @@ export type TabListVariantInput = TabListBaseVariantInput &
 export type TabsVariantProps = TabsBaseVariantProps & TabListVariantProps & TabContentVariantProps;
 
 export type TabsVariantInput = TabsBaseVariantInput & TabListVariantInput & TabContentVariantInput;
+
+/** A strip is always horizontal, so it has no position. */
+export type TabStripVariantProps = Omit<TabListVariantProps, "position">;
+
+export type TabStripVariantInput = Omit<TabListVariantInput, "position">;

@@ -1,0 +1,15 @@
+<mona-tab-list
+    [aria-label]="ariaLabel()"
+    [aria-labelledby]="ariaLabelledBy()"
+    [closable]="closable()"
+    [disabled]="disabled()"
+    [look]="look()"
+    position="top"
+    [size]="size()"
+    [sortable]="sortable()"
+    [tabList]="tabList()"
+    [selectedTabId]="selectedTabId()"
+    (selectedTabIdChange)="selectedTabId.set($event)"
+    (tabClose)="tabClose.emit($event)"
+    (tabReorder)="tabReorder.emit($event)"
+    (tabSelect)="tabSelect.emit($event)"></mona-tab-list>

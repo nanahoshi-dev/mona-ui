@@ -44,20 +44,23 @@
                 [sortableLabel]="tab.title"
                 [active]="selected"
                 [disabled]="itemDisabled"
+                [look]="look()"
                 [position]="position()"
                 [size]="size()"
                 role="presentation"
                 [attr.data-selected]="selected"
-                [attr.data-tab-id]="tab.id">
+                [attr.data-tab-id]="tab.id"
+                (auxclick)="onTabAuxClick(tab, $event)"
+                (mousedown)="onTabMouseDown(tab, $event)">
                 <div
                     #tabElement
                     [class]="tabClass()"
-                    [id]="tab.id + '-tab'"
+                    [id]="tab.tabId"
                     role="tab"
                     [tabindex]="selected ? 0 : -1"
                     [attr.aria-selected]="selected"
                     [attr.aria-disabled]="itemDisabled"
-                    [attr.aria-controls]="tab.id + '-panel'"
+                    [attr.aria-controls]="panelIdOf(tab)"
                     [attr.aria-keyshortcuts]="tabKeyShortcuts(tabClosable && !itemDisabled, sortItem.keyShortcuts())"
                     (click)="onTabClick(tab, $event)">
                     <div>
@@ -99,7 +102,7 @@
                     [id]="tab.id + '-close'"
                     [disabled]="tab.disabled || disabled()"
                     [attr.aria-label]="messages().closeTab"
-                    [attr.aria-labelledby]="tab.id + '-close ' + tab.id + '-tab'"
+                    [attr.aria-labelledby]="tab.id + '-close ' + tab.tabId"
                     [attr.data-tab-id]="tab.id"
                     (click)="onTabClose(tab, $event)"></button>
             }
