@@ -24,6 +24,7 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to 
 | [`GridToolbarContext`](/api/grid/GridToolbarContext) | Interface | The grid state and actions a toolbar template can use. |
 | [`Column`](/api/grid/Column) | Interface | Set `locked` and `lockedPosition` on a `mona-grid-column` (or `mona-grid-command-column`) to keep it fixed while the grid scrolls horizontally. |
 | [`ColumnConfig`](/api/grid/ColumnConfig) | Interface |  |
+| [`GridRowActivateEvent`](/api/grid/GridRowActivateEvent) | Interface | Emitted when the user activates a data row, the way a file list opens an item. |
 | [`GridToolbarTemplateContext`](/api/grid/GridToolbarTemplateContext) | Interface | Context of `monaGridToolbarTemplate`: the toolbar state, also as `$implicit`. |
 | [`ColumnFormat`](/api/grid/ColumnFormat) | Type alias | A date format string, for `date` columns, or a formatter function, for any column. |
 | [`ColumnFormatFunction`](/api/grid/ColumnFormatFunction) | Type alias | Formats a cell's value for display. |

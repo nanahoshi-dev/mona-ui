@@ -4,12 +4,27 @@ import { GridCellDirective } from "../../directives/grid-cell.directive";
 import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import type { Row } from "../../models/Row";
+import { GRID_CELL_FOCUSABLE_SELECTOR } from "../../services/grid-cell-tab-stops";
 import { GridService } from "../../services/grid.service";
 import { gridListTableRowThemeVariants } from "../../styles/grid.styles";
 import { GridCellComponent } from "../grid-cell/grid-cell.component";
 import { GridRowReorderHandleComponent } from "../grid-row-reorder-handle/grid-row-reorder-handle.component";
 import { GridSelectionCheckboxComponent } from "../grid-selection-checkbox/grid-selection-checkbox.component";
 import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
+
+/** Controls a cell can hold, whose double-clicks are their own: buttons, links, fields, labels, editable text. */
+const CELL_CONTROL_SELECTOR = `${GRID_CELL_FOCUSABLE_SELECTOR}, label, summary, [contenteditable]:not([contenteditable="false"])`;
+
+/** Whether an event happened on a control inside a cell, rather than on the cell itself or its text. */
+function isInCellControl(target: EventTarget | null): boolean {
+    if (!(target instanceof Element)) {
+        return false;
+    }
+    const cell = target.closest("td");
+    // The cell itself matches too, by its tabindex.
+    const control = target.closest(CELL_CONTROL_SELECTOR);
+    return cell != null && control != null && control !== cell && cell.contains(control);
+}
 
 /** A data row of the grid body, with one cell per layout column. */
 @Component({
@@ -38,7 +53,8 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
         "[attr.aria-expanded]": "treeInfo()?.hasChildren ? treeInfo()!.expanded : null",
         "[attr.aria-posinset]": "treeInfo()?.posInSet ?? null",
         "[attr.aria-setsize]": "treeInfo()?.setSize ?? null",
-        "(click)": "onClick($event)"
+        "(click)": "onClick($event)",
+        "(dblclick)": "onDoubleClick($event)"
     }
 })
 export class GridRowComponent {
@@ -88,8 +104,24 @@ export class GridRowComponent {
     public readonly row = input.required<Row>();
     public readonly selected = computed(() => this.gridService.isRowSelected(this.row()));
 
+    /** `Enter` on one of the row's cells, where the key had no other use. */
+    protected onActivate(event: KeyboardEvent): void {
+        this.gridService.activateRow(this.row(), event);
+    }
+
     protected onClick(event: MouseEvent): void {
         this.gridService.handleRowClick(event, this.row());
+    }
+
+    /**
+     * A double-click activates the row, unless it's on a control inside a cell or something already handled it,
+     * as an editable cell does by starting its edit.
+     */
+    protected onDoubleClick(event: MouseEvent): void {
+        if (event.defaultPrevented || isInCellControl(event.target)) {
+            return;
+        }
+        this.gridService.activateRow(this.row(), event);
     }
 
     protected toggleDetail(): void {

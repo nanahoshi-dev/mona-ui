@@ -40,8 +40,8 @@ const PAGE_TABBABLE_SELECTOR = `${GRID_CELL_FOCUSABLE_SELECTOR}, summary, [conte
 /**
  * A cell the grid's keyboard navigation can reach. Arrows, Home, End, PageUp and PageDown move between
  * cells; Enter or F2 starts an edit or moves into the controls inside the cell, where Tab and the arrows
- * move between them and Escape returns to the cell. Tab itself leaves the grid: only one cell is in the
- * page Tab order.
+ * move between them and Escape returns to the cell, and Enter on a cell with neither activates its row. Tab
+ * itself leaves the grid: only one cell is in the page Tab order.
  */
 @Directive({
     selector: "td[monaGridLogicalCell], th[monaGridLogicalCell]",
@@ -126,6 +126,11 @@ export class GridLogicalCellDirective {
         }
         return this.#hostElementRef.nativeElement.tagName === "TH" ? "header" : "body";
     });
+    /**
+     * @description Emits the key press when `Enter` on the cell has no other use: it doesn't expand, sort, edit, or
+     * move into the cell's controls.
+     */
+    public readonly activate = output<KeyboardEvent>();
     /**
      * @description The cell's `aria-colindex` when it isn't its column's place in the layout, as for a group
      * row's title cell, which follows the group's indents.
@@ -442,26 +447,38 @@ export class GridLogicalCellDirective {
         return this.#gridNavigationService.navigate(cellKey, navigationKey);
     }
 
-    #onEnterKey(): void {
+    /**
+     * Enter expands or sorts where F2 wouldn't, then does what F2 does. Where neither has a use, as on a cell of a
+     * read-only grid, it activates the row.
+     */
+    #onEnterKey(event: KeyboardEvent): void {
         if (this.groupHeader() || this.resolvedSection() === "header" || this.resolvedCellKind() === "detail") {
             this.toggleExpand.emit();
             return;
         }
-        this.#onF2Key();
+        if (!this.#onF2Key()) {
+            this.activate.emit(event);
+        }
     }
 
-    /** F2 edits an editable cell; on any other cell it moves into the cell's controls. */
-    #onF2Key(): void {
+    /**
+     * F2 edits an editable cell, or the row from any data cell when the grid edits by row; on any other cell it
+     * moves into the cell's controls. Returns whether it did either.
+     */
+    #onF2Key(): boolean {
         if (this.editable()) {
             this.edit.emit();
-            return;
+            return true;
         }
         if (this.#enterCell()) {
-            return;
+            return true;
         }
-        if (this.resolvedCellKind() === "data") {
+        const editableOptions = this.#gridService.editableOptions();
+        if (this.resolvedCellKind() === "data" && editableOptions.enabled === true && editableOptions.mode === "row") {
             this.edit.emit();
+            return true;
         }
+        return false;
     }
 
     #onHostKeydown(event: KeyboardEvent): void {
@@ -515,7 +532,7 @@ export class GridLogicalCellDirective {
             }
             case "Enter":
                 event.preventDefault();
-                this.#onEnterKey();
+                this.#onEnterKey(event);
                 return;
             case "F2":
                 event.preventDefault();

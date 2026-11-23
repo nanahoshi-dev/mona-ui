@@ -57,6 +57,7 @@ import type { GridEditFormContext } from "../models/GridEditFormContext";
 import type { GridEditSession } from "../models/GridEditSession";
 import type { GridViewRow } from "../models/GridGroup";
 import { GridKeySelector } from "../models/GridKeySelector";
+import type { GridRowActivateEvent } from "../models/GridRowActivateEvent";
 import type { GridRowClass } from "../models/GridRowClass";
 import type { GridLayoutColumn } from "../models/GridLayoutColumn";
 import type { GridRangePasteChange, GridRangePasteEvent } from "../models/GridRangePasteEvent";
@@ -587,6 +588,7 @@ export class GridService {
     public readonly renderedBodyRowCount = signal(0);
     public readonly reorderableOptions = this.#reorderableOptions.asReadonly();
     public readonly resizableOptions = this.#resizableOptions.asReadonly();
+    public readonly rowActivate$ = new Subject<GridRowActivateEvent>();
     public readonly rowClass = signal<GridRowClass<unknown> | null>(null);
     public readonly rowDragInProgress = computed(() => this.draggingRowUid() != null);
     public readonly rowEdit$ = new Subject<RowEditEvent>();
@@ -797,6 +799,14 @@ export class GridService {
         this.#scrollbarGutterWidth.set(this.measureFallbackScrollbarGutter());
         this.setHorizontalScrollSyncEffects();
         this.setScrollbarGutterEffects();
+    }
+
+    /** Reports that the user activated a data row. Not while an edit is open, whose keys and clicks are its own. */
+    public activateRow(row: Row, originalEvent: KeyboardEvent | MouseEvent): void {
+        if (this.isInEditMode()) {
+            return;
+        }
+        this.rowActivate$.next({ originalEvent, rowData: row.data });
     }
 
     public addGroupColumn(column: Column): void {

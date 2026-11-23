@@ -130,7 +130,9 @@ export class GridCellComponent {
     }
 
     protected onCellDoubleClick(event: MouseEvent): void {
-        if (this.gridService.editableOptions().mode === "cell") {
+        if (this.gridService.editableOptions().mode === "cell" && this.canEdit()) {
+            // The double-click is the cell's: it edits, even when the edit is prevented, and doesn't activate the row.
+            event.preventDefault();
             this.startEdit(event);
         }
     }
@@ -189,6 +191,12 @@ export class GridCellComponent {
         this.gridService.toggleTreeRow(this.row());
     }
 
+    /** Whether the grid edits and the cell's column can be edited. */
+    private canEdit(): boolean {
+        const column = this.column();
+        return !!this.gridService.editableOptions().enabled && column.editable && column.kind === "data";
+    }
+
     private focusHostCell(): void {
         const cellElement = this.#elementRef.nativeElement.closest("td") as HTMLElement | null;
         cellElement?.focus();
@@ -200,7 +208,7 @@ export class GridCellComponent {
     }
 
     private startEdit(originalEvent?: Event): void {
-        if (!this.gridService.editableOptions().enabled || !this.column().editable || this.column().kind !== "data") {
+        if (!this.canEdit()) {
             return;
         }
         this.gridService.startCellEdit(this.cellUid(), this.row(), this.column(), originalEvent);

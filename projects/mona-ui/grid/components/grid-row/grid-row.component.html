@@ -20,6 +20,7 @@
                     ? treeInfo()!.expanded
                     : null
             "
+            (activate)="onActivate($event)"
             (edit)="gridCell.handleLogicalCellEnter()"
             (toggleExpand)="toggleTree()">
             <mona-grid-cell #gridCell [column]="layoutColumn.column" [row]="row()" />
@@ -38,7 +39,8 @@
             [rowUid]="row().uid"
             [section]="'body'"
             [firstInRow]="layoutColumn.firstInRow"
-            [lastInRow]="layoutColumn.lastInRow">
+            [lastInRow]="layoutColumn.lastInRow"
+            (activate)="onActivate($event)">
             <mona-grid-row-reorder-handle [row]="row()" [pageIndex]="index()" />
         </td>
     } @else if (layoutColumn.kind === "detail") {
@@ -75,7 +77,8 @@
             [rowUid]="row().uid"
             [section]="'body'"
             [firstInRow]="layoutColumn.firstInRow"
-            [lastInRow]="layoutColumn.lastInRow">
+            [lastInRow]="layoutColumn.lastInRow"
+            (activate)="onActivate($event)">
             <mona-grid-selection-checkbox [row]="row()" [rowIndex]="index()" />
         </td>
     }

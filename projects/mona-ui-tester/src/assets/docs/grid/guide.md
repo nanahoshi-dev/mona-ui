@@ -144,7 +144,7 @@ Grid styling is implemented with Tailwind utility classes internally; there are 
 
 ### Events come from the feature directives
 
-`mona-grid` reports only paging (`pageChange`, `skipChange`, `pageSizeChange`) and detail rows (`expandedKeysChange`). Every other event comes from the directive that turns its feature on: `columnSort`, `columnResize`, `columnReorder`, `groupChange`, `selectedKeysChange`, `rowReorder`, `cellEdit`, `rowEdit`, `save`, `remove`, `cancel`, `add`, `edit`, `dataStateChange` and `scrollEnd`.
+`mona-grid` reports only paging (`pageChange`, `skipChange`, `pageSizeChange`), detail rows (`expandedKeysChange`) and row activation (`rowActivate`, see [Rows](/components/grid-rows#row-activation)). Every other event comes from the directive that turns its feature on: `columnSort`, `columnResize`, `columnReorder`, `groupChange`, `selectedKeysChange`, `rowReorder`, `cellEdit`, `rowEdit`, `save`, `remove`, `cancel`, `add`, `edit`, `dataStateChange` and `scrollEnd`.
 
 ### Cancelable events
 
@@ -169,7 +169,7 @@ The grid is one Tab stop. `Tab` moves into the grid at the cell that last had fo
 | `Home` / `End` | Move to the first/last cell in the row. |
 | `Ctrl+Home` / `Ctrl+End` (`Cmd` too) | Move to the first/last cell in the grid. With virtual scrolling, the grid scrolls to the last row first. |
 | `PageUp` / `PageDown` | Move up/down by the number of rows that fit in the body. |
-| `Enter` | On a header, sorts the column. On a group row or the detail toggle, expands or collapses it. On an editable cell, starts editing. On any other cell, moves into its controls. |
+| `Enter` | On a header, sorts the column. On a group row or the detail toggle, expands or collapses it. On an editable cell, starts editing, and with row editing so does any data cell. On a cell with controls, moves into them. On any other cell of a data row, activates the row (`rowActivate`). |
 | `F2` | Starts editing an editable cell; on any other cell, including a header or a filter-row cell, moves into its controls (links, buttons, the filter button, the filter input). |
 | `Ctrl+C` / `Cmd+C` | Copies the focused cell's text (body rows, not while editing, and not when text is selected). |
 | `Tab` / `Shift+Tab` | Leaves the grid. While editing a cell, commits it and edits the next/previous editable cell. |
@@ -202,7 +202,7 @@ Grid cells use a roving `tabindex`: the cell that last had focus has `tabindex="
 | `aria-keyshortcuts` | On a header cell with keyboard shortcuts | The keys that open its filter menu, move it or group by it |
 
 <!-- verification-checklist
-- [x] GridComponent inputs verified against grid.component.ts (aria-label, aria-labelledby, data, expandedKeys, pageSize, pageSizeValues, resizeMethod, responsivePager, rounded, rowClass, rowKey, skip, class); outputs limited to paging and expandedKeys
+- [x] GridComponent inputs verified against grid.component.ts (aria-label, aria-labelledby, data, expandedKeys, pageSize, pageSizeValues, resizeMethod, responsivePager, rounded, rowClass, rowKey, skip, class); outputs limited to paging, expandedKeys and rowActivate
 - [x] Template directive selectors and contexts verified against grid/directives/grid-*template*.directive.ts and the grid templates
 - [x] Keyboard map verified against grid-logical-cell.directive.ts, grid-navigation.service.ts, grid.component.ts (onToolbarKeydown) and tests/grid-keyboard-navigation.spec.ts
 - [x] Feature-specific keys, ARIA rows and limits moved to the feature pages, each verified against its directive
