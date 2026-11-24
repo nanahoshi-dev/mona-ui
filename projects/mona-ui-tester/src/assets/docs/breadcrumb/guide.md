@@ -44,7 +44,11 @@ The anchor is yours, so `href`, `routerLink`, `target` and `rel` all work, and s
 
 The last `<mona-breadcrumb-item>` never emits `itemClick` — it is non-interactive regardless of whether you bind the output. Only non-last items are clickable. When a trail stops before the page you're on, set `[lastItemCurrent]="false"` and the last item becomes a normal one, with no `aria-current`.
 
-**Long trails:** items shrink and truncate with an ellipsis as the space runs out, and the other items give up their width before the current page does. To shorten the trail instead, set `maxItems`, as in [Collapsing a long trail](#collapsing-a-long-trail). The first and last items always stay, and the middle collapses behind a button that shows it again and moves focus to the first item it revealed that can take focus. The button's name comes from `showFullPath` in the `breadcrumb` messages. The trail collapses again when its items change.
+**Long trails:** when the trail is wider than its box, its middle folds behind a button, the items nearest the start first, until the rest fit at their full width, as in [Folding to fit](#folding-to-fit). The first item and the current page always stay. When even those two don't fit, the first item gives up its width before the current page truncates with an ellipsis. The trail measures itself again whenever the breadcrumb or one of its items changes size, and a new trail is folded before the browser paints it.
+
+To fold the middle to a count as well, whatever the width, set `maxItems`, as in [Collapsing a long trail](#collapsing-a-long-trail). The trail then folds whichever asks for more.
+
+The button shows the whole trail and moves focus to the first item it revealed that can take focus. The trail then stays whole, truncating its items if it has to, until its items change, and then folds again. The button's name comes from `showFullPath` in the `breadcrumb` messages.
 
 Truncation needs text to work on. An item whose content is its own flex container, such as `<div class="flex">`, gets clipped without the ellipsis.
 
@@ -86,9 +90,17 @@ Clicking a parent folder opens it, which drops the folders below it from the pat
 breadcrumb/buttons
 ```
 
+### Folding to fit
+
+Drag the box's corner to narrow it. The folders in the middle fold behind the button, nearest the start first, and come back as the box widens.
+
+```example
+breadcrumb/fit
+```
+
 ### Collapsing a long trail
 
-With `maxItems` set to 4, the middle of the trail collapses behind a button that shows it again.
+With `maxItems` set to 4, the middle of the trail collapses behind a button that shows it again, even where there's room for all of it.
 
 ```example
 breadcrumb/collapsed
@@ -127,15 +139,21 @@ Add extra styles to the breadcrumb list via the `class` input on `<mona-breadcru
 
 The host is a block with `max-width: 100%` and `min-width: 0`, and in a flex parent it needs both. `min-width: 0` lets it shrink along a row, and `max-width: 100%` keeps it inside a column that sizes to fit. Without them it would never get narrower than the trail's text, and nothing inside it would truncate.
 
+The trail folds to the width the breadcrumb gets with every item shown. In a row where something beside it shrinks too, such as a search box, give the breadcrumb a width that doesn't depend on its content, such as `flex: 1`. Otherwise it measures more room than it keeps once folded, and the current page can truncate a little.
+
 ## Behavior
 
 - **Content projection:** accepts `<mona-breadcrumb-item>` children and an optional `<ng-template monaBreadcrumbSeparatorTemplate>`.
+- **Folding:** a `ResizeObserver` watches the list and each of its entries. A change in size measures every entry at its natural width and folds the fewest middle items for the rest to fit. Folded items and their separators stay in the list with the `hidden` attribute, so a test that counts items should skip `[hidden]` ones.
+- **Focus while folding:** focus on an item that folds moves to the button that now stands for it. Focus on the button, once everything fits again, moves to the first item it gave back.
 
 ## Accessibility
 
 `BreadcrumbComponent` renders `role="navigation"` on the host, making it a landmark that screen reader users can navigate to directly. The `aria-label` input sets the landmark's accessible name. Left empty, the name comes from the `breadcrumb` message, which is "Breadcrumb" in English. A breadcrumb with no items renders no landmark and no list.
 
 The item list is announced as a list by assistive technology. The last item automatically receives `aria-current="page"`. Separators are hidden from assistive technology.
+
+Folded items are hidden, so they leave the accessibility tree and the tab order. The button in their place is a native button named by the `showFullPath` message, "Show full path" in English.
 
 Items are native buttons, or the anchors you project. A disabled item is removed from the tab order and cannot be activated by keyboard or pointer. A disabled link gets `aria-disabled` and `tabindex="-1"`, and a click on it stops before `routerLink` sees it.
 

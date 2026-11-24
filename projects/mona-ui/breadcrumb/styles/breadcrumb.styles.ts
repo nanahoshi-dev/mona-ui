@@ -17,15 +17,17 @@ export const breadcrumbListThemeVariants = cva(
 );
 
 /**
- * `min-w-0`, or a flex item never gets narrower than its text, and nothing inside it ever truncates. The other items
- * shrink faster than the current page, so it's the one that stays readable. The current page keeps a factor of 1 rather
- * than a fraction, because flexbox only takes that fraction of the overflow once it's the last item left to shrink.
+ * `min-w-0`, or a flex item never gets narrower than its text, and nothing inside it ever truncates. What's left of a
+ * folded trail is the first item and the current page, and the first one gives up all its width before the current page
+ * truncates: flexbox shares the overflow by factor times width, so at a million to one, the current page's share stays
+ * below a layout unit until the first item has none left. The current page keeps a factor of 1 rather than a fraction,
+ * because flexbox only takes that fraction of the overflow once it's the last item left to shrink.
  */
 export const breadcrumbListItemWrapperThemeVariants = cva(`flex min-w-0 items-center`, {
     variants: {
         current: {
             true: "",
-            false: "shrink-[10]"
+            false: "shrink-[1000000]"
         }
     }
 });

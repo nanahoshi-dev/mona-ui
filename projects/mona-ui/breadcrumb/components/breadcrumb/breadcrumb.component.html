@@ -1,30 +1,17 @@
 @if (itemComponents().length > 0) {
+    <!--
+        Folded entries stay in the list, so the trail can be measured whole. The hidden attribute alone would lose to an
+        entry's display class.
+    -->
     <ol #list role="list" [class]="listClass()">
-        @for (entry of entries(); track entry.key) {
+        @for (entry of entries(); track entry.item) {
             @let item = entry.item;
-            @if (item) {
-                <li [class]="listItemClass(item.current())" [attr.data-item-index]="entry.index">
-                    @if (item.link()) {
-                        <!-- The anchor is the item, with its own classes and aria-current. -->
-                        <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
-                    } @else if (item.current()) {
-                        <span aria-current="page" [class]="currentItemClass()">
-                            <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
-                        </span>
-                    } @else {
-                        <button
-                            type="button"
-                            monaBreadcrumbItem
-                            [disabled]="item.effectiveDisabled()"
-                            (click)="onItemClick(item, $event)">
-                            <span [class]="itemContentClass()">
-                                <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
-                            </span>
-                        </button>
-                    }
-                </li>
-            } @else {
-                <li class="shrink-0">
+            @if (entry.foldButtonBefore) {
+                <li
+                    class="shrink-0"
+                    data-breadcrumb-fold
+                    [hidden]="hiddenCount() === 0"
+                    [style.display]="hiddenCount() === 0 ? 'none' : null">
                     <button
                         type="button"
                         monaBreadcrumbItem
@@ -36,9 +23,38 @@
                     </button>
                 </li>
             }
+            <li
+                [class]="listItemClass(item.current())"
+                [attr.data-item-index]="entry.index"
+                [hidden]="entry.folded"
+                [style.display]="entry.folded ? 'none' : null">
+                @if (item.link()) {
+                    <!-- The anchor is the item, with its own classes and aria-current. -->
+                    <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
+                } @else if (item.current()) {
+                    <span aria-current="page" [class]="currentItemClass()">
+                        <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
+                    </span>
+                } @else {
+                    <button
+                        type="button"
+                        monaBreadcrumbItem
+                        [disabled]="item.effectiveDisabled()"
+                        (click)="onItemClick(item, $event)">
+                        <span [class]="itemContentClass()">
+                            <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
+                        </span>
+                    </button>
+                }
+            </li>
 
             @if (!$last) {
-                <li class="shrink-0" aria-hidden="true" role="presentation">
+                <li
+                    class="shrink-0"
+                    aria-hidden="true"
+                    role="presentation"
+                    [hidden]="entry.separatorFolded"
+                    [style.display]="entry.separatorFolded ? 'none' : null">
                     @if (separatorTemplate()) {
                         <ng-container
                             [ngTemplateOutlet]="separatorTemplate()"

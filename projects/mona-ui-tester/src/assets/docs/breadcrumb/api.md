@@ -6,7 +6,7 @@ Everything below is imported from `@nanahoshi/mona-ui/breadcrumb`. Each name lin
 
 | Name | Kind | Description |
 | --- | --- | --- |
-| [`BreadcrumbComponent`](/api/breadcrumb/BreadcrumbComponent) | Component |  |
+| [`BreadcrumbComponent`](/api/breadcrumb/BreadcrumbComponent) | Component | A trail of `mona-breadcrumb-item`s that leads to the current page. |
 | [`BreadcrumbItemComponent`](/api/breadcrumb/BreadcrumbItemComponent) | Component | Use as a direct child of `<mona-breadcrumb>`. |
 | [`BreadcrumbLinkDirective`](/api/breadcrumb/BreadcrumbLinkDirective) | Directive | Makes a projected anchor the item's link, so the browser and the router treat it as one: ctrl-click, copy link, `href`, `routerLink`, `target`. |
 | [`BreadcrumbSeparatorTemplateDirective`](/api/breadcrumb/BreadcrumbSeparatorTemplateDirective) | Directive | Apply to an `<ng-template>` directly inside `<mona-breadcrumb>` to replace the default `ChevronRight` separator. |
