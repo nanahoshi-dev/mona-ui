@@ -1629,7 +1629,9 @@ export const PAGER_B_DEFAULT_MESSAGES: MonaPagerMessages = {
             expect(rowReorderMoved?.staticFragments).toContain("to position");
         });
 
-        it("runs auditAllLocales against the repository without violations", () => {
+        // The audit reads every official locale and the English defaults, which takes three to five seconds on a
+        // GitHub runner: close enough to Vitest's 5 s default that a slow runner failed a release.
+        it("runs auditAllLocales against the repository without violations", { timeout: 30_000 }, () => {
             const violations = auditAllLocales();
             expect(violations).toHaveLength(0);
         });
