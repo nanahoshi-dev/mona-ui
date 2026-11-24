@@ -17,7 +17,7 @@ import {
     viewChild
 } from "@angular/core";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { inertOutside, positionGlobalOverlay } from "@nanahoshi/mona-ui/internal";
+import { inertOutside, positionGlobalOverlay, themeBackdropClassList } from "@nanahoshi/mona-ui/internal";
 import { PopupService, type PopupRef } from "@nanahoshi/mona-ui/popup";
 import { merge, take } from "rxjs";
 import { CommandDialogContentDirective } from "../../directives/command-dialog-content.directive";
@@ -100,7 +100,7 @@ export class CommandDialogComponent {
         const top = Math.round((this.#document.defaultView?.innerHeight ?? 0) * TOP_OF_VIEWPORT);
         const popupRef = this.#popupService.create({
             anchor: this.#document.body,
-            backdropClass: ["fixed", "inset-0", "bg-background/50", "transition-opacity", "z-40", "backdrop-blur-xs"],
+            backdropClass: ["fixed", "inset-0", ...themeBackdropClassList, "transition-opacity", "z-40"],
             blockScroll: true,
             closeOnBackdropClick: true,
             closeOnEscape: true,

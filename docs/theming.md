@@ -8,14 +8,14 @@ A theme is a set of design tokens: named values such as `--color-primary` or `--
 
 A theme defines these kinds of tokens:
 
-| Tokens           | Examples                                       | What they control                                                |
-| ---------------- | ---------------------------------------------- | ---------------------------------------------------------------- |
-| Colors           | `--color-surface`, `--color-primary`           | Backgrounds, text, borders and states.                           |
-| Shadows          | `--shadow-control`, `--shadow-raised`          | How far controls, raised panels and overlays stand off the page. |
-| Shape            | `--radius-sm`, `--radius-md`, `--radius-lg`    | Corner radii.                                                    |
-| Motion           | `--mona-motion-fast`, `--mona-motion-standard` | Animation durations.                                             |
-| Materials        | `--mona-effect-overlay-backdrop-filter`        | Translucent, blurred backgrounds, such as Luna's glass.          |
-| Component tokens | `--mona-menubar-background`                    | Details of single components.                                    |
+| Tokens           | Examples                                       | What they control                                                                                           |
+| ---------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Colors           | `--color-surface`, `--color-primary`           | Backgrounds, text, borders and states.                                                                      |
+| Shadows          | `--shadow-control`, `--shadow-raised`          | How far controls, raised panels and overlays stand off the page.                                            |
+| Shape            | `--radius-sm`, `--radius-md`, `--radius-lg`    | Corner radii.                                                                                               |
+| Motion           | `--mona-motion-fast`, `--mona-motion-standard` | Animation durations.                                                                                        |
+| Materials        | `--mona-effect-overlay-backdrop-filter`        | Translucent, blurred backgrounds, such as Luna's glass, and the backdrop that dims the page behind a modal. |
+| Component tokens | `--mona-menubar-background`                    | Details of single components.                                                                               |
 
 Most themes have a light and a dark variant. The theme and the variant together, such as Mona Dark, decide which tokens are in effect.
 
@@ -210,11 +210,11 @@ In plain CSS, read the variables directly:
 
 The tokens already change with the variant, so most styles need nothing more. For the rest, the theme service sets these attributes on the root element:
 
-| Attribute                | Value                                                                                                                                |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `data-mona-theme`        | The theme's name, such as `mona`.                                                                                                    |
-| `data-mona-variant`      | `light` or `dark`.                                                                                                                   |
-| `data-mona-transparency` | `full`, or `reduced` when materials are opaque because the browser has no `backdrop-filter` or the user asked for less transparency. |
+| Attribute                | Value                                                                                                                                                        |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `data-mona-theme`        | The theme's name, such as `mona`.                                                                                                                            |
+| `data-mona-variant`      | `light` or `dark`.                                                                                                                                           |
+| `data-mona-transparency` | `full`, or `reduced` when materials are opaque and nothing is blurred, because the browser has no `backdrop-filter` or the user asked for less transparency. |
 
 Tailwind's `dark:` variant follows the operating system, not the theme. To make it follow the theme, add this line to your global stylesheet, after the imports:
 

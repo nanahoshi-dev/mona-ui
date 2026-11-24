@@ -502,6 +502,19 @@ describe("mona-command", () => {
             expect(document.activeElement).toBe(dialog()?.querySelector("input"));
         });
 
+        it("dims the page with the theme's backdrop rather than a blur of its own", async () => {
+            const fixture = setup(DialogHostComponent);
+            fixture.componentInstance.open.set(true);
+            await settle(fixture);
+            const classes = Array.from(document.querySelector(".cdk-overlay-backdrop")?.classList ?? []);
+
+            expect(classes).toContain(
+                "[background-color:var(--mona-effect-backdrop-background-color,color-mix(in_oklab,var(--color-background)_50%,transparent))]"
+            );
+            expect(classes).toContain("[backdrop-filter:var(--mona-effect-backdrop-backdrop-filter,blur(4px))]");
+            expect(classes).not.toContain("backdrop-blur-xs");
+        });
+
         it("reports closing through its model, and puts focus back", async () => {
             const fixture = setup(DialogHostComponent);
             const opener: HTMLButtonElement = fixture.nativeElement.querySelector("#opener");

@@ -100,6 +100,12 @@ export const auroraTheme = Object.freeze({
                 "--mona-motion-standard": "240ms"
             }),
             effects: Object.freeze({
+                "--mona-effect-backdrop-background-color":
+                    "color-mix(in oklab, var(--color-background) 50%, transparent)",
+                "--mona-effect-backdrop-fallback-background-color":
+                    "color-mix(in oklab, var(--color-background) 50%, transparent)",
+                "--mona-effect-backdrop-background-image": "none",
+                "--mona-effect-backdrop-backdrop-filter": "blur(4px)",
                 "--mona-effect-control-background-color": "var(--color-input-background)",
                 "--mona-effect-control-fallback-background-color": "var(--color-input-background)",
                 "--mona-effect-control-background-image": "none",

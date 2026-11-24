@@ -26,7 +26,7 @@ import {
     MonaI18nService,
     type SheetMessages
 } from "@nanahoshi/mona-ui/i18n";
-import { createElementControlId, inertOutside } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, inertOutside, themeBackdropClassList } from "@nanahoshi/mona-ui/internal";
 import {
     PopupCloseEvent,
     PopupCloseSource,
@@ -188,8 +188,7 @@ export class SheetComponent implements Omit<SheetVariantInput, "side"> {
             backdropClass: [
                 "fixed",
                 "inset-0",
-                "bg-background/50",
-                "backdrop-blur-xs",
+                ...themeBackdropClassList,
                 // Keeps the backdrop fade in step with the sheet's slide-out instead of the CDK default of 400ms.
                 "[transition-duration:240ms]!"
             ],

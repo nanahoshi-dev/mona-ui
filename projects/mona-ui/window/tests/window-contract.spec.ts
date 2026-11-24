@@ -474,6 +474,20 @@ describe("Window contract", () => {
         expect(escapeLog.closed).toEqual([{ value: undefined, via: PopupCloseSource.Escape }]);
     });
 
+    it("dims the page behind a modal window with the theme's backdrop rather than a blur of its own", () => {
+        const modal = service.open({ modal: true, title: "Modal" });
+        settle();
+        const classes = Array.from(overlayContainer.querySelector(".cdk-overlay-backdrop")?.classList ?? []);
+
+        expect(classes).toContain(
+            "[background-color:var(--mona-effect-backdrop-background-color,color-mix(in_oklab,var(--color-background)_50%,transparent))]"
+        );
+        expect(classes).toContain("[backdrop-filter:var(--mona-effect-backdrop-backdrop-filter,blur(4px))]");
+        expect(classes).not.toContain("backdrop-blur-xs");
+        modal.close();
+        finishLeaveAnimation();
+    });
+
     it("makes the page inert and locks scrolling behind a modal window", () => {
         const settings = captureSettings();
         const modal = service.open({ modal: true, title: "Modal" });

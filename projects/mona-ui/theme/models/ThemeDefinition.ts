@@ -14,7 +14,11 @@ export type ThemeShadowDefinitionRegistry = Readonly<Record<string, ThemeShadowD
 export type ThemeMotionVariable = "--mona-motion-fast" | "--mona-motion-standard";
 export type ThemeMotion = Readonly<Record<ThemeMotionVariable, string>>;
 
-export type ThemeEffectLevel = "control" | "overlay" | "raised";
+/**
+ * The materials a theme defines: `control` for fields, `raised` for elevated panels, `overlay` for menus, popups and
+ * dialogs, and `backdrop` for what dims the page behind a modal dialog, window or sheet.
+ */
+export type ThemeEffectLevel = "backdrop" | "control" | "overlay" | "raised";
 export type ThemeEffectVariable =
     | `--mona-effect-${ThemeEffectLevel}-background-color`
     | `--mona-effect-${ThemeEffectLevel}-fallback-background-color`

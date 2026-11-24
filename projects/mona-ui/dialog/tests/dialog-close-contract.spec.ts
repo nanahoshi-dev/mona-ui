@@ -301,6 +301,20 @@ describe("Dialog close contract", () => {
         finishLeaveAnimation();
     });
 
+    it("dims the page behind a modal dialog with the theme's backdrop rather than a blur of its own", () => {
+        const dialogRef = service.show({ title: "Modal" });
+        settle();
+        const classes = Array.from(overlayContainer.querySelector(".cdk-overlay-backdrop")?.classList ?? []);
+
+        expect(classes).toContain(
+            "[background-color:var(--mona-effect-backdrop-background-color,color-mix(in_oklab,var(--color-background)_50%,transparent))]"
+        );
+        expect(classes).toContain("[backdrop-filter:var(--mona-effect-backdrop-backdrop-filter,blur(4px))]");
+        expect(classes).not.toContain("backdrop-blur-xs");
+        dialogRef.close();
+        finishLeaveAnimation();
+    });
+
     it("keeps the page usable behind a non-modal dialog", () => {
         const settings = captureSettings();
         const dialogRef = service.show({ modal: false, title: "Non-modal" });

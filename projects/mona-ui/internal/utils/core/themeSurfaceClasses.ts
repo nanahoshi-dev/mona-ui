@@ -51,3 +51,22 @@ export const themeOverlaySurfaceClasses = `
     [background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]
     ${themeOverlayBackdropClasses}
 `;
+
+/**
+ * Blurs what's behind a modal's backdrop or a spinner's overlay, as much as the theme's backdrop asks. The fallback is
+ * Mona's, for a page without a theme provider.
+ */
+export const themeBackdropFilterClasses = `
+    [backdrop-filter:var(--mona-effect-backdrop-backdrop-filter,blur(4px))]
+    [-webkit-backdrop-filter:var(--mona-effect-backdrop-backdrop-filter,blur(4px))]
+`;
+
+/**
+ * The backdrop behind a modal dialog, window or sheet, which dims the page and blurs it if the theme does. As a list,
+ * for a popup's `backdropClass`, which takes one class per entry.
+ */
+export const themeBackdropClassList: readonly string[] = [
+    "[background-color:var(--mona-effect-backdrop-background-color,color-mix(in_oklab,var(--color-background)_50%,transparent))]",
+    "[background-image:var(--mona-effect-backdrop-background-image,none)]",
+    ...themeBackdropFilterClasses.trim().split(/\s+/)
+];

@@ -1,6 +1,6 @@
 import { afterNextRender, DOCUMENT, forwardRef, inject, Injectable, Injector } from "@angular/core";
 import { mergeMessages, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
-import { inertOutside, positionGlobalOverlay } from "@nanahoshi/mona-ui/internal";
+import { inertOutside, positionGlobalOverlay, themeBackdropClassList } from "@nanahoshi/mona-ui/internal";
 import { PopupService } from "@nanahoshi/mona-ui/popup";
 import { map, merge, type Observable, take } from "rxjs";
 import { DialogContentComponent } from "../components/dialog-content/dialog-content.component";
@@ -66,7 +66,7 @@ export class DialogService {
         const popupRef = this.#popupService.create({
             anchor: this.#document.body,
             backdropClass: modal
-                ? ["fixed", "inset-0", "bg-background/50", "transition-opacity", "z-40", "backdrop-blur-xs"]
+                ? ["fixed", "inset-0", ...themeBackdropClassList, "transition-opacity", "z-40"]
                 : "transparent",
             blockScroll: modal,
             closeOnBackdropClick: false,

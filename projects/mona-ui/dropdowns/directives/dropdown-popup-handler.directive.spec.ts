@@ -326,7 +326,9 @@ describe("DropdownPopupHandlerDirective as a bottom sheet", () => {
         expect(mediaQueries).toContain("(max-width: 639.98px)");
         expect(getSheet()).not.toBeNull();
         expect(getSheet()?.querySelector("input[aria-label='Filter places']")).not.toBeNull();
-        expect(document.querySelector(".cdk-overlay-backdrop")).not.toBeNull();
+        const backdropClasses = Array.from(document.querySelector(".cdk-overlay-backdrop")?.classList ?? []);
+        expect(backdropClasses).toContain("[backdrop-filter:var(--mona-effect-backdrop-backdrop-filter,blur(4px))]");
+        expect(backdropClasses).not.toContain("backdrop-blur-xs");
         expect(dropdownService.sheet()).toBe(true);
 
         await closePopup();
