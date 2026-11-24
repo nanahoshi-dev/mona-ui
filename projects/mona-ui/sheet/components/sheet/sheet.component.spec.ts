@@ -309,6 +309,17 @@ describe("SheetComponent", () => {
         expect(getDialog()).toBeTruthy();
     });
 
+    it("dims the page with the theme's backdrop rather than a blur of its own", async () => {
+        await createSheet({ ariaLabel: "Dimmed sheet" });
+        const classes = Array.from(overlayContainer.querySelector(".cdk-overlay-backdrop")?.classList ?? []);
+
+        expect(classes).toContain(
+            "[background-color:var(--mona-effect-backdrop-background-color,color-mix(in_oklab,var(--color-background)_50%,transparent))]"
+        );
+        expect(classes).toContain("[backdrop-filter:var(--mona-effect-backdrop-backdrop-filter,blur(4px))]");
+        expect(classes).not.toContain("backdrop-blur-xs");
+    });
+
     it("closes from the backdrop by default and can disable backdrop closing", async () => {
         const component = await createSheet({ ariaLabel: "Backdrop sheet" });
         const sources: Array<PopupCloseSource | undefined> = [];

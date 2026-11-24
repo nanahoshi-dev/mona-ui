@@ -1,11 +1,11 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeBackdropFilterClasses, type VariantInputs } from "@nanahoshi/mona-ui/internal";
 
 export const spinnerOverlayThemeVariants = cva(
     `
         isolate flex items-center justify-center
         pointer-events-auto select-none
-        bg-background/60 backdrop-blur-xs
+        bg-background/60 ${themeBackdropFilterClasses}
         text-foreground
     `,
     {

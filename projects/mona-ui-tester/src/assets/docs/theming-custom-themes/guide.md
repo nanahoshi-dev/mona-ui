@@ -58,15 +58,15 @@ Register themes in the application's root providers. The theme service writes on
 
 Each variant is a complete `ThemeProfile`, with these sections:
 
-| Section      | Tokens                                                                 | What they control                                                                                                |
-| ------------ | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `colors`     | Every `--color-*` token that Mona Light defines                        | Backgrounds, text, borders, states and charts. See [Color Roles](/components/theming/custom-colors#color-roles). |
-| `shadows`    | `--shadow-control`, `--shadow-raised`, `--shadow-overlay`              | How far controls, raised panels and overlays stand off the page.                                                 |
-| `shape`      | `--radius-sm`, `--radius-md`, `--radius-lg`                            | Corner radii.                                                                                                    |
-| `motion`     | `--mona-motion-fast`, `--mona-motion-standard`                         | Animation durations.                                                                                             |
-| `effects`    | `--mona-effect-*`, for the `control`, `raised` and `overlay` materials | Translucent or opaque backgrounds. See [Materials](#materials).                                                  |
-| `components` | Tokens for single components, such as `--mona-menubar-background`      | Calendar, list, menubar, pager and slider details.                                                               |
-| `custom`     | Optional. Any other variables                                          | Optional tokens, such as [indicator colors](#indicator-colors), and tokens of your own.                          |
+| Section      | Tokens                                                                             | What they control                                                                                                |
+| ------------ | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `colors`     | Every `--color-*` token that Mona Light defines                                    | Backgrounds, text, borders, states and charts. See [Color Roles](/components/theming/custom-colors#color-roles). |
+| `shadows`    | `--shadow-control`, `--shadow-raised`, `--shadow-overlay`                          | How far controls, raised panels and overlays stand off the page.                                                 |
+| `shape`      | `--radius-sm`, `--radius-md`, `--radius-lg`                                        | Corner radii.                                                                                                    |
+| `motion`     | `--mona-motion-fast`, `--mona-motion-standard`                                     | Animation durations.                                                                                             |
+| `effects`    | `--mona-effect-*`, for the `control`, `raised`, `overlay` and `backdrop` materials | Translucent or opaque backgrounds, and the backdrop behind a modal. See [Materials](#materials).                 |
+| `components` | Tokens for single components, such as `--mona-menubar-background`                  | Calendar, list, menubar, pager and slider details.                                                               |
+| `custom`     | Optional. Any other variables                                                      | Optional tokens, such as [indicator colors](#indicator-colors), and tokens of your own.                          |
 
 Every token in the first six sections is required, except the two [contrast borders](#contrast-borders). A variant that's missing one throws while the application starts, and the error lists what's missing. The easiest way to get them all is to start from a built-in theme, or to copy one of its variants, such as `monaTheme.variants.light`, and change the values.
 
@@ -74,7 +74,7 @@ A variable in `custom` can't reuse the name of a required token. To add a color 
 
 ### Materials
 
-The `effects` section defines three materials: `control` for fields and similar controls, `raised` for elevated panels, and `overlay` for menus, popups and dialogs. Each material has four tokens. Here is Luna Light's overlay:
+The `effects` section defines four materials: `control` for fields and similar controls, `raised` for elevated panels, `overlay` for menus, popups and dialogs, and `backdrop` for what dims the page behind a modal dialog, window or sheet. Each material has four tokens. Here is Luna Light's overlay:
 
 ```typescript
 "--mona-effect-overlay-background-color": "rgb(249 249 250 / 0.72)",
@@ -84,6 +84,28 @@ The `effects` section defines three materials: `control` for fields and similar 
 ```
 
 When the browser has no `backdrop-filter`, or the user asks for less transparency, the theme service uses the fallback color and drops the image and the filter. So the fallback has to be opaque, and readable on its own. For an opaque theme, use the same color for both and `none` for the image and the filter, as Mona does: `monaTheme.variants.light.effects` is a good starting point.
+
+### The Backdrop
+
+The backdrop is the exception: its fallback stays translucent, since it has to show the page it dims. Every built-in theme dims the page with half its background color and blurs it slightly:
+
+```typescript
+"--mona-effect-backdrop-background-color": "color-mix(in oklab, var(--color-background) 50%, transparent)",
+"--mona-effect-backdrop-fallback-background-color": "color-mix(in oklab, var(--color-background) 50%, transparent)",
+"--mona-effect-backdrop-background-image": "none",
+"--mona-effect-backdrop-backdrop-filter": "blur(4px)"
+```
+
+For a dim without the blur, set `--mona-effect-backdrop-backdrop-filter` to `none`. A spinner's overlay keeps a dim of its own, but takes the backdrop's filter, so it stops blurring too. To change only that in a built-in theme, [override](/components/theming/custom-colors#override-specific-tokens) the one token:
+
+```typescript
+provideThemeOverrides({
+    theme: "mona",
+    common: { effects: { "--mona-effect-backdrop-backdrop-filter": "none" } }
+});
+```
+
+When the user asks for less transparency, the theme service drops the blur in any case, and the page stays dimmed.
 
 ### Indicator Colors
 

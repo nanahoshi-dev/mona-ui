@@ -234,6 +234,21 @@ describe("ThemeService", () => {
         expect(root.style.getPropertyValue("--mona-effect-overlay-background-color")).toBe("#f9f9fa");
     });
 
+    it("keeps a modal backdrop's dim and drops its blur when transparency is reduced", () => {
+        const environment = createTransparencyEnvironment(root, "backdrop-filter", false);
+        configureService(root, environment.document);
+
+        expect(root.style.getPropertyValue("--mona-effect-backdrop-background-color")).toBe("backdrop");
+        expect(root.style.getPropertyValue("--mona-effect-backdrop-background-image")).toBe("backdrop-image");
+        expect(root.style.getPropertyValue("--mona-effect-backdrop-backdrop-filter")).toBe("blur(4px)");
+
+        environment.media.setMatches(true);
+
+        expect(root.style.getPropertyValue("--mona-effect-backdrop-background-color")).toBe("backdrop-fallback");
+        expect(root.style.getPropertyValue("--mona-effect-backdrop-background-image")).toBe("none");
+        expect(root.style.getPropertyValue("--mona-effect-backdrop-backdrop-filter")).toBe("none");
+    });
+
     it("reacts to reduced-transparency changes without changing theme selection and cleans up", () => {
         const environment = createTransparencyEnvironment(root, "backdrop-filter", false);
         const configured = configureService(root, environment.document);
@@ -434,6 +449,10 @@ function createProfile(primary: string, includeLightOnly = false): ThemeProfile 
         shadows: { "--shadow-control": "none" },
         motion: { "--mona-motion-fast": "200ms", "--mona-motion-standard": "300ms" },
         effects: {
+            "--mona-effect-backdrop-background-color": "backdrop",
+            "--mona-effect-backdrop-fallback-background-color": "backdrop-fallback",
+            "--mona-effect-backdrop-background-image": "backdrop-image",
+            "--mona-effect-backdrop-backdrop-filter": "blur(4px)",
             "--mona-effect-control-background-color": "control",
             "--mona-effect-control-fallback-background-color": "control-fallback",
             "--mona-effect-control-background-image": "control-image",

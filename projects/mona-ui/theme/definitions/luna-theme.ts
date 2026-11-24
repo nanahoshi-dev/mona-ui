@@ -1,7 +1,7 @@
 import type { ThemeFamilyRegistration } from "../models/ThemeDefinition";
 import { lunaThemeColors } from "./luna-theme-colors";
 import { lunaThemeShadows } from "./luna-theme-shadows";
-import { createDefaultThemeShape } from "./theme-primitives";
+import { createDefaultBackdropEffects, createDefaultThemeShape } from "./theme-primitives";
 
 export const lunaTheme = Object.freeze({
     name: "luna",
@@ -14,6 +14,7 @@ export const lunaTheme = Object.freeze({
                 "--mona-motion-standard": "320ms"
             }),
             effects: Object.freeze({
+                ...createDefaultBackdropEffects(),
                 "--mona-effect-control-background-color": "rgb(243 244 245 / 0.78)",
                 "--mona-effect-control-fallback-background-color": "#f3f4f5",
                 "--mona-effect-control-background-image": "none",
@@ -62,6 +63,7 @@ export const lunaTheme = Object.freeze({
                 "--mona-motion-standard": "320ms"
             }),
             effects: Object.freeze({
+                ...createDefaultBackdropEffects(),
                 "--mona-effect-control-background-color": "rgb(37 37 39 / 0.74)",
                 "--mona-effect-control-fallback-background-color": "#252527",
                 "--mona-effect-control-background-image": "none",

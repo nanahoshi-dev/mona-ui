@@ -1,7 +1,30 @@
-import type { SidebarColorRoleSeeds, ThemeColors, ThemeEffects, ThemeShape } from "../models/ThemeDefinition";
+import type {
+    SidebarColorRoleSeeds,
+    ThemeColors,
+    ThemeEffects,
+    ThemeEffectVariable,
+    ThemeShape
+} from "../models/ThemeDefinition";
+
+type ThemeBackdropEffects = Readonly<Record<Extract<ThemeEffectVariable, `--mona-effect-backdrop-${string}`>, string>>;
+
+/**
+ * Half the page's background over the page, and a slight blur. It stays translucent without `backdrop-filter`, as it
+ * has to show the page it dims.
+ */
+export function createDefaultBackdropEffects(): ThemeBackdropEffects {
+    return Object.freeze({
+        "--mona-effect-backdrop-background-color": "color-mix(in oklab, var(--color-background) 50%, transparent)",
+        "--mona-effect-backdrop-fallback-background-color":
+            "color-mix(in oklab, var(--color-background) 50%, transparent)",
+        "--mona-effect-backdrop-background-image": "none",
+        "--mona-effect-backdrop-backdrop-filter": "blur(4px)"
+    });
+}
 
 export function createDefaultThemeEffects(): ThemeEffects {
     return Object.freeze({
+        ...createDefaultBackdropEffects(),
         "--mona-effect-control-background-color": "var(--color-input-background)",
         "--mona-effect-control-fallback-background-color": "var(--color-input-background)",
         "--mona-effect-control-background-image": "none",

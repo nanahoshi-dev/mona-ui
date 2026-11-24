@@ -11,7 +11,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import { createElementControlId, focusCanReturn } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, focusCanReturn, themeBackdropClassList } from "@nanahoshi/mona-ui/internal";
 import {
     dropdownPopupAnimation,
     type PopupRef,
@@ -117,7 +117,7 @@ export class DropdownPopupHandlerDirective {
             anchor,
             animation: slideFromBottomPopupAnimation,
             // Keeps the backdrop fade in step with the sheet's slide-out instead of the CDK default of 400ms.
-            backdropClass: ["fixed", "inset-0", "bg-background/50", "backdrop-blur-xs", "[transition-duration:240ms]!"],
+            backdropClass: ["fixed", "inset-0", ...themeBackdropClassList, "[transition-duration:240ms]!"],
             blockScroll: true,
             closeOnBackdropClick: true,
             closeOnEscape: true,

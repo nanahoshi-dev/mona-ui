@@ -23,6 +23,12 @@ describe("SpinnerOverlayComponent", () => {
         expect(host.style.zIndex).toBe("1");
     });
 
+    it("blurs what's behind it as much as the theme's backdrop does, over its own dim", () => {
+        expect(host.classList).toContain("bg-background/60");
+        expect(host.classList).toContain("[backdrop-filter:var(--mona-effect-backdrop-backdrop-filter,blur(4px))]");
+        expect(host.classList).not.toContain("backdrop-blur-xs");
+    });
+
     it("should render full-page overlay with fixed positioning when fullPage is true", () => {
         fixture.componentRef.setInput("fullPage", true);
         fixture.detectChanges();

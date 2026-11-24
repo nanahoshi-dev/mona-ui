@@ -325,7 +325,7 @@ const contrastBorders: readonly (readonly [ThemeVariable, ThemeColorVariable])[]
     ["--color-border-control", "--color-border-control-contrast"],
     ["--color-border-control-hover", "--color-border-control-contrast-hover"]
 ];
-const effectLevels: readonly ThemeEffectLevel[] = ["control", "raised", "overlay"];
+const effectLevels: readonly ThemeEffectLevel[] = ["backdrop", "control", "raised", "overlay"];
 const preferenceVariants: readonly unknown[] = ["light", "dark", "system"];
 
 function applyColorPalette(profile: ThemeProfile, colors: ThemeColors): ThemeProfile {
