@@ -71,6 +71,14 @@ Each structural directive below is an `ng-template` placed as projected content 
 auto-complete/filtering
 ```
 
+### Suggestions the app looks up
+
+When the suggestions come from elsewhere as text is typed, such as from a server or a file system, cancel `filterChange` with `preventDefault()` and give them as `data`: the popup shows them as given, without narrowing them again. With `showNoData` set to `false`, the popup stays closed while there's nothing to suggest, opens as suggestions arrive while text is typed, and closes when they run out, as an address bar's do. With `highlightFirst` set to `false`, Enter commits the typed text unless an option was highlighted with the arrow keys.
+
+```example
+auto-complete/suggestions
+```
+
 ### Grouping
 
 `monaDropDownGroupable` groups options under a header row, driven by `groupBy`.
@@ -156,6 +164,14 @@ auto-complete/adaptive
 
 Even when `monaDropDownFilterable` is not applied, typing still highlights the best-matching option (when `highlightFirst` is `true`) using a case-insensitive "starts with" comparison against `textField`. The popup's visible option list itself is only narrowed once `monaDropDownFilterable` is applied — without it, all options remain visible regardless of what has been typed.
 
+### A cancelled `filterChange`
+
+`filterChange` is cancelable. Calling `preventDefault()` leaves the filtering to the app: the list keeps `data` as given, while the popup still opens and the typed text's match is still highlighted.
+
+### `showNoData`
+
+By default, when no option matches the typed text, the popup opens to say so. With `showNoData` set to `false`, it stays closed while there are no options, and follows them while text is typed: options that arrive open it, and it closes when they run out. Enter, Escape, picking an option and leaving the field end the typing, so options that arrive afterwards leave the popup closed. A bottom sheet stays open with no options, since its text box is where the typing happens.
+
 ### Committing and clearing
 
 Blurring the input while the popup is closed commits the typed text as `value`, even without pressing `Enter`. Clearing the input's text (for example by pressing `Escape` when the popup is closed) also clears `value`.
@@ -199,7 +215,7 @@ When the sheet closes, focus goes back to the field, with the typed text, which 
 
 ### Focus
 
-The host element itself is not a Tab stop (`tabindex="-1"`); the inner `<input>` element receives focus and is the actual Tab stop. Arrow-key navigation moves an internal highlighted-option pointer, reflected through `aria-activedescendant` on the input, instead of moving DOM focus into the popup.
+The host element itself is not a Tab stop (`tabindex="-1"`); the inner `<input>` element receives focus and is the actual Tab stop. `focus()` moves focus to it with the caret at the end of the text; `select()` moves focus to it with its text selected, so typing replaces it. Arrow-key navigation moves an internal highlighted-option pointer, reflected through `aria-activedescendant` on the input, instead of moving DOM focus into the popup.
 
 In a bottom sheet (`adaptiveMode="auto"` on a small screen), focus moves to the sheet's text box, which has the same role and states as the input, and comes back to the input when the sheet closes.
 

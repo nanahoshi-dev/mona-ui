@@ -38,6 +38,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./auto-complete/grouping/grouping-example.component").then(module => module.AutoCompleteGroupingExampleComponent),
         mainFile: "grouping-example.component.ts"
     },
+    "auto-complete/suggestions": {
+        files: ["suggestions-example.component.ts", "suggestions-example.component.html"],
+        load: () => import("./auto-complete/suggestions/suggestions-example.component").then(module => module.AutoCompleteSuggestionsExampleComponent),
+        mainFile: "suggestions-example.component.ts"
+    },
     "auto-complete/templates": {
         files: ["templates-example.component.ts", "templates-example.component.html"],
         load: () => import("./auto-complete/templates/templates-example.component").then(module => module.AutoCompleteTemplatesExampleComponent),

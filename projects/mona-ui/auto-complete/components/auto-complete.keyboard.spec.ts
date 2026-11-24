@@ -59,6 +59,30 @@ class FilterHostComponent {
     }
 }
 
+/** Suggestions the app looks up for itself as text is typed, as an address bar's are, with no "No data". */
+@Component({
+    template: `
+        <mona-auto-complete
+            aria-label="Food"
+            monaDropDownFilterable
+            textField="text"
+            [data]="suggestions()"
+            [highlightFirst]="false"
+            [showNoData]="false"
+            (filterChange)="suggest($event)"></mona-auto-complete>
+    `,
+    imports: [AutoCompleteComponent, DropdownFilterableDirective]
+})
+class SuggestionHostComponent {
+    public readonly asked: string[] = [];
+    public readonly suggestions = signal<readonly Food[]>([]);
+
+    public suggest(event: FilterChangeEvent): void {
+        event.preventDefault();
+        this.asked.push(event.filter);
+    }
+}
+
 @Component({
     template: `
         <mona-auto-complete
@@ -229,6 +253,16 @@ describe("AutoCompleteComponent keyboard and filtering", () => {
         expect(optionTexts()).toEqual(["Banana", "Blueberry"]);
     });
 
+    it("opens with the options as given when the app filters them itself", async () => {
+        host.preventFilter.set(true);
+
+        await typeText(fixture, "ap");
+
+        expect(popupOpen(fixture)).toBe(true);
+        expect(optionTexts()).toEqual(["Apple", "Apricot", "Banana", "Blueberry", "Carrot"]);
+        expect(highlightedText(fixture)).toBe("Apple");
+    });
+
     it("lets Space type a space", async () => {
         await typeText(fixture, "ap");
 
@@ -266,6 +300,105 @@ describe("AutoCompleteComponent keyboard and filtering", () => {
         await settle(fixture);
         expect(host.value()).toBeNull();
         expect(input(fixture).value).toBe("");
+    });
+});
+
+describe("AutoCompleteComponent with suggestions the app looks up", () => {
+    let fixture: ComponentFixture<SuggestionHostComponent>;
+    let host: SuggestionHostComponent;
+
+    beforeEach(async () => {
+        clearOverlays();
+        TestBed.configureTestingModule({ imports: [SuggestionHostComponent] });
+        fixture = TestBed.createComponent(SuggestionHostComponent);
+        host = fixture.componentInstance;
+        document.body.appendChild(fixture.nativeElement as HTMLElement);
+        await settle(fixture);
+    });
+
+    afterEach(() => {
+        (fixture.nativeElement as HTMLElement).remove();
+        clearOverlays();
+    });
+
+    it("stays closed while there's nothing to suggest, and opens as suggestions arrive", async () => {
+        await typeText(fixture, "ap");
+        expect(host.asked).toEqual(["ap"]);
+        expect(popupOpen(fixture)).toBe(false);
+        expect(options()).toEqual([]);
+
+        host.suggestions.set([FOODS[0], FOODS[4]]);
+        await settle(fixture);
+
+        expect(popupOpen(fixture)).toBe(true);
+        expect(optionTexts()).toEqual(["Apple", "Carrot"]);
+        expect(highlightedText(fixture)).toBeNull();
+    });
+
+    it("closes when the suggestions run out, and opens again when more come", async () => {
+        await typeText(fixture, "ap");
+        host.suggestions.set([FOODS[0]]);
+        await settle(fixture);
+
+        host.suggestions.set([]);
+        await settle(fixture);
+        expect(popupOpen(fixture)).toBe(false);
+        expect(input(fixture).value).toBe("ap");
+
+        host.suggestions.set([FOODS[1]]);
+        await settle(fixture);
+        expect(popupOpen(fixture)).toBe(true);
+        expect(optionTexts()).toEqual(["Apricot"]);
+    });
+
+    it("opens with suggestions there already, and keeps them for the next text until new ones come", async () => {
+        host.suggestions.set([FOODS[0], FOODS[1]]);
+        await settle(fixture);
+        expect(popupOpen(fixture)).toBe(false);
+
+        await typeText(fixture, "a");
+        expect(popupOpen(fixture)).toBe(true);
+
+        await typeText(fixture, "apr");
+        expect(host.asked).toEqual(["a", "apr"]);
+        expect(optionTexts()).toEqual(["Apple", "Apricot"]);
+    });
+
+    it("doesn't open for suggestions that come after Escape, until the next typing", async () => {
+        await typeText(fixture, "ap");
+        host.suggestions.set([FOODS[0]]);
+        await settle(fixture);
+
+        await press(fixture, "Escape");
+        host.suggestions.set([FOODS[0], FOODS[1]]);
+        await settle(fixture);
+        expect(popupOpen(fixture)).toBe(false);
+
+        await typeText(fixture, "apr");
+        expect(popupOpen(fixture)).toBe(true);
+    });
+
+    it("doesn't open for suggestions that come after Enter", async () => {
+        await typeText(fixture, "Kiwi");
+
+        await press(fixture, "Enter");
+        host.suggestions.set([FOODS[0]]);
+        await settle(fixture);
+
+        expect(popupOpen(fixture)).toBe(false);
+        expect(input(fixture).value).toBe("Kiwi");
+    });
+
+    it("doesn't open for suggestions that come after focus has left", async () => {
+        await typeText(fixture, "ap");
+        input(fixture).blur();
+        input(fixture).dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
+        await settle(fixture);
+
+        host.suggestions.set([FOODS[0]]);
+        await settle(fixture);
+
+        expect(popupOpen(fixture)).toBe(false);
     });
 });
 
