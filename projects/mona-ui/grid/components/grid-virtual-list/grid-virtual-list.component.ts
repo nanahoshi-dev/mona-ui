@@ -57,7 +57,9 @@ const MAX_BUFFER_ROWS = 8;
     templateUrl: "./grid-virtual-list.component.html",
     host: {
         "[class]": "baseClass()",
-        "[style.--mona-grid-row-height]": "gridService.virtualScrollOptions().height + 'px'"
+        "[style.--mona-grid-row-height]": "gridService.virtualScrollOptions().height + 'px'",
+        "(click)": "onBodyClick($event)",
+        "(contextmenu)": "onBodyClick($event)"
     }
 })
 export class GridVirtualListComponent {
@@ -147,6 +149,13 @@ export class GridVirtualListComponent {
         });
         this.setGroupSubscriptions();
         this.setSelectedKeysLoadSubscription();
+    }
+
+    /** A click or right-click on the body's empty space, below the rows, clears a selection made by clicking rows. */
+    protected onBodyClick(event: MouseEvent): void {
+        if (!(event.target instanceof Element) || event.target.closest("tr") == null) {
+            this.gridService.handleBodyEmptyClick(event);
+        }
     }
 
     protected trackBodyRow(_: number, bodyRow: GridViewRow): string {

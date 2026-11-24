@@ -332,6 +332,21 @@ export const gridListTableThemeVariants = cva(
 
 export const gridListTableRowThemeVariants = cva(``, {
     variants: {
+        /**
+         * Row navigation: the row shows the focus of its cell, with a ring over its cells, above pinned ones too. In
+         * forced colors, where rings don't paint and neither do the cells' backgrounds, the row has an outline.
+         */
+        rowFocus: {
+            true: `
+                relative after:absolute after:inset-0 after:z-2 after:pointer-events-none after:content-['']
+                has-[>td:focus-visible]:after:ring-2 has-[>td:focus-visible]:after:ring-inset
+                has-[>td:focus-visible]:after:ring-focus-indicator
+                forced-colors:has-[>td:focus-visible]:outline-2
+                forced-colors:has-[>td:focus-visible]:-outline-offset-2
+                forced-colors:has-[>td:focus-visible]:outline-[CanvasText]
+            `,
+            false: ""
+        },
         selected: {
             true: `
                     bg-(--color-selected) text-(--color-selected-foreground) hover:bg-(--color-selected-active)
@@ -345,18 +360,17 @@ export const gridListTableRowThemeVariants = cva(``, {
         },
         virtual: { true: gridVirtualRowHeightClass, false: "" }
     },
-    defaultVariants: { virtual: false }
+    defaultVariants: { rowFocus: false, virtual: false }
 });
 
 export const gridListTableCellThemeVariants = cva(
     `
         relative
-        outline-none focus-visible:outline-hidden z-1
+        outline-none z-1
         align-middle
         border-b border-b-border-subtle
         after:content-[''] after:block
         after:absolute after:inset-0 after:pointer-events-none
-        focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-focus-indicator
         aria-selected:bg-(--color-selected) aria-selected:text-(--color-selected-foreground)
         forced-colors:aria-selected:bg-[Highlight] forced-colors:aria-selected:text-[HighlightText]
         forced-colors:aria-selected:forced-color-adjust-none
@@ -365,9 +379,17 @@ export const gridListTableCellThemeVariants = cva(
         variants: {
             virtual: { true: gridVirtualRowHeightClass, false: "" },
             groupIndent: { true: "bg-surface-muted", false: "" },
-            lastInRow: { true: "", false: "border-e border-e-border-subtle" }
+            lastInRow: { true: "", false: "border-e border-e-border-subtle" },
+            /** Row navigation: the row draws the focus, so the cell doesn't. */
+            rowFocus: {
+                true: "",
+                false: `
+                    focus-visible:outline-hidden
+                    focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-focus-indicator
+                `
+            }
         },
-        defaultVariants: { virtual: false }
+        defaultVariants: { rowFocus: false, virtual: false }
     }
 );
 
@@ -408,7 +430,7 @@ export type GridHeaderVariantInput = VariantInputs<GridHeaderVariantProps>;
 
 export type GridListTableCellVariantProps = VariantProps<typeof gridListTableCellThemeVariants>;
 
-export type GridListTableCellVariantInput = Omit<VariantInputs<GridListTableCellVariantProps>, "virtual">;
+export type GridListTableCellVariantInput = Omit<VariantInputs<GridListTableCellVariantProps>, "rowFocus" | "virtual">;
 
 type GridListTableRowVariantProps = VariantProps<typeof gridListTableRowThemeVariants>;
 
@@ -429,7 +451,7 @@ export type GridListVariantProps = VariantProps<typeof gridListBaseThemeVariants
 
 export type GridListVariantInput = Omit<GridListBaseVariantInput, "virtual"> &
     GridListTableVariantInput &
-    Omit<GridListTableRowVariantInput, "selected" | "virtual">;
+    Omit<GridListTableRowVariantInput, "rowFocus" | "selected" | "virtual">;
 
 export type GridVariantProps = GridBaseVariantProps &
     GridHeaderTableCellVariantProps &

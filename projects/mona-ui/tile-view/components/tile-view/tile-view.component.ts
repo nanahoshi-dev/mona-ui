@@ -430,11 +430,25 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
         this.focusViewport();
     }
 
+    /**
+     * A right-click selects as in a file explorer, so a context menu acts on what was right-clicked: a tile that isn't
+     * selected becomes the selection, and a selected one keeps it.
+     */
+    protected onTileContextMenu(index: number): void {
+        this.setActive(index);
+        const key = this.#keys()[index];
+        if (this.selectionMode() !== "none" && !this.#selected().contains(key)) {
+            this.#anchorKey = key;
+            this.report([key]);
+        }
+        this.focusViewport();
+    }
+
     protected onTileDoubleClick(event: MouseEvent, index: number): void {
         this.itemActivate.emit({ item: this.#items()[index], originalEvent: event });
     }
 
-    /** A click on no tile clears the selection, as in a file explorer, unless Ctrl or Shift is held. */
+    /** A click or right-click on no tile clears the selection, as in a file explorer, unless Ctrl or Shift is held. */
     protected onViewportClick(event: MouseEvent): void {
         const target = event.target as Element | null;
         if (target?.closest("[data-mona-tile]") || event.ctrlKey || event.metaKey || event.shiftKey) {

@@ -1,6 +1,6 @@
 ## Overview
 
-`ContextMenuComponent` (`mona-contextmenu`) binds a popup menu to a `target` element. The menu opens at the pointer position when the consumer right-clicks the target, or at the target's center when the consumer presses the `ContextMenu` key (or `Shift+F10`) while the target has focus.
+`ContextMenuComponent` (`mona-contextmenu`) binds a popup menu to a `target` element. The menu opens at the pointer position when the consumer right-clicks the target, or, when the consumer presses the `ContextMenu` key (or `Shift+F10`) while focus is in the target, at the focused element: at its active item when it names one with `aria-activedescendant`, as a list or a tile view does.
 
 Menu content is built from content-projected items — `mona-contextmenu-item`, `mona-contextmenu-checkbox-item`, `mona-contextmenu-radio-group`/`mona-contextmenu-radio-item`, `mona-contextmenu-group`, and `mona-contextmenu-separator` — nested inside `<mona-contextmenu>`. Nesting items inside another item creates a submenu.
 
@@ -135,7 +135,9 @@ contextmenu/icons
 
 ## Behavior
 
-**Positioning is fixed.** The menu opens at the pointer position for a real right-click, or at the target's center when opened via keyboard. `ContextMenuComponent` does not expose a way to anchor the menu elsewhere or to use a different trigger event; use `PopupMenuComponent` directly for that.
+**Positioning is fixed.** The menu opens at the pointer position for a real right-click. Opened via keyboard, it opens at the middle of the focused element inside the target, or of the element that element's `aria-activedescendant` names, as far as it shows inside the target: the focused row of a grid, or the active tile of a tile view. With the focus on the target itself and no active descendant, it opens at the target's center. `ContextMenuComponent` does not expose a way to anchor the menu elsewhere or to use a different trigger event; use `PopupMenuComponent` directly for that.
+
+**On a list, the selection decides what the menu is for.** The [grid](/components/grid-selection#row-clicks) (with `selectOnRowClick`) and the [tile view](/components/tile-view#selection-follows-a-file-explorer) select what was right-clicked before the menu opens, and clear the selection on a right-click in empty space, so a menu bound to them, or to an element around them, can build its items from the selection.
 
 **`items` takes precedence over projected content.** When the `items` input is a non-empty iterable, it is rendered instead of any projected `mona-contextmenu-item` (and related) components.
 
@@ -160,7 +162,7 @@ contextmenu/icons
 | Key                               | Action                                                                                                      |
 |-----------------------------------|-------------------------------------------------------------------------------------------------------------|
 | Right-click                       | Opens the menu at the pointer position                                                                      |
-| `ContextMenu` key, or `Shift+F10` | Opens the menu at the target's center, while the target has focus                                           |
+| `ContextMenu` key, or `Shift+F10` | Opens the menu at the focused element, or its active descendant, while focus is in the target                |
 | `ArrowDown`                       | Highlights the next item, wrapping to the first. Disabled items are highlighted too, but can't be activated |
 | `ArrowUp`                         | Highlights the previous item, wrapping to the last                                                          |
 | `ArrowRight`                      | Opens the highlighted item's submenu, if it has nested items                                                |
@@ -201,7 +203,9 @@ contextmenu/icons
 | `aria-haspopup` | When the item has nested items       | `"menu"`                                                                                 |
 | `aria-expanded` | When the item has nested items       | `"true"` while its submenu is open, otherwise `"false"`                                  |
 | `aria-controls` | While the item's submenu is open     | The submenu's ID                                                                         |
-| `aria-label`    | When the item's `label` is non-empty | The item's `label` text                                                                  |
+| `aria-label`    | When the item's `label` is non-empty, without a text or shortcut template | The item's `label` text                                             |
+
+An item with a `monaContextMenuShortcutTemplate` has no `aria-label`: it is named by what it shows, its label and then the shortcut, such as "Cut Ctrl+X". Screen readers read a native menu's shortcuts the same way, and a name of the label alone would leave out text the item shows (WCAG 2.5.3, Label in Name).
 
 **Group** (`role="group"`): wraps a titled group's header and its items, with `aria-labelledby` pointing at the header. **Separator:** `role="separator"`.
 

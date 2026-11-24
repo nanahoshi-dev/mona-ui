@@ -15,7 +15,8 @@ export class GridCellDirective implements GridListTableCellVariantInput {
         gridListTableCellThemeVariants({
             virtual: this.#gridService?.virtualScrollOptions().enabled ?? false,
             groupIndent: this.groupIndent(),
-            lastInRow: this.lastInRow() || this.groupHeader()
+            lastInRow: this.lastInRow() || this.groupHeader(),
+            rowFocus: (this.#gridService?.rowNavigation() ?? false) && !this.groupHeader()
         })
     );
 

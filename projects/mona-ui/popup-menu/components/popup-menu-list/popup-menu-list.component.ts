@@ -87,7 +87,7 @@ export class PopupMenuListComponent implements OnInit {
     #pendingHover: { readonly item: PopupMenuItem; readonly target: HTMLElement } | null = null;
     #pointerTrail: readonly PointerPosition[] = [];
     protected readonly activeMenuItem = signal<PopupMenuItem | null>(null);
-    protected readonly ariaLabel = this.#parentConfig.ariaLabel || null;
+    protected readonly ariaLabel = computed(() => this.#parentConfig.ariaLabel?.() || null);
     protected readonly baseClasses = computed(() => {
         const rounded = this.#parentConfig.rounded();
         return popupMenuBaseThemeVariants({ rounded });
@@ -111,7 +111,7 @@ export class PopupMenuListComponent implements OnInit {
         return popupMenuIconContainerThemeVariants();
     });
     protected readonly isRtl = computed(() => this.#direction() === "rtl");
-    protected readonly labelledBy = this.ariaLabel ? null : this.#parentConfig.labelledBy;
+    protected readonly labelledBy = computed(() => (this.ariaLabel() ? null : this.#parentConfig.labelledBy));
     protected readonly linkContainerClasses = computed(() => {
         return popupMenuLinkThemeVariants();
     });

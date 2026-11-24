@@ -83,6 +83,8 @@ A selected tile has the selection background, and the tile the keyboard is on ha
 
 The anchor is the tile last clicked, or moved to, without Shift. Ctrl+Shift+click adds the range to the selection.
 
+A right-click selects too, so a context menu acts on what was right-clicked: a tile that isn't selected becomes the selection, a selected tile keeps it, and a right-click in empty space clears it. The right-clicked tile becomes active. Put a [context menu](/components/contextmenu) on the tile view, or on an element around it: opened from the keyboard, it opens at the active tile.
+
 ### The active tile follows the app's selection
 
 When the app sets `selectedKeys` to keys that don't include the active tile, such as the key of an item it just added, the first selected tile in item order becomes active and is scrolled into view. `scrollToItem(key)` scrolls a tile into view without changing anything else.

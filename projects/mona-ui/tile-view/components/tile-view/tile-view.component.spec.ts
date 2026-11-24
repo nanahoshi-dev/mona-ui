@@ -262,6 +262,51 @@ describe("TileViewComponent", () => {
         });
     });
 
+    describe("right-click", () => {
+        async function rightClick(element: HTMLElement): Promise<void> {
+            element.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, button: 2 }));
+            await settle(fixture);
+        }
+
+        it("selects a tile that isn't selected in place of the selection, and makes it active", async () => {
+            await click(0);
+            await click(1, { ctrlKey: true });
+
+            await rightClick(tile(4));
+
+            expect(host.selected()).toEqual([5]);
+            expect(document.activeElement).toBe(listbox());
+            expect(activeText()).toBe("Elder");
+        });
+
+        it("keeps the selection when a selected tile is right-clicked", async () => {
+            await click(0);
+            await click(1, { ctrlKey: true });
+
+            await rightClick(tile(1));
+
+            expect(host.selected()).toEqual([1, 2]);
+            expect(activeText()).toBe("Banana");
+        });
+
+        it("clears the selection on a right-click in empty space", async () => {
+            await click(0);
+
+            await rightClick(listbox());
+
+            expect(host.selected()).toEqual([]);
+        });
+
+        it("selects nothing without selection", async () => {
+            host.mode.set("none");
+            await settle(fixture);
+
+            await rightClick(tile(2));
+
+            expect(host.selected()).toEqual([]);
+        });
+    });
+
     describe("keyboard", () => {
         it("lands on the first tile without selecting it", async () => {
             await focus();

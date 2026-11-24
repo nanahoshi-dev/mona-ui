@@ -54,6 +54,7 @@ function isInCellControl(target: EventTarget | null): boolean {
         "[attr.aria-posinset]": "treeInfo()?.posInSet ?? null",
         "[attr.aria-setsize]": "treeInfo()?.setSize ?? null",
         "(click)": "onClick($event)",
+        "(contextmenu)": "onContextMenu()",
         "(dblclick)": "onDoubleClick($event)"
     }
 })
@@ -69,6 +70,7 @@ export class GridRowComponent {
     });
     protected readonly baseClass = computed(() => {
         const variantClass = gridListTableRowThemeVariants({
+            rowFocus: this.gridService.rowNavigation(),
             selected: this.selected(),
             virtual: this.gridService.virtualScrollOptions().enabled
         });
@@ -111,6 +113,13 @@ export class GridRowComponent {
 
     protected onClick(event: MouseEvent): void {
         this.gridService.handleRowClick(event, this.row());
+    }
+
+    /** A right-click selects the row as a file list does, so a context menu opened on it acts on it. */
+    protected onContextMenu(): void {
+        if (!this.gridService.isInEditMode()) {
+            this.gridService.handleRowContextMenu(this.row());
+        }
     }
 
     /**

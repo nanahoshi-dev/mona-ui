@@ -72,6 +72,7 @@ import type { ColumnResizeEvent } from "../../models/ColumnResizeEvent";
 import { ColumnSortEvent } from "../../models/ColumnSortEvent";
 import { GRID_COLUMN_DEFINITION, type GridColumnDefinition } from "../../models/GridColumnDefinition";
 import type { GridKeySelector } from "../../models/GridKeySelector";
+import type { GridNavigationMode } from "../../models/GridNavigationMode";
 import type { GridRowActivateEvent } from "../../models/GridRowActivateEvent";
 import type { GridRowClass } from "../../models/GridRowClass";
 import type { GridToolbarContext, GridToolbarTemplateContext } from "../../models/GridToolbarTemplateContext";
@@ -442,6 +443,15 @@ export class GridComponent<T> implements GridVariantInput {
     public readonly expandedKeys = model<unknown[]>([]);
 
     /**
+     * @description How the keyboard moves in the body. `"cell"` moves between cells. `"row"` moves between rows, as
+     * in a file list: the arrows go up and down, Home and End to the first and last row, and the focus shows on the
+     * whole row. When rows select on click, moving selects the row, Shift extends the selection from the anchor, and
+     * Ctrl moves without selecting. ArrowLeft and ArrowRight only scroll, and the header keeps moving by cell.
+     * @default "cell"
+     */
+    public readonly navigation = input<GridNavigationMode>("cell");
+
+    /**
      * @description Emitted when the user changes the page or the page size, when the user's sort or filter moves a
      * client-side grid back to the first page, and when the grid moves back to the last page because the data shrank.
      * Not emitted for `skip` or `pageSize` values set from code.
@@ -533,6 +543,13 @@ export class GridComponent<T> implements GridVariantInput {
             untracked(() => this.gridService.setColumnDefinitions(columns));
         });
         effect(() => this.gridService.rowClass.set(this.rowClass() as GridRowClass<unknown> | null));
+        effect(() => {
+            const rowNavigation = this.navigation() === "row";
+            untracked(() => {
+                this.gridService.rowNavigation.set(rowNavigation);
+                this.#gridNavigationService.setRowNavigation(rowNavigation);
+            });
+        });
         this.gridService.rowActivate$
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => this.rowActivate.emit(event as GridRowActivateEvent<T>));

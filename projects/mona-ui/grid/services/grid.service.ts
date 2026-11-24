@@ -613,6 +613,8 @@ export class GridService {
     public readonly rowDragInProgress = computed(() => this.draggingRowUid() != null);
     public readonly rowEdit$ = new Subject<RowEditEvent>();
     public readonly rowKey = signal<GridKeySelector<unknown> | null>(null);
+    /** Whether the keyboard moves from row to row in the body, as in a file list, rather than from cell to cell. */
+    public readonly rowNavigation = signal(false);
     public readonly rowReorder$ = new Subject<RowReorderEvent>();
     public readonly rowReorderColumnVisible = computed(
         () => this.rowReorderableOptions().enabled === true && this.#treeOptions() == null
@@ -1296,6 +1298,17 @@ export class GridService {
         return this.treeView()?.info.get(row.uid) ?? null;
     }
 
+    /**
+     * A click or right-click on the body's empty space, below the rows. When rows select on click, it clears the
+     * selection, as in a file list, unless Ctrl or Shift is held.
+     */
+    public handleBodyEmptyClick(event: GridSelectionModifiers): void {
+        if (!this.selectsOnRowClick() || event.ctrlKey || event.metaKey || event.shiftKey) {
+            return;
+        }
+        this.deselectAllRows();
+    }
+
     public handleMultipleSelection(event: GridSelectionModifiers, row: Row): void {
         if (event.shiftKey) {
             this.selectRowRange(row);
@@ -1325,6 +1338,68 @@ export class GridService {
         } else {
             this.handleMultipleSelection(event, row);
         }
+    }
+
+    /**
+     * A right-click on a data row. When rows select on click, a row that isn't selected becomes the selection, and a
+     * selected row keeps it, as in a file list, so a context menu acts on what was right-clicked.
+     */
+    public handleRowContextMenu(row: Row): void {
+        if (!this.selectsOnRowClick() || this.isRowSelected(row)) {
+            return;
+        }
+        this.deselectAllRows();
+        this.selectRow(row);
+        this.#anchorRowKey.set(this.getRowSelectionKey(row));
+    }
+
+    /**
+     * With row navigation, the keyboard moved to a data row. When rows select on click, the row becomes the selection;
+     * with Shift, the rows from the anchor to it do, and with Ctrl and Shift they're added. Ctrl alone moves without
+     * selecting.
+     */
+    public handleRowKeyboardMove(rowUid: string, event: GridSelectionModifiers): void {
+        const command = event.ctrlKey || event.metaKey;
+        if (!this.selectsOnRowClick() || (command && !event.shiftKey)) {
+            return;
+        }
+        const row = this.viewRows().firstOrDefault(viewRow => viewRow.uid === rowUid);
+        if (row == null) {
+            return;
+        }
+        if (this.selectableOptions().mode === "single" || !event.shiftKey) {
+            this.deselectAllRows();
+            this.selectRow(row);
+            this.#anchorRowKey.set(this.getRowSelectionKey(row));
+            return;
+        }
+        const selected = this.selectedKeys();
+        this.selectRowRange(row);
+        if (command) {
+            this.selectedKeys.update(keys => keys.addAll(selected));
+        }
+    }
+
+    /**
+     * With row navigation, Space on a data row selects it, adding it to the selection; Ctrl+Space toggles it, and
+     * Shift+Space selects from the anchor. Returns false when rows can't be selected.
+     */
+    public handleRowSpace(rowUid: string, event: GridSelectionModifiers): boolean {
+        if (event.shiftKey || event.ctrlKey || event.metaKey) {
+            return this.selectRowFromKeyboard(rowUid, event.shiftKey);
+        }
+        const row = this.viewRows().firstOrDefault(viewRow => viewRow.uid === rowUid);
+        if (!this.selectableOptions().enabled || row == null) {
+            return false;
+        }
+        if (!this.isRowSelected(row)) {
+            if (this.selectableOptions().mode === "single") {
+                this.deselectAllRows();
+            }
+            this.selectRow(row);
+        }
+        this.#anchorRowKey.set(this.getRowSelectionKey(row));
+        return true;
     }
 
     public handleSingleSelection(event: GridSelectionModifiers, row: Row): void {
@@ -2835,6 +2910,12 @@ export class GridService {
         const [start, end] = anchorIndex <= targetIndex ? [anchorIndex, targetIndex] : [targetIndex, anchorIndex];
         const rangeKeys = rows.slice(start, end + 1).map(r => this.getRowSelectionKey(r));
         this.selectedKeys.set(ImmutableSet.create(rangeKeys));
+    }
+
+    /** Whether a click on a row selects it, as in a file list. */
+    private selectsOnRowClick(): boolean {
+        const options = this.selectableOptions();
+        return options.enabled === true && options.selectOnRowClick !== false;
     }
 
     private serializeFilter(

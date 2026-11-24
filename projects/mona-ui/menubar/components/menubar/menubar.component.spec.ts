@@ -94,6 +94,8 @@ describe("MenubarComponent", () => {
         expect(classes).toContain(
             "data-[active='true']:text-[var(--mona-menu-item-hover-foreground,var(--color-selected-foreground))]"
         );
+        expect(classes).toContain("forced-colors:data-[active='true']:bg-[Highlight]");
+        expect(classes).toContain("forced-colors:data-[active='true']:**:text-[HighlightText]");
     });
 
     it("navigates horizontally with ArrowRight / ArrowLeft in LTR", () => {

@@ -3,8 +3,8 @@
     [attr.tabindex]="0"
     [attr.aria-orientation]="'vertical'"
     [attr.aria-activedescendant]="activeMenuItem()?.uid"
-    [attr.aria-label]="ariaLabel"
-    [attr.aria-labelledby]="labelledBy"
+    [attr.aria-label]="ariaLabel()"
+    [attr.aria-labelledby]="labelledBy()"
     [attr.id]="menuId()"
     [class]="containerClasses()">
     @for (group of menuItems(); track $index) {
@@ -35,7 +35,8 @@
 <ng-template #itemsTemplate let-items>
     @for (item of asItems(items); track $index) {
         @if (item.separator) {
-            <div role="separator" class="bg-border my-1 h-px"></div>
+            <!-- A line of background, which forced colors would leave out, so it is drawn in GrayText there. -->
+            <div role="separator" class="bg-border my-1 h-px forced-colors:bg-[GrayText]"></div>
         } @else {
             @let iconTemplate = item.iconTemplate?.() ?? popupIconTemplate() ?? null;
             @let shortcutTemplate = item.shortcutTemplate?.() ?? popupShortcutTemplate() ?? null;
@@ -52,7 +53,9 @@
                 [attr.aria-expanded]="item.items.length > 0 ? item === openSubmenuItem() : null"
                 [attr.aria-controls]="item === openSubmenuItem() ? submenuId() : null"
                 [attr.aria-haspopup]="item.items.length > 0 ? 'menu' : null"
-                [attr.aria-label]="textTemplate ? null : item.label || null"
+                [attr.aria-label]="
+                    textTemplate || (shortcutTemplate && item.items.length === 0) ? null : item.label || null
+                "
                 [attr.data-disabled]="item.disabled"
                 [class]="menuItemClasses()">
                 @if (iconAreaVisible()) {
@@ -100,6 +103,8 @@
                         </div>
                     }
                 } @else if (shortcutTemplate) {
+                    <!-- An item with a shortcut is named by what it shows, its label and then the shortcut, as screen
+                         readers read a native menu's: a name of the label alone would leave out text it shows. -->
                     <ng-container
                         [ngTemplateOutlet]="shortcutTemplate"
                         [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>

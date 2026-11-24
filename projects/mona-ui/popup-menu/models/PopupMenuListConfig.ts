@@ -17,8 +17,11 @@ export interface PopupMenuCloseRequest {
 }
 
 export interface PopupMenuListConfig {
-    /** The root menu's name; submenus are named by their parent item. */
-    ariaLabel?: string;
+    /**
+     * The root menu's name; submenus are named by their parent item. A signal, so an open menu's name follows it, as
+     * when it names what the menu acts on and the right-click that opened it changed that.
+     */
+    ariaLabel?: Signal<string>;
     childCloseRequest$?: Subject<void>;
     closeMenu: (request: PopupMenuCloseRequest) => void;
     initialFocus?: PopupMenuInitialFocus | null;

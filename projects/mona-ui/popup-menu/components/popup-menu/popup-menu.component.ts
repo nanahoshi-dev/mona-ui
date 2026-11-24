@@ -262,7 +262,9 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
     }
 
     /**
-     * @description Opens the menu, as if the target had been clicked.
+     * @description Opens the menu, as if the target had been clicked. From the ContextMenu key or Shift+F10, with
+     * `openAtPointer` and no `anchor`, it opens at the focused element inside the target, such as a list's focused
+     * item, or at the element its `aria-activedescendant` names; otherwise at the target's center.
      * @param viaContextMenuKey Whether the menu opens from the ContextMenu key or Shift+F10.
      */
     public openMenu(viaContextMenuKey: boolean = false): void {
@@ -270,16 +272,14 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         if (!targetElement) {
             return;
         }
-        const center = targetElement.getBoundingClientRect();
-        // Create a fake event to pass the center of the target element as the mouse position.
-        // This is useful when openAtPointer is true, but we want to open the menu via keyboard
-        // or some other non-mouse event.
+        // A fake event passes the position, for openAtPointer, when the menu opens from the keyboard.
         if (viaContextMenuKey) {
+            const { x, y } = this.#keyboardPosition(targetElement);
             const contextMenuEvent = new MouseEvent("contextmenu", {
                 bubbles: true,
                 cancelable: true,
-                clientX: center.left + center.width / 2,
-                clientY: center.top + center.height / 2,
+                clientX: x,
+                clientY: y,
                 button: -1
             });
             const ownerDocument = targetElement.ownerDocument;
@@ -331,6 +331,31 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         return element instanceof HTMLElement ? element : null;
     }
 
+    /**
+     * Where a menu opened from the keyboard goes: the middle of the focused element inside the target, or of its
+     * active descendant, as far as it shows inside the target; otherwise the target's middle.
+     */
+    #keyboardPosition(targetElement: HTMLElement): { x: number; y: number } {
+        const target = targetElement.getBoundingClientRect();
+        const document = targetElement.ownerDocument;
+        const focused = document.activeElement;
+        let anchor: Element | null = focused instanceof HTMLElement && targetElement.contains(focused) ? focused : null;
+        const descendantId = anchor?.getAttribute("aria-activedescendant");
+        const descendant = descendantId ? document.getElementById(descendantId) : null;
+        if (descendant != null && targetElement.contains(descendant)) {
+            anchor = descendant;
+        }
+        const box = anchor?.getBoundingClientRect() ?? target;
+        const left = Math.max(box.left, target.left);
+        const right = Math.min(box.right, target.right);
+        const top = Math.max(box.top, target.top);
+        const bottom = Math.min(box.bottom, target.bottom);
+        if (right <= left || bottom <= top) {
+            return { x: target.left + target.width / 2, y: target.top + target.height / 2 };
+        }
+        return { x: (left + right) / 2, y: (top + bottom) / 2 };
+    }
+
     private closeFromList(state: OpenMenuState, options: PopupMenuCloseRequest): void {
         if (this.#open !== state || !state.ref) {
             return;
@@ -358,7 +383,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         const anchorConnectionPoint = this.openAtPointer() ? undefined : this.anchorConnectionPoint();
         const targetId = this.#element(this.target())?.id ?? "";
         const data: PopupMenuListConfig = {
-            ariaLabel: this.ariaLabel(),
+            ariaLabel: this.ariaLabel,
             closeMenu: options => this.closeFromList(state, options),
             initialFocus: this.#pendingInitialFocus,
             isRoot: true,
@@ -401,9 +426,12 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         const actualTargetElement = targetInput instanceof ElementRef ? targetInput.nativeElement : targetInput;
         let anchor: Point | Element;
         if (atPointer) {
-            if (event.button < 0) {
+            // From the keyboard (button -1): the anchor's center, or where openMenu put the event, at the focus.
+            if (event.button < 0 && anchorElement != null) {
                 const rect = actualTargetElement.getBoundingClientRect();
                 anchor = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+            } else if (event.button < 0) {
+                anchor = { x: event.clientX, y: event.clientY };
             } else {
                 anchor = { x: event.x, y: event.y };
             }

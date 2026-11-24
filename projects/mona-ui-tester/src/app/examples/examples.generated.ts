@@ -763,6 +763,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./grid-rows/master-detail/master-detail-example.component").then(module => module.GridMasterDetailExampleComponent),
         mainFile: "master-detail-example.component.ts"
     },
+    "grid-selection/file-list": {
+        files: ["file-list-example.component.ts", "file-list-example.component.html"],
+        load: () => import("./grid-selection/file-list/file-list-example.component").then(module => module.GridFileListExampleComponent),
+        mainFile: "file-list-example.component.ts"
+    },
     "grid-selection/range": {
         files: ["range-example.component.ts", "range-example.component.html"],
         load: () => import("./grid-selection/range/range-example.component").then(module => module.GridRangeSelectionExampleComponent),

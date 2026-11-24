@@ -389,6 +389,49 @@ export class GridLogicalCellDirective {
         return true;
     }
 
+    /**
+     * With row navigation, the keys of a data row in the body: the arrows, PageUp and PageDown move by rows, Home and
+     * End to the first and last row, and moving selects as in a file list. ArrowLeft and ArrowRight don't move, so the
+     * body scrolls, except on a tree row's cell, which expands and collapses. Returns whether the key was one of them.
+     */
+    #handleRowKey(event: KeyboardEvent): boolean {
+        const rowUid = this.rowUid();
+        if (
+            !this.#gridService.rowNavigation() ||
+            this.resolvedSection() !== "body" ||
+            this.groupHeader() ||
+            this.resolvedCellKind() === "detail" ||
+            rowUid == null ||
+            event.altKey
+        ) {
+            return false;
+        }
+        switch (event.key) {
+            case "ArrowDown":
+            case "ArrowUp":
+            case "PageDown":
+            case "PageUp":
+                event.preventDefault();
+                this.#moveToRow(event.key, event);
+                return true;
+            case "Home":
+            case "End":
+                event.preventDefault();
+                this.#moveToRow(event.key === "Home" ? "FirstRow" : "LastRow", event);
+                return true;
+            case "ArrowLeft":
+            case "ArrowRight":
+                return !this.treeCell();
+            case " ":
+                if (this.#gridService.handleRowSpace(rowUid, event)) {
+                    event.preventDefault();
+                }
+                return true;
+            default:
+                return false;
+        }
+    }
+
     /** Space, Shift+Space, Shift+ArrowUp/Down and Ctrl+A select rows. Returns whether the key was one of them. */
     #handleSelectionKey(event: KeyboardEvent): boolean {
         const rowUid = this.rowUid();
@@ -437,6 +480,19 @@ export class GridLogicalCellDirective {
 
     #isElementHidden(element: HTMLElement): boolean {
         return element.closest("[hidden], [inert]") != null || element.getAttribute("aria-hidden") === "true";
+    }
+
+    #moveToRow(navigationKey: string, event: KeyboardEvent): void {
+        const cellKey = this.#cellKey();
+        if (!cellKey) {
+            return;
+        }
+        this.#gridService.clearCellRange();
+        this.#gridNavigationService.navigate(cellKey, navigationKey, cell => {
+            if (cell.section === "body" && !cell.groupHeader && cell.rowUid != null) {
+                this.#gridService.handleRowKeyboardMove(cell.rowUid, event);
+            }
+        });
     }
 
     #navigate(navigationKey: string): boolean {
@@ -493,7 +549,7 @@ export class GridLogicalCellDirective {
         }
 
         this.#copyCellText(event);
-        if (this.#handleRangeKey(event) || this.#handleSelectionKey(event)) {
+        if (this.#handleRowKey(event) || this.#handleRangeKey(event) || this.#handleSelectionKey(event)) {
             return;
         }
 
@@ -569,7 +625,8 @@ export class GridLogicalCellDirective {
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => {
                 const key = this.#cellKey();
-                if (key) {
+                // With row navigation, a click on another cell of a row hands the focus to the row's first cell.
+                if (key && !this.#gridNavigationService.focusRowOf(key)) {
                     this.#gridNavigationService.setLastFocusedCellKey(key);
                 }
             });

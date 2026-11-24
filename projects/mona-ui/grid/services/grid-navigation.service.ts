@@ -21,9 +21,13 @@ export class GridNavigationService {
     #defaultTabStop = false;
     /** The cell whose row was scrolled out while it had focus, with the element that had it. */
     #lostFocus: { element: HTMLElement; snapshot: NavigationCellSnapshot } | null = null;
+    /** Called with the cell a key moved to, once it has focus, which in a virtual list may be after a scroll. */
+    #onArrive: ((cell: NavigationData) => void) | null = null;
     /** A body row the virtual list is scrolling to; its cell takes focus once it is drawn. */
     #pendingFocus: PendingFocus | null = null;
     #pendingFocusScheduled = false;
+    /** Whether body rows are moved through as wholes, with focus on each row's first data cell. */
+    #rowNavigation = false;
     #rowScroller: GridNavigationRowScroller | null = null;
     #viewport: GridNavigationViewport | null = null;
 
@@ -98,6 +102,24 @@ export class GridNavigationService {
         return true;
     }
 
+    /**
+     * With row navigation, moves focus from another cell of a body row, such as one clicked, to the row's first data
+     * cell, which holds it. Returns whether it moved.
+     */
+    public focusRowOf(cellKey: string): boolean {
+        const data = this.#cellElementDict().get(cellKey);
+        if (!this.#rowNavigation || data == null || !this.#isRowCell(data)) {
+            return false;
+        }
+        const target = this.#rowFocusCell(data.rowIndex);
+        if (target == null || target.key === cellKey) {
+            return false;
+        }
+        this.#focusCell(target.key, target.value);
+        this.#lastNonGroupCellKey.set(target.key);
+        return true;
+    }
+
     /** The rendered cell an element is in, such as the target of a pointer event. */
     public getCellAt(target: Element | null): NavigationData | null {
         const element = target?.closest("td, th");
@@ -116,31 +138,17 @@ export class GridNavigationService {
         return this.#lastFocusedCellKey() === cellKey;
     }
 
-    public navigate(cellKey: string, navigationKey: string): boolean {
+    /**
+     * Moves focus from a cell as a key does. `onArrive` is called with the cell focus moves to, once it has it: in a
+     * virtual list, that can be after the row scrolls into view.
+     */
+    public navigate(cellKey: string, navigationKey: string, onArrive?: (cell: NavigationData) => void): boolean {
         this.#pendingFocus = null;
-        switch (navigationKey) {
-            case "ArrowDown":
-                return this.#navigateVertically("down", cellKey);
-            case "ArrowUp":
-                return this.#navigateVertically("up", cellKey);
-            case "ArrowLeft":
-                return this.#navigateHorizontally("previous", cellKey);
-            case "ArrowRight":
-                return this.#navigateHorizontally("next", cellKey);
-            case "Home":
-                return this.#navigateToRowEdge("first", cellKey);
-            case "End":
-                return this.#navigateToRowEdge("last", cellKey);
-            case "CtrlHome":
-                return this.#navigateToGridEdge("first");
-            case "CtrlEnd":
-                return this.#navigateToGridEdge("last");
-            case "PageDown":
-                return this.#navigateByPage("down", cellKey);
-            case "PageUp":
-                return this.#navigateByPage("up", cellKey);
-            default:
-                return false;
+        this.#onArrive = onArrive ?? null;
+        try {
+            return this.#navigateBy(cellKey, navigationKey);
+        } finally {
+            this.#onArrive = null;
         }
     }
 
@@ -217,6 +225,11 @@ export class GridNavigationService {
             this.#lostFocus = null;
             this.#setFocusedCell(key, data);
         }
+    }
+
+    /** Turns row navigation on or off: body rows are moved through as wholes, with focus on each row's first data cell. */
+    public setRowNavigation(rowNavigation: boolean): void {
+        this.#rowNavigation = rowNavigation;
     }
 
     /** Lets a virtual list move focus to rows it hasn't drawn yet. */
@@ -410,12 +423,26 @@ export class GridNavigationService {
     }
 
     #focusCell(key: string, data: NavigationData): void {
-        this.#focusElement(data.element);
-        this.#setFocusedCell(key, data);
+        // With row navigation, a body row's focus is on its first data cell.
+        const target = this.#rowNavigation && this.#isRowCell(data) ? this.#rowFocusCell(data.rowIndex) : null;
+        const [focusKey, focusData] = target == null ? [key, data] : [target.key, target.value];
+        this.#focusElement(focusData.element, target != null);
+        this.#setFocusedCell(focusKey, focusData);
+        const onArrive = this.#onArrive;
+        this.#onArrive = null;
+        onArrive?.(focusData);
     }
 
-    #focusElement(element: HTMLTableCellElement): void {
+    /**
+     * Focuses a cell and scrolls it into view. A whole row, for row navigation, scrolls only as far as the row needs,
+     * so a body scrolled sideways stays where it is.
+     */
+    #focusElement(element: HTMLTableCellElement, wholeRow = false): void {
         element.focus({ preventScroll: true });
+        if (wholeRow) {
+            (element.closest("tr") ?? element).scrollIntoView({ block: "nearest", inline: "nearest" });
+            return;
+        }
         element.scrollIntoView({ block: "nearest", inline: "nearest" });
         this.#revealFromPinnedColumns(element);
     }
@@ -448,7 +475,8 @@ export class GridNavigationService {
         if (this.#rowScroller == null) {
             return false;
         }
-        this.#pendingFocus = { colIndex, rowIndex };
+        this.#pendingFocus = { colIndex, onArrive: this.#onArrive, rowIndex };
+        this.#onArrive = null;
         this.#rowScroller.scrollToRow(rowIndex);
         return true;
     }
@@ -472,6 +500,42 @@ export class GridNavigationService {
     /** Whether a header row is a row of column group titles, which sits above the column headers. */
     #isColumnGroupRow(row: { rowIndex: number; section: GridNavigationSection }): boolean {
         return row.section === "header" && row.rowIndex < -1;
+    }
+
+    /** Whether a cell is in a data row of the body, which row navigation moves through as a whole. */
+    #isRowCell(data: NavigationData): boolean {
+        return data.section === "body" && !data.groupHeader && data.cellKind !== "detail";
+    }
+
+    #navigateBy(cellKey: string, navigationKey: string): boolean {
+        switch (navigationKey) {
+            case "ArrowDown":
+                return this.#navigateVertically("down", cellKey);
+            case "ArrowUp":
+                return this.#navigateVertically("up", cellKey);
+            case "ArrowLeft":
+                return this.#navigateHorizontally("previous", cellKey);
+            case "ArrowRight":
+                return this.#navigateHorizontally("next", cellKey);
+            case "Home":
+                return this.#navigateToRowEdge("first", cellKey);
+            case "End":
+                return this.#navigateToRowEdge("last", cellKey);
+            case "CtrlHome":
+                return this.#navigateToGridEdge("first");
+            case "CtrlEnd":
+                return this.#navigateToGridEdge("last");
+            case "PageDown":
+                return this.#navigateByPage("down", cellKey);
+            case "PageUp":
+                return this.#navigateByPage("up", cellKey);
+            case "FirstRow":
+                return this.#navigateToBodyEdge("first");
+            case "LastRow":
+                return this.#navigateToBodyEdge("last");
+            default:
+                return false;
+        }
     }
 
     #navigateByPage(direction: "down" | "up", cellKey: string): boolean {
@@ -500,7 +564,8 @@ export class GridNavigationService {
     // Moves in logical column order; callers map arrow keys to it according to the text direction.
     #navigateHorizontally(direction: "next" | "previous", cellKey: string): boolean {
         const data = this.#cellElementDict().get(cellKey);
-        if (!data || data.groupHeader) {
+        // Row navigation moves through body rows as wholes.
+        if (!data || data.groupHeader || (this.#rowNavigation && this.#isRowCell(data))) {
             return false;
         }
         if (direction === "previous" ? data.firstInRow : data.lastInRow) {
@@ -518,6 +583,23 @@ export class GridNavigationService {
         }
         this.#focusCell(target.key, target.value);
         return true;
+    }
+
+    /** Moves to the first or last row of the body, for row navigation's Home and End. */
+    #navigateToBodyEdge(edge: "first" | "last"): boolean {
+        const column = this.#getTargetColumn();
+        if (this.#rowScroller != null) {
+            const count = this.#rowScroller.rowCount();
+            const row = edge === "first" ? this.#navigableRowNear(0, "down") : this.#navigableRowNear(count - 1, "up");
+            return row != null && this.#focusRow(row, column);
+        }
+        const rows = this.#cells()
+            .where(e => e.value.section === "body")
+            .select(e => e.value.rowIndex);
+        if (rows.none()) {
+            return false;
+        }
+        return this.#focusRow(edge === "first" ? rows.min() : rows.max(), column);
     }
 
     #navigateToGridEdge(edge: "first" | "last"): boolean {
@@ -714,6 +796,12 @@ export class GridNavigationService {
         }
     }
 
+    /** The cell that holds a body row's focus with row navigation: its first data cell, or its first cell. */
+    #rowFocusCell(rowIndex: number): { key: string; value: NavigationData } | null {
+        const rowCells = this.#findCellsInRow(rowIndex, "body");
+        return rowCells.find(e => e.value.cellKind === "data") ?? rowCells[0] ?? null;
+    }
+
     #sameIdentity(data: NavigationData | NavigationCellSnapshot, snapshot: NavigationCellSnapshot): boolean {
         return (
             data.section === snapshot.section &&
@@ -741,6 +829,7 @@ export class GridNavigationService {
             }
             this.#pendingFocus = null;
             const target = this.#pickCellInRow(rowCells, pending.colIndex);
+            this.#onArrive = pending.onArrive;
             this.#focusCell(target.key, target.value);
             if (!target.value.groupHeader) {
                 this.#lastNonGroupCellKey.set(target.key);
@@ -827,5 +916,7 @@ interface NavigationCellSnapshot {
 
 interface PendingFocus {
     colIndex: number | "last";
+    /** Called with the cell once it has focus. */
+    onArrive: ((cell: NavigationData) => void) | null;
     rowIndex: number;
 }

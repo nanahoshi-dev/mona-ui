@@ -729,8 +729,20 @@ export const ALLOWLIST: AllowlistEntry[] = [
     {
         category: "rtl-manual-review",
         filePattern: "projects/mona-ui/popup-menu/components/popup-menu/popup-menu.component.ts",
-        lineSnippet: "center.left + center.width / 2",
-        reason: "Popup menu calculates midpoint of target element for keyboard context menu"
+        lineSnippet: "Math.max(box.left, target.left)",
+        reason: "A menu opened from the keyboard clips the focused element's box to the target's, in viewport coordinates"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/popup-menu/components/popup-menu/popup-menu.component.ts",
+        lineSnippet: "Math.min(box.right, target.right)",
+        reason: "A menu opened from the keyboard clips the focused element's box to the target's, in viewport coordinates"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/popup-menu/components/popup-menu/popup-menu.component.ts",
+        lineSnippet: "target.left + target.width / 2",
+        reason: "A menu opened from the keyboard falls back to the target's midpoint, in viewport coordinates"
     },
     {
         category: "rtl-manual-review",
