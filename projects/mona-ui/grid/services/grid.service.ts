@@ -223,6 +223,8 @@ export class GridService {
         }
         return count;
     });
+    /** Columns whose width the user set, by resizing them or through restored state: `fitView` keeps their widths. */
+    readonly #columnIdsSizedByUser = signal(ImmutableSet.create<string>());
     readonly #document = inject(DOCUMENT);
     readonly #editContext = signal<GridEditContext | null>(null);
     readonly #editSession = signal<GridEditSession | null>(null);
@@ -252,7 +254,6 @@ export class GridService {
     readonly #rowReorderableOptions = signal<RowReorderableOptions>({ enabled: false });
     readonly #rowUidByData = new WeakMap<Record<PropertyKey, unknown>, string>();
     readonly #rowUidByKeyObject = new WeakMap<object, string>();
-    readonly #scrollbarGutterMeasurementSource = signal<"body" | "fallback">("fallback");
     readonly #scrollbarGutterWidth = signal(0);
     /**
      * Fields an edit session filled with `null` because the row had no value for an editable column, keyed by
@@ -486,7 +487,6 @@ export class GridService {
             this.selectionColumnVisible() ||
             this.visibleColumns().any(column => column.locked && column.lockedPosition === "left")
     );
-    public readonly hasLiveScrollbarGutterWidth = computed(() => this.#scrollbarGutterMeasurementSource() === "body");
     /** How many group rows sit above the column headers: the deepest `mona-grid-column-group` nesting shown. */
     public readonly headerGroupDepth = computed(() => this.headerGroupRows().length);
     /** The rows of column group headers, outermost first; empty without groups. */
@@ -881,6 +881,11 @@ export class GridService {
                       hidden: columnState.hidden
                   };
         });
+        // A saved width is the user's earlier layout, which fitView keeps as it keeps a width the user resizes.
+        const restoredColumnIds = columns
+            .filter(column => stateColumnById.get(this.getColumnStateId(column) ?? "")?.width != null)
+            .map(column => column.id);
+        this.#columnIdsSizedByUser.update(ids => ids.addAll(restoredColumnIds));
         const updatedColumnById = new Map<string, Column>();
         for (const column of columns) {
             const id = this.getColumnStateId(column);
@@ -1348,6 +1353,11 @@ export class GridService {
         );
     }
 
+    /** Whether the user gave the column its width, by resizing it or through restored state. */
+    public isColumnSizedByUser(columnId: string): boolean {
+        return this.#columnIdsSizedByUser().contains(columnId);
+    }
+
     public isGroupCollapsed(groupKey: string): boolean {
         return this.collapsedGroupKeys().contains(groupKey);
     }
@@ -1484,6 +1494,11 @@ export class GridService {
         if (next.size() !== current.size() || !next.all(key => current.contains(key))) {
             this.treeExpandedKeys.set(next);
         }
+    }
+
+    /** Records that the user gave the column its width, which `fitView` then keeps as the grid's width changes. */
+    public markColumnSizedByUser(columnId: string): void {
+        this.#columnIdsSizedByUser.update(ids => ids.add(columnId));
     }
 
     public moveGroupColumn(column: Column, moveAs: "prev" | "next"): void {
@@ -1846,11 +1861,12 @@ export class GridService {
     }
 
     public setCalculatedWidths(widthByColumnId: ReadonlyMap<string, number | null>): void {
-        this.updateColumns(column =>
-            widthByColumnId.has(column.id)
-                ? { ...column, calculatedWidth: widthByColumnId.get(column.id) ?? null }
-                : column
-        );
+        this.updateColumns(column => {
+            const calculatedWidth = widthByColumnId.get(column.id) ?? null;
+            return widthByColumnId.has(column.id) && column.calculatedWidth !== calculatedWidth
+                ? { ...column, calculatedWidth }
+                : column;
+        });
     }
 
     /** Selects the cells from `anchor` to `focus`, both included, and reports the change. */
@@ -2939,13 +2955,11 @@ export class GridService {
         effect(onCleanup => {
             const bodyElement = this.bodyScrollElement();
             if (bodyElement == null) {
-                this.#scrollbarGutterMeasurementSource.set("fallback");
                 this.#scrollbarGutterWidth.set(this.measureFallbackScrollbarGutter());
                 return;
             }
 
             const updateScrollbarGutter = (): void => {
-                this.#scrollbarGutterMeasurementSource.set("body");
                 this.#scrollbarGutterWidth.set(this.measureElementScrollbarGutter(bodyElement));
             };
 

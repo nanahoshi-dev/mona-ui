@@ -283,6 +283,33 @@ async function main(): Promise<void> {
             }
         }
 
+        // fitView follows the grid's width: as it narrows and widens, the columns fill the header, with no overflow
+        // and no gap. This grid's columns have no width, beside the group indent.
+        const fitted = page.locator("#virtual-grouped mona-grid");
+        await fitted.scrollIntoViewIfNeeded();
+        for (const width of [600, 1100]) {
+            await fitted.evaluate((element, gridWidth) => {
+                element.style.width = `${gridWidth}px`;
+            }, width);
+            await expect
+                .poll(() =>
+                    fitted.evaluate(element => {
+                        const header = element.querySelector<HTMLElement>(
+                            ":is([role='grid'], [role='treegrid']) > :first-child"
+                        );
+                        const table = header?.querySelector("table");
+                        if (header == null || table == null) {
+                            throw new Error("Expected the grid header table");
+                        }
+                        return Math.abs(table.getBoundingClientRect().width - header.clientWidth);
+                    })
+                )
+                .toBeLessThan(1);
+        }
+        await fitted.evaluate(element => {
+            element.style.width = "";
+        });
+
         const dragRow = page.locator("#natural-ltr tbody tr[monaGridRow]").nth(1);
         await dragRow.scrollIntoViewIfNeeded();
         const original = await box(dragRow);
@@ -334,7 +361,7 @@ async function main(): Promise<void> {
         expect(violations).toEqual([]);
         expect(errors).toEqual([]);
         console.log(
-            "Grid browser checks passed: server interactions, natural sizing, RTL/locked cells, editing, fixed virtual geometry, drag and keyboard row moves, and accessibility."
+            "Grid browser checks passed: server interactions, natural sizing, RTL/locked cells, editing, fixed virtual geometry, fitView refits, drag and keyboard row moves, and accessibility."
         );
     } finally {
         await browser.close();

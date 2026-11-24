@@ -136,7 +136,7 @@ To show the condition in a column's filter UI as well, set the `filter` model of
 | `class` | Classes on the grid element, merged with `tailwind-merge`. Set a height here for a grid that scrolls inside a fixed area. |
 | `rounded` | The corner radius: `"none"`, `"small"`, `"medium"` (default) or `"large"`. |
 | `rowClass` | A function that returns classes for each data row, such as a muted row for a cancelled order. See [Rows](/components/grid-rows). |
-| `resizeMethod` | How columns without a `width` get one: `"fitView"` (default) shares the free width, `"auto"` fits the content, and a number gives each of them that many pixels. See [Columns](/components/grid-columns). |
+| `resizeMethod` | How columns without a `width` get one: `"fitView"` (default) shares the free width and follows the grid's width as it changes, `"auto"` fits the content, and a number gives each of them that many pixels. See [Columns](/components/grid-columns). |
 
 Grid styling is implemented with Tailwind utility classes internally; there are no public CSS custom properties to override.
 

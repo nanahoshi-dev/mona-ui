@@ -12999,7 +12999,7 @@
         "defaultValue": "[]"
       },
       {
-        "description": "The method to be used to set initial column widths.\nIt can be the following values:\n- `fitView`: The columns will be resized to fit the available width.\n- `auto`: The columns will be resized based on the content.\n- A number representing the width of the columns. All columns except the columns with a specified width\nwill have the same width.",
+        "description": "The method to be used to size the columns that have no `width`.\nIt can be the following values:\n- `fitView`: The columns share the width the other columns leave, and follow the grid's width as it changes,\nsuch as when the window is resized. A column the user resized, or whose width came from restored state,\nkeeps its width.\n- `auto`: The columns will be resized based on the content.\n- A number representing the width of the columns. All columns except the columns with a specified width\nwill have the same width.",
         "kind": "input",
         "name": "resizeMethod",
         "type": "ResizeMethod",
