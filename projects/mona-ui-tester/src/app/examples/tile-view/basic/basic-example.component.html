@@ -1,0 +1,11 @@
+<div class="flex flex-col gap-2">
+    <mona-tile-view
+        aria-label="Fruits"
+        class="h-64"
+        selectionMode="multiple"
+        [items]="fruits"
+        [tileHeight]="64"
+        [tileWidth]="96"
+        [(selectedKeys)]="selected" />
+    <span aria-live="polite" class="text-sm">Selected: {{ selected().join(", ") || "none" }}</span>
+</div>

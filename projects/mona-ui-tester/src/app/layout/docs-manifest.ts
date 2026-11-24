@@ -403,6 +403,12 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                 "Lets users reorder any list by dragging or with the keyboard, and move items between connected lists."
             ),
             component(
+                "tile-view",
+                "Tile View",
+                "tile-view",
+                "A collection as tiles in rows that fill the width, virtualized, with file-explorer selection."
+            ),
+            component(
                 "timeline",
                 "Timeline",
                 "timeline",

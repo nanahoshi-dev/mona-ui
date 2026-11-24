@@ -112,6 +112,7 @@
             "@nanahoshi/mona-ui/time-picker": ["./projects/mona-ui/time-picker/public-api.ts"],
             "@nanahoshi/mona-ui/time-selector": ["./projects/mona-ui/time-selector/public-api.ts"],
             "@nanahoshi/mona-ui/timeline": ["./projects/mona-ui/timeline/public-api.ts"],
+            "@nanahoshi/mona-ui/tile-view": ["./projects/mona-ui/tile-view/public-api.ts"],
             "@nanahoshi/mona-ui/toolbar": ["./projects/mona-ui/toolbar/public-api.ts"],
             "@nanahoshi/mona-ui/tooltip": ["./projects/mona-ui/tooltip/public-api.ts"],
             "@nanahoshi/mona-ui/tree-view": ["./projects/mona-ui/tree-view/public-api.ts"],

@@ -1,0 +1,22 @@
+<mona-tile-view
+    aria-label="Photos"
+    itemKey="id"
+    textField="name"
+    [class]="'h-96 ' + userClass()"
+    [gap]="gap()"
+    [items]="photos"
+    [loading]="loading()"
+    [rounded]="rounded()"
+    [selectionMode]="selectionMode()"
+    [size]="size()"
+    [tileHeight]="tileHeight()"
+    [tileWidth]="tileWidth()"
+    [(selectedKeys)]="selectedKeys">
+    <ng-template monaTileViewItemTemplate [monaTileViewItemTemplateOf]="photos" let-photo>
+        <span
+            aria-hidden="true"
+            class="mx-auto mt-2 size-12 shrink-0 rounded-sm forced-color-adjust-none"
+            [style.background-color]="'hsl(' + photo.hue + ' 60% 55%)'"></span>
+        <span class="mt-1 line-clamp-2 px-1 text-center text-sm wrap-break-word">{{ photo.name }}</span>
+    </ng-template>
+</mona-tile-view>

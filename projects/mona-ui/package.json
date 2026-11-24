@@ -97,6 +97,7 @@
         "./time-picker": "./time-picker/public-api.ts",
         "./time-selector": "./time-selector/public-api.ts",
         "./timeline": "./timeline/public-api.ts",
+        "./tile-view": "./tile-view/public-api.ts",
         "./toolbar": "./toolbar/public-api.ts",
         "./tooltip": "./tooltip/public-api.ts",
         "./tree-view": "./tree-view/public-api.ts",

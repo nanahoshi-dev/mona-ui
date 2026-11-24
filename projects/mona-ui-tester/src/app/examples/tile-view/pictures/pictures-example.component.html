@@ -1,0 +1,22 @@
+<div class="flex flex-col gap-2">
+    <mona-tile-view
+        aria-label="Pictures"
+        class="h-80"
+        itemKey="id"
+        selectionMode="multiple"
+        textField="name"
+        [items]="pictures"
+        [(selectedKeys)]="selected"
+        (itemActivate)="open($event)">
+        <ng-template monaTileViewItemTemplate [monaTileViewItemTemplateOf]="pictures" let-picture>
+            <span
+                aria-hidden="true"
+                class="mx-auto mt-2 size-14 shrink-0 rounded-sm forced-color-adjust-none"
+                [style.background-color]="'hsl(' + picture.hue + ' 55% 50%)'"></span>
+            <span class="mt-1 line-clamp-2 px-1 text-center text-sm wrap-break-word">{{ picture.name }}</span>
+        </ng-template>
+    </mona-tile-view>
+    <span aria-live="polite" class="text-sm">
+        {{ selected().length }} selected{{ opened() ? ", opened " + opened() : "" }}
+    </span>
+</div>
