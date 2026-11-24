@@ -64,7 +64,9 @@ const ROW_MOVE_SNAPSHOT_LIFETIME = 1000;
         CdkDragPreview
     ],
     host: {
-        "[class]": "baseClass"
+        "[class]": "baseClass",
+        "(click)": "onBodyClick($event)",
+        "(contextmenu)": "onBodyClick($event)"
     }
 })
 export class GridListComponent implements GridListVariantInput {
@@ -132,6 +134,13 @@ export class GridListComponent implements GridListVariantInput {
             this.gridService.requestRowReorder(event.item.data, event.previousIndex, event.currentIndex);
         } finally {
             this.#dropping = false;
+        }
+    }
+
+    /** A click or right-click on the body's empty space, below the rows, clears a selection made by clicking rows. */
+    protected onBodyClick(event: MouseEvent): void {
+        if (!(event.target instanceof Element) || event.target.closest("tr") == null) {
+            this.gridService.handleBodyEmptyClick(event);
         }
     }
 

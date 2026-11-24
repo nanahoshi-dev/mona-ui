@@ -174,7 +174,16 @@ The grid is one Tab stop. `Tab` moves into the grid at the cell that last had fo
 | `Ctrl+C` / `Cmd+C` | Copies the focused cell's text (body rows, not while editing, and not when text is selected). |
 | `Tab` / `Shift+Tab` | Leaves the grid. While editing a cell, commits it and edits the next/previous editable cell. |
 
-Sorting, filtering, grouping, selection, column moves and row moves add keys of their own, listed on their pages. Headers list their shortcuts in `aria-keyshortcuts`.
+With [`navigation="row"`](/api/grid/GridComponent#navigation), the body moves by rows, as a file list does, and the header still moves by cell:
+
+| Key | Action |
+| --- | --- |
+| `ArrowDown` / `ArrowUp` | Move to the next/previous row. Up from the first row goes to the header. |
+| `ArrowLeft` / `ArrowRight` | Don't move, so the body scrolls sideways. On a tree row, they expand and collapse it. |
+| `Home` / `End` | Move to the first/last row. With virtual scrolling, the grid scrolls to it first. |
+| `PageUp` / `PageDown` | Move up/down by the number of rows that fit in the body. |
+
+Sorting, filtering, grouping, selection, column moves and row moves add keys of their own, listed on their pages. With `selectOnRowClick`, moving by rows selects as a file list does; see [Grid Selection](/components/grid-selection#moving-by-rows). Headers list their shortcuts in `aria-keyshortcuts`.
 
 Inside a cell's controls, `Tab`, `Shift+Tab` and the arrows move between them (text fields keep their arrow keys), `Tab` past the last control moves on to the next cell, and `Escape` returns to the cell.
 
@@ -182,7 +191,7 @@ The toolbar is a `role="toolbar"` named by the `toolbar` message. `ArrowLeft`/`A
 
 ### Focus
 
-Grid cells use a roving `tabindex`: the cell that last had focus has `tabindex="0"`, every other cell and every control inside a cell has `tabindex="-1"`. Keyboard focus shows a solid 2px ring inside the cell. Cells moved to with the keys scroll clear of pinned columns. Focus returns to a header after it's dragged, and to a cell of a virtual grid when its row scrolls back into view. Changing the page from the pager scrolls the body to the first row.
+Grid cells use a roving `tabindex`: the cell that last had focus has `tabindex="0"`, every other cell and every control inside a cell has `tabindex="-1"`. Keyboard focus shows a solid 2px ring inside the cell. With row navigation, a body row's focus is on its first data cell, where a click on any of its cells moves it, and the ring goes around the whole row, or an outline in forced colors; moving to a row scrolls it into view without scrolling the body sideways. Cells moved to with the keys scroll clear of pinned columns. Focus returns to a header after it's dragged, and to a cell of a virtual grid when its row scrolls back into view. Changing the page from the pager scrolls the body to the first row.
 
 ### ARIA
 
@@ -202,7 +211,7 @@ Grid cells use a roving `tabindex`: the cell that last had focus has `tabindex="
 | `aria-keyshortcuts` | On a header cell with keyboard shortcuts | The keys that open its filter menu, move it or group by it |
 
 <!-- verification-checklist
-- [x] GridComponent inputs verified against grid.component.ts (aria-label, aria-labelledby, data, expandedKeys, pageSize, pageSizeValues, resizeMethod, responsivePager, rounded, rowClass, rowKey, skip, class); outputs limited to paging, expandedKeys and rowActivate
+- [x] GridComponent inputs verified against grid.component.ts (aria-label, aria-labelledby, data, expandedKeys, navigation, pageSize, pageSizeValues, resizeMethod, responsivePager, rounded, rowClass, rowKey, skip, class); outputs limited to paging, expandedKeys and rowActivate
 - [x] Template directive selectors and contexts verified against grid/directives/grid-*template*.directive.ts and the grid templates
 - [x] Keyboard map verified against grid-logical-cell.directive.ts, grid-navigation.service.ts, grid.component.ts (onToolbarKeydown) and tests/grid-keyboard-navigation.spec.ts
 - [x] Feature-specific keys, ARIA rows and limits moved to the feature pages, each verified against its directive

@@ -29,5 +29,6 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to 
 | [`ColumnFormat`](/api/grid/ColumnFormat) | Type alias | A date format string, for `date` columns, or a formatter function, for any column. |
 | [`ColumnFormatFunction`](/api/grid/ColumnFormatFunction) | Type alias | Formats a cell's value for display. |
 | [`ColumnKind`](/api/grid/ColumnKind) | Type alias |  |
+| [`GridNavigationMode`](/api/grid/GridNavigationMode) | Type alias | How the keyboard moves in the grid's body: `"cell"` from cell to cell, as in a spreadsheet, or `"row"` from row to row, as in a file list, where the focus shows on the whole row. |
 
 **Related types:** [`AggregateFunction`](/api/grid/AggregateFunction), [`ColumnGroup`](/api/grid/ColumnGroup), [`ColumnSortComparator`](/api/grid/ColumnSortComparator), [`DataType`](/api/common/DataType), [`GridColumnLockedPosition`](/api/grid/GridColumnLockedPosition), [`GridDataState`](/api/grid/GridDataState), [`GridEditSession`](/api/grid/GridEditSession), [`GridKeySelector`](/api/grid/GridKeySelector), [`GridRowClass`](/api/grid/GridRowClass), [`PageChangeEvent`](/api/pager/PageChangeEvent), [`ResizeMethod`](/api/grid/ResizeMethod), [`SortDirection`](/api/query/SortDirection)

@@ -31,6 +31,7 @@ export * from "./models/GroupDescriptor";
 export { GroupableOptions } from "./models/GroupableOptions";
 export { FilterableOptions } from "./models/FilterableOptions";
 export type { GridColumnLockedPosition } from "./models/GridColumnLockedPosition";
+export type { GridNavigationMode } from "./models/GridNavigationMode";
 export type { GridRowActivateEvent } from "./models/GridRowActivateEvent";
 export type { GridRowClass, GridRowClassValue } from "./models/GridRowClass";
 export type { GridToolbarContext, GridToolbarTemplateContext } from "./models/GridToolbarTemplateContext";

@@ -1,0 +1,28 @@
+<div class="flex flex-col gap-2">
+    <div #list class="h-72">
+        <mona-grid
+            aria-label="Documents"
+            navigation="row"
+            rowKey="id"
+            [data]="files"
+            [monaGridSelectable]="{ mode: 'multiple', selectOnRowClick: true }"
+            [(selectedKeys)]="selectedIds">
+            <mona-grid-column field="name" title="Name" />
+            <mona-grid-column field="modified" title="Date modified" [width]="140" />
+            <mona-grid-column field="size" title="Size" [width]="100" />
+        </mona-grid>
+    </div>
+    <!-- The right-click selects first, so the items follow the selection: none means the folder itself. -->
+    <mona-contextmenu aria-label="Documents" [target]="list" (menuClick)="onMenuClick($event)">
+        @if (selectedCount() === 0) {
+            <mona-contextmenu-item label="New folder"></mona-contextmenu-item>
+            <mona-contextmenu-item label="Paste"></mona-contextmenu-item>
+        } @else {
+            <mona-contextmenu-item label="Open"></mona-contextmenu-item>
+            <mona-contextmenu-item label="Rename" [disabled]="selectedCount() !== 1"></mona-contextmenu-item>
+            <mona-contextmenu-separator></mona-contextmenu-separator>
+            <mona-contextmenu-item label="Delete"></mona-contextmenu-item>
+        }
+    </mona-contextmenu>
+    <span aria-live="polite" class="text-sm">{{ selectedCount() }} selected. {{ lastCommand() }}</span>
+</div>

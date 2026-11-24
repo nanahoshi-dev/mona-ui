@@ -42,6 +42,14 @@ grid-selection/selection
 
 `rowAriaLabel` names each checkbox after its row, so a screen reader says "Select Lukas Weber" instead of "Select row 2".
 
+### A File List
+
+```example
+grid-selection/file-list
+```
+
+With `navigation="row"` and `selectOnRowClick`, the grid behaves as a file list: the arrows move by rows and select, and a right-click selects what it lands on, or clears the selection in empty space. The context menu builds its items from the selection, so with nothing selected it offers the folder's commands. Opened with the `ContextMenu` key or `Shift+F10`, it appears at the focused row.
+
 ### Options
 
 | Option | Default | What it does |
@@ -94,6 +102,12 @@ The two directives work together. Space, the checkboxes and row clicks select ro
 
 Off by default, so clicking a row's content (a link, a button, an editable cell) never silently discards the selection. With `selectOnRowClick`: in single mode, clicking a row replaces the selection; in multiple mode, a plain click selects just that row, Ctrl/Cmd-click toggles one row without disturbing the rest, and Shift-click selects the range from the last clicked row. Checkbox clicks always toggle their row, whatever `selectOnRowClick` says.
 
+With `selectOnRowClick`, the grid also selects as a file list does on a right-click and in empty space, so a context menu acts on what was right-clicked: a right-click on a row that isn't selected makes it the selection, one on a selected row keeps the selection, and a click or right-click on the empty space below the rows clears it, unless Ctrl or Shift is held.
+
+### Moving by rows
+
+With [`navigation="row"`](/api/grid/GridComponent#navigation) and `selectOnRowClick`, the selection follows the keyboard, as in a file list: moving to a row selects it, Shift extends the selection from the anchor, Ctrl and Shift add that range, and Ctrl moves without selecting. Space then adds the focused row instead of toggling it.
+
 ### The checkbox column
 
 It's fixed at the start of the grid, stays put while the grid scrolls sideways, and never takes part in sorting, filtering, grouping, resizing, reordering or the Columns popup. The header checkbox is checked when every row in scope is selected, and mixed when only some are. Selecting or clearing everything in scope keeps the keys of rows outside it.
@@ -115,6 +129,7 @@ Selected rows carry `aria-selected`, and the grid says it allows several with `a
 | `Shift+ArrowDown` / `Shift+ArrowUp` | Moves to the next/previous row and extends the selection to it. |
 | `Ctrl+A` / `Cmd+A` | In multiple mode, selects every row in the select-all scope. With range selection, selects every cell of the page, or of the whole view with virtual scrolling. |
 | `Shift+Arrow keys` | With range selection, extends the range of cells from where it started. Moving without Shift leaves it. |
+| Moving keys, with `navigation="row"` and `selectOnRowClick` | Select the row moved to. With Shift, from the anchor; with Ctrl and Shift, added; with Ctrl alone, nothing changes. `Space` adds the focused row, and `Ctrl+Space` toggles it. |
 | `Escape` | With range selection, clears the range. |
 | `Ctrl+C` / `Cmd+C` | Copies the range, or the focused cell. |
 | `Ctrl+V` / `Cmd+V` | With range selection and editing on, pastes into the cells. |

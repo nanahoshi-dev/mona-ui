@@ -12993,6 +12993,17 @@
         "defaultValue": "[]"
       },
       {
+        "description": "How the keyboard moves in the body. `\"cell\"` moves between cells. `\"row\"` moves between rows, as\nin a file list: the arrows go up and down, Home and End to the first and last row, and the focus shows on the\nwhole row. When rows select on click, moving selects the row, Shift extends the selection from the anchor, and\nCtrl moves without selecting. ArrowLeft and ArrowRight only scroll, and the header keeps moving by cell.",
+        "kind": "input",
+        "name": "navigation",
+        "type": "GridNavigationMode",
+        "options": [
+          "cell",
+          "row"
+        ],
+        "defaultValue": "\"cell\""
+      },
+      {
         "description": "Emitted when the user changes the page or the page size, when the user's sort or filter moves a\nclient-side grid back to the first page, and when the grid moves back to the last page because the data shrank.\nNot emitted for `skip` or `pageSize` values set from code.",
         "kind": "output",
         "name": "pageChange",
