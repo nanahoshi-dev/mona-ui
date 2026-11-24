@@ -196,6 +196,13 @@
         "defaultValue": "true"
       },
       {
+        "description": "Whether the popup opens to say there's no data when no option matches. When false, the popup stays\nclosed while there are no options: it opens as options arrive while text is typed, and closes when they run out,\nas an address bar's suggestions do.",
+        "kind": "input",
+        "name": "showNoData",
+        "type": "boolean",
+        "defaultValue": "true"
+      },
+      {
         "description": "Size preset controlling the component's dimensions.",
         "kind": "input",
         "name": "size",

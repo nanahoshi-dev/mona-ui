@@ -153,8 +153,15 @@ export class AutoCompleteComponent<TData = unknown>
     readonly #listService = inject(ListService);
     readonly #popupRef = this.#dropdownService.popupRef;
     readonly #smallScreen = injectSmallScreen();
+    /** Whether the popup is closing only because there are no options to show, which keeps the typed text coming. */
+    #closingEmpty = false;
     /** Whether the popup that's closing is a bottom sheet, which took focus into its text box. */
     #closingSheet = false;
+    /**
+     * Whether text has been typed since the popup last closed for good, by Enter, Escape, a pick or leaving the field.
+     * Without "No data", options that arrive while it is set open the popup.
+     */
+    #typing = false;
 
     protected readonly activeDescendant = computed(() => {
         const highlightedItem = this.#listService.highlightedItem();
@@ -397,6 +404,14 @@ export class AutoCompleteComponent<TData = unknown>
     public readonly showClearButton = input(true, { transform: booleanAttribute });
 
     /**
+     * @description Whether the popup opens to say there's no data when no option matches. When false, the popup stays
+     * closed while there are no options: it opens as options arrive while text is typed, and closes when they run out,
+     * as an address bar's suggestions do.
+     * @default true
+     */
+    public readonly showNoData = input(true, { transform: booleanAttribute });
+
+    /**
      * @description Size preset controlling the component's dimensions.
      * @default "medium"
      */
@@ -453,6 +468,12 @@ export class AutoCompleteComponent<TData = unknown>
             const popupTemplate = this.popupTemplate();
             untracked(() => this.#dropdownService.popupTemplate.set(popupTemplate));
         });
+        effect(() => {
+            const empty = this.isEmpty();
+            if (!this.showNoData()) {
+                untracked(() => this.followOptions(empty));
+            }
+        });
     }
 
     /**
@@ -464,6 +485,18 @@ export class AutoCompleteComponent<TData = unknown>
         if (input) {
             input.focus(options);
             input.setSelectionRange(input.value.length, input.value.length);
+        }
+    }
+
+    /**
+     * @description Moves focus to the inner input and selects its text, so what is typed next replaces it.
+     * @param options Passed to `HTMLElement.focus()`, for example `{ preventScroll: true }`.
+     */
+    public select(options?: FocusOptions): void {
+        const input = this.#hostElementRef.nativeElement.querySelector("input");
+        if (input) {
+            input.focus(options);
+            input.select();
         }
     }
 
@@ -479,6 +512,7 @@ export class AutoCompleteComponent<TData = unknown>
                 return;
             }
         }
+        this.#typing = false;
         if (this.value() !== this.autoCompleteValue() && !this.#popupRef()) {
             this.updateValue(this.autoCompleteValue());
         }
@@ -508,6 +542,7 @@ export class AutoCompleteComponent<TData = unknown>
     }
 
     protected onItemSelect(event: SelectionChangeEvent<TData>): void {
+        this.#typing = false;
         const itemText = this.#listService.getItemText(event.item);
         this.updateValue(itemText);
         this.autoCompleteValue.set(itemText);
@@ -541,21 +576,20 @@ export class AutoCompleteComponent<TData = unknown>
     }
 
     /**
-     * Filters the list by the text and opens the popup, highlighting the first match. Without text, the popup closes,
-     * unless it's a bottom sheet, whose text box is where the next text comes from: the sheet shows the whole list.
+     * Filters the list by the text and opens the popup, highlighting the first match. A prevented filter change leaves
+     * the filtering to the app, whose options come as `data`. Without text, the popup closes, unless it's a bottom
+     * sheet, whose text box is where the next text comes from: the sheet shows the whole list.
      */
     private applyText(value: string): void {
         if (this.#listService.isFilteringEnabled()) {
             const event = this.notifyFilterChange(value);
-            if (event.isDefaultPrevented()) {
-                return;
-            }
-            if (value) {
+            if (value && !event.isDefaultPrevented()) {
                 this.#listService.setFilter(value);
             }
         }
 
         if (!value) {
+            this.#typing = false;
             const popupRef = this.#popupRef();
             if (popupRef && this.#dropdownService.sheet()) {
                 this.clear(false);
@@ -569,22 +603,17 @@ export class AutoCompleteComponent<TData = unknown>
             return;
         }
 
-        if (!this.#popupRef()) {
+        this.#typing = true;
+        if (!this.#popupRef() && (this.showNoData() || !this.isEmpty())) {
             this.#dropdownService.triggerPopupOpen$.next({});
         }
 
         this.autoCompleteValue.set(value);
-        const item = this.#listService.getMatchingFilteredItem(value);
-        if (this.highlightFirst()) {
-            this.#listService.clearSelections();
-            this.#listService.highlightedItem.set(item);
-            if (item) {
-                this.#listService.scrollToItem$.next({ item, focus: false });
-            }
-        }
+        this.highlightMatch(value);
     }
 
     private clear(notify: boolean): void {
+        this.#typing = false;
         this.autoCompleteValue.set("");
         this.#listService.clearSelections();
         this.#listService.clearFilter();
@@ -597,6 +626,41 @@ export class AutoCompleteComponent<TData = unknown>
         // Drops typed text still waiting for the filter's debounce, which would otherwise come back after the close.
         this.autoCompleteValue$.next(null);
         this.#popupRef()?.close();
+    }
+
+    /**
+     * Without "No data", the popup follows the options while text is typed: it opens as they arrive, with the typed
+     * text's match highlighted, and closes when they run out. A bottom sheet stays, since its text box has the typing.
+     */
+    private followOptions(empty: boolean): void {
+        const popupRef = this.#popupRef();
+        if (this.#dropdownService.sheet()) {
+            return;
+        }
+        if (empty) {
+            if (popupRef) {
+                this.#closingEmpty = true;
+                popupRef.close();
+            }
+            return;
+        }
+        if (!popupRef && this.#typing && this.#hostElementRef.nativeElement.contains(this.#document.activeElement)) {
+            this.#dropdownService.triggerPopupOpen$.next({});
+            this.highlightMatch(this.autoCompleteValue());
+        }
+    }
+
+    /** Highlights the first option that matches the text, when `highlightFirst` asks for it. */
+    private highlightMatch(value: string): void {
+        if (!this.highlightFirst()) {
+            return;
+        }
+        const item = this.#listService.getMatchingFilteredItem(value);
+        this.#listService.clearSelections();
+        this.#listService.highlightedItem.set(item);
+        if (item) {
+            this.#listService.scrollToItem$.next({ item, focus: false });
+        }
     }
 
     private initialize(): void {
@@ -646,6 +710,7 @@ export class AutoCompleteComponent<TData = unknown>
                 tap(e => e.preventDefault())
             )
             .subscribe(() => {
+                this.#typing = false;
                 const highlightedItem = this.#listService.highlightedItem();
                 const autoCompleteValue = this.autoCompleteValue();
                 if (highlightedItem) {
@@ -670,6 +735,7 @@ export class AutoCompleteComponent<TData = unknown>
                 tap(e => e.preventDefault())
             )
             .subscribe(event => {
+                this.#typing = false;
                 if (this.#popupRef()) {
                     this.closePopup();
                     return;
@@ -687,7 +753,11 @@ export class AutoCompleteComponent<TData = unknown>
             this.#closingSheet = this.#dropdownService.sheet();
         });
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            this.autoCompleteValue$.next(null);
+            if (this.#closingEmpty) {
+                this.#closingEmpty = false;
+            } else {
+                this.autoCompleteValue$.next(null);
+            }
             // The popup under the field leaves focus on it, but a sheet took it into its text box, so it comes back.
             if (this.#closingSheet && this.#dropdownService.focusCanReturn()) {
                 this.focus();

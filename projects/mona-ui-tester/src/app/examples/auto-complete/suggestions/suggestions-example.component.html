@@ -1,0 +1,14 @@
+<div class="flex max-w-xs flex-col gap-1">
+    <label monaLabel for="auto-complete-suggestions-folder">Folder</label>
+    <mona-auto-complete
+        inputId="auto-complete-suggestions-folder"
+        monaDropDownFilterable
+        placeholder="Type a folder, such as pi"
+        [data]="suggestions()"
+        [highlightFirst]="false"
+        [loading]="loading()"
+        [showNoData]="false"
+        [(value)]="folder"
+        (filterChange)="suggest($event)" />
+    <span aria-live="polite" class="text-sm">Value: {{ folder() ?? "none" }}</span>
+</div>

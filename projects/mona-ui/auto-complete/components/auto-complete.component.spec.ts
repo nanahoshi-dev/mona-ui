@@ -1,5 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import {
     disabled as fieldDisabled,
     form,
@@ -318,6 +319,18 @@ describe("AutoCompleteComponent", () => {
             fixture.componentInstance.focus({ preventScroll: true });
 
             expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+        });
+
+        it("selects the input's text, so typing replaces it", async () => {
+            const fixture = await createSignalFormFixture();
+            const autoComplete = fixture.debugElement.query(By.directive(AutoCompleteComponent))
+                .componentInstance as AutoCompleteComponent;
+
+            autoComplete.select();
+
+            const input = getInput(fixture);
+            expect(document.activeElement).toBe(input);
+            expect([input.selectionStart, input.selectionEnd]).toEqual([0, "Banana".length]);
         });
     });
 
