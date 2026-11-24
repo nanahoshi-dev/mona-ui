@@ -46,6 +46,11 @@ export const popupMenuGroupHeaderThemeVariants = cva(
 
 export const popupMenuIconContainerThemeVariants = cva(`absolute start-2 flex items-center justify-center`);
 
+/**
+ * A menu item. The active one, which the arrows and the pointer move, has a background. In forced colors, where
+ * backgrounds don't paint, it is drawn in Highlight, its text and icons in HighlightText. Disabled items are GrayText, and
+ * a disabled active one has a Highlight outline instead, since GrayText on Highlight can be unreadable.
+ */
 export const popupMenuItemThemeVariants = cva(
     `
         relative flex cursor-pointer select-none items-center gap-2 py-1 pe-2 ps-8
@@ -58,6 +63,18 @@ export const popupMenuItemThemeVariants = cva(
         data-[active='true']:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]
         data-[active='true']:text-foreground
         data-[active='true']:data-[disabled='true']:text-disabled-foreground
+        forced-colors:data-[disabled='true']:text-[GrayText]
+        forced-colors:data-[active='true']:forced-color-adjust-none
+        forced-colors:data-[active='true']:bg-[Highlight]
+        forced-colors:data-[active='true']:text-[HighlightText]
+        forced-colors:data-[active='true']:**:text-[HighlightText]
+        forced-colors:data-[active='true']:data-[disabled='true']:bg-[Canvas]
+        forced-colors:data-[active='true']:data-[disabled='true']:text-[GrayText]
+        forced-colors:data-[active='true']:data-[disabled='true']:**:text-[GrayText]
+        forced-colors:data-[active='true']:data-[disabled='true']:outline-solid
+        forced-colors:data-[active='true']:data-[disabled='true']:outline-1
+        forced-colors:data-[active='true']:data-[disabled='true']:-outline-offset-1
+        forced-colors:data-[active='true']:data-[disabled='true']:outline-[Highlight]
     `,
     {
         variants: {

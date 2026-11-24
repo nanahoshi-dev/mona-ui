@@ -35,4 +35,14 @@ describe("PopupMenuItemComponent", () => {
         expect(classes).not.toContain("focus-within:bg-accent");
         expect(classes).not.toContain("text-accent-foreground");
     });
+
+    it("draws the active and disabled rows in system colors in forced colors", () => {
+        const classes = popupMenuItemThemeVariants({ rounded: "medium", size: "medium" }).split(/\s+/);
+
+        expect(classes).toContain("forced-colors:data-[active='true']:bg-[Highlight]");
+        expect(classes).toContain("forced-colors:data-[active='true']:**:text-[HighlightText]");
+        expect(classes).toContain("forced-colors:data-[active='true']:forced-color-adjust-none");
+        expect(classes).toContain("forced-colors:data-[disabled='true']:text-[GrayText]");
+        expect(classes).toContain("forced-colors:data-[active='true']:data-[disabled='true']:outline-[Highlight]");
+    });
 });

@@ -111,6 +111,10 @@ export const menubarListItemThemeVariants = cva(
         data-[disabled='true']:text-disabled-foreground
         data-[active='true']:bg-[var(--mona-menu-item-hover-background,var(--color-selected))]
         data-[active='true']:text-[var(--mona-menu-item-hover-foreground,var(--color-selected-foreground))]
+        forced-colors:data-[active='true']:forced-color-adjust-none
+        forced-colors:data-[active='true']:bg-[Highlight]
+        forced-colors:data-[active='true']:text-[HighlightText]
+        forced-colors:data-[active='true']:**:text-[HighlightText]
     `,
     {
         variants: {

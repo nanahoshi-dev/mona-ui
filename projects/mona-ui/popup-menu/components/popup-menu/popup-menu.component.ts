@@ -358,7 +358,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         const anchorConnectionPoint = this.openAtPointer() ? undefined : this.anchorConnectionPoint();
         const targetId = this.#element(this.target())?.id ?? "";
         const data: PopupMenuListConfig = {
-            ariaLabel: this.ariaLabel(),
+            ariaLabel: this.ariaLabel,
             closeMenu: options => this.closeFromList(state, options),
             initialFocus: this.#pendingInitialFocus,
             isRoot: true,

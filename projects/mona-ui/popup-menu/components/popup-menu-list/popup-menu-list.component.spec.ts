@@ -24,7 +24,10 @@ const createItem = (overrides: Partial<PopupMenuItem> & { label: string; uid: st
     ...overrides
 });
 
-const createConfig = (menuItems: PopupMenuItem[]): PopupMenuListConfig => ({
+const createConfig = (
+    menuItems: PopupMenuItem[],
+    overrides: Partial<PopupMenuListConfig> = {}
+): PopupMenuListConfig => ({
     childCloseRequest$: new Subject(),
     closeMenu: () => undefined,
     isRoot: true,
@@ -42,13 +45,17 @@ const createConfig = (menuItems: PopupMenuItem[]): PopupMenuListConfig => ({
     popupTextTemplate: signal(null),
     rounded: signal("medium"),
     size: signal("medium"),
-    width: signal(null)
+    width: signal(null),
+    ...overrides
 });
 
-async function setup(menuItems: PopupMenuItem[]): Promise<ComponentFixture<PopupMenuListComponent>> {
+async function setup(
+    menuItems: PopupMenuItem[],
+    overrides: Partial<PopupMenuListConfig> = {}
+): Promise<ComponentFixture<PopupMenuListComponent>> {
     await TestBed.configureTestingModule({
         imports: [PopupMenuListComponent],
-        providers: [{ provide: PopupDataInjectionToken, useValue: createConfig(menuItems) }]
+        providers: [{ provide: PopupDataInjectionToken, useValue: createConfig(menuItems, overrides) }]
     }).compileComponents();
 
     const fixture = TestBed.createComponent(PopupMenuListComponent);
@@ -81,6 +88,22 @@ describe("PopupMenuListComponent", () => {
     it("should create", async () => {
         const fixture = await setup(items);
         expect(fixture.componentInstance).toBeTruthy();
+    });
+
+    it("is named by its label, which it follows while open, and by the target without one", async () => {
+        const label = signal("report.pdf");
+        const fixture = await setup(items, { ariaLabel: label, labelledBy: "target" });
+        expect(menuElement(fixture).getAttribute("aria-label")).toBe("report.pdf");
+        expect(menuElement(fixture).hasAttribute("aria-labelledby")).toBe(false);
+
+        label.set("2 items");
+        fixture.detectChanges();
+        expect(menuElement(fixture).getAttribute("aria-label")).toBe("2 items");
+
+        label.set("");
+        fixture.detectChanges();
+        expect(menuElement(fixture).hasAttribute("aria-label")).toBe(false);
+        expect(menuElement(fixture).getAttribute("aria-labelledby")).toBe("target");
     });
 
     it("ArrowDown selects the first item, then advances and wraps", async () => {
