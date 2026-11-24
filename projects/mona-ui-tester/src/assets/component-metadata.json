@@ -2504,6 +2504,19 @@
       }
     ]
   },
+  "TileViewItemTemplateDirective": {
+    "name": "TileViewItemTemplateDirective",
+    "selector": "\"ng-template[monaTileViewItemTemplate]\"",
+    "inputs": [
+      {
+        "description": "The tile view's items, used only to type the template's item. Optional.",
+        "kind": "input",
+        "name": "monaTileViewItemTemplateOf",
+        "type": "Iterable<T> | null | undefined",
+        "defaultValue": "null"
+      }
+    ]
+  },
   "TimeSelectorItemDirective": {
     "name": "TimeSelectorItemDirective",
     "selector": "\"li[monaTimeSelectorItem]\"",
@@ -20204,6 +20217,142 @@
         "kind": "model",
         "name": "value",
         "type": "string",
+        "defaultValue": "\"\""
+      }
+    ]
+  },
+  "TileViewComponent": {
+    "name": "TileViewComponent",
+    "selector": "\"mona-tile-view\"",
+    "inputs": [
+      {
+        "description": "Accessible name of the tiles' listbox. Describe what the tiles show.",
+        "kind": "input",
+        "name": "ariaLabel",
+        "type": "string",
+        "alias": "aria-label",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Id of the element that names the tiles' listbox, as an alternative to `aria-label`.",
+        "kind": "input",
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "alias": "aria-labelledby",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "How many tiles a row holds: as many as fit the width, or a fixed number.",
+        "kind": "input",
+        "name": "columns",
+        "type": "number | \"auto\"",
+        "defaultValue": "auto"
+      },
+      {
+        "description": "Space between tiles, and around them, in pixels.",
+        "kind": "input",
+        "name": "gap",
+        "type": "number",
+        "defaultValue": "4"
+      },
+      {
+        "description": "Emitted when a tile is double-clicked, or Enter is pressed on the active tile, with the item and\nthe event, so modifier keys can change what activating does.",
+        "kind": "output",
+        "name": "itemActivate",
+        "type": "TileViewItemActivateEvent<T>"
+      },
+      {
+        "description": "Property name or function that gives each item's key, which `selectedKeys` holds and tiles are\ntracked by. Keys must be unique. Without it, the item itself is its key.",
+        "kind": "input",
+        "name": "itemKey",
+        "type": "string | ((item: T) => unknown)",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Collection of items to show as tiles.",
+        "kind": "input",
+        "name": "items",
+        "type": "Iterable<T>",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "Marks the tiles as loading: the listbox gets `aria-busy` and a polite \"Loading\" status.",
+        "kind": "input",
+        "name": "loading",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Border-radius preset applied to the component.",
+        "kind": "input",
+        "name": "rounded",
+        "type": "TileViewVariantProps[\"rounded\"]",
+        "options": [
+          "none",
+          "small",
+          "medium",
+          "large"
+        ],
+        "defaultValue": "medium"
+      },
+      {
+        "description": "Keys of the selected items. Changes the user makes are emitted through `selectedKeysChange`, so\n`[(selectedKeys)]` works; keys set here aren't emitted back. When they leave the active tile unselected, the\nfirst selected tile becomes active and is scrolled into view.",
+        "kind": "model",
+        "name": "selectedKeys",
+        "type": "readonly unknown[]",
+        "defaultValue": "[]"
+      },
+      {
+        "description": "How tiles are selected. `\"multiple\"` works as in a file explorer: a click selects one tile,\nCtrl+click toggles one, Shift+click selects a range, and Ctrl+A selects all. `\"none\"` makes the tiles a plain\nlist.",
+        "kind": "input",
+        "name": "selectionMode",
+        "type": "TileViewSelectionMode",
+        "options": [
+          "none",
+          "single",
+          "multiple"
+        ],
+        "defaultValue": "single"
+      },
+      {
+        "description": "Size preset controlling the component's text size.",
+        "kind": "input",
+        "name": "size",
+        "type": "TileViewVariantProps[\"size\"]",
+        "options": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "defaultValue": "medium"
+      },
+      {
+        "description": "Property name or function that gives an item's text, which typeahead matches and a tile shows\nwithout an item template. Without it, the item itself is converted to text.",
+        "kind": "input",
+        "name": "textField",
+        "type": "string | ((item: T) => string)",
+        "defaultValue": "\"\""
+      },
+      {
+        "description": "Height of every tile, in pixels. Tiles must all be this tall for scrolling to stay accurate.",
+        "kind": "input",
+        "name": "tileHeight",
+        "type": "number",
+        "defaultValue": "112"
+      },
+      {
+        "description": "Width of every tile, in pixels.",
+        "kind": "input",
+        "name": "tileWidth",
+        "type": "number",
+        "defaultValue": "112"
+      },
+      {
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input",
+        "name": "userClass",
+        "type": "string",
+        "alias": "class",
         "defaultValue": "\"\""
       }
     ]

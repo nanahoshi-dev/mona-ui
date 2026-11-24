@@ -1,0 +1,65 @@
+@let showNoData = count() === 0 && !loading();
+@if (showNoData) {
+    <!-- The listbox lies over the "No data" content, so that content keeps its place and the ring frames it. -->
+    <div [id]="noDataId" class="absolute inset-0">
+        @if (noDataTemplate(); as template) {
+            <ng-container [ngTemplateOutlet]="template"></ng-container>
+        } @else {
+            <mona-placeholder
+                [text]="messages().noData"
+                class="flex h-full w-full items-center justify-center"></mona-placeholder>
+        }
+    </div>
+}
+<cdk-virtual-scroll-viewport
+    [itemSize]="rowHeight()"
+    [minBufferPx]="minBufferPx()"
+    [maxBufferPx]="maxBufferPx()"
+    [class]="viewportClasses()"
+    [tabIndex]="0"
+    [attr.role]="role()"
+    [attr.aria-label]="ariaLabel() || null"
+    [attr.aria-labelledby]="ariaLabelledBy() || null"
+    [attr.aria-activedescendant]="activeDescendant()"
+    [attr.aria-multiselectable]="(role() === 'listbox' && selectionMode() === 'multiple') || null"
+    [attr.aria-busy]="loading() || null"
+    [attr.aria-describedby]="showNoData ? noDataId : null"
+    (blur)="onBlur()"
+    (click)="onViewportClick($event)"
+    (focus)="onFocus()"
+    (keydown)="onKeydown($event)"
+    (pointerdown)="onPointerDown()">
+    <div
+        *cdkVirtualFor="let row of rows(); trackBy: trackRow"
+        role="none"
+        class="flex"
+        [style.height.px]="rowHeight()"
+        [style.gap.px]="gap()"
+        [style.padding-top.px]="gap()"
+        [style.padding-inline.px]="gap()">
+        <!-- By place: a row scrolled away is reused for one scrolled in, with its tiles, which only change items. -->
+        @for (cell of row; track $index) {
+            <div
+                data-mona-tile
+                [id]="tileId(cell.index)"
+                [class]="tileClasses(cell)"
+                [style.width.px]="tileWidth()"
+                [style.height.px]="tileHeight()"
+                [attr.role]="tileRole()"
+                [attr.aria-selected]="tileRole() === 'option' ? isSelected(cell) : null"
+                [attr.aria-posinset]="cell.index + 1"
+                [attr.aria-setsize]="count()"
+                (click)="onTileClick($event, cell.index)"
+                (dblclick)="onTileDoubleClick($event, cell.index)">
+                @if (itemTemplate(); as template) {
+                    <ng-container
+                        [ngTemplateOutlet]="template"
+                        [ngTemplateOutletContext]="contextOf(cell)"></ng-container>
+                } @else {
+                    <span class="m-auto line-clamp-2 px-1 text-center wrap-break-word">{{ textOf(cell.item) }}</span>
+                }
+            </div>
+        }
+    </div>
+</cdk-virtual-scroll-viewport>
+<div role="status" class="sr-only">{{ statusText() }}</div>

@@ -82,6 +82,7 @@ const ROUTES = [
     "tabs",
     "textarea",
     "textbox",
+    "tile-view",
     "time-picker",
     "toolbar",
     "tree-view"

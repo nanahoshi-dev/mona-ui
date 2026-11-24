@@ -653,6 +653,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "tile-view",
+                loadComponent: () =>
+                    import("./docs/components/tile-view-doc/tile-view-doc.component").then(m => m.TileViewDocComponent)
+            },
+            {
                 path: "timeline",
                 loadComponent: () =>
                     import("./docs/components/timeline-doc/timeline-doc.component").then(m => m.TimelineDocComponent)

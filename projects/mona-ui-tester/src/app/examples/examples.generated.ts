@@ -1488,6 +1488,16 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./theming-custom-colors/runtime-primary/runtime-primary-example.component").then(module => module.ThemingCustomColorsRuntimePrimaryExampleComponent),
         mainFile: "runtime-primary-example.component.ts"
     },
+    "tile-view/basic": {
+        files: ["basic-example.component.ts", "basic-example.component.html"],
+        load: () => import("./tile-view/basic/basic-example.component").then(module => module.TileViewBasicExampleComponent),
+        mainFile: "basic-example.component.ts"
+    },
+    "tile-view/pictures": {
+        files: ["pictures-example.component.ts", "pictures-example.component.html"],
+        load: () => import("./tile-view/pictures/pictures-example.component").then(module => module.TileViewPicturesExampleComponent),
+        mainFile: "pictures-example.component.ts"
+    },
     "timeline/alternate": {
         files: ["alternate-example.component.ts", "alternate-example.component.html"],
         load: () => import("./timeline/alternate/alternate-example.component").then(module => module.TimelineAlternateExampleComponent),
