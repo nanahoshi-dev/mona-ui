@@ -62,11 +62,13 @@ Route holds two nested groups, so the header has two rows of group titles above 
 
 | `resizeMethod` | Columns without a `width` |
 | :--- | :--- |
-| `"fitView"` (default) | Share the width the fixed columns leave. |
+| `"fitView"` (default) | Share the width the fixed columns leave, and follow the grid's width as it changes. |
 | `"auto"` | Fit their rendered content. |
 | A number | Get that many pixels each. |
 
 `minWidth` (40 by default) and `maxWidth` bound a resize.
+
+With `"fitView"`, the columns are fitted again whenever the grid's width changes, such as when the window is resized or a pane opens beside the grid. A column the user resized keeps its width, and the others share what it leaves. Widths restored with `monaGridStatePersistence` are kept the same way.
 
 ### Canceling a Move
 

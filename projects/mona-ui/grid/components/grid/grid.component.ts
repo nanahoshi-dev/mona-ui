@@ -172,10 +172,6 @@ export class GridComponent<T> implements GridVariantInput {
 
     readonly #document = inject(DOCUMENT);
 
-    readonly #fitViewInitialScrollbarGutterWidth = signal<number | null>(null);
-
-    readonly #fitViewScrollbarSyncResolved = signal(false);
-
     readonly #gridNavigationService = inject(GridNavigationService);
 
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
@@ -184,14 +180,17 @@ export class GridComponent<T> implements GridVariantInput {
 
     readonly #liveAnnouncer = injectLiveAnnouncer();
 
-    readonly #manuallyResized = signal(false);
-
     readonly #registeredFooterScrollElement = signal<HTMLDivElement | null>(null);
 
     /** Escape was pressed during the current column drag. */
     #dragCancelled = false;
 
     #dragKeySubscription: Subscription | null = null;
+
+    /** The header's width that the fitView columns were last fitted to. */
+    #fitViewHeaderWidth: number | null = null;
+
+    #fitViewRefitScheduled = false;
 
     /** The toolbar control that holds its Tab stop; kept by element, so controls added before it don't take it. */
     #toolbarActiveItem: HTMLElement | null = null;
@@ -463,9 +462,11 @@ export class GridComponent<T> implements GridVariantInput {
     public readonly pageSizeValues = input<number[]>([]);
 
     /**
-     * @description The method to be used to set initial column widths.
+     * @description The method to be used to size the columns that have no `width`.
      * It can be the following values:
-     * - `fitView`: The columns will be resized to fit the available width.
+     * - `fitView`: The columns share the width the other columns leave, and follow the grid's width as it changes,
+     *   such as when the window is resized. A column the user resized, or whose width came from restored state,
+     *   keeps its width.
      * - `auto`: The columns will be resized based on the content.
      * - A number representing the width of the columns. All columns except the columns with a specified width
      *   will have the same width.
@@ -541,7 +542,6 @@ export class GridComponent<T> implements GridVariantInput {
         this.setDataEffect();
         this.setEditSessionEffect();
         this.setFooterScrollElementEffect();
-        this.setFitViewScrollbarSyncEffect();
         // Every render: controls the toolbar template adds later join the roving Tab stop.
         afterEveryRender({
             write: () => this.syncToolbarFocusTargets()
@@ -556,7 +556,7 @@ export class GridComponent<T> implements GridVariantInput {
                 this.gridService.gridHeaderElement.set(this.gridHeaderElement().nativeElement);
                 this.gridService.headerTableElement.set(this.gridHeaderTableElement().nativeElement);
                 this.setInitialCalculatedWidthOfColumns();
-                this.#fitViewInitialScrollbarGutterWidth.set(this.gridService.scrollbarGutterWidth());
+                this.#observeHeaderWidth();
                 this.gridWidthSet.set(true);
                 const stopObservingTabStops = observeGridCellTabStops(this.#hostElementRef.nativeElement);
                 this.#destroyRef.onDestroy(stopObservingTabStops);
@@ -697,11 +697,16 @@ export class GridComponent<T> implements GridVariantInput {
 
     protected onColumnResizeEnd(event: ColumnResizeEvent): void {
         this.resizing.set(false);
+        // A drag that Escape put back leaves the column to fitView.
+        if (event.newWidth !== event.oldWidth) {
+            this.gridService.markColumnSizedByUser(event.column.id);
+        }
+        // The grid's width may have changed during the drag, when fitView waits.
+        this.#scheduleFitViewRefit();
         this.gridService.columnResize$.next(event);
     }
 
     protected onColumnResizeStart(): void {
-        this.#manuallyResized.set(true);
         this.resizing.set(true);
     }
 
@@ -895,6 +900,16 @@ export class GridComponent<T> implements GridVariantInput {
         this.#refocusHeader(column.id);
     }
 
+    /** fitView follows the header's width, which changes as the window is resized or a pane opens beside the grid. */
+    #observeHeaderWidth(): void {
+        if (typeof ResizeObserver === "undefined") {
+            return;
+        }
+        const resizeObserver = new ResizeObserver(() => this.#scheduleFitViewRefit());
+        resizeObserver.observe(this.gridHeaderElement().nativeElement);
+        this.#destroyRef.onDestroy(() => resizeObserver.disconnect());
+    }
+
     /** Moving or grouping re-renders the header; keep focus on it, or on the grid when it's gone. */
     #refocusHeader(columnId: string): void {
         afterNextRender(
@@ -939,6 +954,37 @@ export class GridComponent<T> implements GridVariantInput {
         return groupAfter ? { after: true, column: visible[visible.length - 1] } : { after: false, column: visible[0] };
     }
 
+    /**
+     * Fits the fitView columns to the header's width again after the next render: once, however often the width
+     * changes before it. Columns with a `width`, or that the user sized, keep theirs.
+     */
+    #scheduleFitViewRefit(): void {
+        if (this.#fitViewRefitScheduled || this.resizeMethod() !== "fitView") {
+            return;
+        }
+        this.#fitViewRefitScheduled = true;
+        afterNextRender(
+            {
+                earlyRead: () => this.gridHeaderElement().nativeElement.clientWidth,
+                write: headerWidth => {
+                    this.#fitViewRefitScheduled = false;
+                    // A hidden grid keeps its widths for when it's shown, and a column being dragged keeps the
+                    // width under the pointer until the drag ends.
+                    if (
+                        headerWidth === 0 ||
+                        headerWidth === this.#fitViewHeaderWidth ||
+                        this.gridService.columnResizeActive()
+                    ) {
+                        return;
+                    }
+                    this.#fitViewHeaderWidth = headerWidth;
+                    this.gridService.setCalculatedWidths(this.createFitViewWidthMap(headerWidth));
+                }
+            },
+            { injector: this.#injector }
+        );
+    }
+
     private clearDragState(): void {
         this.dragColumn.set(null);
         this.dropColumn.set(null);
@@ -949,18 +995,27 @@ export class GridComponent<T> implements GridVariantInput {
         this.#dragKeySubscription = null;
     }
 
+    /**
+     * fitView: shares the header's width, less the structural columns and the columns that keep their width, among
+     * the columns that have no `width` and that the user didn't size.
+     */
     private createFitViewWidthMap(headerWidth: number): ReadonlyMap<string, number> {
-        const flexibleColumns = this.gridService
-            .visibleColumns()
-            .where(column => column.width == null)
-            .toArray();
+        const flexibleColumns: Column[] = [];
+        let availableWidth = headerWidth - this.gridService.leadingStructuralWidth();
+        for (const column of this.gridService.visibleColumns()) {
+            if (column.width == null && !this.gridService.isColumnSizedByUser(column.id)) {
+                flexibleColumns.push(column);
+            } else {
+                availableWidth -= this.gridService.getColumnWidth(column);
+            }
+        }
         if (flexibleColumns.length === 0) {
             return new Map<string, number>();
         }
 
         const devicePixelRatio =
             this.gridHeaderElement().nativeElement.ownerDocument.defaultView?.devicePixelRatio ?? 1;
-        const totalWidthUnits = Math.max(0, Math.round(headerWidth * devicePixelRatio));
+        const totalWidthUnits = Math.max(0, Math.round(availableWidth * devicePixelRatio));
         const widthByColumnId = new Map<string, number>();
         const baseWidthUnits = Math.floor(totalWidthUnits / flexibleColumns.length);
         let remainingWidthUnits = totalWidthUnits - baseWidthUnits * flexibleColumns.length;
@@ -1085,32 +1140,6 @@ export class GridComponent<T> implements GridVariantInput {
         });
     }
 
-    private setFitViewScrollbarSyncEffect(): void {
-        effect(() => {
-            if (this.resizeMethod() !== "fitView" || !this.gridWidthSet()) {
-                return;
-            }
-            if (this.#fitViewScrollbarSyncResolved() || this.#manuallyResized()) {
-                return;
-            }
-            if (!this.gridService.hasLiveScrollbarGutterWidth()) {
-                return;
-            }
-
-            const initialScrollbarGutterWidth = this.#fitViewInitialScrollbarGutterWidth();
-            if (initialScrollbarGutterWidth == null) {
-                return;
-            }
-
-            const liveScrollbarGutterWidth = this.gridService.scrollbarGutterWidth();
-            this.#fitViewScrollbarSyncResolved.set(true);
-
-            if (liveScrollbarGutterWidth !== initialScrollbarGutterWidth) {
-                untracked(() => this.setInitialCalculatedWidthOfColumns());
-            }
-        });
-    }
-
     private setFooterScrollElementEffect(): void {
         effect(() => {
             const virtual = this.gridService.virtualScrollOptions().enabled;
@@ -1155,21 +1184,8 @@ export class GridComponent<T> implements GridVariantInput {
         if (this.gridService.gridHeaderElement()) {
             const headerElement = this.gridService.gridHeaderElement() as HTMLElement;
             const headerCells = this.getTableColumnHeaderCellList();
-            let headerWidth = headerElement.clientWidth;
-            const columnsWithWidth = this.gridService.visibleColumns().where(c => c.width != null);
-            if (columnsWithWidth.any()) {
-                headerWidth -= columnsWithWidth.sum(c => c.width ?? 0);
-            }
-            if (this.gridService.rowReorderColumnVisible()) {
-                headerWidth -= this.gridService.rowReorderColumnWidth;
-            }
-            if (this.gridService.masterDetailTemplate()) {
-                headerWidth -= this.gridService.detailColumnWidth;
-            }
-            if (this.gridService.selectionColumnVisible()) {
-                headerWidth -= this.gridService.selectionColumnWidth;
-            }
-            headerWidth -= this.gridService.groupColumnWidth * this.gridService.groupColumns().length;
+            const headerWidth = headerElement.clientWidth;
+            this.#fitViewHeaderWidth = headerWidth;
             const fitViewWidthByColumn =
                 this.resizeMethod() === "fitView" ? this.createFitViewWidthMap(headerWidth) : new Map<string, number>();
             const visibleColumns = this.gridService.visibleColumns().toArray();
@@ -1177,7 +1193,8 @@ export class GridComponent<T> implements GridVariantInput {
 
             for (const [cx, gridCol] of visibleColumns.entries()) {
                 const columnTh = headerCells[cx];
-                if (columnTh == null) {
+                // A width restored from saved state before the first layout stays as it is.
+                if (columnTh == null || this.gridService.isColumnSizedByUser(gridCol.id)) {
                     continue;
                 }
                 const explicitWidth = gridCol.width;
