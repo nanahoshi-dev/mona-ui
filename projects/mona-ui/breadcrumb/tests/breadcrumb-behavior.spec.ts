@@ -129,8 +129,14 @@ describe("mona-breadcrumb behavior", () => {
         return Array.from(fixture.nativeElement.querySelectorAll(selector));
     }
 
+    /** The texts of the shown items and collapse button. Folded entries stay in the list, hidden. */
     function visibleTexts(): (string | undefined)[] {
-        return queryAll("li:not([aria-hidden])").map(item => item.textContent?.trim());
+        return queryAll("li:not([aria-hidden]):not([hidden])").map(item => item.textContent?.trim());
+    }
+
+    /** The collapse button, while it's shown. */
+    function expandButton(): HTMLButtonElement | null {
+        return query("li:not([hidden]) > [data-breadcrumb-expand]");
     }
 
     beforeEach(() => {
@@ -267,8 +273,8 @@ describe("mona-breadcrumb behavior", () => {
             host.lastItemCurrent.set(false);
             await settle(fixture);
             expect(query("[aria-current]")).toBeNull();
-            expect(queryAll("button[monaBreadcrumbItem]").length).toBe(3);
-            queryAll<HTMLButtonElement>("button[monaBreadcrumbItem]")[2].click();
+            expect(queryAll("li[data-item-index] > button[monaBreadcrumbItem]").length).toBe(3);
+            queryAll<HTMLButtonElement>("li[data-item-index] > button[monaBreadcrumbItem]")[2].click();
             expect(host.clicks[0][0]).toBe("Item");
         });
 
@@ -306,18 +312,18 @@ describe("mona-breadcrumb behavior", () => {
         it("keeps every item without it", async () => {
             await setup(LONG);
             expect(visibleTexts()).toEqual(["One", "Two", "Three", "Four", "Five", "Six"]);
-            expect(query("[data-breadcrumb-expand]")).toBeNull();
+            expect(expandButton()).toBeNull();
         });
 
         it("keeps the first and the last ones, with the button between", async () => {
             await setup(LONG, 4);
             expect(visibleTexts()).toEqual(["One", "", "Four", "Five", "Six"]);
-            expect(query("[data-breadcrumb-expand]")?.getAttribute("aria-label")).toBe("Show full path");
+            expect(expandButton()?.getAttribute("aria-label")).toBe("Show full path");
         });
 
         it("doesn't collapse a trail that fits", async () => {
             await setup(LONG, 6);
-            expect(query("[data-breadcrumb-expand]")).toBeNull();
+            expect(expandButton()).toBeNull();
             expect(visibleTexts().length).toBe(6);
         });
 
@@ -343,13 +349,13 @@ describe("mona-breadcrumb behavior", () => {
 
         it("reveals the trail and moves focus to the first item it revealed", async () => {
             await setup(LONG, 3);
-            const button = query<HTMLButtonElement>("[data-breadcrumb-expand]")!;
+            const button = expandButton()!;
             button.focus();
             button.click();
             await settle(fixture);
 
             expect(visibleTexts()).toEqual(["One", "Two", "Three", "Four", "Five", "Six"]);
-            expect(query("[data-breadcrumb-expand]")).toBeNull();
+            expect(expandButton()).toBeNull();
             expect(document.activeElement?.textContent?.trim()).toBe("Two");
         });
 
@@ -364,14 +370,14 @@ describe("mona-breadcrumb behavior", () => {
                 ],
                 3
             );
-            query<HTMLButtonElement>("[data-breadcrumb-expand]")!.click();
+            expandButton()!.click();
             await settle(fixture);
             expect(document.activeElement?.textContent?.trim()).toBe("Three");
         });
 
         it("moves focus to a revealed link", async () => {
             await setup([{ text: "One" }, { text: "Two", href: "/two" }, { text: "Three" }, { text: "Four" }], 3);
-            query<HTMLButtonElement>("[data-breadcrumb-expand]")!.click();
+            expandButton()!.click();
             await settle(fixture);
             expect(document.activeElement).toBe(query("a[monaBreadcrumbLink]"));
         });
@@ -387,31 +393,31 @@ describe("mona-breadcrumb behavior", () => {
                 ],
                 3
             );
-            query<HTMLButtonElement>("[data-breadcrumb-expand]")!.click();
+            expandButton()!.click();
             await settle(fixture);
             expect(document.activeElement?.textContent?.trim()).toBe("Three");
         });
 
         it("falls back to the first usable item when nothing revealed can take focus", async () => {
             await setup([{ text: "One" }, { text: "Two", disabled: true }, { text: "Three" }], 2);
-            query<HTMLButtonElement>("[data-breadcrumb-expand]")!.click();
+            expandButton()!.click();
             await settle(fixture);
             expect(document.activeElement?.textContent?.trim()).toBe("One");
         });
 
         it("collapses again when the trail changes", async () => {
             await setup(LONG, 3);
-            query<HTMLButtonElement>("[data-breadcrumb-expand]")!.click();
+            expandButton()!.click();
             await settle(fixture);
 
             host.crumbs.set([...LONG, { text: "Seven" }]);
             await settle(fixture);
-            expect(query("[data-breadcrumb-expand]")).not.toBeNull();
+            expect(expandButton()).not.toBeNull();
         });
 
         it("reports real indexes to the separator template", async () => {
             await setup(LONG, 3);
-            const indexes = queryAll(".separator").map(separator => separator.textContent);
+            const indexes = queryAll("li:not([hidden]) > .separator").map(separator => separator.textContent);
             // After One, after the button that stands for Two to Four, and after Five. Nothing follows Six.
             expect(indexes).toEqual(["0", "3", "4"]);
         });
@@ -420,7 +426,7 @@ describe("mona-breadcrumb behavior", () => {
             await setup(LONG, 3);
             host.disabled.set(true);
             await settle(fixture);
-            expect(query<HTMLButtonElement>("[data-breadcrumb-expand]")?.disabled).toBe(true);
+            expect(expandButton()?.disabled).toBe(true);
         });
 
         it("passes axe while collapsed", async () => {
@@ -439,8 +445,8 @@ describe("mona-breadcrumb behavior", () => {
         it("has the current page give up its width last", async () => {
             await setup();
             const items = queryAll("li[data-item-index]");
-            expect(items[0].className).toContain("shrink-[10]");
-            expect(items[2].className).not.toContain("shrink-[10]");
+            expect(items[0].className).toContain("shrink-[1000000]");
+            expect(items[2].className).not.toContain("shrink-[1000000]");
         });
 
         it("lets the host shrink inside a flex parent", async () => {

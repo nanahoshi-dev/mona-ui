@@ -3386,7 +3386,7 @@
         "defaultValue": "true"
       },
       {
-        "description": "The most items to show before the middle of the trail collapses behind a button that shows it again.\nThe first and last items always stay, so anything below 2 counts as 2. `null` never collapses.",
+        "description": "The most items to show before the middle of the trail collapses behind a button that shows it again.\nThe trail also folds whatever doesn't fit its width, with or without it. The first and last items always stay, so\nanything below 2 counts as 2. `null` sets no count.",
         "kind": "input",
         "name": "maxItems",
         "type": "number | null",

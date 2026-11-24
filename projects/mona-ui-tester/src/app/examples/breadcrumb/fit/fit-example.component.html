@@ -1,0 +1,11 @@
+<div class="flex flex-col gap-3">
+    <!-- Drag the corner to narrow the box: the folders in the middle fold behind the button, nearest the start first. -->
+    <div class="w-[36rem] min-w-24 max-w-full resize-x overflow-hidden rounded-md border border-border">
+        <mona-breadcrumb aria-label="Location">
+            @for (folder of path; track $index) {
+                <mona-breadcrumb-item (itemClick)="opened.set(folder)">{{ folder }}</mona-breadcrumb-item>
+            }
+        </mona-breadcrumb>
+    </div>
+    <p aria-live="polite" class="text-sm">Last opened: {{ opened() }}</p>
+</div>

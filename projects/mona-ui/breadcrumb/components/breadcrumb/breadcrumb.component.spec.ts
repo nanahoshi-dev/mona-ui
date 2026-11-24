@@ -45,6 +45,9 @@ class TestHostComponent {
     }
 }
 
+/** The items' buttons, without the collapse button, which stays in the list, hidden, while nothing is folded. */
+const SHOWN_ITEM_BUTTONS = "li[data-item-index]:not([hidden]) > button[monaBreadcrumbItem]";
+
 describe("BreadcrumbComponent", () => {
     let hostFixture: ComponentFixture<TestHostComponent>;
     let hostComponent: TestHostComponent;
@@ -69,7 +72,7 @@ describe("BreadcrumbComponent", () => {
 
     describe("Rendering", () => {
         it("should render interactive spans for non-last items", () => {
-            const items = hostFixture.debugElement.queryAll(By.css("button[monaBreadcrumbItem]"));
+            const items = hostFixture.debugElement.queryAll(By.css(SHOWN_ITEM_BUTTONS));
             expect(items.length).toBe(2);
         });
 
@@ -103,7 +106,7 @@ describe("BreadcrumbComponent", () => {
         });
 
         it("should set aria-current='page' on the last item only", () => {
-            const interactiveItems = hostFixture.debugElement.queryAll(By.css("button[monaBreadcrumbItem]"));
+            const interactiveItems = hostFixture.debugElement.queryAll(By.css(SHOWN_ITEM_BUTTONS));
             for (const item of interactiveItems) {
                 expect(item.nativeElement.getAttribute("aria-current")).toBeNull();
             }
@@ -116,7 +119,7 @@ describe("BreadcrumbComponent", () => {
                 items.map((item, index) => (index === 0 ? { ...item, disabled: true } : item))
             );
             hostFixture.detectChanges();
-            const items = hostFixture.debugElement.queryAll(By.css("button[monaBreadcrumbItem]"));
+            const items = hostFixture.debugElement.queryAll(By.css(SHOWN_ITEM_BUTTONS));
             expect(items[0].nativeElement.disabled).toBe(true);
             expect(items[1].nativeElement.disabled).toBe(false);
         });
@@ -138,7 +141,7 @@ describe("BreadcrumbComponent", () => {
 
     describe("Keyboard Navigation", () => {
         it("should keep non-disabled interactive items focusable", () => {
-            const items = hostFixture.debugElement.queryAll(By.css("button[monaBreadcrumbItem]"));
+            const items = hostFixture.debugElement.queryAll(By.css(SHOWN_ITEM_BUTTONS));
             for (const item of items) {
                 item.nativeElement.focus();
                 expect(hostFixture.nativeElement.ownerDocument.activeElement).toBe(item.nativeElement);
@@ -150,7 +153,7 @@ describe("BreadcrumbComponent", () => {
                 items.map((item, index) => (index === 1 ? { ...item, disabled: true } : item))
             );
             hostFixture.detectChanges();
-            const items = hostFixture.debugElement.queryAll(By.css("button[monaBreadcrumbItem]"));
+            const items = hostFixture.debugElement.queryAll(By.css(SHOWN_ITEM_BUTTONS));
             items[1].nativeElement.focus();
             expect(hostFixture.nativeElement.ownerDocument.activeElement).not.toBe(items[1].nativeElement);
         });
@@ -158,7 +161,7 @@ describe("BreadcrumbComponent", () => {
 
     describe("Click Behavior", () => {
         it("should emit itemClick on click", () => {
-            const items = hostFixture.debugElement.queryAll(By.css("button[monaBreadcrumbItem]"));
+            const items = hostFixture.debugElement.queryAll(By.css(SHOWN_ITEM_BUTTONS));
             items[0].nativeElement.click();
             hostFixture.detectChanges();
             expect(hostComponent.clickedItems.length).toBe(1);
@@ -169,7 +172,7 @@ describe("BreadcrumbComponent", () => {
                 items.map((item, index) => (index === 0 ? { ...item, disabled: true } : item))
             );
             hostFixture.detectChanges();
-            const items = hostFixture.debugElement.queryAll(By.css("button[monaBreadcrumbItem]"));
+            const items = hostFixture.debugElement.queryAll(By.css(SHOWN_ITEM_BUTTONS));
             items[0].nativeElement.click();
             hostFixture.detectChanges();
             expect(hostComponent.clickedItems.length).toBe(0);

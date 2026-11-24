@@ -78,6 +78,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./breadcrumb/collapsed/collapsed-example.component").then(module => module.BreadcrumbCollapsedExampleComponent),
         mainFile: "collapsed-example.component.ts"
     },
+    "breadcrumb/fit": {
+        files: ["fit-example.component.ts", "fit-example.component.html"],
+        load: () => import("./breadcrumb/fit/fit-example.component").then(module => module.BreadcrumbFitExampleComponent),
+        mainFile: "fit-example.component.ts"
+    },
     "breadcrumb/separator": {
         files: ["separator-example.component.ts", "separator-example.component.html"],
         load: () => import("./breadcrumb/separator/separator-example.component").then(module => module.BreadcrumbSeparatorExampleComponent),
