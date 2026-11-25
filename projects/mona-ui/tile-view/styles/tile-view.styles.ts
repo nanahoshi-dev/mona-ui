@@ -42,13 +42,18 @@ export const tileViewViewportThemeVariants = cva(
 
 /**
  * A tile. Selection is a background, and in contrast themes, where backgrounds and rings don't paint, a `Highlight`
- * frame; the keyboard's place is a ring, and there a dashed outline inside the frame.
+ * frame; the keyboard's place is a ring, and there a dashed outline inside the frame. A tile a drag is over, where a
+ * drop would do something, has the selection's tint and a frame in its color, as a file explorer shows the folder a
+ * drop goes into.
  */
 export const tileViewTileThemeVariants = cva(
     `
         relative flex shrink-0 cursor-default select-none flex-col overflow-hidden rounded-md text-foreground
         after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:border-2
         after:border-transparent after:forced-color-adjust-none
+        data-drop-target:bg-(--color-selected) data-drop-target:text-(--color-selected-foreground)
+        data-drop-target:hover:bg-(--color-selected) data-drop-target:after:border-(--color-selected-border)
+        forced-colors:data-drop-target:after:border-[Highlight]
     `,
     {
         variants: {
