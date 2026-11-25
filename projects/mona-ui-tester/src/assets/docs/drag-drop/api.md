@@ -9,14 +9,17 @@ Everything below is imported from `@nanahoshi/mona-ui/drag-drop`. Each name link
 | [`DropTargetDirective`](/api/drag-drop/DropTargetDirective) | Directive | Makes an element a place to drop what is dragged with `monaDraggable`, or the rows of a grid or the tiles of a tile view that can be dragged. |
 | [`DraggableDirective`](/api/drag-drop/DraggableDirective) | Directive | Lets the user drag an element onto a `monaDropTarget`, or onto a grid's rows or a tile view's tiles that take drops, with the mouse or a pen. |
 | [`DragPreviewTemplateDirective`](/api/drag-drop/DragPreviewTemplateDirective) | Directive | Template that follows the pointer while a grid's rows or a tile view's tiles are dragged, placed inside `mona-grid` or `mona-tile-view`; for `monaDraggable`, pass it as `dragPreview`. |
+| [`DragDropService`](/api/drag-drop/DragDropService) | Service | Runs the drags over the page's drop targets, one at a time. |
 | [`DragStartEvent`](/api/drag-drop/DragStartEvent) | Class | A drag starting, once the pointer has moved far enough with the button held. |
 
 ### Types
 
 | Type | Kind | Description |
 | --- | --- | --- |
+| [`ExternalDrag`](/api/drag-drop/ExternalDrag) | Interface | A drag that comes from outside the page, such as files dragged from another app, started with `DragDropService.startExternal`. |
 | [`DragEndEvent`](/api/drag-drop/DragEndEvent) | Interface | A drag ending: dropped on a target, or let go of somewhere else, or cancelled with Escape. |
 | [`DragInfo`](/api/drag-drop/DragInfo) | Interface | A drag in progress, as a drop target sees it: what is dragged, and the modifier keys held now. |
+| [`DragPoint`](/api/drag-drop/DragPoint) | Interface | Where a drag from outside the page is, and the modifier keys held there. |
 | [`DragPreviewContext`](/api/drag-drop/DragPreviewContext) | Interface | The context of a `monaDragPreview` template: what is dragged, as `let-data`, what a drop would do where the pointer is, and the target there. |
 | [`DropTargetEvent`](/api/drag-drop/DropTargetEvent) | Interface | A drag entering a drop target, leaving it, or dropped on it. |
 | [`DropEffect`](/api/drag-drop/DropEffect) | Type alias | What a drop does, as a file explorer shows it: copies what is dragged, moves it, links to it, or does nothing. |

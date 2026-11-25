@@ -10,7 +10,7 @@ import type { DragInfo } from "../models/DragInfo";
 import type { DragStartEvent } from "../models/DragStartEvent";
 import type { DropEffect } from "../models/DropEffect";
 import type { DropTargetEvent } from "../models/DropTargetEvent";
-import { DRAG_SCROLL_EDGE } from "../services/drag-drop.service";
+import { DRAG_SCROLL_EDGE, DragDropService } from "../services/drag-drop.service";
 
 @Component({
     imports: [DragPreviewTemplateDirective, DraggableDirective, DropTargetDirective],
@@ -428,5 +428,136 @@ describe("drag and drop", () => {
         const results = await axe.run(document.body);
 
         expect(results.violations).toEqual([]);
+    });
+
+    describe("from outside the page", () => {
+        let service: DragDropService;
+
+        beforeEach(() => {
+            service = TestBed.inject(DragDropService);
+        });
+
+        afterEach(() => {
+            service.cancel();
+        });
+
+        it("comes over the target at its point, with what it carries and the keys held there", () => {
+            const drag = service.startExternal(["c.txt"], { shiftKey: true, x: 150, y: 10 });
+            settle();
+
+            expect(host.enters).toEqual([
+                {
+                    drag: { altKey: false, ctrlKey: false, data: ["c.txt"], metaKey: false, shiftKey: true },
+                    effect: "move",
+                    target: "Inner"
+                }
+            ]);
+            expect(element("inner").hasAttribute("data-drop-target")).toBe(true);
+            expect([drag.effect(), drag.target()]).toEqual(["move", "Inner"]);
+        });
+
+        it("goes from target to target as it moves, and asks again as keys change", () => {
+            const drag = service.startExternal(["c.txt"], { x: 50, y: 10 });
+
+            expect([drag.effect(), drag.target()]).toEqual(["none", null]);
+
+            drag.move({ x: 150, y: 10 });
+            drag.move({ ctrlKey: true, x: 150, y: 10 });
+
+            expect([drag.effect(), drag.target()]).toEqual(["copy", "Inner"]);
+            expect(host.drags.at(-1)?.ctrlKey).toBe(true);
+
+            drag.move({ x: 250, y: 10 });
+
+            expect(host.enters.map(enter => enter.target)).toEqual(["Inner", "Outer"]);
+            expect(host.leaves.map(leave => leave.target)).toEqual(["Inner"]);
+            expect([drag.effect(), drag.target()]).toEqual(["copy", "Outer"]);
+        });
+
+        it("drops on the target where it's dropped, with the keys held then, and says what the drop did", () => {
+            const drag = service.startExternal(["c.txt"], { x: 250, y: 10 });
+
+            expect(drag.drop({ ctrlKey: true, x: 150, y: 10 })).toBe("copy");
+            settle();
+
+            expect(host.drops).toEqual([
+                {
+                    drag: { altKey: false, ctrlKey: true, data: ["c.txt"], metaKey: false, shiftKey: false },
+                    effect: "copy",
+                    target: "Inner"
+                }
+            ]);
+            expect(element("inner").hasAttribute("data-drop-target")).toBe(false);
+            expect([drag.effect(), drag.target()]).toEqual(["none", null]);
+            expect(service.drag()).toBeNull();
+        });
+
+        it("drops nothing away from every target, or where the target refuses it", () => {
+            expect(service.startExternal(["c.txt"], { x: 350, y: 10 }).drop({ x: 350, y: 10 })).toBe("none");
+
+            host.verdict.set("none");
+
+            expect(service.startExternal(["c.txt"], { x: 150, y: 10 }).drop({ x: 150, y: 10 })).toBe("none");
+            expect(host.drops).toEqual([]);
+            expect(host.leaves).toEqual([expect.objectContaining({ effect: "none", target: "Inner" })]);
+        });
+
+        it("ends without a drop when cancelled, and does nothing once it has ended", () => {
+            const drag = service.startExternal(["c.txt"], { x: 150, y: 10 });
+            drag.cancel();
+            drag.move({ x: 250, y: 10 });
+
+            expect(drag.drop({ x: 250, y: 10 })).toBe("none");
+            expect(host.enters.map(enter => enter.target)).toEqual(["Inner"]);
+            expect(host.leaves.map(leave => leave.target)).toEqual(["Inner"]);
+            expect(host.drops).toEqual([]);
+            expect(service.drag()).toBeNull();
+        });
+
+        it("shows no preview and leaves the cursor to the app it comes from", () => {
+            service.startExternal(["c.txt"], { x: 150, y: 10 });
+            settle();
+
+            expect(preview()).toBeNull();
+            expect(document.documentElement.className).not.toContain("cursor");
+        });
+
+        it("ends a drag in progress without a drop, and lets no other start until it ends", () => {
+            press("source");
+            move(150);
+            const first = service.startExternal(["c.txt"], { x: 250, y: 10 });
+            settle();
+
+            expect(host.ends).toEqual([{ data: ["a.txt", "b.txt"], effect: "none" }]);
+            expect(host.drops).toEqual([]);
+            expect(preview()).toBeNull();
+
+            press("source");
+            move(50);
+
+            expect(host.starts).toHaveLength(1);
+            expect(first.target()).toBe("Outer");
+
+            const second = service.startExternal(["d.txt"], { x: 150, y: 10 });
+
+            expect([first.effect(), first.target()]).toEqual(["none", null]);
+            expect(second.target()).toBe("Inner");
+            expect(first.drop({ x: 150, y: 10 })).toBe("none");
+            expect(host.drops).toEqual([]);
+        });
+
+        it("scrolls what it comes near the edge of", async () => {
+            const scroller = element("scroller");
+            Object.defineProperties(scroller, {
+                clientHeight: { configurable: true, value: 100 },
+                scrollHeight: { configurable: true, value: 1000 }
+            });
+            scroller.getBoundingClientRect = (): DOMRect => new DOMRect(0, 500, 400, 100);
+            service.startExternal(["c.txt"], { x: 150, y: 500 + 100 - DRAG_SCROLL_EDGE / 2 });
+
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+            expect(scroller.scrollTop).toBeGreaterThan(0);
+        });
     });
 });

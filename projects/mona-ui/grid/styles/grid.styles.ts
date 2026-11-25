@@ -6,12 +6,21 @@ const gridRowMinHeightClass = "min-h-9";
 const gridVirtualRowHeightClass =
     "h-(--mona-grid-row-height) min-h-(--mona-grid-row-height) max-h-(--mona-grid-row-height)";
 
+/**
+ * The grid. While it's a `monaDropTarget` a drag is over, its frame is drawn over its contents, above the header, the
+ * rows and the resize handles (`z-10`), which would hide a frame drawn under them; in contrast themes, an outline.
+ */
 export const gridBaseThemeVariants = cva(
     `
         relative flex flex-col
         h-full overflow-hidden
         text-foreground text-sm
         bg-surface border border-border
+        after:pointer-events-none after:absolute after:inset-0 after:z-20 after:rounded-[inherit]
+        after:content-[''] after:forced-color-adjust-none
+        data-drop-target:after:inset-ring-2 data-drop-target:after:inset-ring-(--color-selected-border)
+        forced-colors:data-drop-target:after:outline-2 forced-colors:data-drop-target:after:-outline-offset-2
+        forced-colors:data-drop-target:after:outline-[Highlight]
     `,
     {
         variants: {

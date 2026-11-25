@@ -573,6 +573,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./dialog/service/service-example.component").then(module => module.DialogServiceExampleComponent),
         mainFile: "service-example.component.ts"
     },
+    "drag-drop/external": {
+        files: ["external-example.component.ts", "external-example.component.html"],
+        load: () => import("./drag-drop/external/external-example.component").then(module => module.DragDropExternalExampleComponent),
+        mainFile: "external-example.component.ts"
+    },
     "drag-drop/keys": {
         files: ["keys-example.component.ts", "keys-example.component.html"],
         load: () => import("./drag-drop/keys/keys-example.component").then(module => module.DragDropKeysExampleComponent),

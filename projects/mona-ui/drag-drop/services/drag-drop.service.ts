@@ -13,10 +13,12 @@ import {
 } from "@angular/core";
 import { DragPreviewComponent } from "../components/drag-preview/drag-preview.component";
 import type { DragInfo } from "../models/DragInfo";
+import type { DragPoint } from "../models/DragPoint";
 import type { DragPreviewContext } from "../models/DragPreviewContext";
 import type { DropEffect } from "../models/DropEffect";
 import type { DropTargetEvent } from "../models/DropTargetEvent";
 import type { DragSourceStart, DropTargetRef } from "../models/DropTargetRef";
+import type { ExternalDrag } from "../models/ExternalDrag";
 import { DRAG_CURSOR_CLASSES, DRAGGING_ROOT_CLASSES } from "../styles/drag-drop.styles";
 
 /** How far the pointer moves with the button held before a drag starts: Windows' 4 pixels either way. */
@@ -44,13 +46,23 @@ interface Keys {
 interface Session {
     readonly data: unknown;
     readonly end: (effect: DropEffect) => void;
-    readonly preview: ComponentRef<DragPreviewComponent>;
+    /** The preview that follows the pointer, or null for a drag from outside the page, whose app shows its own. */
+    readonly preview: ComponentRef<DragPreviewComponent> | null;
 }
 
 const NO_KEYS: Keys = { altKey: false, ctrlKey: false, metaKey: false, shiftKey: false };
 
 function keysOf(event: KeyboardEvent | PointerEvent): Keys {
     return { altKey: event.altKey, ctrlKey: event.ctrlKey, metaKey: event.metaKey, shiftKey: event.shiftKey };
+}
+
+function keysAt(point: DragPoint): Keys {
+    return {
+        altKey: point.altKey ?? false,
+        ctrlKey: point.ctrlKey ?? false,
+        metaKey: point.metaKey ?? false,
+        shiftKey: point.shiftKey ?? false
+    };
 }
 
 function sameKeys(left: Keys, right: Keys): boolean {
@@ -73,11 +85,9 @@ function scrollStep(fromStart: number, toEnd: number): number {
 }
 
 /**
- * @hidden
- * Runs drags with the pointer: a source arms one on `pointerdown`, and once the pointer moves far enough, the drag
- * follows it, finds the drop target under it, scrolls what it nears the edge of, and drops where the button is let go.
- * Escape cancels it. Drop targets are found by where the pointer is, so they needn't know the source. One drag at a
- * time, with the mouse or a pen; touch keeps scrolling.
+ * Runs the drags over the page's drop targets, one at a time. `monaDraggable`, grid rows and tiles start them with the
+ * pointer, and `startExternal` starts one that comes from outside the page, such as files dragged from another app.
+ * A drag finds the target under it, scrolls what it nears the edge of, and drops on the target where it ends.
  */
 @Injectable({ providedIn: "root" })
 export class DragDropService {
@@ -116,17 +126,23 @@ export class DragDropService {
         return drag === null || target === null ? "none" : (target.effect(drag) ?? "none");
     });
 
-    /** The target under the pointer, or null. */
+    /**
+     * @hidden
+     * The target under the pointer, or null.
+     */
     public readonly target = this.#target.asReadonly();
 
     public constructor() {
         effect(() => {
-            const cursor = this.drag() === null ? "" : DRAG_CURSOR_CLASSES[this.effect()];
+            const session = this.#session();
+            // A drag from outside the page has the cursor its app gives it.
+            const cursor = session?.preview == null ? "" : DRAG_CURSOR_CLASSES[this.effect()];
             untracked(() => this.setCursor(cursor));
         });
     }
 
     /**
+     * @hidden
      * Arms a drag from a `pointerdown`: once the pointer moves far enough with the button held, `start` says what
      * to drag, or null for nothing. Only the main button of a mouse or a pen arms one, and not in a text field.
      */
@@ -187,6 +203,7 @@ export class DragDropService {
     }
 
     /**
+     * @hidden
      * Makes an element a drop target: a drag over it, or over anything inside it that isn't a target for the drag,
      * asks `target`. Returns what unregisters it.
      */
@@ -198,6 +215,57 @@ export class DragDropService {
                 this.#targets.delete(element);
                 this.#hit = null;
             }
+        };
+    }
+
+    /**
+     * Starts a drag that comes from outside the page at a point, such as files dragged from another app, which the
+     * browser, or the native app the page runs in, reports as it goes. Drop targets take it as they take a
+     * `monaDraggable`'s, with `data` as what is dragged. No preview follows it and the cursor is left alone, since the
+     * app it comes from shows its own. A drag in progress ends first, without a drop, and no other starts until this
+     * one ends. Returns the drag, to move, drop or cancel.
+     */
+    public startExternal(data: unknown, point: DragPoint): ExternalDrag {
+        this.#disarm?.();
+        this.finish(null);
+        const window = this.#document.defaultView;
+        const session: Session = { data, end: (): void => undefined, preview: null };
+        this.#keys.set(keysAt(point));
+        this.#session.set(session);
+        this.#stop = () => {
+            window?.cancelAnimationFrame(this.#frame);
+            this.#frame = 0;
+        };
+        this.moveTo(point.x, point.y);
+        if (window !== null) {
+            this.#frame = window.requestAnimationFrame(() => this.onFrame());
+        }
+
+        const current = (): boolean => untracked(this.#session) === session;
+        const moveTo = (to: DragPoint): void => {
+            this.setKeys(keysAt(to));
+            this.moveTo(to.x, to.y);
+        };
+        return {
+            cancel: () => {
+                if (current()) {
+                    this.finish(null);
+                }
+            },
+            drop: to => {
+                if (!current()) {
+                    return "none";
+                }
+                moveTo(to);
+                return this.finish(untracked(this.#target));
+            },
+            effect: computed(() => (this.#session() === session ? this.effect() : "none")),
+            move: to => {
+                if (current()) {
+                    moveTo(to);
+                }
+            },
+            target: computed(() => (this.#session() === session ? (this.#target()?.value() ?? null) : null))
         };
     }
 
@@ -256,11 +324,11 @@ export class DragDropService {
         return { drag, effect: target.effect(drag) ?? "none", target: target.value() };
     }
 
-    /** Ends the drag: dropped on `target`, or with no drop when it is null. */
-    private finish(target: DropTargetRef | null): void {
+    /** Ends the drag: dropped on `target`, or with no drop when it is null. Returns what the drop did. */
+    private finish(target: DropTargetRef | null): DropEffect {
         const session = this.#session();
         if (session === null) {
-            return;
+            return "none";
         }
         const drag = this.drag() as DragInfo;
         const effect = target === null ? "none" : this.effect();
@@ -272,16 +340,20 @@ export class DragDropService {
         this.#session.set(null);
         this.#target.set(null);
         this.#keys.set(NO_KEYS);
-        this.#application.detachView(session.preview.hostView);
-        session.preview.destroy();
-        session.preview.location.nativeElement.remove();
+        if (session.preview !== null) {
+            this.#application.detachView(session.preview.hostView);
+            session.preview.destroy();
+            session.preview.location.nativeElement.remove();
+        }
         this.setCursor("");
         if (target !== null && effect !== "none") {
             target.drop({ drag, effect, target: target.value() });
         } else if (current !== null) {
             current.leave({ drag, effect: current.effect(drag) ?? "none", target: current.value() });
         }
-        session.end(target !== null ? effect : "none");
+        const dropped = target !== null ? effect : "none";
+        session.end(dropped);
+        return dropped;
     }
 
     /** The target under a point: the innermost registered element there whose target takes the drag. */
@@ -306,7 +378,7 @@ export class DragDropService {
 
     private moveTo(x: number, y: number): void {
         this.#pointer = { x, y };
-        const preview = this.#session()?.preview.location.nativeElement as HTMLElement | undefined;
+        const preview = this.#session()?.preview?.location.nativeElement as HTMLElement | undefined;
         if (preview !== undefined) {
             preview.style.transform = `translate(${x + PREVIEW_OFFSET.x}px, ${y + PREVIEW_OFFSET.y}px)`;
         }

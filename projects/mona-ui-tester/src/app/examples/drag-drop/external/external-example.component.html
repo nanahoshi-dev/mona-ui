@@ -1,0 +1,22 @@
+<div class="flex flex-col gap-3">
+    <p class="text-sm">Drag files from your desktop onto a folder. Nothing is uploaded.</p>
+    <section
+        aria-label="Folders"
+        class="flex flex-wrap gap-3 rounded-lg border border-dashed border-border p-3"
+        (dragenter)="onDragEnter($event)"
+        (dragleave)="onDragLeave()"
+        (dragover)="onDragOver($event)"
+        (drop)="onDrop($event)">
+        @for (folder of folders; track folder) {
+            <div
+                class="flex h-24 w-32 flex-col items-center justify-center gap-1 rounded-lg border border-border text-sm"
+                dropEffect="copy"
+                [monaDropTarget]="folder"
+                (dropTargetDrop)="onFolderDrop($event)">
+                <svg lucideFolder aria-hidden="true" [size]="24"></svg>
+                <span>{{ folder }}</span>
+            </div>
+        }
+    </section>
+    <p class="text-sm text-muted-foreground" role="status">{{ lastDrop() }}</p>
+</div>
