@@ -1,0 +1,26 @@
+<div class="flex flex-wrap gap-3">
+    @for (folder of folders(); track folder.name) {
+        <div
+            class="flex w-48 flex-col gap-2 rounded-lg border border-border bg-card p-3"
+            [dropDisabled]="dropDisabled()"
+            [dropEffect]="dropEffect()"
+            [monaDropTarget]="folder.name"
+            (dropTargetDrop)="onDrop($event)">
+            <p class="flex items-center gap-2 text-sm font-medium" [id]="'drag-drop-demo-' + folder.name">
+                <svg lucideFolder aria-hidden="true" [size]="16"></svg>
+                {{ folder.name }}
+            </p>
+            <ul class="flex min-h-28 flex-col gap-1" [attr.aria-labelledby]="'drag-drop-demo-' + folder.name">
+                @for (file of folder.files; track file) {
+                    <li
+                        class="truncate rounded-md px-2 py-1 text-sm hover:bg-hover"
+                        [monaDraggable]="{ file, from: folder.name }">
+                        {{ file }}
+                    </li>
+                } @empty {
+                    <li class="px-2 py-1 text-sm text-muted-foreground">Empty</li>
+                }
+            </ul>
+        </div>
+    }
+</div>

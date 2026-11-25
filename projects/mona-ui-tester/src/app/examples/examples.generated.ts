@@ -573,6 +573,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         load: () => import("./dialog/service/service-example.component").then(module => module.DialogServiceExampleComponent),
         mainFile: "service-example.component.ts"
     },
+    "drag-drop/keys": {
+        files: ["keys-example.component.ts", "keys-example.component.html"],
+        load: () => import("./drag-drop/keys/keys-example.component").then(module => module.DragDropKeysExampleComponent),
+        mainFile: "keys-example.component.ts"
+    },
     "dropdown-button/checkable": {
         files: ["checkable-example.component.ts", "checkable-example.component.html"],
         load: () => import("./dropdown-button/checkable/checkable-example.component").then(module => module.DropdownButtonCheckableExampleComponent),
@@ -762,6 +767,11 @@ export const EXAMPLES: Readonly<Record<string, ExampleEntry>> = {
         files: ["aggregates-example.component.ts", "aggregates-example.component.html"],
         load: () => import("./grid-grouping/aggregates/aggregates-example.component").then(module => module.GridAggregatesExampleComponent),
         mainFile: "aggregates-example.component.ts"
+    },
+    "grid-rows/drag-drop": {
+        files: ["drag-drop-example.component.ts", "drag-drop-example.component.html"],
+        load: () => import("./grid-rows/drag-drop/drag-drop-example.component").then(module => module.GridRowsDragDropExampleComponent),
+        mainFile: "drag-drop-example.component.ts"
     },
     "grid-rows/master-detail": {
         files: ["master-detail-example.component.ts", "master-detail-example.component.html"],

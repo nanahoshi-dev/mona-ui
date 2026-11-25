@@ -112,6 +112,26 @@ breadcrumb/collapsed
 breadcrumb/separator
 ```
 
+### Dropping on crumbs
+
+An item with `monaDropTarget` takes drops, as the crumbs of a file explorer's path take the files dragged onto them:
+
+```html
+<mona-breadcrumb aria-label="Folder path">
+    @for (folder of path(); track $index) {
+        <mona-breadcrumb-item
+            [dropEffect]="crumbEffect"
+            [monaDropTarget]="folder"
+            (dropTargetDrop)="onCrumbDrop($event)"
+            (itemClick)="openCrumb($index)">
+            {{ folder }}
+        </mona-breadcrumb-item>
+    }
+</mona-breadcrumb>
+```
+
+The crumb a drop would go to takes the selection's colors and a frame; in forced colors, a `Highlight` outline. [Dragging rows onto folders](/components/grid-rows#dragging-rows-onto-folders) shows it with a file list, and [Drag and Drop](/components/drag-drop) explains effects and keys. Import `DropTargetDirective` from `@nanahoshi/mona-ui/drag-drop`.
+
 ## Appearance & Styling
 
 ### Visual states
@@ -123,6 +143,7 @@ breadcrumb/separator
 | Individually disabled | Disabled text color, no pointer interaction                                     |
 | List-level disabled   | The entire breadcrumb list uses the disabled text color, no pointer interaction |
 | Current (last) item   | Medium font weight, foreground color, default cursor                            |
+| Drop target           | While a drag is over it and a drop would do something: the selection's colors and a frame |
 
 When the breadcrumb is disabled via `[disabled]="true"`, all items lose pointer interaction. When only a child item's `disabled` is `true`, only that item is visually dimmed (provided the parent is not also disabled).
 

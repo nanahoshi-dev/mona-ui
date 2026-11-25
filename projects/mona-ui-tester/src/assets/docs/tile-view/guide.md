@@ -69,7 +69,7 @@ Ten thousand tiles, each a picture and a name. Double-click a tile, or press Ent
 
 The tile view fills its container's width and height, and has no size of its own, since only the rows in view are rendered: give the container a height, or the tile view a class such as `h-96`. `tileWidth`, `tileHeight` and `gap` size the tiles and the space between and around them, in pixels. Every tile must render at `tileHeight`, or scrolling drifts. `rounded` and `size` set the frame's radius and the text size, and `class` is merged onto the host with `tailwind-merge`.
 
-A selected tile has the selection background, and the tile the keyboard is on has a 2px ring. In forced colors, where backgrounds and rings don't paint, a selected tile has a `Highlight` frame, and the keyboard's tile a dashed outline inside it.
+A selected tile has the selection background, and the tile the keyboard is on has a 2px ring. In forced colors, where backgrounds and rings don't paint, a selected tile has a `Highlight` frame, and the keyboard's tile a dashed outline inside it. The tile a drop would go to has the selection background and a frame in the selection's border color, and the attribute `data-drop-target`; in forced colors, a `Highlight` frame.
 
 ## Behavior
 
@@ -84,6 +84,29 @@ A selected tile has the selection background, and the tile the keyboard is on ha
 The anchor is the tile last clicked, or moved to, without Shift. Ctrl+Shift+click adds the range to the selection.
 
 A right-click selects too, so a context menu acts on what was right-clicked: a tile that isn't selected becomes the selection, a selected tile keeps it, and a right-click in empty space clears it. The right-clicked tile becomes active. Put a [context menu](/components/contextmenu) on the tile view, or on an element around it: opened from the keyboard, it opens at the active tile.
+
+### Dragging tiles
+
+`tileDraggable` lets users drag tiles with the mouse or a pen, and `tileDropEffect` makes tiles drop targets, as folders among files are:
+
+```html
+<mona-tile-view
+    aria-label="Files"
+    itemKey="id"
+    textField="name"
+    [items]="entries()"
+    [tileDropEffect]="tileEffect"
+    tileDraggable
+    (tileDrop)="onTileDrop($event)"
+    [(selectedKeys)]="selected" />
+```
+
+```typescript
+protected readonly tileEffect = (drag: DragInfo, entry: Entry): DropEffect | null =>
+    !entry.folder ? null : (drag.data as Entry[]).includes(entry) ? "none" : "move";
+```
+
+A drag takes the selection, in item order: pressing a selected tile keeps it, and dragging one that isn't selected selects it first. `tileDropEffect` returns what a drop on a tile would do, from the drag and the tile's item, or `null` for a tile that isn't a target, so that a drag over it goes to a `monaDropTarget` around the tile view. `tileDrop` emits a drop with the tile's item as `target`, and the app applies it. The click that ends a drag doesn't change the selection, and the tile view scrolls when the pointer nears its edge. A `monaDragPreview` template inside `mona-tile-view` follows the pointer. Effects, keys and previews are on [Drag and Drop](/components/drag-drop).
 
 ### The active tile follows the app's selection
 
@@ -139,6 +162,8 @@ The tile view is one Tab stop: the listbox takes the focus, and `aria-activedesc
 | `aria-selected`                  | Each option                               | Whether the item is selected                                    |
 | `aria-posinset` / `aria-setsize` | Each tile                                 | The item's 1-based position and the number of items, since only some tiles are rendered |
 | `role="status"`                  | A visually hidden element after the tiles | "Loading" while `loading`, and "No data" when there are no items, unless a no-data template says it |
+
+Dragging tiles needs a pointer. Give each drop another way to do it, such as Cut and Paste in a context menu.
 
 Give pictures in item templates an empty `alt` when the tile's text names the item, so it isn't read twice.
 

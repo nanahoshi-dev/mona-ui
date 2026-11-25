@@ -358,9 +358,22 @@ export const gridListTableRowThemeVariants = cva(``, {
                 `,
             false: "bg-surface hover:bg-hover"
         },
-        virtual: { true: gridVirtualRowHeightClass, false: "" }
+        virtual: { true: gridVirtualRowHeightClass, false: "" },
+        /**
+         * A drag over the row, where a drop would do something: the selection's tint, framed, as a file list shows the
+         * folder a drop goes into. In forced colors, an outline. After `selected`, so its tint wins.
+         */
+        dropTarget: {
+            true: `
+                relative bg-(--color-selected) text-(--color-selected-foreground) hover:bg-(--color-selected)
+                after:absolute after:inset-0 after:z-2 after:pointer-events-none after:content-['']
+                after:ring-2 after:ring-inset after:ring-(--color-selected-border)
+                forced-colors:outline-2 forced-colors:-outline-offset-2 forced-colors:outline-[Highlight]
+            `,
+            false: ""
+        }
     },
-    defaultVariants: { rowFocus: false, virtual: false }
+    defaultVariants: { dropTarget: false, rowFocus: false, virtual: false }
 });
 
 export const gridListTableCellThemeVariants = cva(
@@ -451,7 +464,7 @@ export type GridListVariantProps = VariantProps<typeof gridListBaseThemeVariants
 
 export type GridListVariantInput = Omit<GridListBaseVariantInput, "virtual"> &
     GridListTableVariantInput &
-    Omit<GridListTableRowVariantInput, "rowFocus" | "selected" | "virtual">;
+    Omit<GridListTableRowVariantInput, "dropTarget" | "rowFocus" | "selected" | "virtual">;
 
 export type GridVariantProps = GridBaseVariantProps &
     GridHeaderTableCellVariantProps &

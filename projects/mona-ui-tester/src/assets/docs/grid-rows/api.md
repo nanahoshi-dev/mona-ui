@@ -4,11 +4,12 @@
 
 Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to its reference page, with every input, output, property and method.
 
-| Name | Kind |
-| --- | --- |
-| [`GridRowReorderableDirective`](/api/grid/GridRowReorderableDirective) | Directive |
-| [`GridDetailTemplateDirective`](/api/grid/GridDetailTemplateDirective) | Directive |
-| [`RowReorderEvent`](/api/grid/RowReorderEvent) | Class |
+| Name | Kind | Description |
+| --- | --- | --- |
+| [`GridRowDragDropDirective`](/api/grid/GridRowDragDropDirective) | Directive | Lets the user drag rows out of the grid with the mouse or a pen, onto a `monaDropTarget`, a tile view's tiles or other rows, and makes rows drop targets with `rowDropEffect`, as a file list's folders are. |
+| [`GridRowReorderableDirective`](/api/grid/GridRowReorderableDirective) | Directive |  |
+| [`GridDetailTemplateDirective`](/api/grid/GridDetailTemplateDirective) | Directive |  |
+| [`RowReorderEvent`](/api/grid/RowReorderEvent) | Class |  |
 
 ### Types
 
@@ -18,4 +19,4 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to 
 | [`GridRowClass`](/api/grid/GridRowClass) | Type alias | Returns the classes to add to the data row that shows the given item. |
 | [`GridRowClassValue`](/api/grid/GridRowClassValue) | Type alias | The classes a `GridRowClass` function adds to a data row. |
 
-**Related types:** [`PreventableEvent`](/api/common/PreventableEvent)
+**Related types:** [`DragEndEvent`](/api/drag-drop/DragEndEvent), [`DragInfo`](/api/drag-drop/DragInfo), [`DragStartEvent`](/api/drag-drop/DragStartEvent), [`DropEffect`](/api/drag-drop/DropEffect), [`DropTargetEvent`](/api/drag-drop/DropTargetEvent), [`PreventableEvent`](/api/common/PreventableEvent)

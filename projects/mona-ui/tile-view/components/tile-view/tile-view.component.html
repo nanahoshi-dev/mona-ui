@@ -50,9 +50,11 @@
                 [attr.aria-selected]="tileRole() === 'option' ? isSelected(cell) : null"
                 [attr.aria-posinset]="cell.index + 1"
                 [attr.aria-setsize]="count()"
+                [monaDropTargetHost]="tileTarget(cell.index)"
                 (click)="onTileClick($event, cell.index)"
                 (contextmenu)="onTileContextMenu(cell.index)"
-                (dblclick)="onTileDoubleClick($event, cell.index)">
+                (dblclick)="onTileDoubleClick($event, cell.index)"
+                (pointerdown)="onTilePointerDown($event, cell.index)">
                 @if (itemTemplate(); as template) {
                     <ng-container
                         [ngTemplateOutlet]="template"

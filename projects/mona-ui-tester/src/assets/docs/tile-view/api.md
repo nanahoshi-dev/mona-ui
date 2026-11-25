@@ -17,3 +17,5 @@ Everything below is imported from `@nanahoshi/mona-ui/tile-view`. Each name link
 | [`TileViewItemActivateEvent`](/api/tile-view/TileViewItemActivateEvent) | Interface | A tile was activated: double-clicked, or Enter was pressed on it. |
 | [`TileViewItemTemplateContext`](/api/tile-view/TileViewItemTemplateContext) | Interface | The context of a `monaTileViewItemTemplate`: the data item, as `let-item`, and the tile's state. |
 | [`TileViewSelectionMode`](/api/tile-view/TileViewSelectionMode) | Type alias | How tiles are selected: not at all, one at a time, or several, as in a file explorer, with Ctrl and Shift. |
+
+**Related types:** [`DragEndEvent`](/api/drag-drop/DragEndEvent), [`DragInfo`](/api/drag-drop/DragInfo), [`DragStartEvent`](/api/drag-drop/DragStartEvent), [`DropEffect`](/api/drag-drop/DropEffect), [`DropTargetEvent`](/api/drag-drop/DropTargetEvent)

@@ -20,6 +20,17 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ImmutableSet } from "@mirei/ts-collections";
+import {
+    DragDropService,
+    type DragEndEvent,
+    type DragInfo,
+    DragPreviewTemplateDirective,
+    DragStartEvent,
+    type DropEffect,
+    type DropTargetEvent,
+    DropTargetHostDirective,
+    type DropTargetRef
+} from "@nanahoshi/mona-ui/drag-drop";
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import {
     createElementControlId,
@@ -76,6 +87,7 @@ const NO_MODIFIERS: Modifiers = { ctrlKey: false, metaKey: false, shiftKey: fals
         CdkFixedSizeVirtualScroll,
         CdkVirtualForOf,
         CdkVirtualScrollViewport,
+        DropTargetHostDirective,
         NgTemplateOutlet,
         PlaceholderComponent
     ],
@@ -90,6 +102,7 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
     readonly #activeKey = signal<unknown>(NONE);
     readonly #destroyRef = inject(DestroyRef);
     readonly #direction = injectComponentDirection();
+    readonly #dragDrop = inject(DragDropService);
     readonly #focused = signal(false);
     readonly #id = createElementControlId();
     /** Each key's index. The first of equal keys wins; keys should be unique. */
@@ -117,6 +130,11 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
     });
     readonly #renderedRange = signal<ListRange>({ start: 0, end: 0 });
     readonly #selected = computed(() => ImmutableSet.create(this.selectedKeys()));
+    /** Each tile's drop target, by index, made as tiles are drawn; new items make new ones. */
+    readonly #tileTargets = computed(() => {
+        this.#items();
+        return new Map<number, DropTargetRef>();
+    });
     readonly #typeaheadKey$ = new Subject<string>();
     readonly #viewportHeight = signal(0);
     readonly #viewportWidth = signal(0);
@@ -164,6 +182,7 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
     protected readonly minBufferPx = computed(() => this.rowHeight());
     protected readonly noDataId = `${this.#id}-no-data`;
     protected readonly noDataTemplate = contentChild(TileViewNoDataTemplateDirective, { read: TemplateRef });
+    protected readonly previewTemplate = contentChild(DragPreviewTemplateDirective, { read: TemplateRef });
     protected readonly role = computed(() => (this.selectionMode() === "none" ? "list" : "listbox"));
     protected readonly rowHeight = computed(() => this.tileHeight() + this.gap());
     /** The items in rows of as many tiles as fit. */
@@ -286,6 +305,40 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
      * @default ""
      */
     public readonly textField = input<string | ((item: T) => string)>("");
+
+    /** @description Emitted when a drag of tiles ends, with what the drop did, or `"none"`. */
+    public readonly tileDragEnd = output<DragEndEvent<T[]>>();
+
+    /**
+     * @description Emitted when a drag of tiles starts, with the items dragged: the selected tiles', in order. Call
+     * `preventDefault()` to drag nothing.
+     */
+    public readonly tileDragStart = output<DragStartEvent<T[]>>();
+
+    /**
+     * @description Lets the user drag tiles with the mouse or a pen, onto a `monaDropTarget`, a grid's rows or other
+     * tiles. Dragging takes the selection: pressing a selected tile keeps it, and dragging one that isn't selected
+     * selects it first, as in a file explorer. A `monaDragPreview` template inside the tile view follows the pointer.
+     * @default false
+     */
+    public readonly tileDraggable = input(false, { transform: booleanAttribute });
+
+    /** @description Emitted when a drop that does something is made on a tile, with the tile's item as `target`. */
+    public readonly tileDrop = output<DropTargetEvent<T>>();
+
+    /**
+     * @description What a drop on a tile does, from the drag and the tile's item; null where the tile isn't a target,
+     * so a drag over it goes to a `monaDropTarget` around the tile view, if any. Called as a drag comes over a tile and
+     * as keys are pressed; one that reads signals is called again when they change. Without it, tiles aren't targets.
+     * @default null
+     */
+    public readonly tileDropEffect = input<((drag: DragInfo, item: T) => DropEffect | null) | null>(null);
+
+    /** @description Emitted when a drag comes over a tile that is a target, with what a drop would do. */
+    public readonly tileDropEnter = output<DropTargetEvent<T>>();
+
+    /** @description Emitted when a drag leaves a tile that is a target, or ends over it without a drop. */
+    public readonly tileDropLeave = output<DropTargetEvent<T>>();
 
     /**
      * @description Height of every tile, in pixels. Tiles must all be this tall for scrolling to stay accurate.
@@ -448,6 +501,26 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
         this.itemActivate.emit({ item: this.#items()[index], originalEvent: event });
     }
 
+    /** Arms a drag of the tile, when tiles can be dragged. */
+    protected onTilePointerDown(event: PointerEvent, index: number): void {
+        if (!this.tileDraggable()) {
+            return;
+        }
+        this.#dragDrop.arm(event, move => {
+            const items = this.dragItems(index);
+            const start = new DragStartEvent(items, move);
+            this.tileDragStart.emit(start);
+            if (start.isDefaultPrevented()) {
+                return null;
+            }
+            return {
+                data: items,
+                end: effect => this.tileDragEnd.emit({ data: items, effect }),
+                preview: this.previewTemplate() ?? null
+            };
+        });
+    }
+
     /** A click or right-click on no tile clears the selection, as in a file explorer, unless Ctrl or Shift is held. */
     protected onViewportClick(event: MouseEvent): void {
         const target = event.target as Element | null;
@@ -481,8 +554,47 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
         return `${this.#id}-${index}`;
     }
 
+    /** The drop target of the tile at an index, when tiles are targets. */
+    protected tileTarget(index: number): DropTargetRef | null {
+        if (this.tileDropEffect() === null) {
+            return null;
+        }
+        const targets = this.#tileTargets();
+        let target = targets.get(index);
+        if (target === undefined) {
+            target = {
+                drop: event => this.tileDrop.emit(event as DropTargetEvent<T>),
+                effect: drag => this.tileDropEffect()?.(drag, this.#items()[index]) ?? null,
+                enter: event => this.tileDropEnter.emit(event as DropTargetEvent<T>),
+                leave: event => this.tileDropLeave.emit(event as DropTargetEvent<T>),
+                value: () => this.#items()[index]
+            };
+            targets.set(index, target);
+        }
+        return target;
+    }
+
     protected trackRow(index: number): number {
         return index;
+    }
+
+    /**
+     * A drag of the tile at an index starts. As with a right-click, a tile that isn't selected becomes the selection.
+     * Returns the items dragged: the selected tiles', in order, or the tile's alone when tiles aren't selected.
+     */
+    private dragItems(index: number): T[] {
+        this.setActive(index);
+        const items = this.#items();
+        const keys = this.#keys();
+        if (this.selectionMode() === "none") {
+            return [items[index]];
+        }
+        if (!this.#selected().contains(keys[index])) {
+            this.#anchorKey = keys[index];
+            this.report([keys[index]]);
+        }
+        const selected = this.#selected();
+        return items.filter((_, i) => selected.contains(keys[i]));
     }
 
     /** Typeahead: the next tile whose text starts with what was typed, from the active one on. */

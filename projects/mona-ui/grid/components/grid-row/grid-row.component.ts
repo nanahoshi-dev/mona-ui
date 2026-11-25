@@ -1,4 +1,5 @@
-import { Component, computed, inject, input } from "@angular/core";
+import { Component, computed, DestroyRef, ElementRef, inject, input } from "@angular/core";
+import { DragDropService, DragStartEvent, type DropTargetRef } from "@nanahoshi/mona-ui/drag-drop";
 import { twMerge } from "tailwind-merge";
 import { GridCellDirective } from "../../directives/grid-cell.directive";
 import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
@@ -46,6 +47,7 @@ function isInCellControl(target: EventTarget | null): boolean {
         "[class]": "baseClass()",
         "[attr.data-ruid]": "row().uid",
         "[attr.data-row-view-index]": "index()",
+        "[attr.data-drop-target]": "dropTarget() ? '' : null",
         role: "row",
         "[attr.aria-selected]": "selectable() ? selected() : null",
         "[attr.aria-rowindex]": "ariaRowIndex()",
@@ -55,10 +57,23 @@ function isInCellControl(target: EventTarget | null): boolean {
         "[attr.aria-setsize]": "treeInfo()?.setSize ?? null",
         "(click)": "onClick($event)",
         "(contextmenu)": "onContextMenu()",
-        "(dblclick)": "onDoubleClick($event)"
+        "(dblclick)": "onDoubleClick($event)",
+        "(pointerdown)": "onPointerDown($event)"
     }
 })
 export class GridRowComponent {
+    readonly #dragDrop = inject(DragDropService);
+    /** The row as a drop target, which `monaGridRowDragDrop`'s `rowDropEffect` makes one. */
+    readonly #dropTarget: DropTargetRef = {
+        drop: event => this.gridService.rowDragDrop()?.drop(event),
+        effect: drag => {
+            const effect = this.gridService.rowDragDrop()?.dropEffect();
+            return effect == null ? null : effect(drag, this.row().data as never);
+        },
+        enter: event => this.gridService.rowDragDrop()?.enter(event),
+        leave: event => this.gridService.rowDragDrop()?.leave(event),
+        value: () => this.row().data
+    };
     /** Rows under groups sit one level below the innermost group, and tree rows at their depth (treegrid). */
     protected readonly ariaLevel = computed(() => {
         const treeLevel = this.treeInfo()?.level;
@@ -70,6 +85,7 @@ export class GridRowComponent {
     });
     protected readonly baseClass = computed(() => {
         const variantClass = gridListTableRowThemeVariants({
+            dropTarget: this.dropTarget(),
             rowFocus: this.gridService.rowNavigation(),
             selected: this.selected(),
             virtual: this.gridService.virtualScrollOptions().enabled
@@ -91,6 +107,10 @@ export class GridRowComponent {
         const rowNumber = this.index() + this.gridService.paginationState().skip + 1;
         return this.expanded() ? messages.collapseDetail(rowNumber) : messages.expandDetail(rowNumber);
     });
+    /** Whether a drag is over the row, and a drop on it would do something. */
+    protected readonly dropTarget = computed(
+        () => this.#dragDrop.target() === this.#dropTarget && this.#dragDrop.effect() !== "none"
+    );
     /** With editing on, data cells say whether their column can be edited, in either edit mode. */
     protected readonly editingEnabled = computed(() => this.gridService.editableOptions().enabled === true);
     protected readonly gridService = inject(GridService);
@@ -105,6 +125,14 @@ export class GridRowComponent {
     public readonly index = input.required<number>();
     public readonly row = input.required<Row>();
     public readonly selected = computed(() => this.gridService.isRowSelected(this.row()));
+
+    public constructor() {
+        const unregister = this.#dragDrop.register(
+            inject<ElementRef<Element>>(ElementRef).nativeElement,
+            this.#dropTarget
+        );
+        inject(DestroyRef).onDestroy(unregister);
+    }
 
     /** `Enter` on one of the row's cells, where the key had no other use. */
     protected onActivate(event: KeyboardEvent): void {
@@ -131,6 +159,35 @@ export class GridRowComponent {
             return;
         }
         this.gridService.activateRow(this.row(), event);
+    }
+
+    /**
+     * Arms a drag of the row with `monaGridRowDragDrop`, unless it starts on a control inside a cell, such as the
+     * reorder handle, or an edit is open.
+     */
+    protected onPointerDown(event: PointerEvent): void {
+        const dragDrop = this.gridService.rowDragDrop();
+        if (
+            dragDrop === null ||
+            !dragDrop.draggable() ||
+            this.gridService.isInEditMode() ||
+            isInCellControl(event.target)
+        ) {
+            return;
+        }
+        this.#dragDrop.arm(event, move => {
+            const items = this.gridService.handleRowDragStart(this.row());
+            const start = new DragStartEvent(items, move);
+            dragDrop.dragStart(start);
+            if (start.isDefaultPrevented()) {
+                return null;
+            }
+            return {
+                data: items,
+                end: effect => dragDrop.dragEnd({ data: items, effect }),
+                preview: dragDrop.preview() ?? null
+            };
+        });
     }
 
     protected toggleDetail(): void {

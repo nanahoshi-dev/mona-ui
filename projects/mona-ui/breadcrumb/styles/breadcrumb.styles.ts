@@ -21,16 +21,27 @@ export const breadcrumbListThemeVariants = cva(
  * folded trail is the first item and the current page, and the first one gives up all its width before the current page
  * truncates: flexbox shares the overflow by factor times width, so at a million to one, the current page's share stays
  * below a layout unit until the first item has none left. The current page keeps a factor of 1 rather than a fraction,
- * because flexbox only takes that fraction of the overflow once it's the last item left to shrink.
+ * because flexbox only takes that fraction of the overflow once it's the last item left to shrink. An item with
+ * `monaDropTarget` that a drag is over, where a drop would do something, has the selection's tint and a frame in its
+ * color, and in forced colors an outline.
  */
-export const breadcrumbListItemWrapperThemeVariants = cva(`flex min-w-0 items-center`, {
-    variants: {
-        current: {
-            true: "",
-            false: "shrink-[1000000]"
+export const breadcrumbListItemWrapperThemeVariants = cva(
+    `
+        flex min-w-0 items-center rounded-sm
+        data-drop-target:bg-(--color-selected) data-drop-target:inset-ring-2
+        data-drop-target:inset-ring-(--color-selected-border) data-drop-target:*:bg-transparent!
+        data-drop-target:*:text-(--color-selected-foreground)! forced-colors:data-drop-target:outline-2
+        forced-colors:data-drop-target:-outline-offset-2 forced-colors:data-drop-target:outline-[Highlight]
+    `,
+    {
+        variants: {
+            current: {
+                true: "",
+                false: "shrink-[1000000]"
+            }
         }
     }
-});
+);
 
 /** Inset focus, because the list clips anything outside it. */
 export const breadcrumbListItemThemeVariants = cva(

@@ -10,12 +10,14 @@ import {
     TemplateRef,
     viewChild
 } from "@angular/core";
+import { DropTargetDirective } from "@nanahoshi/mona-ui/drag-drop";
 import { BreadcrumbLinkDirective } from "../../directives/breadcrumb-link.directive";
 import { BREADCRUMB_CONTEXT, BREADCRUMB_ITEM_CONTEXT } from "../../models/breadcrumb.tokens";
 
 /**
  * Use as a direct child of `<mona-breadcrumb>`. Project any Angular content — text, icons, or elements — into the
- * default slot.
+ * default slot. With `monaDropTarget`, the item is a place to drop what is dragged, as a file explorer's address bar
+ * takes files onto its folders.
  */
 @Component({
     selector: "mona-breadcrumb-item",
@@ -34,6 +36,11 @@ export class BreadcrumbItemComponent {
      * @default false
      */
     public readonly disabled = input(false, { transform: booleanAttribute });
+    /**
+     * @internal
+     * The item's `monaDropTarget`, which the breadcrumb puts on the item it renders.
+     */
+    public readonly dropTarget = inject(DropTargetDirective, { optional: true, self: true });
     /**
      * @internal
      */
