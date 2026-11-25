@@ -10,9 +10,11 @@ export * from "./directives/drop-target-host.directive";
 export { DragStartEvent } from "./models/DragStartEvent";
 export type * from "./models/DragEndEvent";
 export type * from "./models/DragInfo";
+export type * from "./models/DragPoint";
 export type * from "./models/DragPreviewContext";
 export type * from "./models/DropEffect";
 export type * from "./models/DropTargetEvent";
 export type * from "./models/DropTargetRef";
+export type * from "./models/ExternalDrag";
 
 export { DragDropService } from "./services/drag-drop.service";
