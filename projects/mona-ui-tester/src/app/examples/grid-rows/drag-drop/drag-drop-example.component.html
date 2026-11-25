@@ -1,0 +1,41 @@
+<div class="flex flex-col gap-2">
+    <mona-breadcrumb aria-label="Folder path">
+        @for (folder of path(); track $index) {
+            <mona-breadcrumb-item
+                [dropEffect]="crumbEffect"
+                [monaDropTarget]="folder"
+                (dropTargetDrop)="onCrumbDrop($event)"
+                (itemClick)="openCrumb($index)">
+                {{ folder }}
+            </mona-breadcrumb-item>
+        }
+    </mona-breadcrumb>
+    <div class="h-64">
+        <mona-grid
+            navigation="row"
+            rowKey="id"
+            [attr.aria-label]="current()"
+            [data]="shown()"
+            [monaGridSelectable]="{ mode: 'multiple', selectOnRowClick: true }"
+            [rowDropEffect]="rowEffect"
+            monaGridRowDragDrop
+            (rowActivate)="onActivate($event)"
+            (rowDrop)="onRowDrop($event)"
+            [(selectedKeys)]="selectedIds">
+            <mona-grid-column field="name" title="Name" />
+            <mona-grid-column field="type" title="Type" [width]="120" />
+            <ng-template monaDragPreview let-entries let-effect="effect" let-target="target">
+                <span
+                    class="inline-flex rounded-md border border-border bg-surface-overlay px-2 py-1 text-sm text-foreground shadow-(--shadow-overlay)">
+                    @if (effect === "move") {
+                        Move {{ entries.length === 1 ? entries[0].name : entries.length + " items" }} to
+                        {{ target.name ?? target }}
+                    } @else {
+                        {{ entries.length === 1 ? entries[0].name : entries.length + " items" }}
+                    }
+                </span>
+            </ng-template>
+        </mona-grid>
+    </div>
+    <p class="text-sm text-muted-foreground" role="status">{{ lastDrop() }}</p>
+</div>

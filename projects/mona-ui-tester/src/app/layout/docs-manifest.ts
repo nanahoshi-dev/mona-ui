@@ -367,6 +367,12 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
             component("badge", "Badge", "badge", "A small filled or outlined label for a count or a status."),
             component("chip", "Chip", "chip", "A compact label that can be selected, removed or given a prefix."),
             component(
+                "drag-drop",
+                "Drag and Drop",
+                "drag-drop",
+                "Drag things onto places that take them, moving, copying or linking as the place and the keys held decide."
+            ),
+            component(
                 "kanban",
                 "Kanban",
                 "kanban",
@@ -559,12 +565,13 @@ export const DOCS_MANIFEST: readonly DocsCategory[] = [
                 "grid-rows",
                 "Rows",
                 "grid",
-                "Expandable detail rows, row reordering by drag or keyboard, row classes and row sizing.",
+                "Expandable detail rows, row reordering, dragging rows onto folders, row classes and row sizing.",
                 {
                     apiExports: [
                         "GridDetailTemplateDirective",
                         "GridRowClass",
                         "GridRowClassValue",
+                        "GridRowDragDropDirective",
                         "GridRowReorderableDirective",
                         "RowReorderableOptions",
                         "RowReorderEvent"

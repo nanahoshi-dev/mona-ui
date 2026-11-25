@@ -4,6 +4,7 @@
 | :--- | :--- | :--- |
 | Detail rows | `monaGridDetailTemplate` inside `mona-grid` | `[(expandedKeys)]` on the grid |
 | Row reordering | `monaGridRowReorderable` | `rowReorder` with the reordered data |
+| Row drag and drop | `monaGridRowDragDrop`, and `rowDropEffect` for rows that take drops | `rowDrop`, `rowDragStart`, `rowDragEnd` |
 | Row activation | A double-click on a data row, or `Enter` on one of its cells | `rowActivate` on the grid |
 | Row classes | `rowClass` on the grid | — |
 | Row height | Cell templates and editors | — |
@@ -95,6 +96,35 @@ protected onRowActivate(event: GridRowActivateEvent<FileEntry>): void {
 
 Import `type GridRowActivateEvent` from `@nanahoshi/mona-ui/grid`. The grid reports every activation without a directive, with `monaGridVirtualScroll` too; which keys and clicks count is under [Row activation](#row-activation).
 
+### Dragging Rows onto Folders
+
+```example
+grid-rows/drag-drop
+```
+
+`monaGridRowDragDrop` lets users drag rows with the mouse or a pen. A drag takes the selected rows, in the order shown: pressing a selected row keeps the selection, and dragging one that isn't selected selects it first, as in a file explorer. `rowDropEffect` makes rows drop targets. It returns what a drop on a row would do, from the drag and the row's item, or `null` for a row that isn't a target, so that a drag over it goes to a `monaDropTarget` around the grid. `rowDrop` emits a drop with the row's item as `target`, and the app applies it.
+
+Here, folders take the entries dragged onto them, and so do the crumbs of the path, except the current folder's. Double-click a folder, or press `Enter` on it, to open it.
+
+```html
+<mona-grid
+    rowKey="id"
+    [data]="entries()"
+    [monaGridSelectable]="{ mode: 'multiple', selectOnRowClick: true }"
+    [rowDropEffect]="rowEffect"
+    monaGridRowDragDrop
+    (rowDrop)="onRowDrop($event)">
+    <mona-grid-column field="name" title="Name"></mona-grid-column>
+</mona-grid>
+```
+
+```typescript
+protected readonly rowEffect = (drag: DragInfo, entry: Entry): DropEffect | null =>
+    !entry.folder ? null : (drag.data as Entry[]).includes(entry) ? "none" : "move";
+```
+
+Import `GridRowDragDropDirective` from `@nanahoshi/mona-ui/grid`, and `type DragInfo` and `type DropEffect` from `@nanahoshi/mona-ui/drag-drop`. `[monaGridRowDragDrop]="false"` leaves rows as drop targets that can't be dragged. A `monaDragPreview` template inside `mona-grid` follows the pointer, with the dragged items as its implicit value. Effects, keys and previews are on [Drag and Drop](/components/drag-drop).
+
 ### Row Classes
 
 `rowClass` returns classes for each data row from its item, such as a muted row for a cancelled order:
@@ -160,6 +190,10 @@ The handle sits in a column of its own, the first in the grid, and rows move onl
 
 Row reordering works with paging (moving rows within the current page), detail rows, selection, locked columns, footers, and the add row. It's disabled while sorting, filtering, grouping, server binding, virtual scrolling, or an edit is active, because those change which row sits where; the handle then says why (the `rowReorderDisabled…` messages).
 
+### Row drag and drop
+
+A drag doesn't start from a cell's controls, such as a button, a field or a reorder handle, nor while an edit is open. The click that ends a drag doesn't change the selection. The row a drop would go to has the attribute `data-drop-target`, and a ring in the selection's border color over the selection background; in forced colors, a `Highlight` outline. The grid scrolls when the pointer nears its edge.
+
 ## Accessibility
 
 A row's handle is a button named after the row (`reorderRow`, or `rowAriaLabel`), with the keyboard hint and, when it's disabled, the reason. A keyboard move is announced through a polite live region (`rowReorderMoved`). The detail toggle is a button named by the `expandDetail`/`collapseDetail` messages.
@@ -173,6 +207,8 @@ A row's handle is a button named after the row (`reorderRow`, or `rowAriaLabel`)
 | `Alt+ArrowUp` / `Alt+ArrowDown` | On a reorder handle, moves the row up/down one place. Focus stays on the handle, so the row can keep moving. |
 
 The rest of the grid's keys are on [Grid Overview](/components/grid#keyboard).
+
+Dragging rows needs a pointer. Give each drop another way to do it, such as Cut and Paste in a [context menu](/components/contextmenu), since `monaGridRowDragDrop` adds none.
 
 ### ARIA
 

@@ -29,6 +29,8 @@ export class TileViewDemoComponent extends AbstractDemoComponent<TileViewCompone
                 defaultValue: "multiple"
             },
             textField: undefined,
+            // The photos aren't dragged anywhere: dragging tiles is in the guide.
+            tileDraggable: undefined,
             tileHeight: { type: "number", min: 48, max: 256, value: 112 },
             tileWidth: { type: "number", min: 48, max: 256, value: 112 },
             userClass: {

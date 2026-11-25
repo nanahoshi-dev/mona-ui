@@ -1,0 +1,44 @@
+<div class="flex flex-col gap-3">
+    <div class="flex flex-wrap items-start gap-3">
+        <ul aria-label="Files" class="flex w-56 flex-col gap-1 rounded-lg border border-border p-2">
+            @for (file of files(); track file) {
+                <li
+                    class="flex items-center justify-between gap-2 rounded-md px-2 py-1 text-sm hover:bg-hover"
+                    [dragPreview]="preview"
+                    [monaDraggable]="file">
+                    <span class="truncate">{{ file.name }}</span>
+                    <span class="text-xs text-muted-foreground">{{ file.folder }}</span>
+                </li>
+            }
+        </ul>
+        @for (folder of folders; track folder) {
+            <div
+                class="flex h-24 w-32 flex-col items-center justify-center gap-1 rounded-lg border border-border text-sm"
+                [dropEffect]="effectFor"
+                [monaDropTarget]="folder"
+                (dropTargetDrop)="onDrop($event)">
+                <svg lucideFolder aria-hidden="true" [size]="24"></svg>
+                <span>{{ folder }}</span>
+                <span class="text-xs text-muted-foreground">{{ counts()[folder] }}</span>
+            </div>
+        }
+    </div>
+    <p class="text-sm text-muted-foreground" role="status">{{ lastDrop() }}</p>
+</div>
+
+<ng-template #preview monaDragPreview let-file let-effect="effect" let-target="target">
+    <span
+        class="inline-flex rounded-md border border-border bg-surface-overlay px-2 py-1 text-sm text-foreground shadow-(--shadow-overlay)">
+        @switch (effect) {
+            @case ("copy") {
+                Copy to {{ target }}
+            }
+            @case ("move") {
+                Move to {{ target }}
+            }
+            @default {
+                {{ file.name }}
+            }
+        }
+    </span>
+</ng-template>

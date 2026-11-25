@@ -48,6 +48,7 @@ const ROUTES = [
     "date-range-picker",
     "datetime-picker",
     "decimal-textbox",
+    "drag-drop",
     "dropdown-button",
     "dropdown-list",
     "dropdown-tree",

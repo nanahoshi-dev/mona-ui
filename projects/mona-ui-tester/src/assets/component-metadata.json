@@ -911,6 +911,106 @@
       }
     ]
   },
+  "DraggableDirective": {
+    "name": "DraggableDirective",
+    "selector": "\"[monaDraggable]\"",
+    "inputs": [
+      {
+        "description": "What is dragged, which drop targets receive.",
+        "kind": "input",
+        "name": "data",
+        "type": "D",
+        "alias": "monaDraggable",
+        "defaultValue": "undefined"
+      },
+      {
+        "description": "Stops the element from being dragged.",
+        "kind": "input",
+        "name": "dragDisabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Emitted when the drag ends, with what the drop did, or `\"none\"`.",
+        "kind": "output",
+        "name": "dragEnd",
+        "type": "DragEndEvent<D>"
+      },
+      {
+        "description": "A template to follow the pointer, such as one marked `monaDragPreview`. Without it, the preview is\nwhat a drop would do, and how many items an array holds.",
+        "kind": "input",
+        "name": "dragPreview",
+        "type": "TemplateRef<DragPreviewContext<D>> | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Emitted when a drag starts. Call `preventDefault()` to drag nothing.",
+        "kind": "output",
+        "name": "dragStart",
+        "type": "DragStartEvent<D>"
+      }
+    ]
+  },
+  "DropTargetHostDirective": {
+    "name": "DropTargetHostDirective",
+    "selector": "\"[monaDropTargetHost]\"",
+    "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "target",
+        "type": "DropTargetRef | null",
+        "alias": "monaDropTargetHost",
+        "defaultValue": "null"
+      }
+    ]
+  },
+  "DropTargetDirective": {
+    "name": "DropTargetDirective",
+    "selector": "\"[monaDropTarget]\"",
+    "inputs": [
+      {
+        "description": "Stops the element from being a drop target: a drag over it goes to the target around it, if any.",
+        "kind": "input",
+        "name": "dropDisabled",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "What a drop does: an effect, or a function of the drag and the target's value, called as the drag\ncomes over the target and as keys are pressed. A function that reads signals is called again when they change.\n`\"none\"` refuses the drop.",
+        "kind": "input",
+        "name": "dropEffect",
+        "type": "DropEffect | ((drag: DragInfo<D>, target: T) => DropEffect)",
+        "defaultValue": "\"move\""
+      },
+      {
+        "description": "Emitted when a drop that does something is made on the target, with what it does. The target\ndoesn't apply it.",
+        "kind": "output",
+        "name": "dropTargetDrop",
+        "type": "DropTargetEvent<T, D>"
+      },
+      {
+        "description": "Emitted when a drag comes over the target, with what a drop would do.",
+        "kind": "output",
+        "name": "dropTargetEnter",
+        "type": "DropTargetEvent<T, D>"
+      },
+      {
+        "description": "Emitted when a drag leaves the target, or ends over it without a drop.",
+        "kind": "output",
+        "name": "dropTargetLeave",
+        "type": "DropTargetEvent<T, D>"
+      },
+      {
+        "description": "The target's value, which its events and the preview give, such as the folder it stands for.",
+        "kind": "input",
+        "name": "value",
+        "type": "T",
+        "alias": "monaDropTarget",
+        "defaultValue": "undefined"
+      }
+    ]
+  },
   "DropdownFilterableDirective": {
     "name": "DropdownFilterableDirective",
     "selector": "",
@@ -1449,6 +1549,57 @@
         "type": "ResizableOptions | \"\"",
         "alias": "monaGridResizable",
         "defaultValue": "\"\""
+      }
+    ]
+  },
+  "GridRowDragDropDirective": {
+    "name": "GridRowDragDropDirective",
+    "selector": "\"mona-grid[monaGridRowDragDrop]\"",
+    "inputs": [
+      {
+        "description": "Whether rows can be dragged. `false` leaves rows as drop targets only.",
+        "kind": "input",
+        "name": "draggable",
+        "type": "boolean",
+        "alias": "monaGridRowDragDrop",
+        "defaultValue": "true"
+      },
+      {
+        "description": "Emitted when a drag of rows ends, with what the drop did, or `\"none\"`.",
+        "kind": "output",
+        "name": "rowDragEnd",
+        "type": "DragEndEvent<T[]>"
+      },
+      {
+        "description": "Emitted when a drag of rows starts, with the items dragged: the selected rows', in the order\nshown. Call `preventDefault()` to drag nothing.",
+        "kind": "output",
+        "name": "rowDragStart",
+        "type": "DragStartEvent<T[]>"
+      },
+      {
+        "description": "Emitted when a drop that does something is made on a row, with the row's item as `target`.",
+        "kind": "output",
+        "name": "rowDrop",
+        "type": "DropTargetEvent<T>"
+      },
+      {
+        "description": "What a drop on a row does, from the drag and the row's item; null where the row isn't a target,\nso a drag over it goes to a `monaDropTarget` around the grid, if any. Called as a drag comes over a row and as\nkeys are pressed; one that reads signals is called again when they change. Without it, rows aren't targets.",
+        "kind": "input",
+        "name": "rowDropEffect",
+        "type": "((drag: DragInfo, item: T) => DropEffect | null) | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Emitted when a drag comes over a row that is a target, with what a drop would do.",
+        "kind": "output",
+        "name": "rowDropEnter",
+        "type": "DropTargetEvent<T>"
+      },
+      {
+        "description": "Emitted when a drag leaves a row that is a target, or ends over it without a drop.",
+        "kind": "output",
+        "name": "rowDropLeave",
+        "type": "DropTargetEvent<T>"
       }
     ]
   },
@@ -11445,6 +11596,26 @@
       }
     ]
   },
+  "DragPreviewComponent": {
+    "name": "DragPreviewComponent",
+    "selector": "\"mona-drag-preview\"",
+    "inputs": [
+      {
+        "description": "",
+        "kind": "input",
+        "name": "context",
+        "type": "Signal<DragPreviewContext>",
+        "required": true
+      },
+      {
+        "description": "",
+        "kind": "input",
+        "name": "template",
+        "type": "TemplateRef<DragPreviewContext> | null",
+        "defaultValue": "null"
+      }
+    ]
+  },
   "DropdownButtonComponent": {
     "name": "DropdownButtonComponent",
     "selector": "\"mona-dropdown-button\"",
@@ -20350,6 +20521,50 @@
         "name": "textField",
         "type": "string | ((item: T) => string)",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Emitted when a drag of tiles ends, with what the drop did, or `\"none\"`.",
+        "kind": "output",
+        "name": "tileDragEnd",
+        "type": "DragEndEvent<T[]>"
+      },
+      {
+        "description": "Emitted when a drag of tiles starts, with the items dragged: the selected tiles', in order. Call\n`preventDefault()` to drag nothing.",
+        "kind": "output",
+        "name": "tileDragStart",
+        "type": "DragStartEvent<T[]>"
+      },
+      {
+        "description": "Lets the user drag tiles with the mouse or a pen, onto a `monaDropTarget`, a grid's rows or other\ntiles. Dragging takes the selection: pressing a selected tile keeps it, and dragging one that isn't selected\nselects it first, as in a file explorer. A `monaDragPreview` template inside the tile view follows the pointer.",
+        "kind": "input",
+        "name": "tileDraggable",
+        "type": "boolean",
+        "defaultValue": "false"
+      },
+      {
+        "description": "Emitted when a drop that does something is made on a tile, with the tile's item as `target`.",
+        "kind": "output",
+        "name": "tileDrop",
+        "type": "DropTargetEvent<T>"
+      },
+      {
+        "description": "What a drop on a tile does, from the drag and the tile's item; null where the tile isn't a target,\nso a drag over it goes to a `monaDropTarget` around the tile view, if any. Called as a drag comes over a tile and\nas keys are pressed; one that reads signals is called again when they change. Without it, tiles aren't targets.",
+        "kind": "input",
+        "name": "tileDropEffect",
+        "type": "((drag: DragInfo, item: T) => DropEffect | null) | null",
+        "defaultValue": "null"
+      },
+      {
+        "description": "Emitted when a drag comes over a tile that is a target, with what a drop would do.",
+        "kind": "output",
+        "name": "tileDropEnter",
+        "type": "DropTargetEvent<T>"
+      },
+      {
+        "description": "Emitted when a drag leaves a tile that is a target, or ends over it without a drop.",
+        "kind": "output",
+        "name": "tileDropLeave",
+        "type": "DropTargetEvent<T>"
       },
       {
         "description": "Height of every tile, in pixels. Tiles must all be this tall for scrolling to stay accurate.",
