@@ -39,6 +39,7 @@
         "./date-range-picker": "./date-range-picker/public-api.ts",
         "./datetime-picker": "./datetime-picker/public-api.ts",
         "./dialog": "./dialog/public-api.ts",
+        "./drag-drop": "./drag-drop/public-api.ts",
         "./dropdown-button": "./dropdown-button/public-api.ts",
         "./dropdown-list": "./dropdown-list/public-api.ts",
         "./dropdown-tree": "./dropdown-tree/public-api.ts",

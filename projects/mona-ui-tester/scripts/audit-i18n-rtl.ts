@@ -443,6 +443,24 @@ export const ALLOWLIST: AllowlistEntry[] = [
     },
     {
         category: "rtl-physical-style",
+        filePattern: "projects/mona-ui/drag-drop/services/drag-drop.service.ts",
+        lineSnippet: 'left: "0px"',
+        reason: "The drag preview sits at the viewport's origin and follows the pointer's clientX, which is physical"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/drag-drop/services/drag-drop.service.ts",
+        lineSnippet: "rect.left, rect.right - x",
+        reason: "Autoscroll compares the pointer's clientX with the scroller's edges, all physical coordinates"
+    },
+    {
+        category: "rtl-manual-review",
+        filePattern: "projects/mona-ui/drag-drop/services/drag-drop.service.ts",
+        lineSnippet: "scroller.scrollLeft += dx",
+        reason: "Autoscroll steps toward the physical edge the pointer nears; scrollLeft grows rightward in RTL too"
+    },
+    {
+        category: "rtl-physical-style",
         filePattern: "projects/mona-ui/window/directives/window-drag-handler.directive.ts",
         lineSnippet: "element.style.left",
         reason: "Desktop window drag handler operates in 2D viewport coordinates"

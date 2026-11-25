@@ -46,6 +46,7 @@
             "@nanahoshi/mona-ui/date-range-picker": ["./projects/mona-ui/date-range-picker/public-api.ts"],
             "@nanahoshi/mona-ui/datetime-picker": ["./projects/mona-ui/datetime-picker/public-api.ts"],
             "@nanahoshi/mona-ui/dialog": ["./projects/mona-ui/dialog/public-api.ts"],
+            "@nanahoshi/mona-ui/drag-drop": ["./projects/mona-ui/drag-drop/public-api.ts"],
             "@nanahoshi/mona-ui/dropdown-list": ["./projects/mona-ui/dropdown-list/public-api.ts"],
             "@nanahoshi/mona-ui/dropdown-tree": ["./projects/mona-ui/dropdown-tree/public-api.ts"],
             "@nanahoshi/mona-ui/dropdown-button": ["./projects/mona-ui/dropdown-button/public-api.ts"],
