@@ -540,10 +540,18 @@ describe("Leaf component documentation", () => {
                         }
                         const names = attributes.replace(/="[^"]*"/g, " ");
                         const bindings = [...names.matchAll(/(?:^|\s)[[(]*([\w.-]+)[\])]*/g)].map(match => match[1]);
+                        // An attribute naming a directive, such as monaDropTarget, brings the directive's bindings.
+                        const directives = bindings.flatMap(binding => {
+                            const directive =
+                                selectorMembers.get(`[${binding}]`) ?? selectorMembers.get(`${selector}[${binding}]`);
+                            return directive ? [directive] : [];
+                        });
                         for (const binding of bindings) {
                             checked++;
-                            const known = source.members.some(
-                                member => member.name === binding || `${member.name}Change` === binding
+                            const known = [source, ...directives].some(owner =>
+                                owner.members.some(
+                                    member => member.name === binding || `${member.name}Change` === binding
+                                )
                             );
                             if (!known && !elementBindings.test(binding) && !/^#/.test(binding)) {
                                 problems.push(`${name}: ${binding} isn't a binding of <${selector}>`);
