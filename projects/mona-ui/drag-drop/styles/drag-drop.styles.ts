@@ -35,7 +35,7 @@ export const DRAG_PREVIEW_COUNT_CLASSES = `
 /**
  * A `monaDropTarget` while a drag is over it and a drop there would do something: a frame inside it in the selection's
  * color, and in contrast themes, where rings don't paint, an outline. The attribute `data-drop-target` says so, for
- * other styles.
+ * other styles: a component whose contents would hide the frame, such as a grid's rows, draws it over them itself.
  */
 export const DROP_TARGET_CLASSES = `
     data-drop-target:inset-ring-2 data-drop-target:inset-ring-(--color-selected-border)
