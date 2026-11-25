@@ -25,6 +25,7 @@
             }
             <li
                 [class]="listItemClass(item.current())"
+                [monaDropTargetHost]="item.dropTarget?.ref ?? null"
                 [attr.data-item-index]="entry.index"
                 [hidden]="entry.folded"
                 [style.display]="entry.folded ? 'none' : null">

@@ -20,6 +20,7 @@ import {
 } from "@angular/core";
 import { LucideChevronRight, LucideEllipsis } from "@lucide/angular";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { DropTargetHostDirective } from "@nanahoshi/mona-ui/drag-drop";
 import { twMerge } from "tailwind-merge";
 import { BreadcrumbItemDirective } from "../../directives/breadcrumb-item.directive";
 import { BreadcrumbSeparatorTemplateDirective } from "../../directives/breadcrumb-separator-template.directive";
@@ -110,7 +111,7 @@ function itemsToFold(widths: BreadcrumbWidths): number {
 @Component({
     selector: "mona-breadcrumb",
     templateUrl: "./breadcrumb.component.html",
-    imports: [NgTemplateOutlet, BreadcrumbItemDirective, LucideChevronRight, LucideEllipsis],
+    imports: [NgTemplateOutlet, BreadcrumbItemDirective, DropTargetHostDirective, LucideChevronRight, LucideEllipsis],
     providers: [{ provide: BREADCRUMB_CONTEXT, useExisting: forwardRef(() => BreadcrumbComponent) }],
     host: {
         "[attr.aria-label]": "hasItems() ? ariaLabel() || messages().breadcrumb : null",
