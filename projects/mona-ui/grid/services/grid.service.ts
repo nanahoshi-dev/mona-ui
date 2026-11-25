@@ -59,6 +59,7 @@ import type { GridViewRow } from "../models/GridGroup";
 import { GridKeySelector } from "../models/GridKeySelector";
 import type { GridRowActivateEvent } from "../models/GridRowActivateEvent";
 import type { GridRowClass } from "../models/GridRowClass";
+import type { GridRowDragDrop } from "../models/GridRowDragDrop";
 import type { GridLayoutColumn } from "../models/GridLayoutColumn";
 import type { GridRangePasteChange, GridRangePasteEvent } from "../models/GridRangePasteEvent";
 import { GridRemoveEvent } from "../models/GridRemoveEvent";
@@ -610,6 +611,8 @@ export class GridService {
     public readonly resizableOptions = this.#resizableOptions.asReadonly();
     public readonly rowActivate$ = new Subject<GridRowActivateEvent>();
     public readonly rowClass = signal<GridRowClass<unknown> | null>(null);
+    /** How rows are dragged and dropped on, set by `monaGridRowDragDrop`; null without it. */
+    public readonly rowDragDrop = signal<GridRowDragDrop | null>(null);
     public readonly rowDragInProgress = computed(() => this.draggingRowUid() != null);
     public readonly rowEdit$ = new Subject<RowEditEvent>();
     public readonly rowKey = signal<GridKeySelector<unknown> | null>(null);
@@ -1345,12 +1348,23 @@ export class GridService {
      * selected row keeps it, as in a file list, so a context menu acts on what was right-clicked.
      */
     public handleRowContextMenu(row: Row): void {
-        if (!this.selectsOnRowClick() || this.isRowSelected(row)) {
-            return;
+        this.selectRowUnlessSelected(row);
+    }
+
+    /**
+     * A drag of a data row starts. As with a right-click, a row that isn't selected becomes the selection when rows
+     * select on click. Returns the items dragged: the selected rows', in the order shown, or the row's alone when it
+     * isn't selected.
+     */
+    public handleRowDragStart(row: Row): unknown[] {
+        this.selectRowUnlessSelected(row);
+        if (!this.isRowSelected(row)) {
+            return [row.data];
         }
-        this.deselectAllRows();
-        this.selectRow(row);
-        this.#anchorRowKey.set(this.getRowSelectionKey(row));
+        return this.viewRows()
+            .where(viewRow => this.isRowSelected(viewRow))
+            .select(viewRow => viewRow.data)
+            .toArray();
     }
 
     /**
@@ -2910,6 +2924,16 @@ export class GridService {
         const [start, end] = anchorIndex <= targetIndex ? [anchorIndex, targetIndex] : [targetIndex, anchorIndex];
         const rangeKeys = rows.slice(start, end + 1).map(r => this.getRowSelectionKey(r));
         this.selectedKeys.set(ImmutableSet.create(rangeKeys));
+    }
+
+    /** Makes a data row the selection unless it is selected, when rows select on click. */
+    private selectRowUnlessSelected(row: Row): void {
+        if (!this.selectsOnRowClick() || this.isRowSelected(row)) {
+            return;
+        }
+        this.deselectAllRows();
+        this.selectRow(row);
+        this.#anchorRowKey.set(this.getRowSelectionKey(row));
     }
 
     /** Whether a click on a row selects it, as in a file list. */

@@ -52,6 +52,7 @@ export * from "./directives/grid-no-data-template.directive";
 export * from "./directives/grid-range-selectable.directive";
 export * from "./directives/grid-reorderable.directive";
 export * from "./directives/grid-resizable.directive";
+export * from "./directives/grid-row-drag-drop.directive";
 export * from "./directives/grid-row-reorderable.directive";
 export * from "./directives/grid-selectable.directive";
 export * from "./directives/grid-sortable.directive";
