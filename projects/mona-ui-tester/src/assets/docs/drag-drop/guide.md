@@ -6,12 +6,13 @@ Put `monaDraggable` on what users drag, with the data it carries, and `monaDropT
 
 - Users move or copy things onto places: files onto folders, cards onto lanes, people onto teams.
 - What a drop does depends on the place and on the keys held, as in a file explorer.
+- Files dragged from the desktop or another app should land on those places too: see [Drags from outside the page](#drags-from-outside-the-page).
 
 **Use something else when:**
 
 - Users reorder a list, or move items between lists of the same kind. [Sortable](/components/sortable) does that, with the keyboard too.
 - Columns of a board take cards, with limits. Use [Kanban](/components/kanban).
-- Files come from the desktop or another app. That is the browser's own drag and drop: see [File Upload](/components/file-upload).
+- Files from the desktop or another app are to be uploaded. [File Upload](/components/file-upload) takes them.
 
 ## Import & Quick Start
 
@@ -57,13 +58,21 @@ drag-drop/keys
 
 `dropEffect` takes a function of the drag and the target's value, called as the drag comes over the target and again as keys are pressed. Here, Ctrl copies, and otherwise a file moves, except into the folder it's in, where the drop is refused. The preview says what the drop would do, and where. Type the function's parameters, as `DragInfo<FileItem>` here, and the events carry the same types.
 
+### Files from the desktop
+
+```example
+drag-drop/external
+```
+
+The area listens to the browser's own drag events and passes them to `DragDropService`: `startExternal` when files come over it, `move` on each `dragover`, `drop` on `drop`, and `cancel` once the drag has left every element of it. The folders are ordinary `monaDropTarget`s, and setting `dropEffect` on the browser's `DataTransfer` from the drag's `effect` makes its pointer agree with them. The browser says what the files are only on the drop, so the drag carries how many there are.
+
 ### Rows, tiles and crumbs
 
 Grid rows and tile view tiles drag the selection, and folders among them can be drop targets, as [Dragging rows onto folders](/components/grid-rows#dragging-rows-onto-folders) shows with a file list and the crumbs of its path. See also [Dragging tiles](/components/tile-view#dragging-tiles) and [Dropping on crumbs](/components/breadcrumb#dropping-on-crumbs).
 
 ## Appearance & Styling
 
-A target with a drop that does something has the attribute `data-drop-target` and a 2px ring in the selection's border color, inside its edge; `active` on the directive, through `exportAs: "monaDropTarget"`, says the same. Style it further with Tailwind's `data-drop-target:` variant, such as `data-drop-target:bg-(--color-selected)`. In forced colors, the ring is a `Highlight` outline.
+A target with a drop that does something has the attribute `data-drop-target` and a 2px ring in the selection's border color, inside its edge; `active` on the directive, through `exportAs: "monaDropTarget"`, says the same. Style it further with Tailwind's `data-drop-target:` variant, such as `data-drop-target:bg-(--color-selected)`. In forced colors, the ring is a `Highlight` outline. A `mona-grid` or `mona-tile-view` that is a target draws its ring over its header, rows and tiles, which would hide a ring drawn under them.
 
 The default preview is a small chip by the pointer: a plus for a copy, an arrow for a move, a link for a link and a crossed circle for none, and the count when an array of more than one item is dragged. The pointer shows the effect too, over every element: the copy, alias or no-drop cursor, and the arrow for a move. A `monaDragPreview` template replaces the chip; it sits 12 pixels right of the pointer and 16 below it, and never takes the pointer's events.
 
@@ -91,6 +100,14 @@ Bringing the pointer within 32 pixels of the edge of an element that scrolls, su
 
 Drags start from the main button of a mouse or a pen. Touch scrolls the page as usual, and starts no drag.
 
+### Drags from outside the page
+
+The page can't follow a drag that starts outside it, such as files dragged from another app, with the pointer. Your app follows it instead, from the browser's drag events or from the native app the page runs in, and passes it on: `DragDropService.startExternal(data, point)` starts it at a point with what it carries, and returns an `ExternalDrag`, whose `move(point)`, `drop(point)` and `cancel()` take it the rest of the way. A point is a `DragPoint`: `x` and `y` as a pointer event's `clientX` and `clientY` are, and the keys held there.
+
+Targets take it as they take a `monaDraggable`'s drag: they are found by its point, framed, asked again as the keys change, and told as it enters, leaves and drops, and it scrolls what it comes near the edge of. The drag's `effect` and `target` signals say what a drop would do and where; hand them back to the browser or the other app, which draws the drag. `drop` returns what the drop did. No preview follows the drag and the cursor is left alone, since the app it comes from shows its own.
+
+Starting one ends a drag in progress without a drop, and no drag starts with the pointer until it ends. Once it has ended, its `effect` is `"none"`, its `target` null, and its methods do nothing.
+
 ## Accessibility
 
 Dragging needs a pointer and a steady hand, so give every drop another way to do it: a Cut and Paste, a Move to command in a menu, or buttons. WCAG 2.5.7 asks for one that works with single clicks or the keyboard. The directives don't add it, since what a drop does is your app's.
@@ -100,6 +117,7 @@ The preview is hidden from screen readers, and the directives add no roles: drag
 <!-- verification-checklist
 - [x] Inputs, outputs and defaults checked against drag-drop/directives/draggable.directive.ts and drop-target.directive.ts
 - [x] Threshold, fields, keys, Escape, blur, scrolling and touch checked against services/drag-drop.service.ts and the specs in tests/drag-drop.spec.ts
+- [x] Drags from outside the page checked against DragDropService.startExternal, models/ExternalDrag.ts and models/DragPoint.ts, and the "from outside the page" specs
 - [x] Preview context checked against models/DragPreviewContext.ts; DragPreviewTemplateDirective has a context guard
 - [x] Styling checked against styles/drag-drop.styles.ts and components/drag-preview/drag-preview.component.ts
 - [x] Exports checked against drag-drop/public-api.ts
