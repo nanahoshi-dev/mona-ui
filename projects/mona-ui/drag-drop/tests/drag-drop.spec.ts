@@ -430,6 +430,81 @@ describe("drag and drop", () => {
         expect(results.violations).toEqual([]);
     });
 
+    describe("leaving the page", () => {
+        let service: DragDropService;
+
+        beforeEach(() => {
+            service = TestBed.inject(DragDropService);
+        });
+
+        it("says when the pointer is past an edge of the page, and when it's back", () => {
+            press("source");
+            move(150);
+
+            expect(service.outsidePage()).toBe(false);
+
+            const seen: boolean[] = [];
+            for (const [x, y] of [
+                [-1, 10],
+                [150, 10],
+                [150, -3],
+                [window.innerWidth, 10],
+                [150, window.innerHeight],
+                [150, window.innerHeight - 1]
+            ]) {
+                move(x, y);
+                seen.push(service.outsidePage());
+            }
+
+            expect(seen).toEqual([true, false, true, true, true, false]);
+
+            service.cancel();
+        });
+
+        it("ends without a drop when cancelled out there, and leaves the next click alone", () => {
+            press("source");
+            move(150);
+            move(-20);
+            service.cancel();
+            settle();
+
+            expect(service.outsidePage()).toBe(false);
+            expect(service.drag()).toBeNull();
+            expect(preview()).toBeNull();
+            expect(host.drops).toEqual([]);
+            expect(host.leaves.map(leave => leave.target)).toEqual(["Inner"]);
+            expect(host.ends.map(end => end.effect)).toEqual(["none"]);
+
+            // The button is let go where the page can't see it, and the next click is the page's again.
+            element("source").click();
+
+            expect(host.clicks).toBe(1);
+        });
+
+        it("drops nothing where the button is let go out there, and is back to false", () => {
+            press("source");
+            move(150);
+            move(150, -10);
+
+            expect(host.leaves.map(leave => leave.target)).toEqual(["Inner"]);
+
+            release(150, -10);
+
+            expect(service.outsidePage()).toBe(false);
+            expect(host.drops).toEqual([]);
+            expect(host.ends.map(end => end.effect)).toEqual(["none"]);
+        });
+
+        it("stays false for a drag from outside the page", () => {
+            const drag = service.startExternal(["c.txt"], { x: 150, y: 10 });
+            drag.move({ x: -5, y: 10 });
+
+            expect(service.outsidePage()).toBe(false);
+
+            drag.cancel();
+        });
+    });
+
     describe("from outside the page", () => {
         let service: DragDropService;
 

@@ -7,6 +7,7 @@ Put `monaDraggable` on what users drag, with the data it carries, and `monaDropT
 - Users move or copy things onto places: files onto folders, cards onto lanes, people onto teams.
 - What a drop does depends on the place and on the keys held, as in a file explorer.
 - Files dragged from the desktop or another app should land on those places too: see [Drags from outside the page](#drags-from-outside-the-page).
+- In a desktop app, what is dragged out of the window should land in other apps: see [Drags that leave the page](#drags-that-leave-the-page).
 
 **Use something else when:**
 
@@ -108,6 +109,12 @@ Targets take it as they take a `monaDraggable`'s drag: they are found by its poi
 
 Starting one ends a drag in progress without a drop, and no drag starts with the pointer until it ends. Once it has ended, its `effect` is `"none"`, its `target` null, and its methods do nothing.
 
+### Drags that leave the page
+
+A drag follows the pointer past the edges of the page, where nothing of the page is, so letting go there drops nothing. `DragDropService.outsidePage` says while the pointer is out there. In a browser the drag goes on, and takes targets again when the pointer comes back.
+
+A desktop app the page runs in, such as one built on WebView2 or Electron, can hand the drag to the system's own drag and drop there, so it drops in other apps. Watch `outsidePage`, read what is dragged from `drag()`, end the page's drag with `cancel()`, and start the system's drag with that, while the button is still held. `cancel()` drops nothing, the draggable's `dragEnd` has the effect `"none"`, and the click after it is the page's again. A drag from outside the page is never outside it.
+
 ## Accessibility
 
 Dragging needs a pointer and a steady hand, so give every drop another way to do it: a Cut and Paste, a Move to command in a menu, or buttons. WCAG 2.5.7 asks for one that works with single clicks or the keyboard. The directives don't add it, since what a drop does is your app's.
@@ -118,6 +125,7 @@ The preview is hidden from screen readers, and the directives add no roles: drag
 - [x] Inputs, outputs and defaults checked against drag-drop/directives/draggable.directive.ts and drop-target.directive.ts
 - [x] Threshold, fields, keys, Escape, blur, scrolling and touch checked against services/drag-drop.service.ts and the specs in tests/drag-drop.spec.ts
 - [x] Drags from outside the page checked against DragDropService.startExternal, models/ExternalDrag.ts and models/DragPoint.ts, and the "from outside the page" specs
+- [x] Drags that leave the page checked against DragDropService.outsidePage, cancel and hitTest, and the "leaving the page" specs
 - [x] Preview context checked against models/DragPreviewContext.ts; DragPreviewTemplateDirective has a context guard
 - [x] Styling checked against styles/drag-drop.styles.ts and components/drag-preview/drag-preview.component.ts
 - [x] Exports checked against drag-drop/public-api.ts

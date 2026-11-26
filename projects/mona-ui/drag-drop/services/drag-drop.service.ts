@@ -95,6 +95,7 @@ export class DragDropService {
     readonly #document = inject(DOCUMENT);
     readonly #injector = inject(EnvironmentInjector);
     readonly #keys = signal<Keys>(NO_KEYS);
+    readonly #outsidePage = signal(false);
     readonly #previewContext = computed<DragPreviewContext>(() => {
         const data = this.drag()?.data;
         return { $implicit: data, data, effect: this.effect(), target: this.#target()?.value() ?? null };
@@ -125,6 +126,13 @@ export class DragDropService {
         const target = this.#target();
         return drag === null || target === null ? "none" : (target.effect(drag) ?? "none");
     });
+
+    /**
+     * Whether the pointer of the drag in progress is outside the page, such as past the edge of the window of a
+     * desktop app the page runs in. Such an app can hand the drag to the system's own drag and drop there, so it
+     * drops in other apps, and end it here with `cancel()`. Always false for a drag from outside the page.
+     */
+    public readonly outsidePage = this.#outsidePage.asReadonly();
 
     /**
      * @hidden
@@ -317,6 +325,7 @@ export class DragDropService {
         };
 
         this.moveTo(move.clientX, move.clientY);
+        this.#outsidePage.set(this.isOutsidePage(move.clientX, move.clientY));
         this.#frame = window.requestAnimationFrame(() => this.onFrame());
     }
 
@@ -340,6 +349,7 @@ export class DragDropService {
         this.#session.set(null);
         this.#target.set(null);
         this.#keys.set(NO_KEYS);
+        this.#outsidePage.set(false);
         if (session.preview !== null) {
             this.#application.detachView(session.preview.hostView);
             session.preview.destroy();
@@ -359,7 +369,7 @@ export class DragDropService {
     /** The target under a point: the innermost registered element there whose target takes the drag. */
     private hitTest(x: number, y: number): DropTargetRef | null {
         const drag = this.drag();
-        const hit = this.#document.elementFromPoint?.(x, y) ?? null;
+        const hit = this.isOutsidePage(x, y) ? null : (this.#document.elementFromPoint?.(x, y) ?? null);
         if (hit !== this.#hit) {
             this.#hit = hit;
             this.#scroller = this.scrollerOf(hit);
@@ -374,6 +384,12 @@ export class DragDropService {
             }
         }
         return null;
+    }
+
+    /** Whether a point is past an edge of the page's viewport, where nothing of the page is. */
+    private isOutsidePage(x: number, y: number): boolean {
+        const window = this.#document.defaultView;
+        return window !== null && (x < 0 || y < 0 || x >= window.innerWidth || y >= window.innerHeight);
     }
 
     private moveTo(x: number, y: number): void {
@@ -430,6 +446,7 @@ export class DragDropService {
         }
         this.setKeys(keysOf(event));
         this.moveTo(event.clientX, event.clientY);
+        this.#outsidePage.set(this.isOutsidePage(event.clientX, event.clientY));
     }
 
     private onPointerUp(event: PointerEvent): void {
