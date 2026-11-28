@@ -147,9 +147,18 @@ export class DropdownButtonComponent implements ButtonGroupMember, DropdownButto
     public readonly look = input<ButtonVariantProps["look"]>("default");
 
     /**
-     * @description Emitted when a menu item in the dropdown menu is clicked.
+     * @description Emitted when a menu item is activated, while the menu is still open and has the focus. Prevent it
+     * to keep the menu open. To act on the item, for example to open a dialog, use `menuItemSelect`, which comes once
+     * the menu has closed.
      */
     public readonly menuItemClick = output<PopupMenuItemClickEvent>();
+
+    /**
+     * @description Emitted when a menu item is chosen, once the menu has closed and the focus is back on the button:
+     * the place to act on the item, as a dialog opened here returns the focus to the button. Carries the event
+     * `menuItemClick` emitted, and doesn't come when that event was prevented.
+     */
+    public readonly menuItemSelect = output<PopupMenuItemClickEvent>();
 
     /**
      * @description Minimum width of the popup menu in pixels. A value of `0` makes the menu at least as wide as the

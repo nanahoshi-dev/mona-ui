@@ -10426,9 +10426,15 @@
         "defaultValue": "[]"
       },
       {
-        "description": "Emits when a menu item is clicked.",
+        "description": "Emits when a menu item is activated, while the menu is still open and has the focus. Prevent it to\nkeep the menu open. To act on the item, for example to open a dialog, use `menuSelect`, which comes once the\nmenu has closed.",
         "kind": "output",
         "name": "menuClick",
+        "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "Emits when a menu item is chosen, once the menu has closed and the focus is back where the menu\nopened from (the target, or the element in it that had the focus): the place to act on the item, as a dialog\nopened here returns the focus there. Carries the event `menuClick` emitted, and doesn't come when that event\nwas prevented.",
+        "kind": "output",
+        "name": "menuSelect",
         "type": "PopupMenuItemClickEvent"
       },
       {
@@ -11678,9 +11684,15 @@
         "defaultValue": "\"default\""
       },
       {
-        "description": "Emitted when a menu item in the dropdown menu is clicked.",
+        "description": "Emitted when a menu item is activated, while the menu is still open and has the focus. Prevent it\nto keep the menu open. To act on the item, for example to open a dialog, use `menuItemSelect`, which comes once\nthe menu has closed.",
         "kind": "output",
         "name": "menuItemClick",
+        "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "Emitted when a menu item is chosen, once the menu has closed and the focus is back on the button:\nthe place to act on the item, as a dialog opened here returns the focus to the button. Carries the event\n`menuItemClick` emitted, and doesn't come when that event was prevented.",
+        "kind": "output",
+        "name": "menuItemSelect",
         "type": "PopupMenuItemClickEvent"
       },
       {
@@ -14736,9 +14748,15 @@
         "defaultValue": "false"
       },
       {
-        "description": "Emits when a menu item is clicked.",
+        "description": "Emitted when a menu item is activated, while its menu is still open and has the focus. Prevent it\nto keep the menu open. To act on the item, for example to open a dialog, use `menuItemSelect`, which comes once\nthe menu has closed.",
         "kind": "output",
         "name": "menuItemClick",
+        "type": "MenuItemClickEvent"
+      },
+      {
+        "description": "Emitted when a menu item is chosen, once its menu has closed and the focus is back on the menubar\nitem: the place to act on the item, as a dialog opened here returns the focus there. Carries the event\n`menuItemClick` emitted, and doesn't come when that event was prevented.",
+        "kind": "output",
+        "name": "menuItemSelect",
         "type": "MenuItemClickEvent"
       },
       {
@@ -16723,7 +16741,7 @@
         "defaultValue": "[]"
       },
       {
-        "description": "The event that is emitted when a menu item is clicked.",
+        "description": "Emitted when a menu item is activated, while the menu is still open and has the focus. Prevent it\nto keep the menu open. To act on the item, for example to open a dialog, use `menuSelect`, which comes once the\nmenu has closed.",
         "kind": "output",
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent"
@@ -16735,6 +16753,12 @@
         "type": "string",
         "alias": "id",
         "defaultValue": "\"\""
+      },
+      {
+        "description": "Emitted when a menu item is chosen, once the menu has closed and the focus is back where the menu\nopened from: the place to act on the item, as a dialog opened here returns the focus there. Carries the event\n`menuClick` emitted, and doesn't come when that event was prevented. When a `close` handler keeps the menu\nopen, it comes right away.",
+        "kind": "output",
+        "name": "menuSelect",
+        "type": "PopupMenuItemClickEvent"
       },
       {
         "description": "Sets the minimum width of the popup menu.\nThis will be applied to the root menu and all submenus.",
@@ -19259,9 +19283,15 @@
         "defaultValue": "\"\""
       },
       {
-        "description": "Emitted when a menu item in the popup is clicked.",
+        "description": "Emitted when a menu item is activated, while the menu is still open and has the focus. Prevent it\nto keep the menu open. To act on the item, for example to open a dialog, use `menuItemSelect`, which comes once\nthe menu has closed.",
         "kind": "output",
         "name": "menuItemClick",
+        "type": "PopupMenuItemClickEvent"
+      },
+      {
+        "description": "Emitted when a menu item is chosen, once the menu has closed and the focus is back on the button the\nmenu opened from: the place to act on the item, as a dialog opened here returns the focus there. Carries the\nevent `menuItemClick` emitted, and doesn't come when that event was prevented.",
+        "kind": "output",
+        "name": "menuItemSelect",
         "type": "PopupMenuItemClickEvent"
       },
       {

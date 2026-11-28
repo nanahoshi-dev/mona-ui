@@ -27,7 +27,7 @@ Add the components you need to your standalone component's `imports` array.
 
 ```html
 <button #target type="button">Right-click me</button>
-<mona-contextmenu [target]="target" (menuClick)="onMenuClick($event)">
+<mona-contextmenu [target]="target" (menuSelect)="onMenuSelect($event)">
     <mona-contextmenu-item label="Copy"></mona-contextmenu-item>
     <mona-contextmenu-item label="Paste" [disabled]="true"></mona-contextmenu-item>
     <mona-contextmenu-separator></mona-contextmenu-separator>
@@ -36,9 +36,9 @@ Add the components you need to your standalone component's `imports` array.
 ```
 
 ```typescript
-import type { MenuItemClickEvent } from "@nanahoshi/mona-ui/menubar";
+import type { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/popup-menu";
 
-protected onMenuClick(event: MenuItemClickEvent): void { /* ... */ }
+protected onMenuSelect(event: PopupMenuItemClickEvent): void { /* ... */ }
 ```
 
 `target` accepts a template reference (as above), an `ElementRef<HTMLElement>`, or a plain `HTMLElement`.
@@ -141,13 +141,15 @@ contextmenu/icons
 
 **`items` takes precedence over projected content.** When the `items` input is a non-empty iterable, it is rendered instead of any projected `mona-contextmenu-item` (and related) components.
 
-**Keep the menu open after a click.** Calling `event.preventDefault()` in a `(menuClick)` handler — on `<mona-contextmenu>` itself or on an individual item — prevents the menu from closing after that selection.
+**Act on the item in `menuSelect`.** `menuClick` comes while the menu is still open and has the focus. `menuSelect` comes with the same event once the menu has closed and the focus is back where the menu opened from: the target, or the element in it that had the focus, such as a focused row. A dialog opened from `menuSelect` returns the focus there when it closes, while one opened from `menuClick` would return it to the menu, which is gone by then. `menuSelect` waits for the menu's closing animation.
+
+**Keep the menu open after a click.** Calling `event.preventDefault()` in a `(menuClick)` handler — on `<mona-contextmenu>` itself or on an individual item — prevents the menu from closing after that selection, and `menuSelect` doesn't come.
 
 **Identifying the item.** The click event's `value` is the item's `value` input, so handlers don't need to compare label text (which changes with translation). `label` is the item's label, and for checkbox and radio items `checked` is the state the item has once the click is applied.
 
 **Suppressing checkbox/radio state changes.** Calling `event.preventDefault()` on a `mona-contextmenu-checkbox-item`'s or `mona-contextmenu-radio-item`'s `menuClick` event suppresses the resulting `checkedChange` emission (checkbox item) or selection update (radio group). Use this to confirm or validate a change before it applies.
 
-**No open/close output.** `ContextMenuComponent` only exposes `menuClick`. It does not re-emit `PopupMenuComponent`'s `open`/`close`/`navigate` events. If your use case needs to react to the menu opening or closing, use `PopupMenuComponent` directly.
+**No open/close output.** `ContextMenuComponent` only exposes `menuClick` and `menuSelect`. It does not re-emit `PopupMenuComponent`'s `open`/`close`/`navigate` events. If your use case needs to react to the menu opening or closing, use `PopupMenuComponent` directly.
 
 **`aria-label` names the menu.** The context menu passes it to the menu it opens. When it's empty, the menu is labelled by the target, if the target has an `id`.
 
@@ -229,7 +231,7 @@ An item with a `monaContextMenuShortcutTemplate` has no `aria-label`: it is name
 - [x] ARIA table verified against popup-menu-list.component.html (post-fix: item id binding, aria-label fallback, aria-current removed) and context-menu.component.ts target attribute handling
 - [x] Keyboard map verified against PopupMenuListComponent's handle*Key methods and isNavigationKey/isTypeaheadKey
 - [x] Focus-restoration-on-close behavior verified against PopupMenuComponent's open-menu state (`restoreFocus`, `returnFocusTo`)
-- [x] No open/close output on ContextMenuComponent confirmed — only menuClick is defined in context-menu.component.ts
+- [x] No open/close output on ContextMenuComponent confirmed — only menuClick and menuSelect are defined in context-menu.component.ts
 - [x] PopupMenuItem and MenuItem confirmed exported from popup-menu/public-api.ts; typeahead no longer lists space, which activates the item
 - [x] No internal or unexported APIs exposed beyond the documented TODOs
 - [x] Inputs sorted A→Z within each table

@@ -9,6 +9,7 @@
     [size]="size()"
     [openAtPointer]="true"
     (menuClick)="menuClick.emit($event)"
+    (menuSelect)="menuSelect.emit($event)"
     (open)="onMenuOpen()"
     (close)="onMenuClose()"
     [id]="menuId"

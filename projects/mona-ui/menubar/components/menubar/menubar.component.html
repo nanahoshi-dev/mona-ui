@@ -48,6 +48,7 @@
                 [anchorConnectionPoint]="'bottomleft'"
                 [popupConnectionPoint]="'topleft'"
                 (menuClick)="onMenuItemClick($event)"
+                (menuSelect)="menuItemSelect.emit($event)"
                 (navigate)="navigate$.next($event)"
                 [trigger]="hasItems && !item.disabled() && !disabled() ? 'click' : 'none'"
                 [offset]="{ horizontal: 0, vertical: 2 }"
