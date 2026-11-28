@@ -122,13 +122,26 @@ export class ContextMenuComponent implements ContextMenuVariantInput {
      * The element in the target that the menu last opened on, for one menu that serves many elements, such as the tabs
      * of a tab strip. After a right-click it is the element under the pointer; after the ContextMenu key or Shift+F10,
      * the element in the target that had the focus, or the one its `aria-activedescendant` names; the target itself
-     * when there's none. It is set as the menu opens, before the menu renders, so an `aria-label` and `items` worked out
-     * from it (with `computed()`) are the menu's from the start, and it stays until the menu opens again. `menuClick`
-     * and `menuSelect` carry the same element as `contextElement`.
+     * when there's none. With a `filter`, it is the element that matched, the closest one around that element. It is
+     * set as the menu opens, before the menu renders, so an `aria-label` and `items` worked out from it (with
+     * `computed()`) are the menu's from the start, and it stays until the menu opens again. `menuClick` and
+     * `menuSelect` carry the same element as `contextElement`.
      */
     public readonly contextElement: Signal<HTMLElement | null> = computed(
         () => this.popupMenuRef()?.contextElement() ?? null
     );
+
+    /**
+     * @description A CSS selector of the elements in the target that the menu opens on, for one menu that serves many
+     * elements, such as the rows of a sidebar. The menu then opens only on an element that matches it, or on an element
+     * inside one: the element under the pointer, or, from the ContextMenu key or Shift+F10, the focused element or its
+     * `aria-activedescendant`. A right-click or the keys elsewhere in the target, such as on a group's heading or the
+     * space below the rows, are left alone, as outside the target, so the browser's own menu, or a menu on an element
+     * around the target, can open. `contextElement` is the element that matched. Elements added later match too.
+     * Empty, the menu opens anywhere in the target.
+     * @default ""
+     */
+    public readonly filter = input<string>("");
 
     /**
      * @description The menu items to render. When provided, these take precedence over
@@ -235,9 +248,12 @@ export class ContextMenuComponent implements ContextMenuVariantInput {
             if (!contextMenuKey || handledKeyEvents.has(event)) {
                 return;
             }
-            handledKeyEvents.add(event);
-            event.preventDefault();
             this.openMenuViaKeyboard();
+            // Keys that open nothing, on an element the filter doesn't name, are left alone.
+            if (this.#isMenuOpen()) {
+                handledKeyEvents.add(event);
+                event.preventDefault();
+            }
         };
         element.addEventListener("keydown", onKeydown);
         const role = roleOf(element);

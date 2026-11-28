@@ -10419,6 +10419,13 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "A CSS selector of the elements in the target that the menu opens on, for one menu that serves many\nelements, such as the rows of a sidebar. The menu then opens only on an element that matches it, or on an element\ninside one: the element under the pointer, or, from the ContextMenu key or Shift+F10, the focused element or its\n`aria-activedescendant`. A right-click or the keys elsewhere in the target, such as on a group's heading or the\nspace below the rows, are left alone, as outside the target, so the browser's own menu, or a menu on an element\naround the target, can open. `contextElement` is the element that matched. Elements added later match too.\nEmpty, the menu opens anywhere in the target.",
+        "kind": "input",
+        "name": "filter",
+        "type": "string",
+        "defaultValue": "\"\""
+      },
+      {
         "description": "The menu items to render. When provided, these take precedence over\ncontent-projected `mona-contextmenu-item` (and related) components.",
         "kind": "input",
         "name": "items",
@@ -16732,6 +16739,13 @@
         "kind": "output",
         "name": "close",
         "type": "PopupMenuCloseEvent"
+      },
+      {
+        "description": "A CSS selector of the elements in the target that the menu opens on, for one menu that serves many\nelements, such as the rows of a list. The menu then opens only on an element that matches it, or on an element\ninside one: the element under the pointer, or, from the ContextMenu key or Shift+F10, the focused element or its\n`aria-activedescendant`. Elsewhere in the target, the event is left alone, as one outside the target is, so the\nbrowser's own menu, or a menu on an element around the target, can open. Elements added later match too. Empty,\nthe menu opens anywhere in the target.",
+        "kind": "input",
+        "name": "filter",
+        "type": "string",
+        "defaultValue": "\"\""
       },
       {
         "description": "The items to render in the popup menu.\nIf provided, it will override the menu items defined by projected menu item components.",
