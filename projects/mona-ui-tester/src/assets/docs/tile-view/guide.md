@@ -114,7 +114,11 @@ When the app sets `selectedKeys` to keys that don't include the active tile, suc
 
 ### When items change
 
-The active tile stays on its item while the item is there. When it goes, the item that takes its place becomes active. Selected keys aren't pruned: the app owns them.
+The active tile stays on its item while the item is there. When it goes, the item that takes its place becomes active. When none of the items before are left, as when a file explorer shows another folder, or empties its list while the next folder loads, no tile is active until one is chosen: while the tile view has the focus, the first selected tile, or else the first, is active and scrolled into view, so `aria-activedescendant` always names a tile. Selected keys aren't pruned: the app owns them.
+
+### Focus from code
+
+`focus()` moves the focus to the tile view as Tab does, onto the active tile, or else the first selected tile or the first. `focusItem(key)` makes the tile of that item active and focuses the view, or does what `focus()` does for a key no item has. Both scroll the tile into view, select nothing, and wait until the view has rendered what changed before the call, so they can follow new `items` (focusing an item just added, for example).
 
 ### Tiles are reused
 
@@ -145,7 +149,7 @@ A move without Ctrl selects the tile moved to, in single and multiple selection.
 
 ### Focus
 
-The tile view is one Tab stop: the listbox takes the focus, and `aria-activedescendant` points at the active tile. Tabbing in makes the first selected tile active, or the first tile, without selecting it. A click focuses the tile view without scrolling it. The active tile shows its ring only while the keyboard is in use, as `:focus-visible` would. An empty tile view keeps its listbox as the Tab stop, with a ring of its own, described by the "No data" text.
+The tile view is one Tab stop: the listbox takes the focus, and `aria-activedescendant` points at the active tile. Tabbing in makes the first selected tile active, or the first tile, without selecting it. `focus()` and `focusItem(key)` do the same from code ([Focus from code](#focus-from-code)). A click focuses the tile view without scrolling it. The active tile shows its ring only while the keyboard is in use, as `:focus-visible` would. An empty tile view keeps its listbox as the Tab stop, with a ring of its own, described by the "No data" text.
 
 ### ARIA
 
