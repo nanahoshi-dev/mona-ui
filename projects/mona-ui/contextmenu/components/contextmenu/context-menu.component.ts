@@ -44,6 +44,9 @@ import { ensureContextMenuComponentTypes } from "../../utils/ctx-menu.utils";
 const POPUP_ROLES: ReadonlySet<string> = new Set(["button", "gridcell", "link", "menuitem", "tab", "treeitem"]);
 const MANAGED_ATTRIBUTES = ["aria-controls", "aria-expanded", "aria-haspopup"] as const;
 
+/** Presses of the ContextMenu key or Shift+F10 that a menu opened for, so menus on ancestor targets leave them alone. */
+const handledKeyEvents = new WeakSet<Event>();
+
 const roleOf = (element: HTMLElement): string | null => {
     const explicit = element.getAttribute("role")?.trim().split(/\s+/)[0];
     if (explicit) {
@@ -228,10 +231,13 @@ export class ContextMenuComponent implements ContextMenuVariantInput {
      */
     #attachTo(element: HTMLElement): () => void {
         const onKeydown = (event: KeyboardEvent): void => {
-            if (event.key === "ContextMenu" || (event.key === "F10" && event.shiftKey)) {
-                event.preventDefault();
-                this.openMenuViaKeyboard();
+            const contextMenuKey = event.key === "ContextMenu" || (event.key === "F10" && event.shiftKey);
+            if (!contextMenuKey || handledKeyEvents.has(event)) {
+                return;
             }
+            handledKeyEvents.add(event);
+            event.preventDefault();
+            this.openMenuViaKeyboard();
         };
         element.addEventListener("keydown", onKeydown);
         const role = roleOf(element);

@@ -159,6 +159,8 @@ protected onMenuSelect(event: PopupMenuItemClickEvent): void {
 </mona-contextmenu>
 ```
 
+**On nested targets, the innermost menu opens.** A right-click or the keys on an element that two context menus' targets contain open the menu of the inner target only.
+
 **`items` takes precedence over projected content.** When the `items` input is a non-empty iterable, it is rendered instead of any projected `mona-contextmenu-item` (and related) components.
 
 **Act on the item in `menuSelect`.** `menuClick` comes while the menu is still open and has the focus. `menuSelect` comes with the same event once the menu has closed and the focus is back where the menu opened from: the target, or the element in it that had the focus, such as a focused row. A dialog opened from `menuSelect` returns the focus there when it closes, while one opened from `menuClick` would return it to the menu, which is gone by then. `menuSelect` waits for the menu's closing animation.
@@ -252,6 +254,7 @@ An item with a `monaContextMenuShortcutTemplate` has no `aria-label`: it is name
 - [x] Keyboard map verified against PopupMenuListComponent's handle*Key methods and isNavigationKey/isTypeaheadKey
 - [x] Focus-restoration-on-close behavior verified against PopupMenuComponent's open-menu state (`restoreFocus`, `returnFocusTo`)
 - [x] No open/close output on ContextMenuComponent confirmed — only menuClick and menuSelect are defined in context-menu.component.ts
+- [x] Innermost-menu-from-the-keys verified against ContextMenuComponent's handledKeyEvents; right-clicks against PopupMenuComponent's handledContextMenuEvents
 - [x] PopupMenuItem and MenuItem confirmed exported from popup-menu/public-api.ts; typeahead no longer lists space, which activates the item
 - [x] No internal or unexported APIs exposed beyond the documented TODOs
 - [x] Inputs sorted A→Z within each table
