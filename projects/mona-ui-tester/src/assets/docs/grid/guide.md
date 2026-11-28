@@ -216,6 +216,8 @@ A press with the main or the secondary button on the body's empty space, below t
 
 `focus()` moves the focus into the rows from code: to the current cell when it's in the body, or else the first row. `focusRow(key)` moves it to the row of an item, by its `rowKey` value (or the item itself without a `rowKey`), scrolling a virtual grid to it; for a key no row has, it does what `focus()` does. Neither selects, and both wait until the grid has drawn what changed before the call, so `focusRow` can focus a row just added to `data`.
 
+When the grid has rows it hasn't drawn yet, both wait for them too: a grid just made draws its body after its first layout, and a virtual grid draws its rows a frame or so after that, so a grid made with its data and focused at once puts the focus on a row, not on a column header. Only the last call made while waiting moves the focus. A grid without rows still puts it on the current cell, a column header.
+
 ### ARIA
 
 | Attribute | When present | Value |
@@ -235,7 +237,7 @@ A press with the main or the secondary button on the body's empty space, below t
 
 <!-- verification-checklist
 - [x] GridComponent inputs verified against grid.component.ts (aria-label, aria-labelledby, data, expandedKeys, navigation, pageSize, pageSizeValues, resizeMethod, responsivePager, rounded, rowClass, rowKey, skip, textField, class); outputs limited to paging, expandedKeys and rowActivate
-- [x] Typeahead verified against grid-typeahead.service.ts, findTypeaheadMatch in internal/utils/typeahead.util.ts and tests/grid-typeahead.spec.ts
+- [x] Typeahead verified against grid-typeahead.service.ts, findTypeaheadMatch in internal/utils/typeahead.util.ts and tests/grid-typeahead.spec.ts; the focus wait against grid.component.ts (#afterRowsRegister) and tests/grid-focus.spec.ts
 - [x] Template directive selectors and contexts verified against grid/directives/grid-*template*.directive.ts and the grid templates
 - [x] Keyboard map verified against grid-logical-cell.directive.ts, grid-navigation.service.ts, grid.component.ts (onToolbarKeydown) and tests/grid-keyboard-navigation.spec.ts
 - [x] Feature-specific keys, ARIA rows and limits moved to the feature pages, each verified against its directive

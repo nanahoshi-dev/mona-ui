@@ -603,21 +603,23 @@ export class GridComponent<T> implements GridVariantInput {
     /**
      * Moves the focus into the grid's rows, without selecting: to the current cell when it's in the body, or else the
      * first row, which a virtual grid scrolls into view. With no rows, the focus goes to the current cell, such as a
-     * column header. It happens once the grid has drawn what changed before the call, such as new `data`.
+     * column header. It happens once the grid has drawn what changed before the call, such as new `data`, and its rows:
+     * a grid just made, or a virtual one, draws them a frame or so later, and the focus waits for them.
      */
     public focus(): void {
-        this.#afterCellsRegister(() => this.#focusBody());
+        this.#afterRowsRegister(() => this.#focusBody());
     }
 
     /**
      * Moves the focus to an item's row, without selecting it: the row whose `rowKey` value is `key`, or, in a grid
      * with no `rowKey`, the row of the item `key`. A virtual grid scrolls the row into view; a paged grid finds rows
      * on its page. For a key no row has, it moves the focus as `focus()` does. It happens once the grid has drawn what
-     * changed before the call, so it can focus a row just added to `data`.
+     * changed before the call, and its rows, as for `focus()`, so it can focus a row just added to `data`, or one of a
+     * grid just made.
      * @param key The row's `rowKey` value, or its data item.
      */
     public focusRow(key: unknown): void {
-        this.#afterCellsRegister(() => {
+        this.#afterRowsRegister(() => {
             const rowUid = this.gridService.findRowUid(key);
             if (rowUid == null || !this.#gridNavigationService.focusRowByUid(rowUid)) {
                 this.#focusBody();
@@ -972,6 +974,21 @@ export class GridComponent<T> implements GridVariantInput {
      */
     #afterCellsRegister(callback: () => void): void {
         afterNextRender({ mixedReadWrite: () => queueMicrotask(callback) }, { injector: this.#injector });
+    }
+
+    /**
+     * Runs a callback as `#afterCellsRegister` does, and, when the body has rows it hasn't drawn yet, once their cells
+     * have registered: a grid just made draws its body after its first layout, and a virtual one its rows on the next
+     * animation frame. A grid without rows runs it at once. A later call replaces a callback still waiting.
+     */
+    #afterRowsRegister(callback: () => void): void {
+        this.#afterCellsRegister(() => {
+            const gridService = this.gridService;
+            const rows = gridService.virtualScrollOptions().enabled
+                ? gridService.viewRows()
+                : gridService.viewPageRows();
+            this.#gridNavigationService.whenBodyCellsRegister(callback, rows.length !== 0);
+        });
     }
 
     /** Focuses the body's current cell or first row, or, with no rows, the current cell. */
