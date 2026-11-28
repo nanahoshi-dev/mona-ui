@@ -66,6 +66,12 @@ interface OpenMenuState {
 /** Context menu events that a menu opened for, so menus on ancestor targets leave them alone. */
 const handledContextMenuEvents = new WeakSet<Event>();
 
+/**
+ * The context menu events `openMenu` dispatches for the ContextMenu key and Shift+F10. They are known by identity:
+ * Chromium reads the `button` of -1 they are made with back as 0.
+ */
+const keyboardContextMenuEvents = new WeakSet<Event>();
+
 @Component({
     selector: "mona-popup-menu",
     template: "",
@@ -144,10 +150,22 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
     /**
      * The element in the target that the menu last opened on: the element under the pointer, or, for a menu opened from
      * the keyboard, the element in the target that had the focus, or the one its `aria-activedescendant` names; the
-     * target itself when there's none. It is set as the menu opens, before the menu renders, so the menu's name and
-     * items can be worked out from it, and stays until the menu opens again. The menu's click events carry it too.
+     * target itself when there's none. With a `filter`, it is the element that matched, the closest one around that
+     * element. It is set as the menu opens, before the menu renders, so the menu's name and items can be worked out
+     * from it, and stays until the menu opens again. The menu's click events carry it too.
      */
     public readonly contextElement: Signal<HTMLElement | null> = this.#contextElement.asReadonly();
+
+    /**
+     * @description A CSS selector of the elements in the target that the menu opens on, for one menu that serves many
+     * elements, such as the rows of a list. The menu then opens only on an element that matches it, or on an element
+     * inside one: the element under the pointer, or, from the ContextMenu key or Shift+F10, the focused element or its
+     * `aria-activedescendant`. Elsewhere in the target, the event is left alone, as one outside the target is, so the
+     * browser's own menu, or a menu on an element around the target, can open. Elements added later match too. Empty,
+     * the menu opens anywhere in the target.
+     * @default ""
+     */
+    public readonly filter = input<string>("");
 
     /**
      * @description The items to render in the popup menu.
@@ -289,7 +307,9 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
     /**
      * @description Opens the menu, as if the target had been clicked. From the ContextMenu key or Shift+F10, with
      * `openAtPointer` and no `anchor`, it opens at the focused element inside the target, such as a list's focused
-     * item, or at the element its `aria-activedescendant` names; otherwise at the target's center.
+     * item, or at the element its `aria-activedescendant` names; otherwise at the target's center. With a `filter`, it
+     * opens only on an element that matches: from the keys, around the focused element; otherwise, never, as the
+     * target isn't one of its own elements.
      * @param viaContextMenuKey Whether the menu opens from the ContextMenu key or Shift+F10.
      */
     public openMenu(viaContextMenuKey: boolean = false): void {
@@ -299,6 +319,10 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         }
         // A fake event passes the position, for openAtPointer, when the menu opens from the keyboard.
         if (viaContextMenuKey) {
+            // The keys on an element the menu doesn't open on are left to the browser, and to menus around the target.
+            if (this.#openingElement(this.#focusedElementIn(targetElement), targetElement) === null) {
+                return;
+            }
             const { x, y } = this.#keyboardPosition(targetElement);
             const contextMenuEvent = new MouseEvent("contextmenu", {
                 bubbles: true,
@@ -307,6 +331,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
                 clientY: y,
                 button: -1
             });
+            keyboardContextMenuEvents.add(contextMenuEvent);
             const ownerDocument = targetElement.ownerDocument;
             const suppressNativeContextMenu = (nativeEvent: Event): void => {
                 if (nativeEvent.isTrusted) {
@@ -352,19 +377,16 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
     }
 
     /**
-     * The element in the target a menu opens on: from the keyboard (a menu `openMenu` opens with the ContextMenu key's
-     * event), the focused element in the target or its active descendant; from the pointer, the element under it, or
-     * the HTML element an SVG graphic under it is in.
+     * The element in the target a menu opens on for an event: from the keyboard, the focused element in the target or
+     * its active descendant; from the pointer, the element under it. `null` when the menu doesn't open there.
      */
-    #contextElementOf(event: MouseEvent, targetElement: HTMLElement): HTMLElement {
-        if (event.button < 0) {
-            return this.#focusedElementIn(targetElement) ?? targetElement;
-        }
-        let element = event.target instanceof Element ? event.target : null;
-        while (element != null && !(element instanceof HTMLElement)) {
-            element = element.parentElement;
-        }
-        return element != null && targetElement.contains(element) ? element : targetElement;
+    #contextElementOf(event: MouseEvent, targetElement: HTMLElement): HTMLElement | null {
+        const element = this.#fromKeyboard(event)
+            ? this.#focusedElementIn(targetElement)
+            : event.target instanceof Element
+              ? event.target
+              : null;
+        return this.#openingElement(element, targetElement);
     }
 
     #element(value: ElementRef<HTMLElement> | Element | undefined | null): HTMLElement | null {
@@ -385,6 +407,14 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
     }
 
     /**
+     * Whether a context menu event comes from the ContextMenu key or Shift+F10: one `openMenu` dispatched, or one the
+     * browser marks with a `button` of -1, as Chromium does for its own.
+     */
+    #fromKeyboard(event: MouseEvent): boolean {
+        return keyboardContextMenuEvents.has(event) || event.button < 0;
+    }
+
+    /**
      * Where a menu opened from the keyboard goes: the middle of the focused element inside the target, or of its
      * active descendant, as far as it shows inside the target; otherwise the target's middle.
      */
@@ -399,6 +429,25 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
             return { x: target.left + target.width / 2, y: target.top + target.height / 2 };
         }
         return { x: (left + right) / 2, y: (top + bottom) / 2 };
+    }
+
+    /**
+     * The element in the target that a menu opens on, given the element it is opened at. Without a `filter`, that
+     * element (for an SVG graphic, the HTML element it is in), or the target itself for one outside it. With one, the
+     * closest element in the target that matches, from that element up, or `null` for none: the menu doesn't open.
+     */
+    #openingElement(element: Element | null, targetElement: HTMLElement): HTMLElement | null {
+        let html = element;
+        while (html != null && !(html instanceof HTMLElement)) {
+            html = html.parentElement;
+        }
+        const inTarget = html != null && targetElement.contains(html) ? html : null;
+        const filter = this.filter();
+        if (!filter) {
+            return inTarget ?? targetElement;
+        }
+        const match = inTarget?.closest(filter);
+        return match instanceof HTMLElement && match !== targetElement && targetElement.contains(match) ? match : null;
     }
 
     /**
@@ -489,11 +538,12 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         const actualTargetElement = targetInput instanceof ElementRef ? targetInput.nativeElement : targetInput;
         let anchor: Point | Element;
         if (atPointer) {
-            // From the keyboard (button -1): the anchor's center, or where openMenu put the event, at the focus.
-            if (event.button < 0 && anchorElement != null) {
+            // From the keyboard: the anchor's center, or where openMenu put the event, at the focus.
+            const fromKeyboard = this.#fromKeyboard(event);
+            if (fromKeyboard && anchorElement != null) {
                 const rect = actualTargetElement.getBoundingClientRect();
                 anchor = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-            } else if (event.button < 0) {
+            } else if (fromKeyboard) {
                 anchor = { x: event.clientX, y: event.clientY };
             } else {
                 anchor = { x: event.x, y: event.y };
@@ -504,7 +554,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         return anchor;
     }
 
-    private openFor(event: MouseEvent, targetElement: HTMLElement): void {
+    private openFor(event: MouseEvent, targetElement: HTMLElement, contextElement: HTMLElement): void {
         const opener = this.#document.activeElement as HTMLElement | null;
         const hasOpener = !!opener && opener !== this.#document.body;
         // Focus in another menu (a menubar moving to the next menu) leaves with that menu, so it can't come back there.
@@ -523,7 +573,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         const state: OpenMenuState = {
             chosen: null,
             close$: new Subject<void>(),
-            contextElement: this.#contextElementOf(event, targetElement),
+            contextElement,
             ref: null,
             restoreFocus: true,
             returnFocusTo
@@ -615,19 +665,24 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
 
     private setTriggerSubscription(targetElement: HTMLElement, trigger: PopupMenuTrigger): Subscription {
         return fromEvent<MouseEvent>(targetElement, trigger)
-            .pipe(
-                takeUntilDestroyed(this.#destroyRef),
-                tap(e => e.preventDefault())
-            )
+            .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(e => {
                 if (e.isTrusted && this.#suppressNextTrustedContextMenu) {
+                    e.preventDefault();
                     this.#suppressNextTrustedContextMenu = false;
                     return;
                 }
                 // A context menu on a nested target already opened for this event.
                 if (trigger === "contextmenu" && handledContextMenuEvents.has(e)) {
+                    e.preventDefault();
                     return;
                 }
+                const contextElement = this.#contextElementOf(e, targetElement);
+                if (contextElement === null) {
+                    // Not on an element the filter names: the event goes on as one outside the target would.
+                    return;
+                }
+                e.preventDefault();
                 const open = this.#open;
                 if (open) {
                     if (trigger !== "contextmenu" && !this.openAtPointer()) {
@@ -643,7 +698,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
                 if (trigger === "contextmenu") {
                     handledContextMenuEvents.add(e);
                 }
-                this.openFor(e, targetElement);
+                this.openFor(e, targetElement, contextElement);
             });
     }
 }

@@ -32,7 +32,8 @@ export class PopupMenuItemClickEvent extends PreventableEvent {
     /**
      * The element in the menu's target that the menu opened on, as the menu's `contextElement` gave it when this menu
      * opened: for a context menu, the element under the pointer, or, from the ContextMenu key or Shift+F10, the
-     * element that had the focus. `null` when the event didn't come from a menu.
+     * element that had the focus; with a `filter`, the element around it that matched. `null` when the event didn't
+     * come from a menu.
      */
     public get contextElement(): HTMLElement | null {
         return this.#contextElement;

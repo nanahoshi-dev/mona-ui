@@ -159,6 +159,27 @@ protected onMenuSelect(event: PopupMenuItemClickEvent): void {
 </mona-contextmenu>
 ```
 
+**Open only on some of the target's elements.** When a menu is for the target's rows, and nothing else in the target has anything to act on, such as a group's heading or the space below the rows, set `filter` to a CSS selector of the rows. The menu then opens only on an element that matches it, or on an element inside one: after a right-click, around the element under the pointer; after the `ContextMenu` key or `Shift+F10`, around the focused element, or the element its `aria-activedescendant` names. `contextElement` is the closest match, the row itself rather than its label or icon. A right-click or the keys anywhere else in the target are left alone, as they would be outside the target: the browser's own menu opens, or a menu on an element around the target. Rows added later match too, and without `filter` the menu opens anywhere in the target.
+
+```html
+<nav aria-label="Places" #sidebar>
+    <h2>Favorites</h2>
+    <div class="row" tabindex="0" data-place="desktop">Desktop</div>
+    …
+</nav>
+<mona-contextmenu #menu filter=".row" [target]="sidebar" (menuSelect)="onMenuSelect($event)">
+    <mona-contextmenu-item label="Open in new tab" value="open" />
+</mona-contextmenu>
+```
+
+```typescript
+protected onMenuSelect(event: PopupMenuItemClickEvent): void {
+    const place = event.contextElement?.dataset["place"]; // Always a row: the menu opens on nothing else.
+}
+```
+
+**On nested targets, the innermost menu opens.** A right-click or the keys on an element that two context menus' targets contain open the menu of the inner target only. Where the inner menu's `filter` leaves the element out, the outer menu opens instead.
+
 **`items` takes precedence over projected content.** When the `items` input is a non-empty iterable, it is rendered instead of any projected `mona-contextmenu-item` (and related) components.
 
 **Act on the item in `menuSelect`.** `menuClick` comes while the menu is still open and has the focus. `menuSelect` comes with the same event once the menu has closed and the focus is back where the menu opened from: the target, or the element in it that had the focus, such as a focused row. A dialog opened from `menuSelect` returns the focus there when it closes, while one opened from `menuClick` would return it to the menu, which is gone by then. `menuSelect` waits for the menu's closing animation.
@@ -195,6 +216,8 @@ protected onMenuSelect(event: PopupMenuItemClickEvent): void {
 | `Escape`                          | Closes the open submenu                                                                                     |
 | `Tab`                             | Closes the menu and its submenus; focus moves on from the target                                            |
 | Letter, digit, `-`, or `_`        | Jumps to (cycles through) items whose label starts with the typed text                                      |
+
+With `filter`, a right-click and the `ContextMenu` key or `Shift+F10` open the menu only on an element that matches it. Elsewhere in the target they do what they would outside it. For the keys to reach every element the menu is for, the focus must be able to go to it or into it, or an `aria-activedescendant` must name it.
 
 ### ARIA
 
@@ -252,6 +275,8 @@ An item with a `monaContextMenuShortcutTemplate` has no `aria-label`: it is name
 - [x] Keyboard map verified against PopupMenuListComponent's handle*Key methods and isNavigationKey/isTypeaheadKey
 - [x] Focus-restoration-on-close behavior verified against PopupMenuComponent's open-menu state (`restoreFocus`, `returnFocusTo`)
 - [x] No open/close output on ContextMenuComponent confirmed — only menuClick and menuSelect are defined in context-menu.component.ts
+- [x] filter verified against PopupMenuComponent's #openingElement: the closest match inside the target, never the target itself; events that match nothing aren't prevented
+- [x] Innermost-menu-from-the-keys verified against ContextMenuComponent's handledKeyEvents; right-clicks against PopupMenuComponent's handledContextMenuEvents
 - [x] PopupMenuItem and MenuItem confirmed exported from popup-menu/public-api.ts; typeahead no longer lists space, which activates the item
 - [x] No internal or unexported APIs exposed beyond the documented TODOs
 - [x] Inputs sorted A→Z within each table

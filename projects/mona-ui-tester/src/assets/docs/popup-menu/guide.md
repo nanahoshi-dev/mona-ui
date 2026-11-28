@@ -142,6 +142,8 @@ Set `trigger` to `"none"` when the target shouldn't open the menu by itself, and
 - **Checkable data items:** a `MenuItem` with `checkable` holds its state inside the menu. Read the new state from the event's `checked`, and keep it in your items if they can be replaced.
 - **Disabled items** stay in the arrow-key order, so screen reader users learn they exist, but they can't be activated.
 - **Target element:** `target` must be an element in the DOM, passed as a template reference or an `ElementRef`.
+- **Which element it opened on:** `contextElement` is a signal of the element in the target that the menu last opened on: the element under the pointer, or, opened with `openMenu(true)` for the `ContextMenu` key or `Shift+F10`, the focused element in the target or the element its `aria-activedescendant` names; the target itself when there's none. It is set before the menu renders, and `menuClick` and `menuSelect` carry it as `contextElement`.
+- **Opening on some elements only:** `filter` takes a CSS selector of the elements in the target that the menu opens on, such as a toolbar's tool buttons. The menu then opens only when the element under the pointer, or, from the keys, the focused element, matches it or is inside a match, and `contextElement` is that match. A click or right-click elsewhere in the target isn't prevented, so it does what it would outside the target. `openMenu()` without the keys opens nothing then, as the target isn't one of its own elements.
 
 ## Accessibility
 

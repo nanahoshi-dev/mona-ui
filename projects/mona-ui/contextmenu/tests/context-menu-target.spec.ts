@@ -160,3 +160,64 @@ describe("context menu target", () => {
         expect(menus().length).toBe(0);
     });
 });
+
+/** A menu on a list, and one on the pane around it. */
+@Component({
+    imports: [ContextMenuComponent, ContextMenuItemComponent],
+    template: `
+        <div #pane class="pane" tabindex="0">
+            <div #list class="list" tabindex="0">List</div>
+        </div>
+        <mona-contextmenu [target]="pane" aria-label="Pane">
+            <mona-contextmenu-item label="Refresh"></mona-contextmenu-item>
+        </mona-contextmenu>
+        <mona-contextmenu [target]="list" aria-label="List">
+            <mona-contextmenu-item label="Open"></mona-contextmenu-item>
+        </mona-contextmenu>
+    `
+})
+class NestedTargetsHostComponent {}
+
+describe("context menus on nested targets", () => {
+    let fixture: ComponentFixture<NestedTargetsHostComponent>;
+    let pane: HTMLElement;
+    let list: HTMLElement;
+
+    async function settle(): Promise<void> {
+        fixture.detectChanges();
+        await fixture.whenStable();
+        await wait(5);
+        fixture.detectChanges();
+    }
+
+    beforeEach(async () => {
+        fixture = TestBed.createComponent(NestedTargetsHostComponent);
+        document.body.appendChild(fixture.nativeElement);
+        await settle();
+        const element = fixture.nativeElement as HTMLElement;
+        pane = element.querySelector(".pane")!;
+        list = element.querySelector(".list")!;
+    });
+
+    afterEach(() => {
+        (fixture.nativeElement as HTMLElement).remove();
+        document.querySelectorAll(".cdk-overlay-container").forEach(overlay => overlay.remove());
+    });
+
+    it("opens only the inner target's menu from the keys", async () => {
+        list.focus();
+        const event = keydown(list, "ContextMenu");
+        await settle();
+
+        expect(event.defaultPrevented).toBe(true);
+        expect(menus().map(menu => menu.getAttribute("aria-label"))).toEqual(["List"]);
+    });
+
+    it("opens the outer target's menu from the keys outside the inner target", async () => {
+        pane.focus();
+        keydown(pane, "F10", { shiftKey: true });
+        await settle();
+
+        expect(menus().map(menu => menu.getAttribute("aria-label"))).toEqual(["Pane"]);
+    });
+});
