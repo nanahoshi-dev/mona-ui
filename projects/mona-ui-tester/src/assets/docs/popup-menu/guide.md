@@ -21,7 +21,7 @@ Add the components you need to your standalone component's `imports` array. Pass
     <svg lucideEllipsis [size]="16" aria-hidden="true"></svg>
 </button>
 
-<mona-popup-menu [target]="actions" (menuClick)="onAction($event)">
+<mona-popup-menu [target]="actions" (menuSelect)="onAction($event)">
     <mona-popup-menu-item label="Edit" value="edit"></mona-popup-menu-item>
     <mona-popup-menu-item label="Delete" value="delete"></mona-popup-menu-item>
 </mona-popup-menu>
@@ -137,7 +137,8 @@ Set `trigger` to `"none"` when the target shouldn't open the menu by itself, and
 
 - **Toggling:** with `trigger="click"`, clicking the target while the menu is open closes it.
 - **Closing:** the menu closes when an item is activated, on `Escape`, on a click outside, and on scroll.
-- **Keeping it open:** call `preventDefault()` on the `menuClick` event to keep the menu open and leave a checkbox or radio item as it was. Prevented on the item, the menu's own `menuClick` isn't emitted. Calling it on the `close` event stops that close.
+- **Acting on an item:** `menuClick` comes while the menu is still open and has the focus; `menuSelect` comes with the same event once the menu has closed and the focus is back where it opened from. Act on the item in `menuSelect`: a dialog opened there returns the focus to the trigger when it closes, while one opened from `menuClick` would return it to the menu, which is gone by then. `menuSelect` waits for the menu's closing animation.
+- **Keeping it open:** call `preventDefault()` on the `menuClick` event to keep the menu open and leave a checkbox or radio item as it was; `menuSelect` doesn't come then. Prevented on the item, the menu's own `menuClick` isn't emitted. Calling it on the `close` event stops that close, and `menuSelect` comes right away.
 - **Checkable data items:** a `MenuItem` with `checkable` holds its state inside the menu. Read the new state from the event's `checked`, and keep it in your items if they can be replaced.
 - **Disabled items** stay in the arrow-key order, so screen reader users learn they exist, but they can't be activated.
 - **Target element:** `target` must be an element in the DOM, passed as a template reference or an `ElementRef`.

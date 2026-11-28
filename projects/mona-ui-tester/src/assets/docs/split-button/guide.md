@@ -24,9 +24,9 @@ Add the components you need to your standalone component's `imports` array.
 
 ```html
 
-<mona-split-button text="Save" (buttonClick)="onSave()">
-    <mona-split-button-item label="Save as…" (menuClick)="onSaveAs($event)"></mona-split-button-item>
-    <mona-split-button-item label="Export PDF" (menuClick)="onExport($event)"></mona-split-button-item>
+<mona-split-button text="Save" (buttonClick)="onSave()" (menuItemSelect)="onMenuSelect($event)">
+    <mona-split-button-item label="Save as…" value="save-as"></mona-split-button-item>
+    <mona-split-button-item label="Export PDF" value="export-pdf"></mona-split-button-item>
 </mona-split-button>
 ```
 
@@ -34,8 +34,7 @@ Add the components you need to your standalone component's `imports` array.
 import type { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/popup-menu";
 
 protected onSave(): void { /* ... */ }
-protected onSaveAs(event: PopupMenuItemClickEvent): void { /* ... */ }
-protected onExport(event: PopupMenuItemClickEvent): void { /* ... */ }
+protected onMenuSelect(event: PopupMenuItemClickEvent): void { /* event.value is "save-as" or "export-pdf" */ }
 ```
 
 ## Anatomy
@@ -162,6 +161,8 @@ The two buttons form a group (`role="group"`) named by the main button. The main
 
 `menuItemClick` on `SplitButtonComponent` fires for every item click in the popup (top-level aggregator). `menuClick` on individual `mona-split-button-item` / `mona-split-button-checkbox-item` / `mona-split-button-radio-item` fires only for that specific item. Use item-level `menuClick` when you need per-action handlers; use the top-level `menuItemClick` when you need a single entry point.
 
+These come while the menu is still open and has the focus, so that preventing them can keep it open. `menuItemSelect` comes with the same event once the menu has closed and the focus is back on the button it opened from (the arrow, or the main button when `Alt+ArrowDown` opened it there), and not at all when the click was prevented. Act on the item there: a dialog opened from `menuItemSelect` returns the focus to that button when it closes, while one opened from `menuItemClick` would return it to the menu, which is gone by then. `menuItemSelect` waits for the menu's closing animation.
+
 ### Identifying the clicked item
 
 The click event's `value` is the item's `value` input, so handlers don't need to compare label text. For checkbox and radio items, `checked` is the state the item has once the click is applied. Calling `event.preventDefault()` on a checkbox item's `menuClick` keeps its state, and on a radio item's keeps the group's value.
@@ -216,7 +217,7 @@ The main button carries:
 - [x] aria-label and aria-labelledby are the inputs' aliases on this component
 - [x] SplitButtonGroupComponent.title and SplitButtonRadioItemComponent.value marked Required (input.required<string>())
 - [x] SplitButtonRadioGroupComponent.value documented as two-way bindable model
-- [x] menuItemClick typed PopupMenuItemClickEvent (exported from @nanahoshi/mona-ui/popup-menu); buttonClick typed MouseEvent
+- [x] menuItemClick and menuItemSelect typed PopupMenuItemClickEvent (exported from @nanahoshi/mona-ui/popup-menu); buttonClick typed MouseEvent
 - [x] Kind and Required columns removed from API tables; tables split into Inputs / Outputs per doc guidelines
 - [x] No internal or unexported APIs exposed
 - [x] ChangeDetectionStrategy.OnPush confirmed on all components

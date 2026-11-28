@@ -26,16 +26,16 @@ Add the components you need to your standalone component's `imports` array.
 **Minimal example:**
 
 ```html
-<mona-menubar (menuItemClick)="onMenuClick($event)">
+<mona-menubar (menuItemSelect)="onMenuSelect($event)">
     <mona-menu text="File">
-        <mona-menu-item label="New"></mona-menu-item>
-        <mona-menu-item label="Open"></mona-menu-item>
+        <mona-menu-item label="New" value="new"></mona-menu-item>
+        <mona-menu-item label="Open" value="open"></mona-menu-item>
         <mona-menu-separator></mona-menu-separator>
-        <mona-menu-item label="Exit"></mona-menu-item>
+        <mona-menu-item label="Exit" value="exit"></mona-menu-item>
     </mona-menu>
     <mona-menu text="Edit">
-        <mona-menu-item label="Undo"></mona-menu-item>
-        <mona-menu-item label="Redo"></mona-menu-item>
+        <mona-menu-item label="Undo" value="undo"></mona-menu-item>
+        <mona-menu-item label="Redo" value="redo"></mona-menu-item>
     </mona-menu>
 </mona-menubar>
 ```
@@ -43,7 +43,7 @@ Add the components you need to your standalone component's `imports` array.
 ```typescript
 import type { MenuItemClickEvent } from "@nanahoshi/mona-ui/menubar";
 
-protected onMenuClick(event: MenuItemClickEvent): void { /* ... */ }
+protected onMenuSelect(event: MenuItemClickEvent): void { /* event.value is "new", "open", … */ }
 ```
 
 ## Anatomy
@@ -163,7 +163,9 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 
 **`items` takes precedence over projected content.** When a `mona-menu`'s `items` input is a non-empty iterable, it is rendered instead of any projected `mona-menu-item` (and related) components.
 
-**Keep the menu open after a click.** Calling `event.preventDefault()` in a `(menuItemClick)` handler — on `<mona-menubar>` itself or on an individual item's own `(menuClick)` — prevents the menu from closing after that selection.
+**Act on the item in `menuItemSelect`.** `menuItemClick` comes while the menu is still open and has the focus. `menuItemSelect` comes with the same event once the menu has closed and the focus is back on the menubar item, so a dialog opened from it returns the focus there when it closes, while one opened from `menuItemClick` would return it to the menu, which is gone by then. `menuItemSelect` waits for the menu's closing animation.
+
+**Keep the menu open after a click.** Calling `event.preventDefault()` in a `(menuItemClick)` handler — on `<mona-menubar>` itself or on an individual item's own `(menuClick)` — prevents the menu from closing after that selection. `menuItemSelect` doesn't come then.
 
 **Identifying the item.** The click event's `value` is the item's `value` input, so handlers don't need to compare label text (which changes with translation). `label` is the item's label, and for checkbox and radio items `checked` is the state the item has once the click is applied.
 
@@ -241,7 +243,7 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source (menubar/*.component.ts and the inherited PopupMenu* base classes in popup-menu/)
-- [x] menuItemClick/menuClick output types documented as MenuItemClickEvent, the menubar's alias of PopupMenuItemClickEvent
+- [x] menuItemClick/menuItemSelect/menuClick output types documented as MenuItemClickEvent, the menubar's alias of PopupMenuItemClickEvent
 - [x] MenuGroupComponent.title is optional (input<string>()); MenuRadioItemComponent.value is input.required<string>()
 - [x] MenuRadioGroupComponent.value confirmed as model<string>("") — documented as two-way bindable
 - [x] MenuCheckboxItemComponent.checked confirmed as model(false): two-way bindable, and the item toggles itself

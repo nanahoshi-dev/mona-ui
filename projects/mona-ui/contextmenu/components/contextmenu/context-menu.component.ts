@@ -121,9 +121,19 @@ export class ContextMenuComponent implements ContextMenuVariantInput {
     public readonly items = input<Iterable<PopupMenuItem>>([]);
 
     /**
-     * @description Emits when a menu item is clicked.
+     * @description Emits when a menu item is activated, while the menu is still open and has the focus. Prevent it to
+     * keep the menu open. To act on the item, for example to open a dialog, use `menuSelect`, which comes once the
+     * menu has closed.
      */
     public readonly menuClick = output<PopupMenuItemClickEvent>();
+
+    /**
+     * @description Emits when a menu item is chosen, once the menu has closed and the focus is back where the menu
+     * opened from (the target, or the element in it that had the focus): the place to act on the item, as a dialog
+     * opened here returns the focus there. Carries the event `menuClick` emitted, and doesn't come when that event
+     * was prevented.
+     */
+    public readonly menuSelect = output<PopupMenuItemClickEvent>();
 
     /**
      * @description Sets the minimum width of the context menu.

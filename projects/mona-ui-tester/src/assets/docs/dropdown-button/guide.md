@@ -24,7 +24,7 @@ Add the components you need to your standalone component's `imports` array.
 **Minimal example:**
 
 ```html
-<mona-dropdown-button text="Options" (menuItemClick)="onAction($event)">
+<mona-dropdown-button text="Options" (menuItemSelect)="onAction($event)">
     <mona-dropdown-button-item label="Edit"></mona-dropdown-button-item>
     <mona-dropdown-button-item label="Duplicate"></mona-dropdown-button-item>
     <mona-dropdown-button-separator></mona-dropdown-button-separator>
@@ -144,6 +144,8 @@ The button is named by its content: the `text`, or what a `monaDropdownButtonTex
 ### Handling menu item events
 
 `menuItemClick` on `DropdownButtonComponent` fires for any item in the popup. `menuClick` on individual `mona-dropdown-button-item`, `mona-dropdown-button-checkbox-item`, or `mona-dropdown-button-radio-item` fires only for that specific item. Use item-level `menuClick` for per-action handlers.
+
+These come while the menu is still open and has the focus, so that preventing them can keep it open. `menuItemSelect` comes with the same event once the menu has closed and the focus is back on the button, and not at all when the click was prevented. Act on the item there: a dialog opened from `menuItemSelect` returns the focus to the button when it closes, while one opened from `menuItemClick` would return it to the menu, which is gone by then. `menuItemSelect` waits for the menu's closing animation.
 
 ### Identifying the clicked item
 

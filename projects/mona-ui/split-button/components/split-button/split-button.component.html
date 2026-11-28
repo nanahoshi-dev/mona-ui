@@ -47,6 +47,7 @@
     [anchor]="mainButton"
     [items]="menuItems()"
     (menuClick)="onMenuItemClick($event)"
+    (menuSelect)="menuItemSelect.emit($event)"
     (open)="onMenuOpen()"
     (close)="onMenuClose()"
     [offset]="{ horizontal: 0, vertical: 2 }"

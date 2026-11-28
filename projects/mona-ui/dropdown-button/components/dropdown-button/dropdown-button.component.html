@@ -30,6 +30,7 @@
     #popupMenu
     (close)="onMenuClose()"
     (menuClick)="onMenuItemClick($event)"
+    (menuSelect)="menuItemSelect.emit($event)"
     (open)="onMenuOpen()"
     [anchorConnectionPoint]="'bottomcenter'"
     [id]="menuId"

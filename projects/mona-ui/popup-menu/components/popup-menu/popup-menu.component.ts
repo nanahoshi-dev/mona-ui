@@ -51,6 +51,8 @@ import { PopupMenuListComponent } from "../popup-menu-list/popup-menu-list.compo
 
 /** What the component keeps about the menu it has open. */
 interface OpenMenuState {
+    /** The item chosen in the menu, reported through `menuSelect` once the menu has closed. */
+    chosen: PopupMenuItemClickEvent | null;
     readonly close$: Subject<void>;
     ref: PopupRef | null;
     restoreFocus: boolean;
@@ -141,7 +143,9 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
     public readonly items = input<Iterable<PopupMenuItem | MenuItem>>([]);
 
     /**
-     * @description The event that is emitted when a menu item is clicked.
+     * @description Emitted when a menu item is activated, while the menu is still open and has the focus. Prevent it
+     * to keep the menu open. To act on the item, for example to open a dialog, use `menuSelect`, which comes once the
+     * menu has closed.
      */
     public readonly menuClick = output<PopupMenuItemClickEvent>();
 
@@ -149,6 +153,14 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
      * @description The id of the popup menu's root element.
      */
     public readonly menuId = input<string>("", { alias: "id" });
+
+    /**
+     * @description Emitted when a menu item is chosen, once the menu has closed and the focus is back where the menu
+     * opened from: the place to act on the item, as a dialog opened here returns the focus there. Carries the event
+     * `menuClick` emitted, and doesn't come when that event was prevented. When a `close` handler keeps the menu
+     * open, it comes right away.
+     */
+    public readonly menuSelect = output<PopupMenuItemClickEvent>();
 
     /**
      * @description Sets the minimum width of the popup menu.
@@ -356,6 +368,23 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         return { x: (left + right) / 2, y: (top + bottom) / 2 };
     }
 
+    /**
+     * Closes the menu for a chosen item, and reports the choice once the menu has closed and given the focus back.
+     */
+    private closeForChoice(event: PopupMenuItemClickEvent): void {
+        const open = this.#open;
+        if (!open?.ref) {
+            this.menuSelect.emit(event);
+            return;
+        }
+        open.chosen = event;
+        if (!open.ref.close()) {
+            // A close handler kept the menu open. The choice stands, so it is reported now.
+            open.chosen = null;
+            this.menuSelect.emit(event);
+        }
+    }
+
     private closeFromList(state: OpenMenuState, options: PopupMenuCloseRequest): void {
         if (this.#open !== state || !state.ref) {
             return;
@@ -457,7 +486,13 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         } else if (hasOpener && !openerInMenu) {
             returnFocusTo = opener;
         }
-        const state: OpenMenuState = { close$: new Subject<void>(), ref: null, restoreFocus: true, returnFocusTo };
+        const state: OpenMenuState = {
+            chosen: null,
+            close$: new Subject<void>(),
+            ref: null,
+            restoreFocus: true,
+            returnFocusTo
+        };
         const ref = this.createMenu(event, state);
         state.ref = ref;
         this.#open = state;
@@ -490,6 +525,15 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
             if (state.restoreFocus && this.#open === null) {
                 this.restoreFocus(state.returnFocusTo);
             }
+            const chosen = state.chosen;
+            if (chosen && !this.#destroyed) {
+                // The popup leaves the page right after `closed`, in the same task: report the choice once it has.
+                queueMicrotask(() => {
+                    if (!this.#destroyed) {
+                        this.menuSelect.emit(chosen);
+                    }
+                });
+            }
         });
     }
 
@@ -517,7 +561,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
                     if (isMenuOwnedCheckState(item)) {
                         item.checked.set(event.checked === true);
                     }
-                    this.closeMenu();
+                    this.closeForChoice(event);
                 })
             )
             .subscribe();

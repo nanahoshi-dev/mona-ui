@@ -5,7 +5,8 @@ import type { ToolbarItemOverflow } from "../models/ToolbarItemOverflow";
 /**
  * @description Marks a control directly inside `<mona-toolbar>` as one that moves into the toolbar's More menu when
  * there's no room for it, last ones first. In the menu it's an item with the control's text, disabled with it and
- * checked while it's pressed, and choosing it clicks the control.
+ * checked while it's pressed, and choosing it clicks the control once the menu has closed and the focus is back on the
+ * More button.
  */
 @Directive({
     selector: "[monaToolbarItem]"
@@ -33,9 +34,9 @@ export class ToolbarItemDirective {
     });
 
     /**
-     * @description Emitted when the item is chosen from the More menu. Unless it's prevented, the toolbar then clicks the
-     * control, which suits a button. Handle it for a control a click doesn't operate, or keep that control in the toolbar
-     * with `overflow="never"`.
+     * @description Emitted when the item is chosen from the More menu, once the menu has closed and the focus is back on
+     * the More button. Unless it's prevented, the toolbar then clicks the control, which suits a button. Handle it for a
+     * control a click doesn't operate, or keep that control in the toolbar with `overflow="never"`.
      */
     public readonly overflowActivate = output<PreventableEvent<Event>>();
 

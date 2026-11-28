@@ -132,9 +132,18 @@ export class MenubarComponent implements MenubarVariantInput {
     public readonly disabled = input(false);
 
     /**
-     * @description Emits when a menu item is clicked.
+     * @description Emitted when a menu item is activated, while its menu is still open and has the focus. Prevent it
+     * to keep the menu open. To act on the item, for example to open a dialog, use `menuItemSelect`, which comes once
+     * the menu has closed.
      */
     public readonly menuItemClick = output<MenuItemClickEvent>();
+
+    /**
+     * @description Emitted when a menu item is chosen, once its menu has closed and the focus is back on the menubar
+     * item: the place to act on the item, as a dialog opened here returns the focus there. Carries the event
+     * `menuItemClick` emitted, and doesn't come when that event was prevented.
+     */
+    public readonly menuItemSelect = output<MenuItemClickEvent>();
 
     /**
      * @description Sets the rounded style of the menubar.
