@@ -66,6 +66,12 @@ interface OpenMenuState {
 /** Context menu events that a menu opened for, so menus on ancestor targets leave them alone. */
 const handledContextMenuEvents = new WeakSet<Event>();
 
+/**
+ * The context menu events `openMenu` dispatches for the ContextMenu key and Shift+F10. They are known by identity:
+ * Chromium reads the `button` of -1 they are made with back as 0.
+ */
+const keyboardContextMenuEvents = new WeakSet<Event>();
+
 @Component({
     selector: "mona-popup-menu",
     template: "",
@@ -307,6 +313,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
                 clientY: y,
                 button: -1
             });
+            keyboardContextMenuEvents.add(contextMenuEvent);
             const ownerDocument = targetElement.ownerDocument;
             const suppressNativeContextMenu = (nativeEvent: Event): void => {
                 if (nativeEvent.isTrusted) {
@@ -352,12 +359,11 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
     }
 
     /**
-     * The element in the target a menu opens on: from the keyboard (a menu `openMenu` opens with the ContextMenu key's
-     * event), the focused element in the target or its active descendant; from the pointer, the element under it, or
-     * the HTML element an SVG graphic under it is in.
+     * The element in the target a menu opens on: from the keyboard, the focused element in the target or its active
+     * descendant; from the pointer, the element under it, or the HTML element an SVG graphic under it is in.
      */
     #contextElementOf(event: MouseEvent, targetElement: HTMLElement): HTMLElement {
-        if (event.button < 0) {
+        if (this.#fromKeyboard(event)) {
             return this.#focusedElementIn(targetElement) ?? targetElement;
         }
         let element = event.target instanceof Element ? event.target : null;
@@ -382,6 +388,14 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         const descendantId = focused.getAttribute("aria-activedescendant");
         const descendant = descendantId ? document.getElementById(descendantId) : null;
         return descendant != null && targetElement.contains(descendant) ? descendant : focused;
+    }
+
+    /**
+     * Whether a context menu event comes from the ContextMenu key or Shift+F10: one `openMenu` dispatched, or one the
+     * browser marks with a `button` of -1, as Chromium does for its own.
+     */
+    #fromKeyboard(event: MouseEvent): boolean {
+        return keyboardContextMenuEvents.has(event) || event.button < 0;
     }
 
     /**
@@ -489,11 +503,12 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         const actualTargetElement = targetInput instanceof ElementRef ? targetInput.nativeElement : targetInput;
         let anchor: Point | Element;
         if (atPointer) {
-            // From the keyboard (button -1): the anchor's center, or where openMenu put the event, at the focus.
-            if (event.button < 0 && anchorElement != null) {
+            // From the keyboard: the anchor's center, or where openMenu put the event, at the focus.
+            const fromKeyboard = this.#fromKeyboard(event);
+            if (fromKeyboard && anchorElement != null) {
                 const rect = actualTargetElement.getBoundingClientRect();
                 anchor = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-            } else if (event.button < 0) {
+            } else if (fromKeyboard) {
                 anchor = { x: event.clientX, y: event.clientY };
             } else {
                 anchor = { x: event.x, y: event.y };

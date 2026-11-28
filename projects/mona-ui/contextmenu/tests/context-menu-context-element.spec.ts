@@ -1,7 +1,7 @@
 import { Component, computed, viewChild } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import type { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/popup-menu";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { ContextMenuComponent } from "../components/contextmenu/context-menu.component";
 import { ContextMenuItemComponent } from "../components/contextmenu-item/context-menu-item.component";
 
@@ -68,6 +68,18 @@ function keydown(target: Element, key: string, init: KeyboardEventInit = {}): vo
 
 function wait(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * For the rest of the test, reads `MouseEvent.button` as Chromium does: the -1 a script makes an event with reads back
+ * as 0. jsdom keeps it.
+ */
+function readButtonAsChromium(): void {
+    const button = Object.getOwnPropertyDescriptor(MouseEvent.prototype, "button")!.get!;
+    const spy = vi.spyOn(MouseEvent.prototype, "button", "get").mockImplementation(function (this: MouseEvent) {
+        return Math.max(0, button.call(this) as number);
+    });
+    onTestFinished(() => spy.mockRestore());
 }
 
 describe("context menu contextElement", () => {
@@ -182,5 +194,50 @@ describe("context menu contextElement", () => {
         expect(host.menu().contextElement()).toBe(docs);
         // The chosen item's event keeps the element its own menu opened on.
         expect(host.selections[0].contextElement).toBe(music);
+    });
+
+    describe("in Chromium, which reads the button of the keys' event back as 0", () => {
+        it("is the focused element in the target after Shift+F10", async () => {
+            readButtonAsChromium();
+            docs.focus();
+            keydown(docs, "F10", { shiftKey: true });
+            await settle();
+
+            expect(host.menu().contextElement()).toBe(docs);
+            expect(menus()[0].getAttribute("aria-label")).toBe("Tab Docs");
+            expect(item("Close").getAttribute("aria-disabled")).not.toBe("true");
+        });
+
+        it("is the focused element in the target after the ContextMenu key", async () => {
+            readButtonAsChromium();
+            music.focus();
+            keydown(music, "ContextMenu");
+            await settle();
+
+            expect(host.menu().contextElement()).toBe(music);
+            expect(menus()[0].getAttribute("aria-label")).toBe("Tab Music");
+        });
+
+        it("is the element the focused element's aria-activedescendant names", async () => {
+            readButtonAsChromium();
+            const list = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(".list")!;
+            list.focus();
+            keydown(list, "ContextMenu");
+            await settle();
+
+            expect(host.listMenu().contextElement()?.id).toBe("file-b");
+        });
+
+        it("comes with menuClick and menuSelect after the keys", async () => {
+            readButtonAsChromium();
+            music.focus();
+            keydown(music, "F10", { shiftKey: true });
+            await settle();
+            keydown(menus()[0], "Enter");
+            expect(host.clicks.map(event => event.contextElement)).toEqual([music]);
+
+            await settleClose();
+            expect(host.selections.map(event => event.contextElement)).toEqual([music]);
+        });
     });
 });
