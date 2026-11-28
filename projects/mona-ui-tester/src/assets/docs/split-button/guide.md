@@ -180,6 +180,8 @@ The click event's `value` is the item's `value` input, so handlers don't need to
 | `ArrowUp`                       | Menu toggle       | Open the menu with its last item highlighted                                                          |
 | `Escape`                        | Menu (while open) | Close the menu and return focus to the button that opened it                                          |
 
+Opened from the keys, the menu keeps that highlight while the pointer rests where the menu appears, as it does after an item was chosen with the pointer. Once the pointer moves, the item under it takes over, as on hover.
+
 Inside the menu:
 
 | Key               | Action                                                                                                      |

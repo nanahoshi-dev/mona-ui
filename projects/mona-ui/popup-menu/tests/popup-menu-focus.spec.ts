@@ -408,6 +408,72 @@ describe("popup menu focus and lifecycle", () => {
                 expect(expanded("Other parent")).toBe("true");
             });
 
+            // A menu opened from the keys under a pointer at rest: the browser reports the item under it as entered,
+            // and no move.
+            it("leaves the highlight of a menu opened from the keys to a pointer at rest", async () => {
+                buttons[0].focus();
+                host.menu()!.openMenuViaKeyboard();
+                await settle();
+                enter(item("Omega"), 50, 90);
+                await settle();
+                expect(activeLabel(menus()[0])).toBe("Alpha");
+
+                keydown(menus()[0], "ArrowDown");
+                await settle();
+                expect(activeLabel(menus()[0])).toBe("Parent");
+
+                keydown(menus()[0], "Escape");
+                await settle();
+                await wait(200);
+                host.menu()!.openMenuViaKeyboard(false, "last");
+                await settle();
+                enter(item("Alpha"), 50, 10);
+                await settle();
+                expect(activeLabel(menus()[0])).toBe("Omega");
+            });
+
+            it("opens no submenu for a pointer at rest on its item, until the pointer moves", async () => {
+                buttons[0].focus();
+                host.menu()!.openMenuViaKeyboard();
+                await settle();
+                enter(item("Parent"), 50, 30);
+                await settle();
+                expect(menus().length).toBe(1);
+                expect(activeLabel(menus()[0])).toBe("Alpha");
+
+                move(item("Parent"), 51, 30);
+                await settle();
+                expect(menus().length).toBe(2);
+                expect(activeLabel(menus()[0])).toBe("Parent");
+                expect(document.activeElement).toBe(menus()[0]);
+            });
+
+            it("gives the highlight to the item the pointer moves on to", async () => {
+                buttons[0].focus();
+                host.menu()!.openMenuViaKeyboard();
+                await settle();
+                enter(item("Omega"), 50, 90);
+                enter(item("Other parent"), 50, 50);
+                move(item("Other parent"), 50, 50);
+                await settle();
+
+                expect(activeLabel(menus()[0])).toBe("Other parent");
+                expect(expanded("Other parent")).toBe("true");
+            });
+
+            it("keeps the first item of a submenu opened from the keys under a pointer at rest", async () => {
+                const menu = await clickOpen();
+                keydown(menu, "ArrowDown");
+                keydown(menu, "ArrowDown");
+                keydown(menu, "ArrowRight");
+                await settle();
+                const submenu = menus()[1];
+                enter(item("Child"), 150, 30);
+                await settle();
+
+                expect(activeLabel(submenu)).toBe("Child");
+            });
+
             it("keeps the open submenu when it leaves the menu after crossing another item", async () => {
                 await openParentSubmenu();
                 aimAcrossOtherParent();
