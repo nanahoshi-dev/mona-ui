@@ -1115,6 +1115,11 @@ export class GridService {
         this.treeExpandedKeysChange$.next(this.treeExpandedKeys().toArray());
     }
 
+    /** The uid of the row whose identity is a key: its `rowKey` value, or its data item without a row key. */
+    public findRowUid(key: unknown): string | null {
+        return this.rows().firstOrDefault(row => Object.is(this.getRowIdentityKey(row), key))?.uid ?? null;
+    }
+
     public findTextWidthOfColumn(column: Column, element: HTMLTableCellElement): number {
         if (!isPlatformBrowser(this.#platformId)) {
             return 0;

@@ -24,6 +24,8 @@ export interface PopupMenuListConfig {
     ariaLabel?: Signal<string>;
     childCloseRequest$?: Subject<void>;
     closeMenu: (request: PopupMenuCloseRequest) => void;
+    /** The element in the target the root menu opened on, which the menu's click events carry. */
+    contextElement?: HTMLElement | null;
     initialFocus?: PopupMenuInitialFocus | null;
     isRoot: boolean;
     items: Signal<readonly PopupMenuItemGroup[]>;

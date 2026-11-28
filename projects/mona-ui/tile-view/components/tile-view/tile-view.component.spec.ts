@@ -499,4 +499,173 @@ describe("TileViewComponent", () => {
             expect(tiles().some(element => element.getAttribute("aria-posinset") === "2000")).toBe(true);
         });
     });
+
+    describe("the focus", () => {
+        let scrollTo: MockInstance<Element["scrollTo"]>;
+
+        /** Another folder's items: none of them is one of the photos. */
+        const otherFolder = (count: number): Photo[] =>
+            Array.from({ length: count }, (_, i) => ({ id: 5_001 + i, name: `File ${5_001 + i}` }));
+
+        beforeEach(() => {
+            scrollTo = vi.spyOn(Element.prototype, "scrollTo").mockImplementation(function (
+                this: Element,
+                options?: ScrollToOptions | number
+            ) {
+                if (typeof options === "object" && options.top != null) {
+                    this.scrollTop = options.top;
+                    this.dispatchEvent(new Event("scroll"));
+                }
+            });
+        });
+
+        afterEach(() => scrollTo.mockRestore());
+
+        describe("when the items change", () => {
+            it("makes the first tile active when none of the items before are left", async () => {
+                await focus();
+                await press("ArrowRight", { ctrlKey: true });
+                host.items.set(otherFolder(10));
+                await settle(fixture);
+
+                expect(activeText()).toBe("File 5001");
+                expect(host.selected()).toEqual([]);
+            });
+
+            it("makes the first selected tile active when the app selects among the new items", async () => {
+                await focus();
+                await press("ArrowRight");
+                host.items.set(otherFolder(10));
+                host.selected.set([5_004, 5_003]);
+                await settle(fixture);
+
+                expect(activeText()).toBe("File 5003");
+            });
+
+            it("goes back to the first tile, scrolled into view, through a list emptied while the next one loads", async () => {
+                host.items.set(createPhotos(3_000));
+                await settle(fixture);
+                await focus();
+                await press("End", { ctrlKey: true });
+                expect(listbox().scrollTop).toBeGreaterThan(0);
+
+                host.items.set([]);
+                await settle(fixture);
+                host.items.set(otherFolder(3_000));
+                await settle(fixture);
+
+                expect(listbox().scrollTop).toBe(0);
+                expect(activeText()).toBe("File 5001");
+            });
+
+            it("scrolls to the first tile when another folder's items replace the items at once", async () => {
+                host.items.set(createPhotos(3_000));
+                await settle(fixture);
+                await focus();
+                await press("End", { ctrlKey: true });
+
+                host.items.set(otherFolder(3_000));
+                await settle(fixture);
+
+                expect(listbox().scrollTop).toBe(0);
+                expect(activeText()).toBe("File 5001");
+            });
+
+            it("doesn't scroll a view that doesn't have the focus, and lands on the first tile when it gets it", async () => {
+                host.items.set(createPhotos(3_000));
+                await settle(fixture);
+                await focus();
+                await press("End", { ctrlKey: true });
+                listbox().blur();
+                await settle(fixture);
+                const scrolled = listbox().scrollTop;
+
+                host.items.set(otherFolder(3_000));
+                await settle(fixture);
+                expect(listbox().scrollTop).toBe(scrolled);
+
+                listbox().scrollTop = 0;
+                listbox().dispatchEvent(new Event("scroll"));
+                await focus();
+                expect(activeText()).toBe("File 5001");
+            });
+
+            it("keeps the place of an active item that goes while other items stay", async () => {
+                await focus();
+                await press("ArrowRight");
+                await press("ArrowRight");
+                host.items.set(createPhotos(10).filter(photo => photo.id !== 3));
+                await settle(fixture);
+
+                expect(activeText()).toBe("Date");
+            });
+        });
+
+        describe("from code", () => {
+            it("focuses the view on the active tile and scrolls it into view, selecting nothing", async () => {
+                host.items.set(createPhotos(3_000));
+                await settle(fixture);
+                await focus();
+                await press("End", { ctrlKey: true });
+                listbox().blur();
+                listbox().scrollTop = 0;
+                listbox().dispatchEvent(new Event("scroll"));
+                await settle(fixture);
+
+                host.tileView().focus();
+                await settle(fixture);
+
+                expect(document.activeElement).toBe(listbox());
+                expect(listbox().scrollTop).toBeGreaterThan(0);
+                expect(activeText()).toBe("Photo 3000");
+                expect(host.selected()).toEqual([]);
+            });
+
+            it("focuses the first selected tile, or else the first, when no tile is active", async () => {
+                host.tileView().focus();
+                await settle(fixture);
+                expect(document.activeElement).toBe(listbox());
+                expect(activeText()).toBe("Apple");
+
+                listbox().blur();
+                host.items.set(otherFolder(10));
+                host.selected.set([5_006]);
+                await settle(fixture);
+                host.tileView().focus();
+                await settle(fixture);
+                expect(activeText()).toBe("File 5006");
+            });
+
+            it("focuses an item's tile by its key, scrolled into view, without selecting it", async () => {
+                host.items.set(createPhotos(3_000));
+                await settle(fixture);
+
+                host.tileView().focusItem(2_500);
+                await settle(fixture);
+
+                expect(document.activeElement).toBe(listbox());
+                expect(listbox().scrollTop).toBeGreaterThan(0);
+                const id = listbox().getAttribute("aria-activedescendant");
+                expect(root.querySelector(`#${id}`)?.getAttribute("aria-posinset")).toBe("2500");
+                expect(host.selected()).toEqual([]);
+            });
+
+            it("focuses an item added just before the call", async () => {
+                host.items.update(items => [...items, { id: 99, name: "Quince" }]);
+                host.tileView().focusItem(99);
+                await settle(fixture);
+
+                expect(document.activeElement).toBe(listbox());
+                expect(activeText()).toBe("Quince");
+            });
+
+            it("focuses the view as focus() does for a key no item has", async () => {
+                host.tileView().focusItem(12_345);
+                await settle(fixture);
+
+                expect(document.activeElement).toBe(listbox());
+                expect(activeText()).toBe("Apple");
+            });
+        });
+    });
 });

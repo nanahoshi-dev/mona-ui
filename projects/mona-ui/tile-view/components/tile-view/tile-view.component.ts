@@ -10,7 +10,9 @@ import {
     DestroyRef,
     effect,
     inject,
+    Injector,
     input,
+    linkedSignal,
     model,
     output,
     signal,
@@ -99,10 +101,37 @@ const NO_MODIFIERS: Modifiers = { ctrlKey: false, metaKey: false, shiftKey: fals
     }
 })
 export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
-    readonly #activeKey = signal<unknown>(NONE);
+    /**
+     * The active tile's item, by key. When the items change and the active one is gone, the item now in its place
+     * takes over; when none of the items before are left, as when a file explorer shows another folder, no tile is
+     * active until one is chosen.
+     */
+    readonly #activeKey = linkedSignal<readonly unknown[], unknown>({
+        source: () => this.#keys(),
+        computation: (_, previous) => {
+            const active = previous?.value ?? NONE;
+            if (active === NONE || previous === undefined) {
+                return NONE;
+            }
+            const indexOf = this.#indexOf();
+            return indexOf.has(active) || previous.source.some(key => indexOf.has(key)) ? active : NONE;
+        }
+    });
     readonly #destroyRef = inject(DestroyRef);
     readonly #direction = injectComponentDirection();
     readonly #dragDrop = inject(DragDropService);
+    /** The first selected tile's index, or -1. */
+    readonly #firstSelectedIndex = computed(() => {
+        const indexOf = this.#indexOf();
+        let first = -1;
+        for (const key of this.selectedKeys()) {
+            const index = indexOf.get(key);
+            if (index !== undefined && (first < 0 || index < first)) {
+                first = index;
+            }
+        }
+        return first;
+    });
     readonly #focused = signal(false);
     readonly #id = createElementControlId();
     /** Each key's index. The first of equal keys wins; keys should be unique. */
@@ -115,6 +144,7 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
         });
         return indexOf;
     });
+    readonly #injector = inject(Injector);
     readonly #items = computed(() => Array.from(this.items()));
     /** Whether the keyboard brought or moved the focus, so the active tile shows a ring. A click doesn't. */
     readonly #keyboard = signal(false);
@@ -140,10 +170,14 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
     readonly #viewportWidth = signal(0);
     /** The tile Shift extends the selection from, by key. */
     #anchorKey: unknown = NONE;
+    /** Whether a tile was active, so its loss to new items is told from no tile being active yet. */
+    #hadActiveKey = false;
     /** Where the active tile was, for when its item goes. */
     #lastActiveIndex = -1;
     /** The selection this view last reported, to tell it from one the app sets. */
     #ownSelection: readonly unknown[] | null = null;
+    /** Whether the tile that becomes active is scrolled into view: new items replaced the active one's, in focus. */
+    #revealActive = false;
     /** Until when a space continues a typeahead search rather than selecting. */
     #typeaheadUntil = 0;
 
@@ -157,10 +191,14 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
     });
     /** The active tile's index: the keyboard moves from it, and Enter activates it. -1 when there is none. */
     protected readonly activeIndex = computed(() => {
-        const key = this.#activeKey();
         const count = this.count();
-        if (key === NONE || count === 0) {
+        if (count === 0) {
             return -1;
+        }
+        const key = this.#activeKey();
+        if (key === NONE) {
+            // The focus lands on the first selected tile, or the first; that selects nothing.
+            return this.#focused() ? Math.max(this.#firstSelectedIndex(), 0) : -1;
         }
         // An active item that's gone leaves its place to the item now there.
         return this.#indexOf().get(key) ?? Math.min(this.#lastActiveIndex, count - 1);
@@ -375,15 +413,53 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
                 if (set.size() === 0 || set.contains(this.#activeKey())) {
                     return;
                 }
-                const indexOf = this.#indexOf();
-                const first = Math.min(...selected.map(key => indexOf.get(key) ?? Infinity));
-                if (Number.isFinite(first)) {
+                const first = this.#firstSelectedIndex();
+                if (first >= 0) {
                     this.setActive(first);
                     this.#anchorKey = this.#keys()[first];
                     this.scrollToIndex(first);
                 }
             });
         });
+        // New items that left no tile active, while the view has the focus, scroll the tile that is active now (the
+        // first selected, or the first) into view, so the listbox's aria-activedescendant names one.
+        effect(() => {
+            const active = this.#activeKey();
+            const index = this.activeIndex();
+            untracked(() => {
+                if (active !== NONE) {
+                    this.#hadActiveKey = true;
+                    return;
+                }
+                if (this.#hadActiveKey) {
+                    this.#hadActiveKey = false;
+                    this.#revealActive = this.#focused();
+                }
+                if (this.#revealActive && index >= 0) {
+                    this.#revealActive = false;
+                    this.scrollToIndex(index);
+                }
+            });
+        });
+    }
+
+    /**
+     * Moves the focus to the tile view, as Tab does: to the active tile, or else the first selected tile or the first.
+     * The tile is scrolled into view, and nothing is selected. It happens once the view has rendered what changed
+     * before the call, such as new `items`.
+     */
+    public focus(): void {
+        afterNextRender({ write: () => this.#focusTile(-1) }, { injector: this.#injector });
+    }
+
+    /**
+     * Moves the focus to the tile of an item, which becomes the active tile and is scrolled into view; nothing is
+     * selected. For a key no item has, it focuses the view as `focus()` does. It happens once the view has rendered
+     * what changed before the call, such as new `items`, so it can focus an item just added.
+     * @param key The item's key, as `itemKey` gives it.
+     */
+    public focusItem(key: unknown): void {
+        afterNextRender({ write: () => this.#focusTile(this.#indexOf().get(key) ?? -1) }, { injector: this.#injector });
     }
 
     /**
@@ -416,14 +492,9 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
     }
 
     protected onFocus(): void {
+        // Tabbing in lands on the active tile, or the first selected one, or the first (see activeIndex).
         this.#focused.set(true);
         this.#keyboard.set(this.matchesFocusVisible());
-        // Tabbing in lands on the active tile, or the first selected one, or the first; it selects nothing.
-        if (this.activeIndex() < 0 && this.count() > 0) {
-            const indexOf = this.#indexOf();
-            const first = Math.min(...this.selectedKeys().map(key => indexOf.get(key) ?? Infinity));
-            this.setActive(Number.isFinite(first) ? first : 0);
-        }
     }
 
     protected onKeydown(event: KeyboardEvent): void {
@@ -612,6 +683,18 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
                 this.moveTo(index, NO_MODIFIERS);
                 return;
             }
+        }
+    }
+
+    /** Focuses the view with the tile at an index active, or the one that is active (-1), shown in the viewport. */
+    #focusTile(index: number): void {
+        if (index >= 0) {
+            this.setActive(index);
+        }
+        this.focusViewport();
+        const active = this.activeIndex();
+        if (active >= 0) {
+            this.scrollToIndex(active);
         }
     }
 

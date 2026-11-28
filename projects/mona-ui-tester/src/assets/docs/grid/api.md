@@ -6,8 +6,8 @@ Everything below is imported from `@nanahoshi/mona-ui/grid`. Each name links to 
 
 | Name | Kind | Description |
 | --- | --- | --- |
-| [`GridColumnComponent`](/api/grid/GridColumnComponent) | Component |  |
 | [`GridComponent`](/api/grid/GridComponent) | Component |  |
+| [`GridColumnComponent`](/api/grid/GridColumnComponent) | Component |  |
 | [`GridCellTemplateDirective`](/api/grid/GridCellTemplateDirective) | Directive |  |
 | [`GridColumnTitleTemplateDirective`](/api/grid/GridColumnTitleTemplateDirective) | Directive |  |
 | [`GridContextMenuDirective`](/api/grid/GridContextMenuDirective) | Directive |  |

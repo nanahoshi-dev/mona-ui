@@ -229,7 +229,11 @@ export class PopupMenuListComponent implements OnInit {
             this.openSubmenuFromClick(item, event.currentTarget as HTMLElement | null, event.detail === 0);
             return;
         }
-        const popupMenuItemClickEvent = new PopupMenuItemClickEvent(item, event);
+        const popupMenuItemClickEvent = new PopupMenuItemClickEvent(
+            item,
+            event,
+            this.#parentConfig.contextElement ?? null
+        );
         item.click$?.next(popupMenuItemClickEvent);
         if (popupMenuItemClickEvent.isDefaultPrevented()) {
             return;
@@ -295,6 +299,7 @@ export class PopupMenuListComponent implements OnInit {
         const data: PopupMenuListConfig = {
             childCloseRequest$: this.#childCloseRequest$,
             closeMenu: this.#parentConfig.closeMenu,
+            contextElement: this.#parentConfig.contextElement,
             isRoot: false,
             items: computed(() => groupPopupMenuItems(this.findItem(uid)?.items ?? [])),
             labelledBy: uid,

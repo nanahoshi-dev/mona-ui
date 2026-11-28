@@ -11,6 +11,8 @@ import {
     inject,
     input,
     output,
+    type Signal,
+    signal,
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -54,6 +56,8 @@ interface OpenMenuState {
     /** The item chosen in the menu, reported through `menuSelect` once the menu has closed. */
     chosen: PopupMenuItemClickEvent | null;
     readonly close$: Subject<void>;
+    /** The element in the target the menu opened on. */
+    readonly contextElement: HTMLElement;
     ref: PopupRef | null;
     restoreFocus: boolean;
     readonly returnFocusTo: HTMLElement | null;
@@ -72,6 +76,7 @@ const handledContextMenuEvents = new WeakSet<Event>();
     }
 })
 export class PopupMenuComponent implements PopupMenuVariantInput {
+    readonly #contextElement = signal<HTMLElement | null>(null);
     readonly #destroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
     readonly #menuItemClick$ = new Subject<PopupMenuItemClickEvent>();
@@ -135,6 +140,14 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
      */
     // eslint-disable-next-line @angular-eslint/no-output-native -- renaming the output would break existing (close) bindings
     public readonly close = output<PopupMenuCloseEvent>();
+
+    /**
+     * The element in the target that the menu last opened on: the element under the pointer, or, for a menu opened from
+     * the keyboard, the element in the target that had the focus, or the one its `aria-activedescendant` names; the
+     * target itself when there's none. It is set as the menu opens, before the menu renders, so the menu's name and
+     * items can be worked out from it, and stays until the menu opens again. The menu's click events carry it too.
+     */
+    public readonly contextElement: Signal<HTMLElement | null> = this.#contextElement.asReadonly();
 
     /**
      * @description The items to render in the popup menu.
@@ -338,9 +351,37 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         }
     }
 
+    /**
+     * The element in the target a menu opens on: from the keyboard (a menu `openMenu` opens with the ContextMenu key's
+     * event), the focused element in the target or its active descendant; from the pointer, the element under it, or
+     * the HTML element an SVG graphic under it is in.
+     */
+    #contextElementOf(event: MouseEvent, targetElement: HTMLElement): HTMLElement {
+        if (event.button < 0) {
+            return this.#focusedElementIn(targetElement) ?? targetElement;
+        }
+        let element = event.target instanceof Element ? event.target : null;
+        while (element != null && !(element instanceof HTMLElement)) {
+            element = element.parentElement;
+        }
+        return element != null && targetElement.contains(element) ? element : targetElement;
+    }
+
     #element(value: ElementRef<HTMLElement> | Element | undefined | null): HTMLElement | null {
         const element = value instanceof ElementRef ? value.nativeElement : value;
         return element instanceof HTMLElement ? element : null;
+    }
+
+    /** The focused element in the target, or the element its `aria-activedescendant` names there. */
+    #focusedElementIn(targetElement: HTMLElement): HTMLElement | null {
+        const document = targetElement.ownerDocument;
+        const focused = document.activeElement;
+        if (!(focused instanceof HTMLElement) || !targetElement.contains(focused)) {
+            return null;
+        }
+        const descendantId = focused.getAttribute("aria-activedescendant");
+        const descendant = descendantId ? document.getElementById(descendantId) : null;
+        return descendant != null && targetElement.contains(descendant) ? descendant : focused;
     }
 
     /**
@@ -349,15 +390,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
      */
     #keyboardPosition(targetElement: HTMLElement): { x: number; y: number } {
         const target = targetElement.getBoundingClientRect();
-        const document = targetElement.ownerDocument;
-        const focused = document.activeElement;
-        let anchor: Element | null = focused instanceof HTMLElement && targetElement.contains(focused) ? focused : null;
-        const descendantId = anchor?.getAttribute("aria-activedescendant");
-        const descendant = descendantId ? document.getElementById(descendantId) : null;
-        if (descendant != null && targetElement.contains(descendant)) {
-            anchor = descendant;
-        }
-        const box = anchor?.getBoundingClientRect() ?? target;
+        const box = this.#focusedElementIn(targetElement)?.getBoundingClientRect() ?? target;
         const left = Math.max(box.left, target.left);
         const right = Math.min(box.right, target.right);
         const top = Math.max(box.top, target.top);
@@ -414,6 +447,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         const data: PopupMenuListConfig = {
             ariaLabel: this.ariaLabel,
             closeMenu: options => this.closeFromList(state, options),
+            contextElement: state.contextElement,
             initialFocus: this.#pendingInitialFocus,
             isRoot: true,
             items: this.menuItems,
@@ -489,10 +523,13 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
         const state: OpenMenuState = {
             chosen: null,
             close$: new Subject<void>(),
+            contextElement: this.#contextElementOf(event, targetElement),
             ref: null,
             restoreFocus: true,
             returnFocusTo
         };
+        // Before the menu is made, so a name and items worked out from it are the menu's from its first render.
+        this.#contextElement.set(state.contextElement);
         const ref = this.createMenu(event, state);
         state.ref = ref;
         this.#open = state;

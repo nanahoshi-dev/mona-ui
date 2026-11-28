@@ -43,6 +43,7 @@ import {
     viewChildren
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import type { ImmutableList } from "@mirei/ts-collections";
 import { fromEvent, type Subscription } from "rxjs";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ChipComponent } from "@nanahoshi/mona-ui/chip";
@@ -76,6 +77,7 @@ import type { GridNavigationMode } from "../../models/GridNavigationMode";
 import type { GridRowActivateEvent } from "../../models/GridRowActivateEvent";
 import type { GridRowClass } from "../../models/GridRowClass";
 import type { GridToolbarContext, GridToolbarTemplateContext } from "../../models/GridToolbarTemplateContext";
+import type { Row } from "../../models/Row";
 import { ResizeMethod } from "../../models/ResizeMethod";
 import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
 import { isKeyboardEntryElement, observeGridCellTabStops } from "../../services/grid-cell-tab-stops";
@@ -581,6 +583,31 @@ export class GridComponent<T> implements GridVariantInput {
         });
     }
 
+    /**
+     * Moves the focus into the grid's rows, without selecting: to the current cell when it's in the body, or else the
+     * first row, which a virtual grid scrolls into view. With no rows, the focus goes to the current cell, such as a
+     * column header. It happens once the grid has drawn what changed before the call, such as new `data`.
+     */
+    public focus(): void {
+        this.#afterCellsRegister(() => this.#focusBody());
+    }
+
+    /**
+     * Moves the focus to an item's row, without selecting it: the row whose `rowKey` value is `key`, or, in a grid
+     * with no `rowKey`, the row of the item `key`. A virtual grid scrolls the row into view; a paged grid finds rows
+     * on its page. For a key no row has, it moves the focus as `focus()` does. It happens once the grid has drawn what
+     * changed before the call, so it can focus a row just added to `data`.
+     * @param key The row's `rowKey` value, or its data item.
+     */
+    public focusRow(key: unknown): void {
+        this.#afterCellsRegister(() => {
+            const rowUid = this.gridService.findRowUid(key);
+            if (rowUid == null || !this.#gridNavigationService.focusRowByUid(rowUid)) {
+                this.#focusBody();
+            }
+        });
+    }
+
     protected isColumnDragDisabled(column: Column): boolean {
         return column.locked || (!this.gridService.reorderableOptions().enabled && !this.groupable());
     }
@@ -738,6 +765,11 @@ export class GridComponent<T> implements GridVariantInput {
             return;
         }
         this.gridService.columnSort$.next(new ColumnSortEvent(column));
+    }
+
+    /** A press on the empty grid's body keeps the focus in the grid. */
+    protected onEmptyBodyMouseDown(event: MouseEvent): void {
+        this.#gridNavigationService.keepFocusOnPress(event);
     }
 
     protected onGroupColumnReorder(column: Column, moveAs: "prev" | "next"): void {
@@ -915,6 +947,21 @@ export class GridComponent<T> implements GridVariantInput {
                 .findIndex(candidate => candidate.id === column.id) + 1;
         void this.#liveAnnouncer.announce(this.messages().columnMoved(column.title, position));
         this.#refocusHeader(column.id);
+    }
+
+    /**
+     * Runs a callback once the grid has drawn what changed and the cells it drew have registered for keyboard
+     * navigation, which they do late in the render.
+     */
+    #afterCellsRegister(callback: () => void): void {
+        afterNextRender({ mixedReadWrite: () => queueMicrotask(callback) }, { injector: this.#injector });
+    }
+
+    /** Focuses the body's current cell or first row, or, with no rows, the current cell. */
+    #focusBody(): void {
+        if (!this.#gridNavigationService.focusBody()) {
+            this.#gridNavigationService.focusActiveCellOrFirstHeader();
+        }
     }
 
     /** fitView follows the header's width, which changes as the window is resized or a pane opens beside the grid. */
@@ -1115,13 +1162,31 @@ export class GridComponent<T> implements GridVariantInput {
         effect(() => {
             const data = this.data();
             const rowKey = this.rowKey();
-            const shouldRestoreGridFocus = this.#hostElementRef.nativeElement.contains(
-                this.#hostElementRef.nativeElement.ownerDocument.activeElement
-            );
-            untracked(() => {
+            const host = this.#hostElementRef.nativeElement;
+            const shouldRestoreGridFocus = host.contains(host.ownerDocument.activeElement);
+            const replaced = untracked(() => {
+                const before = this.gridService.rows();
                 this.gridService.setRows(data as Iterable<Record<PropertyKey, unknown>>, rowKey);
                 this.gridService.setRowKey(rowKey);
+                return replacesEveryRow(before, this.gridService.rows());
             });
+            if (replaced) {
+                // Rows that share none with the rows before, as another folder's in a file list, start again at the
+                // first row; the focus goes there if it was in the rows.
+                const focusedCell = untracked(() => this.#gridNavigationService.getFocusedCell());
+                const focusInBody =
+                    focusedCell?.section === "body" && focusedCell.element.contains(host.ownerDocument.activeElement);
+                this.#afterCellsRegister(() => {
+                    if (this.gridService.editContext() != null) {
+                        return;
+                    }
+                    const active = host.ownerDocument.activeElement;
+                    const stayed = this.gridService.bodyTableElement()?.contains(active) === true;
+                    const lost = active == null || active === host.ownerDocument.body || !active.isConnected;
+                    this.#gridNavigationService.startAtFirstRow(focusInBody && (stayed || lost));
+                });
+                return;
+            }
             if (shouldRestoreGridFocus) {
                 afterNextRender(
                     {
@@ -1307,4 +1372,13 @@ export class GridComponent<T> implements GridVariantInput {
             target.setAttribute("data-grid-toolbar-item", "");
         }
     }
+}
+
+/** Whether rows share none with the rows they replace, when there were rows before and are rows now. */
+function replacesEveryRow(before: ImmutableList<Row>, after: ImmutableList<Row>): boolean {
+    if (before.none() || after.none()) {
+        return false;
+    }
+    const uids = new Set(before.select(row => row.uid));
+    return !after.any(row => uids.has(row.uid));
 }
