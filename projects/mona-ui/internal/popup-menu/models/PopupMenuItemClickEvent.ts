@@ -7,11 +7,13 @@ import type { PopupMenuItem } from "./PopupMenuItem";
  */
 export class PopupMenuItemClickEvent extends PreventableEvent {
     readonly #checked: boolean | undefined;
+    readonly #contextElement: HTMLElement | null;
     readonly #item: PopupMenuItem;
 
-    public constructor(item: PopupMenuItem, originalEvent: MouseEvent) {
+    public constructor(item: PopupMenuItem, originalEvent: MouseEvent, contextElement: HTMLElement | null = null) {
         super("popupMenuItemClick", originalEvent);
         this.#item = item;
+        this.#contextElement = contextElement;
         if (item.checkable) {
             this.#checked = !(item.checked?.() ?? false);
         } else if (item.radio) {
@@ -25,6 +27,15 @@ export class PopupMenuItemClickEvent extends PreventableEvent {
      */
     public get checked(): boolean | undefined {
         return this.#checked;
+    }
+
+    /**
+     * The element in the menu's target that the menu opened on, as the menu's `contextElement` gave it when this menu
+     * opened: for a context menu, the element under the pointer, or, from the ContextMenu key or Shift+F10, the
+     * element that had the focus. `null` when the event didn't come from a menu.
+     */
+    public get contextElement(): HTMLElement | null {
+        return this.#contextElement;
     }
 
     /**

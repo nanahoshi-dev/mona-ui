@@ -139,6 +139,26 @@ contextmenu/icons
 
 **On a list, the selection decides what the menu is for.** The [grid](/components/grid-selection#row-clicks) (with `selectOnRowClick`) and the [tile view](/components/tile-view#selection-follows-a-file-explorer) select what was right-clicked before the menu opens, and clear the selection on a right-click in empty space, so a menu bound to them, or to an element around them, can build its items from the selection.
 
+**One menu for many elements.** `contextElement` is a signal of the element in the target that the menu last opened on: after a right-click, the element under the pointer (for an SVG icon, the HTML element it's in); after the `ContextMenu` key or `Shift+F10`, the focused element in the target, or the element its `aria-activedescendant` names; the target itself when there's none, as for a right-click on the target's own space. It is set as the menu opens, before the menu renders, so a name and items worked out from it with `computed()` are the menu's from the start, and it stays until the menu opens again. `menuClick` and `menuSelect` carry the element as `contextElement` too, which is the one to use when acting on the item: it is the element that item's menu opened on, even when another right-click has opened the menu again meanwhile.
+
+```typescript
+protected readonly menu = viewChild.required(ContextMenuComponent);
+protected readonly tab = computed(() => this.menu().contextElement()?.closest<HTMLElement>("[role='tab']") ?? null);
+protected readonly menuLabel = computed(() => (this.tab() ? `${this.tab()!.textContent} tab` : "Tabs"));
+
+protected onMenuSelect(event: PopupMenuItemClickEvent): void {
+    const tab = event.contextElement?.closest<HTMLElement>("[role='tab']");
+    // Act on that tab.
+}
+```
+
+```html
+<div role="tablist" aria-label="Tabs" #strip>…</div>
+<mona-contextmenu #menu [target]="strip" [aria-label]="menuLabel()" (menuSelect)="onMenuSelect($event)">
+    <mona-contextmenu-item label="Close tab" value="close" [disabled]="!tab()" />
+</mona-contextmenu>
+```
+
 **`items` takes precedence over projected content.** When the `items` input is a non-empty iterable, it is rendered instead of any projected `mona-contextmenu-item` (and related) components.
 
 **Act on the item in `menuSelect`.** `menuClick` comes while the menu is still open and has the focus. `menuSelect` comes with the same event once the menu has closed and the focus is back where the menu opened from: the target, or the element in it that had the focus, such as a focused row. A dialog opened from `menuSelect` returns the focus there when it closes, while one opened from `menuClick` would return it to the menu, which is gone by then. `menuSelect` waits for the menu's closing animation.
@@ -149,7 +169,7 @@ contextmenu/icons
 
 **Suppressing checkbox/radio state changes.** Calling `event.preventDefault()` on a `mona-contextmenu-checkbox-item`'s or `mona-contextmenu-radio-item`'s `menuClick` event suppresses the resulting `checkedChange` emission (checkbox item) or selection update (radio group). Use this to confirm or validate a change before it applies.
 
-**No open/close output.** `ContextMenuComponent` only exposes `menuClick` and `menuSelect`. It does not re-emit `PopupMenuComponent`'s `open`/`close`/`navigate` events. If your use case needs to react to the menu opening or closing, use `PopupMenuComponent` directly.
+**No open/close output.** `ContextMenuComponent` only exposes `menuClick` and `menuSelect`. It does not re-emit `PopupMenuComponent`'s `open`/`close`/`navigate` events: what the menu is for comes from `contextElement`. If your use case needs to react to the menu opening or closing, use `PopupMenuComponent` directly.
 
 **`aria-label` names the menu.** The context menu passes it to the menu it opens. When it's empty, the menu is labelled by the target, if the target has an `id`.
 

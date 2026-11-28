@@ -11,6 +11,7 @@ import {
     inject,
     input,
     output,
+    type Signal,
     signal,
     TemplateRef,
     untracked,
@@ -113,6 +114,18 @@ export class ContextMenuComponent implements ContextMenuVariantInput {
      * @description Accessible name for the menu. When empty, the menu is named by the target if it has an `id`.
      */
     public readonly ariaLabel = input<string>("", { alias: "aria-label" });
+
+    /**
+     * The element in the target that the menu last opened on, for one menu that serves many elements, such as the tabs
+     * of a tab strip. After a right-click it is the element under the pointer; after the ContextMenu key or Shift+F10,
+     * the element in the target that had the focus, or the one its `aria-activedescendant` names; the target itself
+     * when there's none. It is set as the menu opens, before the menu renders, so an `aria-label` and `items` worked out
+     * from it (with `computed()`) are the menu's from the start, and it stays until the menu opens again. `menuClick`
+     * and `menuSelect` carry the same element as `contextElement`.
+     */
+    public readonly contextElement: Signal<HTMLElement | null> = computed(
+        () => this.popupMenuRef()?.contextElement() ?? null
+    );
 
     /**
      * @description The menu items to render. When provided, these take precedence over
