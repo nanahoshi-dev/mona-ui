@@ -15,6 +15,13 @@ export class GridNavigationService {
     readonly #lastFocusedCellKey = signal<string | null>(null);
     readonly #lastFocusedCellSnapshot = signal<NavigationCellSnapshot | null>(null);
     readonly #lastNonGroupCellKey = signal<string | null>(null);
+    /**
+     * Set when the Tab stop left the body only because its last row went, as when the data is cleared while the next
+     * loads. The first row takes the Tab stop back once one is drawn, and the focus too while it is on the cell the
+     * grid moved it to (`parked`).
+     */
+    #bodyEmptied: { parked: HTMLElement | null } | null = null;
+    #bodyRefillScheduled = false;
     /** Whether a cell (not a control inside it) had focus last; only then is lost focus brought back. */
     #cellHasFocus = false;
     /** Whether the Tab stop is the grid's own pick, which moves to a better cell as cells register. */
@@ -32,18 +39,15 @@ export class GridNavigationService {
     #viewport: GridNavigationViewport | null = null;
 
     public focusActiveCellOrFirstHeader(): boolean {
-        const focusedCell = this.#getFocusedCell();
-        if (focusedCell) {
-            this.#focusCell(focusedCell.key, focusedCell.value);
-            return true;
-        }
-
-        const fallback = this.#findFallbackCell(this.#lastFocusedCellSnapshot());
-        if (!fallback) {
+        const target = this.#getFocusedCell() ?? this.#findFallbackCell(this.#lastFocusedCellSnapshot());
+        if (!target) {
             return false;
         }
-
-        this.#focusCell(fallback.key, fallback.value);
+        // The body has no rows yet: the focus waits here for the first one.
+        if (this.#bodyEmptied != null && target.value.section !== "body") {
+            this.#bodyEmptied.parked = target.value.element;
+        }
+        this.#focusCell(target.key, target.value);
         return true;
     }
 
@@ -73,6 +77,26 @@ export class GridNavigationService {
         return true;
     }
 
+    /**
+     * Focuses the body, without selecting: the current cell when it's in the body (scrolled to in a virtual list),
+     * else the first row. Returns whether a row took the focus, or will once a virtual list has drawn it.
+     */
+    public focusBody(): boolean {
+        const current = this.#getFocusedCell();
+        if (current != null) {
+            if (current.value.section !== "body") {
+                return this.#navigateToBodyEdge("first");
+            }
+            this.#focusCell(current.key, current.value);
+            return true;
+        }
+        const snapshot = this.#lastFocusedCellSnapshot();
+        if (snapshot?.section === "body" && snapshot.rowUid != null && this.focusRowByUid(snapshot.rowUid)) {
+            return true;
+        }
+        return this.#navigateToBodyEdge("first");
+    }
+
     /** Focuses a body cell by its row and column, when it's rendered. */
     public focusBodyCell(rowUid: string, columnId: string): boolean {
         const cell = this.#cells().firstOrDefault(
@@ -100,6 +124,26 @@ export class GridNavigationService {
         }
         this.#focusCell(cell.key, cell.value);
         return true;
+    }
+
+    /**
+     * Focuses a body row by its uid, without selecting, in the column the keyboard last moved in; a virtual list
+     * scrolls to it. Returns false when no row has it, or when it isn't on the page.
+     */
+    public focusRowByUid(rowUid: string): boolean {
+        const column = this.#getTargetColumn();
+        const rowCells = this.#cells()
+            .where(e => e.value.section === "body" && e.value.cellKind !== "detail" && e.value.rowUid === rowUid)
+            .orderBy(e => e.value.colIndex)
+            .toArray();
+        if (rowCells.length !== 0) {
+            const target = this.#pickCellInRow(rowCells, column);
+            this.#focusCell(target.key, target.value);
+            this.#lastNonGroupCellKey.set(target.key);
+            return true;
+        }
+        const index = this.#rowScroller?.indexOfRow(rowUid) ?? -1;
+        return index >= 0 && this.#focusRow(index, column);
     }
 
     /**
@@ -136,6 +180,32 @@ export class GridNavigationService {
 
     public isFocused(cellKey: string): boolean {
         return this.#lastFocusedCellKey() === cellKey;
+    }
+
+    /**
+     * A press with the main or the secondary button on the body's own space, below the rows or where there are none,
+     * keeps the focus in the grid, where the browser would drop it on the page: on the cell that has it, or, from
+     * outside the grid, on the grid's current cell. A context menu opened by a right-click there gives the focus back
+     * to that cell. Presses on a row, and on a scrollbar, are left alone, and so is a control inside a cell that has
+     * the focus, such as an editor, which ends its edit as it loses the focus.
+     */
+    public keepFocusOnPress(event: MouseEvent): void {
+        const target = event.target;
+        if ((event.button !== 0 && event.button !== 2) || event.defaultPrevented || !(target instanceof Element)) {
+            return;
+        }
+        if (target.closest("tr") != null || this.#onScrollbar(event, target)) {
+            return;
+        }
+        const active = this.#document.activeElement;
+        const cell = active == null ? null : this.#cells().firstOrDefault(e => e.value.element.contains(active));
+        if (cell != null && cell.value.element !== active) {
+            return;
+        }
+        event.preventDefault();
+        if (cell == null) {
+            this.focusActiveCellOrFirstHeader();
+        }
     }
 
     /**
@@ -181,6 +251,9 @@ export class GridNavigationService {
             this.#cellElementDict.update(dict => dict.put(cellKey, data));
         }
         this.#ensureFocusedCell();
+        if (this.#bodyEmptied != null && data.section === "body") {
+            this.#scheduleBodyRefill();
+        }
         if (this.#pendingFocus?.rowIndex === data.rowIndex && data.section === "body") {
             this.#schedulePendingFocus();
         }
@@ -221,6 +294,10 @@ export class GridNavigationService {
     public setLastFocusedCellKey(key: string): void {
         const data = this.#cellElementDict().get(key);
         if (data) {
+            // The user took the focus elsewhere while the body had no rows: it stays there when they come.
+            if (this.#bodyEmptied != null && data.element !== this.#bodyEmptied.parked) {
+                this.#bodyEmptied = null;
+            }
             this.#cellHasFocus = true;
             this.#lostFocus = null;
             this.#setFocusedCell(key, data);
@@ -243,6 +320,25 @@ export class GridNavigationService {
         this.#viewport = viewport;
     }
 
+    /**
+     * Starts again at the first row, for rows that replaced every row, as another folder's do in a file list: it
+     * becomes the current row, and takes the focus when `focus` is set (scrolled to in a virtual list).
+     */
+    public startAtFirstRow(focus: boolean): void {
+        this.#bodyEmptied = null;
+        this.#lostFocus = null;
+        this.#pendingFocus = null;
+        if (focus && this.#navigateToBodyEdge("first")) {
+            return;
+        }
+        const first = this.#findFirstBodyCell();
+        if (first == null) {
+            return;
+        }
+        const target = this.#isRowCell(first.value) ? (this.#rowFocusCell(first.value.rowIndex) ?? first) : first;
+        this.#setFocusedCell(target.key, target.value);
+    }
+
     public unregisterCell(cellKey: string, element?: HTMLTableCellElement): void {
         const data = this.#cellElementDict().get(cellKey);
         // A cached view may be destroyed after another view has taken over this logical identity.
@@ -263,6 +359,9 @@ export class GridNavigationService {
             this.#setFocusedCell(fallback.key, fallback.value);
         } else {
             this.#lastFocusedCellKey.set(null);
+        }
+        if (data.section === "body" && fallback?.value.section !== "body") {
+            this.#bodyEmptied = { parked: null };
         }
     }
 
@@ -796,6 +895,15 @@ export class GridNavigationService {
         }
     }
 
+    /** Whether a press is on an element's scrollbar rather than its content. */
+    #onScrollbar(event: MouseEvent, element: Element): boolean {
+        if (element.clientWidth === 0 || element.clientHeight === 0) {
+            return false;
+        }
+        // A start-side scrollbar, as in right-to-left, is left of the content.
+        return event.offsetX < 0 || event.offsetX >= element.clientWidth || event.offsetY >= element.clientHeight;
+    }
+
     /** The cell that holds a body row's focus with row navigation: its first data cell, or its first cell. */
     #rowFocusCell(rowIndex: number): { key: string; value: NavigationData } | null {
         const rowCells = this.#findCellsInRow(rowIndex, "body");
@@ -809,6 +917,27 @@ export class GridNavigationService {
             data.rowUid === snapshot.rowUid &&
             data.groupKey === snapshot.groupKey
         );
+    }
+
+    /**
+     * Rows came to a body that had none: once every cell of the render has registered, the first row takes the Tab
+     * stop back, and the focus with it when the focus is still where the grid moved it, or the rows took it with them.
+     */
+    #scheduleBodyRefill(): void {
+        if (this.#bodyRefillScheduled) {
+            return;
+        }
+        this.#bodyRefillScheduled = true;
+        queueMicrotask(() => {
+            this.#bodyRefillScheduled = false;
+            const emptied = this.#bodyEmptied;
+            if (emptied == null) {
+                return;
+            }
+            const active = this.#document.activeElement;
+            const parked = emptied.parked != null && active === emptied.parked;
+            this.startAtFirstRow(parked || (this.#cellHasFocus && this.#focusIsLost(null)));
+        });
     }
 
     #schedulePendingFocus(): void {
@@ -871,6 +1000,8 @@ export type GridNavigationSection = "add" | "body" | "filter" | "footer" | "head
 
 /** Lets the navigation reach rows of a virtual list that aren't drawn. */
 export interface GridNavigationRowScroller {
+    /** The index of the data row with a uid, drawn or not; -1 when no row has it. */
+    indexOfRow(rowUid: string): number;
     /** Whether a row can take focus; group footers can't. */
     isNavigableRow(rowIndex: number): boolean;
     /** The number of body rows, drawn or not. */

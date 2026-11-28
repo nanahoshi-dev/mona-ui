@@ -508,7 +508,7 @@
 }
 
 <ng-template #emptyGridTemplate>
-    <div [class]="noDataClass()" role="rowgroup">
+    <div [class]="noDataClass()" role="rowgroup" (mousedown)="onEmptyBodyMouseDown($event)">
         <div role="row" class="contents" [attr.aria-rowindex]="gridService.bodyAriaRowStart() + 1">
             <div role="gridcell" class="contents" [attr.aria-colspan]="gridService.layout().length">
                 @if (noDataTemplate()) {

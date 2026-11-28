@@ -193,6 +193,12 @@ The toolbar is a `role="toolbar"` named by the `toolbar` message. `ArrowLeft`/`A
 
 Grid cells use a roving `tabindex`: the cell that last had focus has `tabindex="0"`, every other cell and every control inside a cell has `tabindex="-1"`. Keyboard focus shows a solid 2px ring inside the cell. With row navigation, a body row's focus is on its first data cell, where a click on any of its cells moves it, and the ring goes around the whole row, or an outline in forced colors; moving to a row scrolls it into view without scrolling the body sideways. Cells moved to with the keys scroll clear of pinned columns. Focus returns to a header after it's dragged, and to a cell of a virtual grid when its row scrolls back into view. Changing the page from the pager scrolls the body to the first row.
 
+When `data` changes, the focus stays on its row while the row's item is there (with `rowKey`, an item with the same key), and moves to a neighboring row when it goes. Rows that share none with the rows before, as another folder's in a file list, start again at the first row: it becomes the current cell, and takes the focus if the focus was in the rows. So does the first row to come after the data was emptied, as while the next folder loads: the focus waits on a column header meanwhile, and comes back unless the user has moved it.
+
+A press with the main or the secondary button on the body's empty space, below the rows or in an empty grid, keeps the focus on the current cell, or brings it there from outside the grid, rather than dropping it on the page; a context menu opened there gives the focus back to that cell.
+
+`focus()` moves the focus into the rows from code: to the current cell when it's in the body, or else the first row. `focusRow(key)` moves it to the row of an item, by its `rowKey` value (or the item itself without a `rowKey`), scrolling a virtual grid to it; for a key no row has, it does what `focus()` does. Neither selects, and both wait until the grid has drawn what changed before the call, so `focusRow` can focus a row just added to `data`.
+
 ### ARIA
 
 | Attribute | When present | Value |

@@ -59,7 +59,8 @@ const MAX_BUFFER_ROWS = 8;
         "[class]": "baseClass()",
         "[style.--mona-grid-row-height]": "gridService.virtualScrollOptions().height + 'px'",
         "(click)": "onBodyClick($event)",
-        "(contextmenu)": "onBodyClick($event)"
+        "(contextmenu)": "onBodyClick($event)",
+        "(mousedown)": "onBodyMouseDown($event)"
     }
 })
 export class GridVirtualListComponent {
@@ -158,6 +159,11 @@ export class GridVirtualListComponent {
         }
     }
 
+    /** A press on the body's empty space keeps the focus in the grid. */
+    protected onBodyMouseDown(event: MouseEvent): void {
+        this.#gridNavigationService.keepFocusOnPress(event);
+    }
+
     protected trackBodyRow(_: number, bodyRow: GridViewRow): string {
         return bodyRow.key;
     }
@@ -192,6 +198,7 @@ export class GridVirtualListComponent {
     private setRowScroller(): void {
         const viewport = this.viewport();
         this.#gridNavigationService.setRowScroller({
+            indexOfRow: rowUid => this.bodyRows().findIndex(row => row.type === "data" && row.row.uid === rowUid),
             isNavigableRow: index => this.bodyRows()[index] != null,
             rowCount: () => this.bodyRows().length,
             scrollToRow: index => viewport.scrollToIndex(index)

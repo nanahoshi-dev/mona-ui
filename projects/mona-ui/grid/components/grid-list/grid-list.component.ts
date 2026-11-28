@@ -16,6 +16,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ImmutableList } from "@mirei/ts-collections";
 import { Row } from "../../models/Row";
+import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
 import {
     gridListBaseThemeVariants,
@@ -66,11 +67,13 @@ const ROW_MOVE_SNAPSHOT_LIFETIME = 1000;
     host: {
         "[class]": "baseClass",
         "(click)": "onBodyClick($event)",
-        "(contextmenu)": "onBodyClick($event)"
+        "(contextmenu)": "onBodyClick($event)",
+        "(mousedown)": "onBodyMouseDown($event)"
     }
 })
 export class GridListComponent implements GridListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #gridNavigationService = inject(GridNavigationService);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
     readonly #rowMoveAnimations = new Map<HTMLTableRowElement, Animation>();
     #dropping = false;
@@ -142,6 +145,11 @@ export class GridListComponent implements GridListVariantInput {
         if (!(event.target instanceof Element) || event.target.closest("tr") == null) {
             this.gridService.handleBodyEmptyClick(event);
         }
+    }
+
+    /** A press on the body's empty space keeps the focus in the grid. */
+    protected onBodyMouseDown(event: MouseEvent): void {
+        this.#gridNavigationService.keepFocusOnPress(event);
     }
 
     #canAnimateRowMoves(): boolean {

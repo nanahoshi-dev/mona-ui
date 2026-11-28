@@ -586,7 +586,12 @@ describe("GridNavigationService", () => {
     describe("virtual rows (GK6)", () => {
         it("scrolls to a row that isn't drawn and focuses it once it registers", async () => {
             const scrollToRow = vi.fn();
-            service.setRowScroller({ isNavigableRow: () => true, rowCount: () => 1000, scrollToRow });
+            service.setRowScroller({
+                indexOfRow: () => -1,
+                isNavigableRow: () => true,
+                rowCount: () => 1000,
+                scrollToRow
+            });
             const first = service.registerCell(
                 createData({ rowIndex: 0, colIndex: 0, rowUid: "row-0", columnId: "name", firstInRow: true })
             );
@@ -603,7 +608,12 @@ describe("GridNavigationService", () => {
 
         it("moves by index past rows that aren't drawn, skipping rows that can't take focus", () => {
             const scrollToRow = vi.fn();
-            service.setRowScroller({ isNavigableRow: index => index !== 1, rowCount: () => 10, scrollToRow });
+            service.setRowScroller({
+                indexOfRow: () => -1,
+                isNavigableRow: index => index !== 1,
+                rowCount: () => 10,
+                scrollToRow
+            });
             const first = service.registerCell(createData({ rowIndex: 0, colIndex: 0, rowUid: "row-0" }));
 
             expect(service.navigate(first, "ArrowDown")).toBe(true);
