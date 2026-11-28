@@ -73,6 +73,7 @@ When the row is too narrow, the `monaToolbarItem`s move into the menu from the l
 - `monaToolbarItem="never"` keeps a control in the row, such as a search box or a control a menu item can't stand in for.
 - In the menu, an item takes its text from `overflowText`, then the control's `aria-label`, then its text. It's disabled while the control is disabled, and it's a checkbox item, checked while the control's `aria-pressed` is `true`.
 - Choosing an item emits the item's `overflowActivate`, then clicks the control unless the event is prevented. A button needs nothing more. For a control a click doesn't operate, handle `overflowActivate`, or keep it in the row.
+- Both come once the menu has closed and the focus is back on the More button, after the menu's closing animation. A dialog the control opens returns the focus to the More button when it closes.
 - The menu is read from the hidden controls each time it opens, so their text and states are current.
 
 If focus is on a control as it moves into the menu, focus moves to the More button.

@@ -135,14 +135,18 @@ export class ToolbarComponent {
         this.#roving.onKeydown(event);
     }
 
-    protected onMenuClick(event: PopupMenuItemClickEvent): void {
-        const item = this.#overflowed()[event.value as number];
-        item?.activate(event.originalEvent);
-    }
-
     protected onMenuOpen(): void {
         this.menuItems.set(this.#createMenuItems());
         this.menuOpen.set(true);
+    }
+
+    /**
+     * Operates the chosen control once the menu has closed and the focus is back on the More button, so a dialog its
+     * click opens returns the focus there.
+     */
+    protected onMenuSelect(event: PopupMenuItemClickEvent): void {
+        const item = this.#overflowed()[event.value as number];
+        item?.activate(event.originalEvent);
     }
 
     #createMenuItems(): MenuItem[] {

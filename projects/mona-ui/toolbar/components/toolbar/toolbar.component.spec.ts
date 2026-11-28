@@ -1,6 +1,9 @@
-import { Component, signal } from "@angular/core";
+import { InteractivityChecker } from "@angular/cdk/a11y";
+import { Component, inject, signal } from "@angular/core";
 import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import { type DialogRef, DialogService } from "@nanahoshi/mona-ui/dialog";
+import { MONA_DEFAULT_LOCALE, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import axe from "axe-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ToolbarItemDirective } from "../../directives/toolbar-item.directive";
@@ -53,7 +56,7 @@ class FakeResizeObserver {
                 data-width="60"
                 aria-label="Insert link"
                 overflowText="Link…"
-                (click)="clicks.push('link')">
+                (click)="onLink()">
                 <span aria-hidden="true">🔗</span>
             </button>
             <button
@@ -68,11 +71,27 @@ class FakeResizeObserver {
     `
 })
 class HostComponent {
+    readonly #dialogService = inject(DialogService);
     public readonly bold = signal(false);
     public readonly clicks: string[] = [];
     public readonly label = signal("Formatting");
+    /** Where the focus was, and how many menus were open, when the link button was clicked. */
+    public readonly linkClicks: { readonly active: Element | null; readonly menus: number }[] = [];
     public readonly overflow = signal<ToolbarOverflow>("menu");
     public readonly preventUndo = signal(false);
+    public dialogRef: DialogRef | null = null;
+    public openLinkDialog = false;
+
+    public onLink(): void {
+        this.clicks.push("link");
+        this.linkClicks.push({
+            active: document.activeElement,
+            menus: document.querySelectorAll("[role='menu']").length
+        });
+        if (this.openLinkDialog) {
+            this.dialogRef = this.#dialogService.show({ text: "Paste the address.", title: "Insert link" });
+        }
+    }
 
     public onUndoActivate(event: PreventableEvent<Event>): void {
         if (this.preventUndo()) {
@@ -128,6 +147,12 @@ describe("ToolbarComponent", () => {
         FakeResizeObserver.resize();
         await settle();
     };
+    /** Waits for the menu's leave animation, after which the chosen control is clicked. */
+    const settleClose = async (): Promise<void> => {
+        await settle();
+        await wait(200);
+        await settle();
+    };
     const openMenu = async (): Promise<void> => {
         moreButton().focus();
         moreButton().click();
@@ -157,6 +182,7 @@ describe("ToolbarComponent", () => {
     afterEach(() => {
         fixture.destroy();
         document.querySelectorAll(".cdk-overlay-container").forEach(element => element.remove());
+        document.documentElement.classList.remove("cdk-global-scrollblock");
         vi.unstubAllGlobals();
         vi.restoreAllMocks();
     });
@@ -265,20 +291,49 @@ describe("ToolbarComponent", () => {
         it("clicks the control when its item is chosen", async () => {
             await openMenu();
             menuItems()[0].click();
-            await settle();
+            await settleClose();
             expect(fixture.componentInstance.bold()).toBe(true);
             await openMenu();
             expect(menuItems()[0].getAttribute("aria-checked")).toBe("true");
             menuItems()[2].click();
-            await settle();
+            await settleClose();
             expect(fixture.componentInstance.clicks).toEqual(["link"]);
+        });
+
+        it("clicks the control once the menu has closed and the focus is back on the More button", async () => {
+            await openMenu();
+            menuItems()[2].click();
+            // Not while the menu is open.
+            expect(fixture.componentInstance.clicks).toEqual([]);
+
+            await settleClose();
+            expect(fixture.componentInstance.linkClicks).toEqual([{ active: moreButton(), menus: 0 }]);
+        });
+
+        it("gives the focus back to the More button when a dialog the control opens closes", async () => {
+            TestBed.inject(MonaI18nService).use(MONA_DEFAULT_LOCALE);
+            // jsdom has no layout: without this, the dialog's focus trap finds nothing to focus.
+            vi.spyOn(TestBed.inject(InteractivityChecker), "isVisible").mockReturnValue(true);
+            fixture.componentInstance.openLinkDialog = true;
+            await openMenu();
+            menuItems()[2].click();
+            await settleClose();
+
+            const dialog = document.querySelector<HTMLElement>("[role='dialog']");
+            expect(dialog).not.toBeNull();
+            expect(dialog!.contains(document.activeElement)).toBe(true);
+
+            fixture.componentInstance.dialogRef!.close();
+            await settleClose();
+            expect(document.querySelector("[role='dialog']")).toBeNull();
+            expect(document.activeElement).toBe(moreButton());
         });
 
         it("lets overflowActivate handle an item instead", async () => {
             fixture.componentInstance.preventUndo.set(true);
             await openMenu();
             menuItems()[3].click();
-            await settle();
+            await settleClose();
             expect(fixture.componentInstance.clicks).toEqual(["undo handled"]);
         });
     });

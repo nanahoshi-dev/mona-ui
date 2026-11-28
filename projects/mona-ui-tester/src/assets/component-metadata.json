@@ -2801,7 +2801,7 @@
         "defaultValue": "\"auto\""
       },
       {
-        "description": "Emitted when the item is chosen from the More menu. Unless it's prevented, the toolbar then clicks the\ncontrol, which suits a button. Handle it for a control a click doesn't operate, or keep that control in the toolbar\nwith `overflow=\"never\"`.",
+        "description": "Emitted when the item is chosen from the More menu, once the menu has closed and the focus is back on\nthe More button. Unless it's prevented, the toolbar then clicks the control, which suits a button. Handle it for a\ncontrol a click doesn't operate, or keep that control in the toolbar with `overflow=\"never\"`.",
         "kind": "output",
         "name": "overflowActivate",
         "type": "PreventableEvent<Event>"
