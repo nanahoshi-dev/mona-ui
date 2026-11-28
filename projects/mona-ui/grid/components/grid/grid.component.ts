@@ -83,6 +83,7 @@ import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
 import { isKeyboardEntryElement, observeGridCellTabStops } from "../../services/grid-cell-tab-stops";
 import { getColumnStepTarget, getSiblingRuns } from "../../services/grid-column-groups";
 import { GridNavigationService } from "../../services/grid-navigation.service";
+import { type GridTextField, GridTypeaheadService } from "../../services/grid-typeahead.service";
 import { GridService } from "../../services/grid.service";
 import {
     gridBaseThemeVariants,
@@ -129,7 +130,7 @@ const TOOLBAR_ITEM_SELECTOR =
 @Component({
     selector: "mona-grid",
     templateUrl: "./grid.component.html",
-    providers: [GridService, GridNavigationService, FilterService],
+    providers: [GridService, GridNavigationService, GridTypeaheadService, FilterService],
     imports: [
         LucideArrowDown,
         LucideArrowLeft,
@@ -176,6 +177,8 @@ export class GridComponent<T> implements GridVariantInput {
     readonly #document = inject(DOCUMENT);
 
     readonly #gridNavigationService = inject(GridNavigationService);
+
+    readonly #gridTypeahead = inject(GridTypeaheadService);
 
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
 
@@ -536,6 +539,15 @@ export class GridComponent<T> implements GridVariantInput {
      */
     public readonly skip = model(0);
 
+    /**
+     * @description Field name or function that gives a row's text, which typeahead matches: typing the first letters
+     * of a row's text moves the focus to the row, as in a file list, ignoring case. It searches every row of the body,
+     * in the order shown, not only the rows a virtual grid has drawn. Rows that select as the arrow keys move, with
+     * row navigation and rows that select on click, select the row too. Without it, the grid has no typeahead.
+     * @default null
+     */
+    public readonly textField = input<string | ((item: T) => string) | null>(null);
+
     /** @description Additional CSS classes merged onto the host element via `tailwind-merge`. */
     public readonly userClass = input<string>("", { alias: "class" });
 
@@ -545,6 +557,11 @@ export class GridComponent<T> implements GridVariantInput {
             untracked(() => this.gridService.setColumnDefinitions(columns));
         });
         effect(() => this.gridService.rowClass.set(this.rowClass() as GridRowClass<unknown> | null));
+        effect(() => this.#gridTypeahead.textField.set(this.textField() as GridTextField | null));
+        // Before a cell's own keys: a key that types something searches the rows, Space included while typing.
+        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown", { capture: true })
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => this.#gridTypeahead.handleKeydown(event));
         effect(() => {
             const rowNavigation = this.navigation() === "row";
             untracked(() => {

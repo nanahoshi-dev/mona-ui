@@ -94,6 +94,11 @@ export class GridListComponent implements GridListVariantInput {
             const count = this.ariaRows().count;
             untracked(() => this.gridService.renderedBodyRowCount.set(count));
         });
+        effect(() => {
+            const bodyRows = this.bodyRows();
+            untracked(() => this.gridService.bodyRows.set(bodyRows));
+        });
+        this.#destroyRef.onDestroy(() => this.gridService.bodyRows.set([]));
         afterNextRender({
             read: () => {
                 const bodyTableElement = this.bodyTableElementRef().nativeElement;

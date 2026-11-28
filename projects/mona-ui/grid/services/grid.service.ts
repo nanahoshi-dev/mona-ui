@@ -363,6 +363,8 @@ export class GridService {
             (this.addRowVisible() ? 1 : 0) +
             (this.virtualScrollOptions().enabled ? 0 : this.paginationState().skip)
     );
+    /** The rows the body list shows, in order, detail rows aside; empty without a list. The list keeps it current. */
+    public readonly bodyRows = signal<readonly GridViewRow[]>([]);
     public readonly bodyScrollElement = signal<HTMLElement | null>(null);
     public readonly bodyTableElement = signal<HTMLTableElement | null>(null);
     public readonly bulkSelectionRows = computed(() => {
