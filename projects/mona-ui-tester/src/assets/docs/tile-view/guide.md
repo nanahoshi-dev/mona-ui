@@ -143,9 +143,17 @@ Only the tiles in view and a row or two around them are rendered. A row that scr
 | `Space`                     | Select the active tile, adding it in multiple selection. `Ctrl+Space` adds or removes it.         |
 | `Ctrl+A`                    | Select all, in multiple selection.                                                               |
 | `Enter`                     | Emit `itemActivate` for the active tile.                                                         |
-| Letters, digits             | Typeahead: move to the next tile whose text starts with what was typed. A space typed quickly after a letter is part of the text. |
+| Typed characters            | Typeahead: move to the next tile whose text starts with what was typed. See [Typeahead](#typeahead). |
 
 A move without Ctrl selects the tile moved to, in single and multiple selection. Arrow keys with Alt are left to the page.
+
+### Typeahead
+
+Typing the start of a tile's text (`textField`) moves to the tile and selects it, as an arrow key would, ignoring case:
+
+- A first character moves on to the next tile after the active one that starts with it, wrapping around. More characters, each typed within about a second of the last, search from the active tile on, so typing out a name stays on its tile.
+- A character typed again, as in "aa", moves on to the next tile that starts with what was typed or, when no other tile does, with that character: repeating a letter steps through the tiles that start with it.
+- Any character a name can have is typed, so `.config`, `(old)` and `~$draft.docx` can be typed out. While a search is under way, `Space` types a space rather than selecting. Keys pressed with `Ctrl`, `Alt` or `Meta`, `Ctrl+Space` included, are never typed, and a key that moves ends the search.
 
 ### Focus
 

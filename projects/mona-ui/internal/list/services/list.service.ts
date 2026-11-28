@@ -10,6 +10,7 @@ import {
 } from "@mirei/ts-collections";
 import { type FilterableOptions, FilterChangeEvent, type VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
+import { findTypeaheadMatch } from "@nanahoshi/mona-ui/internal";
 import { ReplaySubject, Subject } from "rxjs";
 import type { GroupableOptions } from "../models/GroupableOptions";
 import { ListItem } from "../models/ListItem";
@@ -20,7 +21,6 @@ import type { NavigationMode } from "../models/NavigationMode";
 import type { PagerSettings } from "../models/PagerSettings";
 import type { PageState } from "../models/PageState";
 import type { SelectableOptions } from "../models/SelectableOptions";
-import { cycleThroughMatchedItems } from "../utils/cycleThroughMatchedItems";
 import { formatGroupHeader, toGroupKey } from "../utils/groupKey";
 
 /** The selection key of the "Select all" option, which no data item can have. */
@@ -349,24 +349,20 @@ export class ListService<TData> {
     }
 
     /**
-     * Finds the next item whose text starts with the typeahead buffer, starting after the active item; once the
-     * buffer holds more than one character, an active item that still matches stays.
-     * Group headers and disabled items are never matched.
+     * The item typeahead moves to, from what was typed, as `findTypeaheadMatch` finds it: from the highlighted item,
+     * or else the last selected one. Headers, "Select all" and disabled items are skipped.
      */
     public cycleThroughMatchedItems(buffer: string): ListItem<TData> | null {
         const activeItem = this.highlightedItem() || this.selectedListItems().lastOrDefault();
-        const prefix = buffer.toLowerCase();
-        return cycleThroughMatchedItems(
-            this.viewItems(),
-            activeItem ?? null,
-            item => {
-                if (item.isHeader || item === this.selectAllItem || this.isDisabled(item)) {
-                    return false;
-                }
-                return this.getItemText(item).toLowerCase().startsWith(prefix);
-            },
-            prefix.length > 1
-        );
+        const items = this.viewItems().toArray();
+        const index = findTypeaheadMatch(buffer, items.length, activeItem ? items.indexOf(activeItem) : -1, i => {
+            const item = items[i];
+            if (item.isHeader || item === this.selectAllItem || this.isDisabled(item)) {
+                return null;
+            }
+            return this.getItemText(item);
+        });
+        return index >= 0 ? items[index] : null;
     }
 
     public deselectItems(item: Iterable<ListItem<TData>>): void {

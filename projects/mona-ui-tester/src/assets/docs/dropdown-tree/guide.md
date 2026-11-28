@@ -147,7 +147,7 @@ The dropdown tree implements `FormValueControl<TValue | null>`, so `[formField]`
 | `ArrowLeft`                                               | Open   | Closes an open node, or moves to its parent (`ArrowRight` in right-to-left)     |
 | `Home` / `End`                                            | Open   | Moves to the first or last visible node                                         |
 | `*`                                                       | Open   | Opens the active node's siblings                                                |
-| Letters and digits                                        | Open   | Moves to the next node whose text starts with them                              |
+| Typed characters                                          | Open   | Moves to the next node whose text starts with them; the same character typed again steps on to the next node that starts with it |
 | `Enter` / `Space`                                         | Open   | Selects the active node and closes the popup                                    |
 | `Escape`, `Alt+ArrowUp`                                   | Open   | Closes the popup without changing the value                                     |
 | `Tab`                                                     | Open   | Closes the popup and moves focus on                                             |

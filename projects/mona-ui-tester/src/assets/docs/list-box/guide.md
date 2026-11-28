@@ -163,7 +163,7 @@ Form integration is not applicable. List Box is a display and selection widget, 
 | `PageUp`                                        | Scroll the list back by roughly one viewport.                                                               |
 | `Enter`                                         | Select the highlighted or currently selected item.                                                          |
 | `Space`, `Ctrl+A`/`Cmd+A` (multiple selection)  | Toggle the focused item; select every enabled item.                                                         |
-| Any letter, digit, hyphen, or underscore        | Typeahead: jumps to the next item whose text starts with the typed characters, staying on the active item while it still matches (resets after a short pause). In multiple selection it moves focus without changing the selection. |
+| Typed characters, punctuation included          | Typeahead: jumps to the next item whose text starts with the typed characters, staying on the active item while it still matches; the same character typed again steps on to the next item that starts with it. A search ends about a second after the last key, or at a key that moves. In multiple selection it moves focus without changing the selection. |
 | `Alt+ArrowUp` / `Alt+ArrowDown`                 | Move the selection up or down (Move Up / Move Down).                                                        |
 | `Delete`                                        | Remove the selection (Remove).                                                                              |
 | `Alt+ArrowRight` (`Alt+ArrowLeft` in RTL)       | In a list box with a `connectedList`: transfer the selection to it (Transfer To).                           |

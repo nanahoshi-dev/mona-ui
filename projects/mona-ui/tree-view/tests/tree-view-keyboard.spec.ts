@@ -198,8 +198,7 @@ describe("tree view keyboard", () => {
         await press("v");
         expect(active()).toBe("Vegetables");
         await press("End");
-        // Let the typeahead buffer reset, so "f" starts a new search.
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // A key that moves ends the search, so "f" starts a new one at once.
         await press("f");
         expect(active()).toBe("Fruits");
     });

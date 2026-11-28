@@ -12,6 +12,7 @@ import axe from "axe-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import type { AdaptiveMode } from "@nanahoshi/mona-ui/dropdowns";
+import { TYPEAHEAD_RESET_DELAY } from "@nanahoshi/mona-ui/internal";
 
 import { DropdownListValueTemplateDirective } from "../../directives/dropdown-list-value-template.directive";
 import { DropdownListComponent } from "./dropdown-list.component";
@@ -770,7 +771,7 @@ describe("DropdownListComponent", () => {
             const fixture = await createObjectFixture(CityDropdownListHostComponent);
 
             pressKey(fixture, "b");
-            await new Promise(resolve => setTimeout(resolve, 250));
+            await new Promise(resolve => setTimeout(resolve, TYPEAHEAD_RESET_DELAY + 50));
             pressKey(fixture, " ");
             await waitForStable(fixture);
 

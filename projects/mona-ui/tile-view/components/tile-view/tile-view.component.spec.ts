@@ -430,6 +430,70 @@ describe("TileViewComponent", () => {
             }
         });
 
+        it("types any character a file name has", async () => {
+            host.items.set([
+                { id: 1, name: "(old)" },
+                { id: 2, name: ".config" },
+                { id: 3, name: "~$draft.docx" },
+                { id: 4, name: "report.pdf" }
+            ]);
+            await settle(fixture);
+            await focus();
+            for (const key of ["~", "$"]) {
+                await press(key);
+            }
+            expect(activeText()).toBe("~$draft.docx");
+
+            await press("Home");
+            for (const key of ["r", "e", "p", "o", "r", "t", "."]) {
+                await press(key);
+            }
+
+            expect(activeText()).toBe("report.pdf");
+            expect(host.selected()).toEqual([4]);
+        });
+
+        it("steps through the tiles that start with a letter typed again", async () => {
+            host.items.set([
+                { id: 1, name: "Apple" },
+                { id: 2, name: "Banana" },
+                { id: 3, name: "Berry" },
+                { id: 4, name: "Blueberry" }
+            ]);
+            await settle(fixture);
+            await focus();
+
+            const active: string[] = [];
+            for (const key of ["b", "b", "b", "b"]) {
+                await press(key);
+                active.push(activeText());
+            }
+
+            expect(active).toEqual(["Banana", "Berry", "Blueberry", "Banana"]);
+        });
+
+        it("starts a new search after a key that moves", async () => {
+            await focus();
+            await press("b");
+            await press("ArrowRight");
+            expect(activeText()).toBe("Cherry");
+
+            await press("a");
+
+            expect(activeText()).toBe("Apple");
+        });
+
+        it("never types Ctrl+Space, which toggles the tile even during a search", async () => {
+            await focus();
+            await press("b");
+            expect(host.selected()).toEqual([2]);
+
+            const event = await press(" ", { ctrlKey: true });
+
+            expect(event.defaultPrevented).toBe(true);
+            expect(host.selected()).toEqual([]);
+        });
+
         it("leaves Alt with the arrows to the browser", async () => {
             await focus();
             const event = await press("ArrowDown", { altKey: true });

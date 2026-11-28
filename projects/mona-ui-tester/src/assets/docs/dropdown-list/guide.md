@@ -206,7 +206,7 @@ These three directives are independent — applying more than one to the same `m
 | `Enter`                 | Open the popup when closed. When open, commits the highlighted option and closes the popup.                                                                                                                                                       |
 | `Space`                 | Toggle the popup open or closed.                                                                                                                                                                                                                  |
 | `Escape` / `Tab`        | Close the popup without committing a highlighted-but-uncommitted option.                                                                                                                                                                          |
-| Character keys          | Typeahead: cycles through options whose text matches the typed characters.                                                                                                                                                                        |
+| Character keys          | Typeahead: moves to the next option whose text starts with the typed characters; the same character typed again steps on to the next option that starts with it. A search ends about a second after the last key, or at a key that moves. While a search is under way, `Space` is part of it.                                                                                                                                                                        |
 
 ### Focus
 

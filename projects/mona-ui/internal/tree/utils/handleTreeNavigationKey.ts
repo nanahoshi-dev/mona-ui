@@ -6,7 +6,10 @@ export interface TreeNavigationKeyContext<T> {
     /** Whether the tree is laid out right to left, which swaps the expand and collapse keys. */
     readonly rtl: boolean;
     readonly treeService: TreeService<T>;
-    /** Takes a typed character for typeahead. Space isn't passed: a tree uses it to check nodes. */
+    /**
+     * Takes a typed character for typeahead, or `""` after a key that moves, which ends the search. Space isn't passed:
+     * a tree uses it to check nodes.
+     */
     readonly typeahead: (key: string) => void;
 }
 
@@ -68,7 +71,11 @@ export function handleTreeNavigationKey<T>(event: KeyboardEvent, context: TreeNa
                 return false;
             }
             context.typeahead(event.key);
+            event.preventDefault();
+            return true;
     }
+    // A key that moves ends a typeahead search: the next character starts a new one.
+    context.typeahead("");
     event.preventDefault();
     return true;
 }

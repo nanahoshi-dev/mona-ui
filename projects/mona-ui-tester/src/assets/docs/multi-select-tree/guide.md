@@ -138,7 +138,7 @@ The multi-select tree implements `FormValueControl<Iterable<TValue>>`, so `[form
 | `ArrowLeft`                                               | Open   | Closes an open node, or moves to its parent (`ArrowRight` in right-to-left)     |
 | `Home` / `End`                                            | Open   | Moves to the first or last visible node                                         |
 | `*`                                                       | Open   | Opens the active node's siblings                                                |
-| Letters and digits                                        | Open   | Moves to the next node whose text starts with them                              |
+| Typed characters                                          | Open   | Moves to the next node whose text starts with them; the same character typed again steps on to the next node that starts with it |
 | `Enter` / `Space`                                         | Open   | Checks or unchecks the active node                                              |
 | `Backspace`                                               | Any    | Unchecks the item of the last tag                                               |
 | `Escape`, `Alt+ArrowUp`                                   | Open   | Closes the popup                                                                |

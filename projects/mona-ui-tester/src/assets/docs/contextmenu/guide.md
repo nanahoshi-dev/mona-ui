@@ -215,7 +215,7 @@ protected onMenuSelect(event: PopupMenuItemClickEvent): void {
 | `Enter` / `Space`                 | Activates the highlighted item, or opens its submenu if it has nested items                                 |
 | `Escape`                          | Closes the open submenu                                                                                     |
 | `Tab`                             | Closes the menu and its submenus; focus moves on from the target                                            |
-| Letter, digit, `-`, or `_`        | Jumps to (cycles through) items whose label starts with the typed text                                      |
+| Typed characters                  | Jumps to the next item whose label starts with the typed text; the same character typed again steps on to the next item that starts with it. A search ends about a second after the last key, or at a key that moves. |
 
 With `filter`, a right-click and the `ContextMenu` key or `Shift+F10` open the menu only on an element that matches it. Elsewhere in the target they do what they would outside it. For the keys to reach every element the menu is for, the focus must be able to go to it or into it, or an `aria-activedescendant` must name it.
 
