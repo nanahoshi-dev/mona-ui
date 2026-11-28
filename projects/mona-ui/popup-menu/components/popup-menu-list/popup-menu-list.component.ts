@@ -56,6 +56,14 @@ const SUBMENU_AIM_REST_DELAY = 100;
  */
 const SUBMENU_AIM_TOLERANCE = 20;
 
+/** The pointer entering an item: the item, its row, and where and how the pointer entered it. */
+interface ItemEntry {
+    readonly item: PopupMenuItem;
+    readonly pointerType: string;
+    readonly position: PointerPosition;
+    readonly target: HTMLElement;
+}
+
 @Component({
     selector: "mona-popup-menu-list",
     imports: [NgTemplateOutlet, LucideChevronRight, LucideCheck, RippleDirective],
@@ -88,9 +96,21 @@ export class PopupMenuListComponent implements OnInit {
     readonly #zone = inject(NgZone);
     #childClose$: Subject<void> | null = null;
     #closing = false;
+    /**
+     * The item the pointer entered while at rest. Browsers report a pointer that a menu opens under as entering the
+     * item there, without a move. That item takes over once the pointer moves.
+     */
+    #entryAtRest: ItemEntry | null = null;
     #hoverTimer: ReturnType<typeof setTimeout> | undefined;
     // An item the pointer crossed while heading for the open submenu: it takes over if the pointer stops or turns away.
     #pendingHover: { readonly item: PopupMenuItem; readonly target: HTMLElement } | null = null;
+    /**
+     * Whether the pointer has stayed at rest since a menu opened from the keys. Until it moves over the menu, the item
+     * the keys highlighted keeps the highlight, rather than the item under the pointer taking it.
+     */
+    #pointerAtRest = this.#parentConfig.isRoot
+        ? this.#parentConfig.initialFocus != null
+        : this.#parentConfig.viaKeyboardNavigation === true;
     #pointerTrail: readonly PointerPosition[] = [];
     protected readonly activeMenuItem = signal<PopupMenuItem | null>(null);
     protected readonly ariaLabel = computed(() => this.#parentConfig.ariaLabel?.() || null);
@@ -222,6 +242,7 @@ export class PopupMenuListComponent implements OnInit {
     protected onHostPointerLeave(): void {
         // An item crossed on the way out doesn't take over, and the pointer's heading starts over when it comes back.
         this.cancelPendingHover();
+        this.#entryAtRest = null;
         this.#pointerTrail = [];
     }
 
@@ -248,20 +269,17 @@ export class PopupMenuListComponent implements OnInit {
     }
 
     protected onItemPointerEnter(event: PointerEvent, item: PopupMenuItem): void {
-        this.cancelPendingHover();
-        const open = this.#openSubmenuItem();
-        if (open === item) {
-            this.activeMenuItem.set(item);
+        const entry: ItemEntry = {
+            item,
+            pointerType: event.pointerType,
+            position: { x: event.clientX, y: event.clientY },
+            target: event.currentTarget as HTMLElement
+        };
+        if (this.#pointerAtRest) {
+            this.#entryAtRest = entry;
             return;
         }
-        const target = event.currentTarget as HTMLElement;
-        if (open && event.pointerType !== "touch" && this.isHeadingToSubmenu({ x: event.clientX, y: event.clientY })) {
-            // The pointer crosses this item on its way into the open submenu: the submenu stays while it keeps going.
-            this.#pendingHover = { item, target };
-            this.restartRestTimer();
-            return;
-        }
-        this.hoverItem(item, target);
+        this.enterItem(entry);
     }
 
     private applyPendingHover(): void {
@@ -372,6 +390,23 @@ export class PopupMenuListComponent implements OnInit {
         if (index >= 0) {
             this.activeMenuItem.set(items[index]);
         }
+    }
+
+    /** The pointer moved onto an item: it highlights the item, or opens its submenu. */
+    private enterItem({ item, pointerType, position, target }: ItemEntry): void {
+        this.cancelPendingHover();
+        const open = this.#openSubmenuItem();
+        if (open === item) {
+            this.activeMenuItem.set(item);
+            return;
+        }
+        if (open && pointerType !== "touch" && this.isHeadingToSubmenu(position)) {
+            // The pointer crosses this item on its way into the open submenu: the submenu stays while it keeps going.
+            this.#pendingHover = { item, target };
+            this.restartRestTimer();
+            return;
+        }
+        this.hoverItem(item, target);
     }
 
     private findItem(uid: string): PopupMenuItem | null {
@@ -550,6 +585,15 @@ export class PopupMenuListComponent implements OnInit {
     }
 
     private onPointerMove(event: PointerEvent): void {
+        if (this.#pointerAtRest) {
+            // The pointer moved: the item it rests on takes over, as if the pointer had just moved onto it.
+            this.#pointerAtRest = false;
+            const entry = this.#entryAtRest;
+            this.#entryAtRest = null;
+            if (entry) {
+                this.#zone.run(() => this.enterItem(entry));
+            }
+        }
         const position = { x: event.clientX, y: event.clientY };
         this.#pointerTrail = [...this.#pointerTrail.slice(1 - POINTER_TRAIL_LENGTH), position];
         if (!this.#pendingHover) {

@@ -166,6 +166,8 @@ Calling `event.preventDefault()` on the `menuClick` event of a `mona-dropdown-bu
 | `ArrowUp`                       | Open the menu with its last item highlighted   |
 | `Escape` (while menu open)      | Close the popup and return focus to the button |
 
+Opened from the keys, the menu keeps that highlight while the pointer rests where the menu appears, as it does after an item was chosen with the pointer. Once the pointer moves, the item under it takes over, as on hover.
+
 Inside the menu:
 
 | Key               | Action                                                                                                      |

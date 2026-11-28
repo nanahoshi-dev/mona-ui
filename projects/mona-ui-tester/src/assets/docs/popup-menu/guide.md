@@ -160,6 +160,8 @@ Inside the menu, the keyboard works the same as in every Mona UI menu:
 | `Tab`                             | Closes every open menu, and focus moves on from where the menu opened. |
 | A letter, digit, `-` or `_`       | Jumps to the next item whose label starts with what was typed.         |
 
+A menu opened from the keys (`openMenuViaKeyboard()`, or a submenu opened with `ArrowRight`) keeps the item they highlighted while the pointer rests where the menu appears. Once the pointer moves, the item under it takes over, as on hover.
+
 When the menu closes, focus returns to where it was when the menu opened, or to the target if it can take focus.
 
 **What you provide:** unlike `DropdownButtonComponent`, this component doesn't change your target element, so its ARIA is yours to set.
