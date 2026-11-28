@@ -1,5 +1,5 @@
 import { Component, signal, viewChild } from "@angular/core";
-import { type ComponentFixture, TestBed } from "@angular/core/testing";
+import { type ComponentFixture, DeferBlockBehavior, DeferBlockState, TestBed } from "@angular/core/testing";
 import { ContextMenuComponent, ContextMenuItemComponent } from "@nanahoshi/mona-ui/contextmenu";
 import type { MockInstance } from "vitest";
 import { GridColumnComponent } from "../components/grid-column/grid-column.component";
@@ -385,5 +385,107 @@ describe("virtual grid focus", () => {
 
         expect(viewport().scrollTop).toBe(0);
         expect(focusedText()).toBe("File 5001");
+    });
+});
+
+describe("focus from code on a grid just made", () => {
+    let clientHeight: MockInstance<() => number>;
+    let root: HTMLElement;
+
+    /**
+     * Makes the grid and draws it once, holding its body back: an app's build loads the body a tick after the grid's
+     * first layout, and a virtual grid draws its rows later still.
+     */
+    async function create<T>(component: new () => T, before?: (host: T) => void): Promise<ComponentFixture<T>> {
+        await TestBed.configureTestingModule({
+            deferBlockBehavior: DeferBlockBehavior.Manual,
+            imports: [component]
+        }).compileComponents();
+        const fixture = TestBed.createComponent(component);
+        root = fixture.nativeElement as HTMLElement;
+        document.body.appendChild(root);
+        before?.(fixture.componentInstance);
+        fixture.detectChanges();
+        return fixture;
+    }
+
+    /** Draws the body the grid held back, then lets it settle. */
+    async function drawBody(fixture: ComponentFixture<unknown>): Promise<void> {
+        await settle(fixture);
+        expect(root.querySelector("tbody td")).toBeNull();
+        for (const block of await fixture.getDeferBlocks()) {
+            await block.render(DeferBlockState.Complete);
+        }
+        await settle(fixture);
+        await settle(fixture);
+    }
+
+    beforeEach(() => {
+        // jsdom has no layout: give a virtual grid's viewport a height of ten rows.
+        clientHeight = vi.spyOn(Element.prototype, "clientHeight", "get").mockImplementation(function (this: Element) {
+            return this.tagName === "CDK-VIRTUAL-SCROLL-VIEWPORT" ? 280 : 0;
+        });
+    });
+
+    afterEach(() => {
+        root.remove();
+        clientHeight.mockRestore();
+    });
+
+    it("waits for the rows, then focuses the first with focus()", async () => {
+        const fixture = await create(FileGridHostComponent);
+
+        fixture.componentInstance.grid().focus();
+        await drawBody(fixture);
+
+        expect(focusedText()).toBe("File 1");
+        expect(fixture.componentInstance.selectedKeys()).toEqual([]);
+    });
+
+    it("waits for the rows, then focuses one by its key with focusRow()", async () => {
+        const fixture = await create(FileGridHostComponent);
+
+        fixture.componentInstance.grid().focusRow(3);
+        await drawBody(fixture);
+
+        expect(focusedText()).toBe("File 3");
+    });
+
+    it("waits for a virtual grid's rows, then focuses the first with focus()", async () => {
+        const fixture = await create(VirtualFileGridHostComponent);
+
+        fixture.componentInstance.grid().focus();
+        await drawBody(fixture);
+
+        expect(focusedText()).toBe("File 1");
+    });
+
+    it("waits for a virtual grid's rows, then focuses one by its key with focusRow()", async () => {
+        const fixture = await create(VirtualFileGridHostComponent);
+
+        fixture.componentInstance.grid().focusRow(4);
+        await drawBody(fixture);
+
+        expect(focusedText()).toBe("File 4");
+    });
+
+    it("focuses only the row asked for last when called again before the rows are drawn", async () => {
+        const fixture = await create(VirtualFileGridHostComponent);
+
+        fixture.componentInstance.grid().focusRow(4);
+        await settle(fixture);
+        fixture.componentInstance.grid().focusRow(6);
+        await drawBody(fixture);
+
+        expect(focusedText()).toBe("File 6");
+    });
+
+    it("still focuses a column header when the grid has no rows", async () => {
+        const fixture = await create(FileGridHostComponent, host => host.rows.set([]));
+
+        fixture.componentInstance.grid().focus();
+        await settle(fixture);
+
+        expect(document.activeElement?.closest("thead")).not.toBeNull();
     });
 });

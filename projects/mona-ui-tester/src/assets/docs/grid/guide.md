@@ -125,6 +125,22 @@ To show the condition in a column's filter UI as well, set the `filter` model of
 
 `rowKey` names the property, or gives the function, that identifies a row. Selection, detail rows and editing use it to find a row again after `data` is replaced, so set it whenever rows have an id. A column whose `field` is the `rowKey` isn't editable unless it says so.
 
+### Typeahead
+
+`textField` names the property, or gives the function `(item: T) => string`, that holds a row's text, such as a file's name. Typing the first letters of that text moves the focus to the row, ignoring case, as in a file list:
+
+```html
+<mona-grid rowKey="path" textField="name" navigation="row" [data]="files()">...</mona-grid>
+```
+
+- The search covers every row of the body in the order shown, sorted and filtered, not only the rows a virtual grid has drawn; a virtual grid scrolls to the row it finds. A paged grid searches its page, and rows in closed groups aren't searched.
+- A first character moves on to the next row after the focused one that starts with it, wrapping around. More characters, each typed within about a second of the last, search from the focused row on, so typing out a name stays on its row. A character typed again, as in "aa", moves on to the next row that starts with what was typed or, when no other row does, with that character: repeating a letter steps through the rows that start with it.
+- Any character a name can have is typed, so `.config`, `(old)` and `~$draft.docx` can be typed out. While a search is under way, `Space` types a space; otherwise it selects as before. Keys pressed with `Ctrl`, `Alt` or `Meta` are never typed, and a key that moves the focus, such as an arrow, ends the search.
+- The focus moves to the row as an arrow key moves it, and the row is selected as an arrow key selects: with `navigation="row"` and `selectOnRowClick`, it becomes the selection, in multiple mode too. When no row matches, nothing changes.
+- Keys typed into a control inside a cell, or into an editor, stay there, and so do keys on the headers.
+
+Without `textField` the grid has no typeahead.
+
 ### Toolbar and the Columns Button
 
 `monaGridToolbarTemplate` adds a toolbar above the column headers, for your own buttons and for commands such as Add. The toolbar also shows a built-in Columns button (the `columns` message). It opens a popup that lists every column, with a box to filter the list by title. Apply shows the checked columns and hides the others; Cancel drops the changes. A column's `hidden` input sets where it starts. Without a toolbar template there is no Columns button. See [Columns](/components/grid-columns).
@@ -172,6 +188,7 @@ The grid is one Tab stop. `Tab` moves into the grid at the cell that last had fo
 | `Enter` | On a header, sorts the column. On a group row or the detail toggle, expands or collapses it. On an editable cell, starts editing, and with row editing so does any data cell. On a cell with controls, moves into them. On any other cell of a data row, activates the row (`rowActivate`). |
 | `F2` | Starts editing an editable cell; on any other cell, including a header or a filter-row cell, moves into its controls (links, buttons, the filter button, the filter input). |
 | `Ctrl+C` / `Cmd+C` | Copies the focused cell's text (body rows, not while editing, and not when text is selected). |
+| Typed characters | With `textField`, on a body cell: move to the next row whose text starts with what was typed (see [Typeahead](#typeahead)). While a search is under way, `Space` is part of it. |
 | `Tab` / `Shift+Tab` | Leaves the grid. While editing a cell, commits it and edits the next/previous editable cell. |
 
 With [`navigation="row"`](/api/grid/GridComponent#navigation), the body moves by rows, as a file list does, and the header still moves by cell:
@@ -199,6 +216,8 @@ A press with the main or the secondary button on the body's empty space, below t
 
 `focus()` moves the focus into the rows from code: to the current cell when it's in the body, or else the first row. `focusRow(key)` moves it to the row of an item, by its `rowKey` value (or the item itself without a `rowKey`), scrolling a virtual grid to it; for a key no row has, it does what `focus()` does. Neither selects, and both wait until the grid has drawn what changed before the call, so `focusRow` can focus a row just added to `data`.
 
+When the grid has rows it hasn't drawn yet, both wait for them too: a grid just made draws its body after its first layout, and a virtual grid draws its rows a frame or so after that, so a grid made with its data and focused at once puts the focus on a row, not on a column header. Only the last call made while waiting moves the focus. A grid without rows still puts it on the current cell, a column header.
+
 ### ARIA
 
 | Attribute | When present | Value |
@@ -217,7 +236,8 @@ A press with the main or the secondary button on the body's empty space, below t
 | `aria-keyshortcuts` | On a header cell with keyboard shortcuts | The keys that open its filter menu, move it or group by it |
 
 <!-- verification-checklist
-- [x] GridComponent inputs verified against grid.component.ts (aria-label, aria-labelledby, data, expandedKeys, navigation, pageSize, pageSizeValues, resizeMethod, responsivePager, rounded, rowClass, rowKey, skip, class); outputs limited to paging, expandedKeys and rowActivate
+- [x] GridComponent inputs verified against grid.component.ts (aria-label, aria-labelledby, data, expandedKeys, navigation, pageSize, pageSizeValues, resizeMethod, responsivePager, rounded, rowClass, rowKey, skip, textField, class); outputs limited to paging, expandedKeys and rowActivate
+- [x] Typeahead verified against grid-typeahead.service.ts, findTypeaheadMatch in internal/utils/typeahead.util.ts and tests/grid-typeahead.spec.ts; the focus wait against grid.component.ts (#afterRowsRegister) and tests/grid-focus.spec.ts
 - [x] Template directive selectors and contexts verified against grid/directives/grid-*template*.directive.ts and the grid templates
 - [x] Keyboard map verified against grid-logical-cell.directive.ts, grid-navigation.service.ts, grid.component.ts (onToolbarKeydown) and tests/grid-keyboard-navigation.spec.ts
 - [x] Feature-specific keys, ARIA rows and limits moved to the feature pages, each verified against its directive

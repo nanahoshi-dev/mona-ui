@@ -15,7 +15,13 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideCheck, LucideChevronRight } from "@lucide/angular";
-import { createElementControlId, isNavigationKey, isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
+import {
+    createElementControlId,
+    findTypeaheadMatch,
+    isNavigationKey,
+    isTypeaheadKey,
+    setupTypeahead
+} from "@nanahoshi/mona-ui/internal";
 import { injectComponentDirection } from "@nanahoshi/mona-ui/i18n";
 import { PopupDataInjectionToken, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
 import { RippleDirective } from "@nanahoshi/mona-ui/ripple";
@@ -353,22 +359,18 @@ export class PopupMenuListComponent implements OnInit {
         });
     }
 
+    /** Typeahead: the item whose label starts with what was typed, as `findTypeaheadMatch` finds it. */
     private cycleThroughMatchedItems(buffer: string): void {
-        const matchedItems = this.#navigationItems()
-            .where(i => i.label.toLowerCase().startsWith(buffer))
-            .toArray();
-        const activeMenuItem = this.activeMenuItem();
-        if (matchedItems.length === 0) {
-            return;
-        }
-        if (matchedItems.length === 1) {
-            this.activeMenuItem.set(matchedItems[0]);
-            return;
-        }
-        if (matchedItems.length > 1) {
-            const currentIndex = activeMenuItem ? matchedItems.indexOf(activeMenuItem) : -1;
-            const nextIndex = (currentIndex + 1) % matchedItems.length;
-            this.activeMenuItem.set(matchedItems[nextIndex]);
+        const items = this.#navigationItems().toArray();
+        const active = this.activeMenuItem();
+        const index = findTypeaheadMatch(
+            buffer,
+            items.length,
+            active ? items.indexOf(active) : -1,
+            i => items[i].label
+        );
+        if (index >= 0) {
+            this.activeMenuItem.set(items[index]);
         }
     }
 

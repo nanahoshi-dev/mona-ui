@@ -83,6 +83,7 @@ import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
 import { isKeyboardEntryElement, observeGridCellTabStops } from "../../services/grid-cell-tab-stops";
 import { getColumnStepTarget, getSiblingRuns } from "../../services/grid-column-groups";
 import { GridNavigationService } from "../../services/grid-navigation.service";
+import { type GridTextField, GridTypeaheadService } from "../../services/grid-typeahead.service";
 import { GridService } from "../../services/grid.service";
 import {
     gridBaseThemeVariants,
@@ -129,7 +130,7 @@ const TOOLBAR_ITEM_SELECTOR =
 @Component({
     selector: "mona-grid",
     templateUrl: "./grid.component.html",
-    providers: [GridService, GridNavigationService, FilterService],
+    providers: [GridService, GridNavigationService, GridTypeaheadService, FilterService],
     imports: [
         LucideArrowDown,
         LucideArrowLeft,
@@ -176,6 +177,8 @@ export class GridComponent<T> implements GridVariantInput {
     readonly #document = inject(DOCUMENT);
 
     readonly #gridNavigationService = inject(GridNavigationService);
+
+    readonly #gridTypeahead = inject(GridTypeaheadService);
 
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
 
@@ -536,6 +539,15 @@ export class GridComponent<T> implements GridVariantInput {
      */
     public readonly skip = model(0);
 
+    /**
+     * @description Field name or function that gives a row's text, which typeahead matches: typing the first letters
+     * of a row's text moves the focus to the row, as in a file list, ignoring case. It searches every row of the body,
+     * in the order shown, not only the rows a virtual grid has drawn. Rows that select as the arrow keys move, with
+     * row navigation and rows that select on click, select the row too. Without it, the grid has no typeahead.
+     * @default null
+     */
+    public readonly textField = input<string | ((item: T) => string) | null>(null);
+
     /** @description Additional CSS classes merged onto the host element via `tailwind-merge`. */
     public readonly userClass = input<string>("", { alias: "class" });
 
@@ -545,6 +557,11 @@ export class GridComponent<T> implements GridVariantInput {
             untracked(() => this.gridService.setColumnDefinitions(columns));
         });
         effect(() => this.gridService.rowClass.set(this.rowClass() as GridRowClass<unknown> | null));
+        effect(() => this.#gridTypeahead.textField.set(this.textField() as GridTextField | null));
+        // Before a cell's own keys: a key that types something searches the rows, Space included while typing.
+        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown", { capture: true })
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => this.#gridTypeahead.handleKeydown(event));
         effect(() => {
             const rowNavigation = this.navigation() === "row";
             untracked(() => {
@@ -586,21 +603,23 @@ export class GridComponent<T> implements GridVariantInput {
     /**
      * Moves the focus into the grid's rows, without selecting: to the current cell when it's in the body, or else the
      * first row, which a virtual grid scrolls into view. With no rows, the focus goes to the current cell, such as a
-     * column header. It happens once the grid has drawn what changed before the call, such as new `data`.
+     * column header. It happens once the grid has drawn what changed before the call, such as new `data`, and its rows:
+     * a grid just made, or a virtual one, draws them a frame or so later, and the focus waits for them.
      */
     public focus(): void {
-        this.#afterCellsRegister(() => this.#focusBody());
+        this.#afterRowsRegister(() => this.#focusBody());
     }
 
     /**
      * Moves the focus to an item's row, without selecting it: the row whose `rowKey` value is `key`, or, in a grid
      * with no `rowKey`, the row of the item `key`. A virtual grid scrolls the row into view; a paged grid finds rows
      * on its page. For a key no row has, it moves the focus as `focus()` does. It happens once the grid has drawn what
-     * changed before the call, so it can focus a row just added to `data`.
+     * changed before the call, and its rows, as for `focus()`, so it can focus a row just added to `data`, or one of a
+     * grid just made.
      * @param key The row's `rowKey` value, or its data item.
      */
     public focusRow(key: unknown): void {
-        this.#afterCellsRegister(() => {
+        this.#afterRowsRegister(() => {
             const rowUid = this.gridService.findRowUid(key);
             if (rowUid == null || !this.#gridNavigationService.focusRowByUid(rowUid)) {
                 this.#focusBody();
@@ -955,6 +974,21 @@ export class GridComponent<T> implements GridVariantInput {
      */
     #afterCellsRegister(callback: () => void): void {
         afterNextRender({ mixedReadWrite: () => queueMicrotask(callback) }, { injector: this.#injector });
+    }
+
+    /**
+     * Runs a callback as `#afterCellsRegister` does, and, when the body has rows it hasn't drawn yet, once their cells
+     * have registered: a grid just made draws its body after its first layout, and a virtual one its rows on the next
+     * animation frame. A grid without rows runs it at once. A later call replaces a callback still waiting.
+     */
+    #afterRowsRegister(callback: () => void): void {
+        this.#afterCellsRegister(() => {
+            const gridService = this.gridService;
+            const rows = gridService.virtualScrollOptions().enabled
+                ? gridService.viewRows()
+                : gridService.viewPageRows();
+            this.#gridNavigationService.whenBodyCellsRegister(callback, rows.length !== 0);
+        });
     }
 
     /** Focuses the body's current cell or first row, or, with no rows, the current cell. */

@@ -13274,6 +13274,13 @@
         "defaultValue": "\"\""
       },
       {
+        "description": "Field name or function that gives a row's text, which typeahead matches: typing the first letters\nof a row's text moves the focus to the row, as in a file list, ignoring case. It searches every row of the body,\nin the order shown, not only the rows a virtual grid has drawn. Rows that select as the arrow keys move, with\nrow navigation and rows that select on click, select the row too. Without it, the grid has no typeahead.",
+        "kind": "input",
+        "name": "textField",
+        "type": "string | ((item: T) => string) | null",
+        "defaultValue": "null"
+      },
+      {
         "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input",
         "name": "userClass",

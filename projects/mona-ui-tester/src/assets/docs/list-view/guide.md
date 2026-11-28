@@ -155,7 +155,7 @@ Keyboard navigation is on by default; `monaListViewNavigable` changes its mode a
 | `PageDown`                                      | Scroll the list forward by roughly one viewport.                                                            |
 | `PageUp`                                        | Scroll the list back by roughly one viewport.                                                               |
 | `Enter`                                         | Select the highlighted or currently selected item, and emit `itemActivate`.                                 |
-| Any letter, digit, space, hyphen, or underscore | Typeahead: jumps to the next item whose text starts with the typed characters, staying on the active item while it still matches (resets after a short pause). In multiple selection it moves focus only. |
+| Typed characters, punctuation included          | Typeahead: jumps to the next item whose text starts with the typed characters, staying on the active item while it still matches; the same character typed again steps on to the next item that starts with it. A search ends about a second after the last key, or at a key that moves. In multiple selection it moves focus only. |
 
 Disabled items (`disabledBy`) are skipped, and can't be selected by click, Enter or typeahead. Arrow keys with Alt are left to the page (the list box uses them to move items). Keys pressed in controls inside header, footer or item templates are left to those controls: an input in a header template takes typing and arrows, and Enter presses a button in an item.
 

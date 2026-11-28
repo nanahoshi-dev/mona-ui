@@ -148,6 +148,11 @@ export class GridVirtualListComponent {
             const count = this.bodyRows().length;
             untracked(() => this.gridService.renderedBodyRowCount.set(count));
         });
+        effect(() => {
+            const bodyRows = this.bodyRows();
+            untracked(() => this.gridService.bodyRows.set(bodyRows));
+        });
+        this.#destroyRef.onDestroy(() => this.gridService.bodyRows.set([]));
         this.setGroupSubscriptions();
         this.setSelectedKeysLoadSubscription();
     }

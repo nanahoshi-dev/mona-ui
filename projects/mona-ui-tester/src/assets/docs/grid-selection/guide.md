@@ -48,7 +48,7 @@ grid-selection/selection
 grid-selection/file-list
 ```
 
-With `navigation="row"` and `selectOnRowClick`, the grid behaves as a file list: the arrows move by rows and select, and a right-click selects what it lands on, or clears the selection in empty space. The context menu builds its items from the selection, so with nothing selected it offers the folder's commands. Opened with the `ContextMenu` key or `Shift+F10`, it appears at the focused row.
+With `navigation="row"` and `selectOnRowClick`, the grid behaves as a file list: the arrows move by rows and select, typing a name's first letters moves to it and selects it (`textField="name"`, see [Typeahead](/components/grid#typeahead)), and a right-click selects what it lands on, or clears the selection in empty space. The context menu builds its items from the selection, so with nothing selected it offers the folder's commands. Opened with the `ContextMenu` key or `Shift+F10`, it appears at the focused row.
 
 ### Options
 
@@ -106,7 +106,7 @@ With `selectOnRowClick`, the grid also selects as a file list does on a right-cl
 
 ### Moving by rows
 
-With [`navigation="row"`](/api/grid/GridComponent#navigation) and `selectOnRowClick`, the selection follows the keyboard, as in a file list: moving to a row selects it, Shift extends the selection from the anchor, Ctrl and Shift add that range, and Ctrl moves without selecting. Space then adds the focused row instead of toggling it.
+With [`navigation="row"`](/api/grid/GridComponent#navigation) and `selectOnRowClick`, the selection follows the keyboard, as in a file list: moving to a row selects it, Shift extends the selection from the anchor, Ctrl and Shift add that range, and Ctrl moves without selecting. Space then adds the focused row instead of toggling it. A row that [typeahead](/components/grid#typeahead) moves to becomes the selection, as one an arrow key moves to does, in multiple mode too.
 
 ### The checkbox column
 
@@ -130,6 +130,7 @@ Selected rows carry `aria-selected`, and the grid says it allows several with `a
 | `Ctrl+A` / `Cmd+A` | In multiple mode, selects every row in the select-all scope. With range selection, selects every cell of the page, or of the whole view with virtual scrolling. |
 | `Shift+Arrow keys` | With range selection, extends the range of cells from where it started. Moving without Shift leaves it. |
 | Moving keys, with `navigation="row"` and `selectOnRowClick` | Select the row moved to. With Shift, from the anchor; with Ctrl and Shift, added; with Ctrl alone, nothing changes. `Space` adds the focused row, and `Ctrl+Space` toggles it. |
+| Typed characters, with `textField`, `navigation="row"` and `selectOnRowClick` | Select the row [typeahead](/components/grid#typeahead) moves to, in place of the selection. While a search is under way, `Space` types a space instead of selecting. |
 | `Escape` | With range selection, clears the range. |
 | `Ctrl+C` / `Cmd+C` | Copies the range, or the focused cell. |
 | `Ctrl+V` / `Cmd+V` | With range selection and editing on, pastes into the cells. |

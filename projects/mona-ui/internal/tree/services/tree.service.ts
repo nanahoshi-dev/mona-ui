@@ -13,6 +13,7 @@ import {
     sequenceEqual
 } from "@mirei/ts-collections";
 import { type FilterableOptions, FilterChangeEvent } from "@nanahoshi/mona-ui/common";
+import { findTypeaheadMatch } from "@nanahoshi/mona-ui/internal";
 import { BehaviorSubject, distinctUntilChanged, Observable, ReplaySubject, Subject, Subscription, take } from "rxjs";
 import type { CheckableOptions } from "../models/CheckableOptions";
 import type { DataStructure } from "../models/DataStructure";
@@ -320,23 +321,16 @@ export class TreeService<T> {
     }
 
     /**
-     * Finds the next visible node whose text starts with `prefix` (case-insensitive), wrapping around. Used for
-     * typeahead: a first character searches after the navigated node, and each further character keeps the
-     * navigated node while it still matches.
+     * Finds the visible node typeahead moves to, from what was typed, as `findTypeaheadMatch` does: a first character
+     * searches after the navigated node, further characters keep the navigated node while it still matches, and a
+     * character typed again steps on to the next node that starts with it.
      */
     public findNodeByText(prefix: string): TreeNode<T> | null {
-        const normalizedPrefix = prefix.toLowerCase();
         const nodes = this.#navigableNodes().toArray();
         const navigatedNode = this.navigatedNode();
-        const start = navigatedNode ? nodes.indexOf(navigatedNode) : -1;
-        const first = normalizedPrefix.length > 1 && start !== -1 ? 0 : 1;
-        for (let offset = first; offset <= nodes.length; offset++) {
-            const node = nodes[(start + offset) % nodes.length];
-            if (this.getNodeText(node).toLowerCase().startsWith(normalizedPrefix)) {
-                return node;
-            }
-        }
-        return null;
+        const active = navigatedNode ? nodes.indexOf(navigatedNode) : -1;
+        const index = findTypeaheadMatch(prefix, nodes.length, active, i => this.getNodeText(nodes[i]));
+        return index >= 0 ? nodes[index] : null;
     }
 
     public getCheckKey(node: TreeNode<T>): unknown {

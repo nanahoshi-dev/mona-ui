@@ -207,7 +207,7 @@ Set `[disabled]` on the whole `<mona-menubar>` to disable every menu at once, or
 | `Enter` / `Space`          | Activates the highlighted item, or opens its submenu if it has nested items                                                                             |
 | `Escape`                   | Closes the open submenu, or the menu itself at the root level                                                                                           |
 | `Tab`                      | Closes the open menus; focus moves on from the menubar                                                                                                  |
-| Letter, digit, `-`, or `_` | Jumps to (cycles through) items whose label starts with the typed text                                                                                  |
+| Typed characters           | Jumps to the next item whose label starts with the typed text; the same character typed again steps on to the next item that starts with it. A search ends about a second after the last key, or at a key that moves. |
 
 ### ARIA
 

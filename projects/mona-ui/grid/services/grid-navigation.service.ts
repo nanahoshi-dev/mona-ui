@@ -15,6 +15,9 @@ export class GridNavigationService {
     readonly #lastFocusedCellKey = signal<string | null>(null);
     readonly #lastFocusedCellSnapshot = signal<NavigationCellSnapshot | null>(null);
     readonly #lastNonGroupCellKey = signal<string | null>(null);
+    /** Waits for the body's first cells, as `whenBodyCellsRegister` sets it. */
+    #bodyCellsWaiter: (() => void) | null = null;
+    #bodyCellsWaiterScheduled = false;
     /**
      * Set when the Tab stop left the body only because its last row went, as when the data is cleared while the next
      * loads. The first row takes the Tab stop back once one is drawn, and the focus too while it is on the cell the
@@ -178,6 +181,11 @@ export class GridNavigationService {
         return this.#getFocusedCell()?.value ?? null;
     }
 
+    /** Whether cells of body rows are registered: whether the body has drawn rows. */
+    public hasBodyCells(): boolean {
+        return this.#findFirstBodyCell() != null;
+    }
+
     public isFocused(cellKey: string): boolean {
         return this.#lastFocusedCellKey() === cellKey;
     }
@@ -253,6 +261,9 @@ export class GridNavigationService {
         this.#ensureFocusedCell();
         if (this.#bodyEmptied != null && data.section === "body") {
             this.#scheduleBodyRefill();
+        }
+        if (this.#bodyCellsWaiter != null && data.section === "body") {
+            this.#scheduleBodyCellsWaiter();
         }
         if (this.#pendingFocus?.rowIndex === data.rowIndex && data.section === "body") {
             this.#schedulePendingFocus();
@@ -363,6 +374,21 @@ export class GridNavigationService {
         if (data.section === "body" && fallback?.value.section !== "body") {
             this.#bodyEmptied = { parked: null };
         }
+    }
+
+    /**
+     * Runs a callback once body cells have registered: at once when some have, or when the body has no rows to draw,
+     * and otherwise once the first do, after every cell of that render has. A later call replaces a callback still
+     * waiting.
+     * @param hasRows Whether the body has rows, drawn or not.
+     */
+    public whenBodyCellsRegister(callback: () => void, hasRows: boolean): void {
+        this.#bodyCellsWaiter = null;
+        if (!hasRows || this.hasBodyCells()) {
+            callback();
+            return;
+        }
+        this.#bodyCellsWaiter = callback;
     }
 
     /** Registered cells that are in the document; a virtual list keeps detached views registered. */
@@ -937,6 +963,22 @@ export class GridNavigationService {
             const active = this.#document.activeElement;
             const parked = emptied.parked != null && active === emptied.parked;
             this.startAtFirstRow(parked || (this.#cellHasFocus && this.#focusIsLost(null)));
+        });
+    }
+
+    #scheduleBodyCellsWaiter(): void {
+        if (this.#bodyCellsWaiterScheduled) {
+            return;
+        }
+        this.#bodyCellsWaiterScheduled = true;
+        queueMicrotask(() => {
+            this.#bodyCellsWaiterScheduled = false;
+            const waiter = this.#bodyCellsWaiter;
+            if (waiter == null || !this.hasBodyCells()) {
+                return;
+            }
+            this.#bodyCellsWaiter = null;
+            waiter();
         });
     }
 

@@ -36,6 +36,7 @@ import {
 import { injectComponentDirection, MonaI18nService } from "@nanahoshi/mona-ui/i18n";
 import {
     createElementControlId,
+    findTypeaheadMatch,
     isTypeaheadKey,
     setupTypeahead,
     TYPEAHEAD_RESET_DELAY
@@ -504,6 +505,9 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
                 return;
             }
             event.preventDefault();
+            // Moving ends a search: the next letter starts a new one.
+            this.#typeaheadUntil = 0;
+            this.#typeaheadKey$.next("");
             const target = navigateTiles(this.activeIndex(), event.key, {
                 columns: this.columnCount(),
                 count: this.count(),
@@ -523,7 +527,9 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
             }
             return;
         }
-        if (event.key === " " && Date.now() >= this.#typeaheadUntil && !event.altKey) {
+        // A space typed during a search is part of it; Ctrl+Space never is.
+        const typing = Date.now() < this.#typeaheadUntil && isTypeaheadKey(event.key, event);
+        if (event.key === " " && !typing && !event.altKey) {
             event.preventDefault();
             if (index >= 0) {
                 this.selectWithSpace(index, event.ctrlKey || event.metaKey);
@@ -668,21 +674,12 @@ export class TileViewComponent<T = unknown> implements TileViewVariantInputs {
         return items.filter((_, i) => selected.contains(keys[i]));
     }
 
-    /** Typeahead: the next tile whose text starts with what was typed, from the active one on. */
+    /** Typeahead: the tile whose text starts with what was typed, as `findTypeaheadMatch` finds it. */
     private findByText(buffer: string): void {
-        const count = this.count();
-        if (count === 0) {
-            return;
-        }
         const items = this.#items();
-        // A first letter moves on from the active tile; more letters may keep matching it.
-        const start = this.activeIndex() + (buffer.length === 1 ? 1 : 0);
-        for (let step = 0; step < count; step++) {
-            const index = (Math.max(start, 0) + step) % count;
-            if (this.textOf(items[index]).toLowerCase().startsWith(buffer)) {
-                this.moveTo(index, NO_MODIFIERS);
-                return;
-            }
+        const index = findTypeaheadMatch(buffer, items.length, this.activeIndex(), i => this.textOf(items[i]));
+        if (index >= 0) {
+            this.moveTo(index, NO_MODIFIERS);
         }
     }
 

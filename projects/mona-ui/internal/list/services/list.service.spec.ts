@@ -212,6 +212,21 @@ describe("ListService", () => {
             expect(service.cycleThroughMatchedItems("m")?.data.name).toBe("Monitor");
         });
 
+        it("steps on to the next item that starts with a letter typed again", () => {
+            service.highlightedItem.set(service.cycleThroughMatchedItems("m"));
+            expect(service.highlightedItem()?.data.name).toBe("Mouse");
+            service.highlightedItem.set(service.cycleThroughMatchedItems("mm"));
+            expect(service.highlightedItem()?.data.name).toBe("Monitor");
+            expect(service.cycleThroughMatchedItems("mmm")?.data.name).toBe("Mouse");
+        });
+
+        it("moves on from the active item even when it doesn't match", () => {
+            service.setData([PRODUCTS[1], PRODUCTS[0], PRODUCTS[2]]);
+            service.highlightedItem.set(service.viewItems().toArray()[1]);
+            expect(service.highlightedItem()?.data.name).toBe("Keyboard");
+            expect(service.cycleThroughMatchedItems("m")?.data.name).toBe("Monitor");
+        });
+
         it("never matches group headers", () => {
             const strings = TestBed.inject(ListService) as unknown as ListService<string>;
             strings.setTextField("");
